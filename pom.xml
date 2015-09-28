@@ -5,9 +5,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.leaguekit</groupId>
-  <artifactId>oauth-service</artifactId>
+  <artifactId>jaxrs-lib</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <packaging>jar</packaging>
 
   <properties>
     <hibernate.version>4.3.9.Final</hibernate.version>
@@ -17,20 +17,6 @@
   </properties>
 
   <dependencies>
-    <!-- password encryption -->
-    <dependency>
-      <groupId>org.mindrot</groupId>
-      <artifactId>jbcrypt</artifactId>
-      <version>0.3m</version>
-    </dependency>
-
-    <!-- reference implementation of the java api for JSON processing -->
-    <dependency>
-      <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
-      <version>1.0.4</version>
-    </dependency>
-
     <!-- jackson serialization of object graph support -->
     <dependency>
       <groupId>com.voodoodyne.jackson.jsog</groupId>
@@ -79,13 +65,6 @@
       <version>2.2.4</version>
     </dependency>
 
-    <!-- jdbc connector -->
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>5.1.35</version>
-    </dependency>
-
     <!-- for running the migrations -->
     <dependency>
       <groupId>org.liquibase</groupId>
@@ -98,20 +77,6 @@
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-json-jackson</artifactId>
       <version>${jersey.version}</version>
-    </dependency>
-
-    <!-- facebook integration -->
-    <dependency>
-      <groupId>com.restfb</groupId>
-      <artifactId>restfb</artifactId>
-      <version>1.8.0</version>
-    </dependency>
-
-    <!-- string utility functions -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.0</version>
     </dependency>
 
     <!-- logging -->
