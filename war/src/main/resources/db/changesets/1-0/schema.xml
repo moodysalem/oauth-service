@@ -7,8 +7,8 @@
 
     <changeSet id="Token Table" author="moody.salem">
         <createTable tableName="Token">
-            <column name="id" type="long" autoIncrement="true"><constraints nullable="false" /></column>
-            <column name="version" type="long" defaultValueNumeric="0"><constraints nullable="false" /></column>
+            <column name="id" type="bigint" autoIncrement="true"><constraints nullable="false" /></column>
+            <column name="version" type="bigint" defaultValueNumeric="0"><constraints nullable="false" /></column>
         </createTable>
     </changeSet>
 
