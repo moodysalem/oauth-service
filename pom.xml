@@ -5,23 +5,21 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.leaguekit</groupId>
-  <artifactId>jaxrs-lib</artifactId>
+  <artifactId>oauth-service</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>war</packaging>
 
   <properties>
-    <hibernate.version>4.3.9.Final</hibernate.version>
-    <jersey.version>2.17</jersey.version>
-    <jackson.version>2.5.3</jackson.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jaxrs.lib.version>1.0.0-SNAPSHOT</jaxrs.lib.version>
   </properties>
 
   <dependencies>
-    <!-- contains the factories we'll use-->
+    <!-- jaxrs library -->
     <dependency>
       <groupId>com.leaguekit</groupId>
       <artifactId>jaxrs-lib</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${jaxrs.lib.version}</version>
     </dependency>
 
     <!-- mysql connector -->
@@ -47,31 +45,9 @@
 
     <!-- TESTING DEPENDENCIES -->
     <dependency>
-      <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-      <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-      <version>${jersey.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>6.8.21</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>1.4.187</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.9.5</version>
-      <scope>test</scope>
+      <groupId>com.leaguekit</groupId>
+      <artifactId>jaxrs-lib-test</artifactId>
+      <version>${jaxrs.lib.version}</version>
     </dependency>
   </dependencies>
 
@@ -85,6 +61,12 @@
           <source>1.8</source>
           <target>1.8</target>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.3.0.M2</version>
       </plugin>
     </plugins>
   </build>
