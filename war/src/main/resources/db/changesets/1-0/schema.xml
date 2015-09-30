@@ -5,4 +5,11 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
+    <changeSet id="Token Table" author="moody.salem">
+        <createTable tableName="Token">
+            <column name="id" type="long" autoIncrement="true"><constraints nullable="false" /></column>
+            <column name="version" type="long" defaultValueNumeric="0"><constraints nullable="false" /></column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

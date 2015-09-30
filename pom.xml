@@ -4,52 +4,57 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.leaguekit</groupId>
-  <artifactId>oauth-service</artifactId>
+  <groupId>com.leaguekit.oauth</groupId>
+  <artifactId>oauth-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <modules>
+    <module>war</module>
+  </modules>
+  <packaging>pom</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.0-SNAPSHOT</jaxrs.lib.version>
   </properties>
 
-  <dependencies>
-    <!-- jaxrs library -->
-    <dependency>
-      <groupId>com.leaguekit</groupId>
-      <artifactId>jaxrs-lib</artifactId>
-      <version>${jaxrs.lib.version}</version>
-    </dependency>
+  <dependencyManagement>
+    <dependencies>
+      <!-- jaxrs library -->
+      <dependency>
+        <groupId>com.leaguekit</groupId>
+        <artifactId>jaxrs-lib</artifactId>
+        <version>${jaxrs.lib.version}</version>
+      </dependency>
 
-    <!-- mysql connector -->
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>5.1.35</version>
-    </dependency>
+      <!-- mysql connector -->
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>5.1.35</version>
+      </dependency>
 
-    <!-- facebook api-->
-    <dependency>
-      <groupId>com.restfb</groupId>
-      <artifactId>restfb</artifactId>
-      <version>1.9.0</version>
-    </dependency>
+      <!-- facebook api-->
+      <dependency>
+        <groupId>com.restfb</groupId>
+        <artifactId>restfb</artifactId>
+        <version>1.9.0</version>
+      </dependency>
 
-    <!-- password hashing -->
-    <dependency>
-      <groupId>org.mindrot</groupId>
-      <artifactId>jbcrypt</artifactId>
-      <version>0.3m</version>
-    </dependency>
+      <!-- password hashing -->
+      <dependency>
+        <groupId>org.mindrot</groupId>
+        <artifactId>jbcrypt</artifactId>
+        <version>0.3m</version>
+      </dependency>
 
-    <!-- TESTING DEPENDENCIES -->
-    <dependency>
-      <groupId>com.leaguekit</groupId>
-      <artifactId>jaxrs-lib-test</artifactId>
-      <version>${jaxrs.lib.version}</version>
-    </dependency>
-  </dependencies>
+      <!-- TESTING DEPENDENCIES -->
+      <dependency>
+        <groupId>com.leaguekit</groupId>
+        <artifactId>jaxrs-lib-test</artifactId>
+        <version>${jaxrs.lib.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>

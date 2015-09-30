@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>oauth-parent</artifactId>
+    <groupId>com.leaguekit.oauth</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>war</artifactId>
+  <packaging>war</packaging>
+
+  <dependencies>
+
+    <!-- jaxrs library -->
+    <dependency>
+      <groupId>com.leaguekit</groupId>
+      <artifactId>jaxrs-lib</artifactId>
+    </dependency>
+
+    <!-- mysql connector -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+
+    <!-- facebook api-->
+    <dependency>
+      <groupId>com.restfb</groupId>
+      <artifactId>restfb</artifactId>
+    </dependency>
+
+    <!-- password hashing -->
+    <dependency>
+      <groupId>org.mindrot</groupId>
+      <artifactId>jbcrypt</artifactId>
+    </dependency>
+
+    <!-- TESTING DEPENDENCIES -->
+    <dependency>
+      <groupId>com.leaguekit</groupId>
+      <artifactId>jaxrs-lib-test</artifactId>
+    </dependency>
+  </dependencies>
+
+
+</project>
