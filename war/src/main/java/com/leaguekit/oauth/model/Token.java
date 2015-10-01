@@ -1,9 +1,11 @@
 package com.leaguekit.oauth.model;
 
+import com.leaguekit.hibernate.model.BaseEntity;
+
 import javax.persistence.Entity;
 
 @Entity
-public class Token extends BaseEntity{
+public class Token extends BaseEntity {
     private String token;
 
     public String getToken() {
