@@ -2,7 +2,7 @@ package com.leaguekit.oauth.model;
 
 import javax.persistence.Entity;
 
-//@Entity
+@Entity
 public class Token extends BaseEntity{
     private String token;
 
