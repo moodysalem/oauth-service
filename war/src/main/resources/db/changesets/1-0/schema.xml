@@ -45,12 +45,12 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
     <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
                              constraintName="FK_Scope_Application"
                              referencedTableName="Application"
                              referencedColumnNames="id"/>
     <addUniqueConstraint tableName="Scope" columnNames="applicationId,name"/>
+    <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
   </changeSet>
 
   <changeSet id="Users Table" author="moody.salem">
@@ -111,11 +111,47 @@
         <constraints nullable="false" unique="true"/>
       </column>
     </createTable>
-    <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
     <addForeignKeyConstraint baseTableName="Client" baseColumnNames="applicationId"
                              constraintName="FK_CLIENT_APPLICATION"
                              referencedTableName="Application"
                              referencedColumnNames="id"/>
+    <sql dbms="mysql">ALTER TABLE Client CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
+  </changeSet>
+
+  <changeSet id="Client Redirect URI table" author="moody.salem">
+    <!-- the list of URIs that a client can redirect to -->
+    <createTable tableName="Client_URI">
+      <column name="clientId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="uri" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addUniqueConstraint tableName="Client_URI" columnNames="clientId,uri"/>
+    <addForeignKeyConstraint baseTableName="Client_URI" baseColumnNames="clientId"
+                             constraintName="FK_Client_URI_Client"
+                             referencedTableName="Client"
+                             referencedColumnNames="id"/>
+    <sql dbms="mysql">ALTER TABLE Client_URI CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
+  </changeSet>
+
+  <changeSet id="Client Permitted Flows" author="moody.salem">
+    <!-- the list of flows a client is allowed to use -->
+    <createTable tableName="Client_Flow">
+      <column name="clientId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="flow" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addUniqueConstraint tableName="Client_Flow" columnNames="clientId,flow"/>
+    <addForeignKeyConstraint baseTableName="Client_Flow" baseColumnNames="clientId"
+                             constraintName="FK_Client_Flow_Client"
+                             referencedTableName="Client"
+                             referencedColumnNames="id"/>
+    <sql dbms="mysql">ALTER TABLE Client_Flow CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
 
