@@ -1,51 +1,61 @@
 package com.leaguekit.oauth.resources;
 
-import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
-import com.leaguekit.oauth.model.Application;
+import com.leaguekit.oauth.model.Client;
 import org.glassfish.jersey.server.mvc.Template;
+import org.glassfish.jersey.server.mvc.Viewable;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.List;
 
 @Path("authorize")
 public class AuthorizeResource extends BaseResource {
 
     public static class AuthorizationResponse {
-        private List<String> configurationErrors;
-
-        public List<String> getConfigurationErrors() {
-            return configurationErrors;
-        }
-        public void addConfigurationError(String error) {
-            if (configurationErrors == null) {
-                configurationErrors = new ArrayList<>();
-            }
-            configurationErrors.add(error);
-        }
     }
+
 
     @GET
     @Template(name = "/templates/Authorize")
-    public AuthorizationResponse auth(
+    public Viewable auth(
         @QueryParam("response_type") String responseType,
         @QueryParam("client_id") String clientId,
         @QueryParam("redirect_uri") String redirectUri
     ) {
-        AuthorizationResponse ar = new AuthorizationResponse();
-
         if (clientId == null || redirectUri == null || responseType == null) {
-            ar.addConfigurationError("Client ID, redirect URI, and response type are all required for this endpoint.");
+            return new Viewable("/templates/Error", "Client ID, redirect URI, and response type are all required for this endpoint.");
+        }
+        URL toRedirect;
+        try {
+            toRedirect = new URL(redirectUri);
+        } catch (Exception e) {
+            return new Viewable("/templates/Error", "Invalid redirect URL: " + e.getMessage());
         }
 
-        // first look up the Application
-
-        return ar;
+        // first look up the Client by the client identifier
+        Client c = getClient(clientId);
+        if (c == null) {
+            return new Viewable("/templates/Error", "Client ID not found.");
+        }
+        
+        return new Viewable("/templates/Authorize");
     }
 
-    private Application getApplication()
+    private Client getClient(String clientId) {
+        CriteriaQuery<Client> cq = cb.createQuery(Client.class);
+        Root<Client> ct = cq.from(Client.class);
+        cq.where(cb.equal(ct.get("identifier"), clientId));
+
+        List<Client> cts = em.createQuery(cq).getResultList();
+        if (cts.size() != 1) {
+            return null;
+        }
+
+        return cts.get(0);
+    }
 
 }

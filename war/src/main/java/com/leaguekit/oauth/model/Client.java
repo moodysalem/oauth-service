@@ -14,18 +14,18 @@ public class Client extends BaseEntity {
     @JoinColumn(name = "applicationId")
     private Application application;
 
-    @Column(name = "clientId")
-    private String clientId;
+    @Column(name = "identifier")
+    private String identifier;
 
     @Column(name = "secret")
     private String secret;
 
-    public String getClientId() {
-        return clientId;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public String getSecret() {
