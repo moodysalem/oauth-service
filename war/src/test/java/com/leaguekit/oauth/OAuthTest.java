@@ -3,6 +3,9 @@ package com.leaguekit.oauth;
 import com.leaguekit.jaxrs.lib.test.BaseTest;
 import org.glassfish.jersey.server.ResourceConfig;
 
+/**
+ * Base test for all the other tests
+ */
 public class OAuthTest extends BaseTest {
     @Override
     public ResourceConfig getResourceConfig() {

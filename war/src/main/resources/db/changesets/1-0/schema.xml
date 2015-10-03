@@ -18,7 +18,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="name" type="VARCHAR(191)">
-        <constraints nullable="false"/>
+        <constraints nullable="false" unique="true"/>
       </column>
     </createTable>
     <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
@@ -49,9 +49,10 @@
     <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
                              constraintName="FK_Scope_Application"
                              referencedTableName="Application"
-                             referencedColumnNames="id" />
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="Scope" columnNames="applicationId,name"/>
   </changeSet>
-  
+
   <changeSet id="Users Table" author="moody.salem">
     <createTable tableName="User">
       <column name="id" autoIncrement="true" type="BIGINT">
@@ -67,15 +68,19 @@
         <constraints nullable="false"/>
       </column>
       <column name="applicationId" type="BIGINT">
-        <constraints nullable="false" />
+        <constraints nullable="false"/>
       </column>
       <column name="email" type="VARCHAR(191)">
-        <constraints nullable="false" />
+        <constraints nullable="false"/>
       </column>
       <column name="password" type="VARCHAR(191)">
-        <constraints nullable="true" />
+        <constraints nullable="true"/>
       </column>
     </createTable>
+    <addForeignKeyConstraint baseTableName="User" baseColumnNames="applicationId" constraintName="FK_User_Application"
+                             referencedTableName="Application"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="User" columnNames="applicationId,email"/>
     <sql dbms="mysql">ALTER TABLE User CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
@@ -110,7 +115,7 @@
     <addForeignKeyConstraint baseTableName="Client" baseColumnNames="applicationId"
                              constraintName="FK_CLIENT_APPLICATION"
                              referencedTableName="Application"
-                             referencedColumnNames="id" />
+                             referencedColumnNames="id"/>
   </changeSet>
 
 

@@ -14,6 +14,7 @@ public class OAuthApplication extends BaseApplication {
 
     public OAuthApplication() {
         super();
+
         packages("com.leaguekit.oauth.resources");
 
         register(new AbstractBinder() {

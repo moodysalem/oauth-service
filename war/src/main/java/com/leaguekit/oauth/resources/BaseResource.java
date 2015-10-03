@@ -8,5 +8,4 @@ public class BaseResource {
     @Inject
     private EntityManager em;
 
-
 }
