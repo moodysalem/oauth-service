@@ -8,9 +8,7 @@ import javax.persistence.criteria.Root;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 
 @Path("authorize")

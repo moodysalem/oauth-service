@@ -185,8 +185,8 @@
     <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
   </changeSet>
 
-  <changeSet author="moody.salem" id="Client_Scope Table">
-    <createTable tableName="Client_Scope">
+  <changeSet author="moody.salem" id="ClientScope Table">
+    <createTable tableName="ClientScope">
       <column name="id" autoIncrement="true" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
       </column>
@@ -209,12 +209,12 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Client_Scope" baseColumnNames="clientId"
-                             constraintName="FK_Client_Scope_Client"
+    <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="clientId"
+                             constraintName="FK_ClientScope_Client"
                              referencedTableName="Client"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Client_Scope" baseColumnNames="scopeId"
-                             constraintName="FK_Client_Scope_Scope"
+    <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="scopeId"
+                             constraintName="FK_ClientScope_Scope"
                              referencedTableName="Scope"
                              referencedColumnNames="id"/>
   </changeSet>

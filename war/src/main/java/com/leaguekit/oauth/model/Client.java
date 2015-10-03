@@ -2,13 +2,16 @@ package com.leaguekit.oauth.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 public class Client extends BaseEntity {
+
+    public enum GrantFlow {
+        CODE,
+        IMPLICIT
+    }
 
     @ManyToOne
     @JoinColumn(name = "applicationId")
@@ -19,6 +22,17 @@ public class Client extends BaseEntity {
 
     @Column(name = "secret")
     private String secret;
+
+    @ElementCollection
+    @CollectionTable(name = "Client_URI", joinColumns = @JoinColumn(name = "clientId"))
+    @Column(name = "uri")
+    private Set<String> uris;
+
+    @ElementCollection
+    @CollectionTable(name = "Client_Flow", joinColumns = @JoinColumn(name = "clientId"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "flow")
+    private Set<GrantFlow> flows;
 
     public String getIdentifier() {
         return identifier;
@@ -42,5 +56,13 @@ public class Client extends BaseEntity {
 
     public void setApplication(Application application) {
         this.application = application;
+    }
+
+    public Set<String> getUris() {
+        return uris;
+    }
+
+    public void setUris(Set<String> uris) {
+        this.uris = uris;
     }
 }

@@ -13,7 +13,6 @@
   <packaging>war</packaging>
 
   <dependencies>
-
     <!-- jaxrs library -->
     <dependency>
       <groupId>com.leaguekit</groupId>
