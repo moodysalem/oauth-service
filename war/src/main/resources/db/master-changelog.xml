@@ -3,6 +3,14 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
+  <property name="BLOB" dbms="mysql" value="LONGBLOB"/>
+  <property name="BLOB" value="BLOB"/>
+
+  <property name="TEXT" dbms="mysql" value="LONGTEXT"/>
+  <property name="TEXT" value="TEXT"/>
+
+  <property name="now" value="CURRENT_TIMESTAMP()" />
+
 
   <include file="changesets/1-0/schema.xml" relativeToChangelogFile="true" />
   <include file="changesets/1-0/data.xml" relativeToChangelogFile="true" />

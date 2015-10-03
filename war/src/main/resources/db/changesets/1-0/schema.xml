@@ -23,6 +23,34 @@
     </createTable>
     <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
   </changeSet>
+
+  <changeSet id="Scopes Table" author="moody.salem">
+    <createTable tableName="Scope">
+      <column name="id" autoIncrement="true" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="applicationId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
+    <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
+                             constraintName="FK_Scope_Application"
+                             referencedTableName="Application"
+                             referencedColumnNames="id" />
+  </changeSet>
   
   <changeSet id="Users Table" author="moody.salem">
     <createTable tableName="User">
