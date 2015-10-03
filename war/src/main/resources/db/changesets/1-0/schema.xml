@@ -104,7 +104,7 @@
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="clientId" type="VARCHAR(191)">
+      <column name="identifier" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
       <column name="secret" type="VARCHAR(191)">
@@ -133,14 +133,54 @@
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="token" type="VARCHAR(255)">
+      <column name="clientId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="token" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
       <column name="expires" type="TIMESTAMP">
         <constraints nullable="false"/>
       </column>
     </createTable>
+    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="clientId" constraintName="FK_Token_Client"
+                             referencedTableName="Client"
+                             referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
+  </changeSet>
+
+  <changeSet author="moody.salem" id="Client_Scope Table">
+    <createTable tableName="Client_Scope">
+      <column name="id" autoIncrement="true" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="clientId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="scopeId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="requiresPermission" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="Client_Scope" baseColumnNames="clientId"
+                             constraintName="FK_Client_Scope_Client"
+                             referencedTableName="Client"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="Client_Scope" baseColumnNames="scopeId"
+                             constraintName="FK_Client_Scope_Scope"
+                             referencedTableName="Scope"
+                             referencedColumnNames="id"/>
   </changeSet>
 
 </databaseChangeLog>
