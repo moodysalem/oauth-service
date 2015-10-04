@@ -194,7 +194,7 @@ public class AuthorizeResource extends BaseResource {
                     if (u.getPassword() == null) {
                         ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                     } else {
-                        if (true || BCrypt.checkpw(password, u.getPassword())) {
+                        if (BCrypt.checkpw(password, u.getPassword())) {
                             // successfully authenticated the user
                             List<ClientScope> toAsk = getScopes(c, u, scopes);
                             if (toAsk.size() > 0) {

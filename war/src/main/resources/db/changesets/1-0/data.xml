@@ -41,6 +41,14 @@
       <column name="scopeId">1</column>
       <column name="priority">ASK</column>
     </insert>
+
+    <insert tableName="User">
+      <column name="id">1</column>
+      <column name="applicationId">1</column>
+      <column name="email">moody.salem@gmail.com</column>
+      <!-- password "test" -->
+      <column name="password">$2a$10$wwQk08.jDCzxff4fq1gNmeMu99eHQifVnv2d5HQGZem3hMmZR4Lvy</column>
+    </insert>
   </changeSet>
 
 </databaseChangeLog>
