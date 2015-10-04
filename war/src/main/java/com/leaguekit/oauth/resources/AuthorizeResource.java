@@ -214,7 +214,7 @@ public class AuthorizeResource extends BaseResource {
                             tokenScopes.add(acceptScope(t.getUser(), cs));
                         }
                     }
-                    Token.Type type = CODE.equalsIgnoreCase(responseType) ? Token.Type.CODE : Token.Type.LOGIN;
+                    Token.Type type = getTokenType(responseType);
                     // now create the token we will be returning to the user
                     Token token = generateToken(type, t, tokenScopes);
                     doRedirect(redirectUri, state, token);
@@ -246,6 +246,8 @@ public class AuthorizeResource extends BaseResource {
                                 }
                             } else {
                                 // redirect with token since they've already asked for all the permissions
+                                Token t = generateToken(getTokenType(responseType), c, u, getExpires(c), findAcceptedScopes(u, c));
+                                doRedirect(redirectUri, state, t);
                             }
                         } else {
                             ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
@@ -258,6 +260,10 @@ public class AuthorizeResource extends BaseResource {
         }
 
         return new Viewable("/templates/Login", ar);
+    }
+
+    private Token.Type getTokenType(String responseType) {
+        return CODE.equalsIgnoreCase(responseType) ? Token.Type.CODE : Token.Type.LOGIN;
     }
 
     private void doRedirect(String redirectUri, String state, Token tkn) {
@@ -301,12 +307,20 @@ public class AuthorizeResource extends BaseResource {
         return sb.toString();
     }
 
+    private Date getExpires(Client c) {
+        return new Date((new Date()).getTime() + c.getTokenTtl() * 1000);
+    }
+
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
+        return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
+            getExpires(permissionToken.getClient()), scopes);
+    }
+
+    private Token generateToken(Token.Type type, Client client, User user, Date expires, List<AcceptedScope> scopes) {
         Token toReturn = new Token();
-        toReturn.setClient(permissionToken.getClient());
-        Date expires = new Date((new Date()).getTime() + permissionToken.getClient().getTokenTtl() * 1000);
+        toReturn.setClient(client);
         toReturn.setExpires(expires);
-        toReturn.setUser(permissionToken.getUser());
+        toReturn.setUser(user);
         toReturn.setType(type);
         toReturn.setRandomToken(64);
         toReturn.setAcceptedScopes(scopes);
@@ -323,7 +337,17 @@ public class AuthorizeResource extends BaseResource {
         return toReturn;
     }
 
-    private AcceptedScope acceptScope(User user, ClientScope clientScope) {
+    private List<AcceptedScope> findAcceptedScopes(User user, Client client) {
+        CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
+        Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
+        List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.join("clientScope").get("client"), client)
+        ))).getResultList();
+        return las;
+    }
+
+    private AcceptedScope findAcceptedScope(User user, ClientScope clientScope) {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
@@ -333,7 +357,15 @@ public class AuthorizeResource extends BaseResource {
         if (las.size() == 1) {
             return las.get(0);
         }
-        AcceptedScope as = new AcceptedScope();
+        return null;
+    }
+
+    private AcceptedScope acceptScope(User user, ClientScope clientScope) {
+        AcceptedScope as = findAcceptedScope(user, clientScope);
+        if (as != null) {
+            return as;
+        }
+        as = new AcceptedScope();
         as.setUser(user);
         as.setClientScope(clientScope);
 
@@ -343,6 +375,7 @@ public class AuthorizeResource extends BaseResource {
             em.flush();
             commit();
         } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to accept a scope", e);
             rollback();
             return null;
         }
