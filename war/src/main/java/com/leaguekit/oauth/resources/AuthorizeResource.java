@@ -11,7 +11,9 @@ import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -27,6 +29,7 @@ public class AuthorizeResource extends BaseResource {
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "An internal server error occurred. Please try again later.";
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
+    public static final String BEARER = "bearer";
 
 
     @QueryParam("response_type")
@@ -214,6 +217,7 @@ public class AuthorizeResource extends BaseResource {
                     Token.Type type = CODE.equalsIgnoreCase(responseType) ? Token.Type.CODE : Token.Type.LOGIN;
                     // now create the token we will be returning to the user
                     Token token = generateToken(type, t, tokenScopes);
+                    doRedirect(redirectUri, state, token);
                 }
             }
         } else {
@@ -256,10 +260,51 @@ public class AuthorizeResource extends BaseResource {
         return new Viewable("/templates/Login", ar);
     }
 
+    private void doRedirect(String redirectUri, String state, Token tkn) {
+        UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
+
+        String scope = tkn.getAcceptedScopes().stream()
+            .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
+            .collect(Collectors.joining(" "));
+        String expiresIn = Long.toString((tkn.getExpires().getTime() - (new Date()).getTime()) / 1000);
+
+        if (tkn.getType().equals(Token.Type.LOGIN)) {
+            Map<String, String> params = new HashMap<>();
+            params.put("access_token", tkn.getToken());
+            params.put("token_type", BEARER);
+            if (state != null) {
+                params.put("state", state);
+            }
+            params.put("expires_in", expiresIn);
+            params.put("scope", scope);
+            toRedirect.fragment(mapToQueryString(params));
+        }
+
+        if (tkn.getType().equals(Token.Type.CODE)) {
+
+        }
+        throw new RedirectionException(302, toRedirect.build());
+    }
+
+    private String mapToQueryString(Map<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+        for (HashMap.Entry<String, String> e : map.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append('&');
+            }
+            try {
+                sb.append(URLEncoder.encode(e.getKey(), "UTF-8")).append('=').append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            } catch (Exception ignored) {
+                LOG.log(Level.SEVERE, "Failed to encode map", ignored);
+            }
+        }
+        return sb.toString();
+    }
+
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         Token toReturn = new Token();
         toReturn.setClient(permissionToken.getClient());
-        Date expires = new Date((new Date()).getTime() + permissionToken.getClient().getTokenTtl());
+        Date expires = new Date((new Date()).getTime() + permissionToken.getClient().getTokenTtl() * 1000);
         toReturn.setExpires(expires);
         toReturn.setUser(permissionToken.getUser());
         toReturn.setType(type);

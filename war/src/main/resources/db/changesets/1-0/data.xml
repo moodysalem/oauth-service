@@ -5,19 +5,25 @@
 
 
   <changeSet id="Testing Data" author="moody.salem" context="test">
+
     <insert tableName="Application">
       <column name="id">1</column>
-      <column name="name">LeagueKit</column>
+      <column name="name">OAuth Cloud</column>
     </insert>
+
     <insert tableName="Client">
       <column name="id">1</column>
-      <column name="name">Website</column>
+      <column name="name">Administration Portal</column>
       <column name="identifier">1</column>
       <column name="secret">abc</column>
       <column name="applicationId">1</column>
       <column name="tokenTtl">3600</column>
     </insert>
 
+    <insert tableName="Client_Flow">
+      <column name="clientId">1</column>
+      <column name="flow">IMPLICIT</column>
+    </insert>
     <insert tableName="Client_Flow">
       <column name="clientId">1</column>
       <column name="flow">CODE</column>
