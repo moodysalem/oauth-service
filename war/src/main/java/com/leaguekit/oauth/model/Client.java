@@ -10,17 +10,10 @@ import java.util.Set;
 @Entity
 public class Client extends BaseEntity {
 
-    public List<ClientScope> getClientScopes() {
-        return clientScopes;
-    }
-
-    public void setClientScopes(List<ClientScope> clientScopes) {
-        this.clientScopes = clientScopes;
-    }
-
     public enum GrantFlow {
         IMPLICIT,
         CODE;
+
     }
 
     @Column(name = "name")
@@ -29,7 +22,6 @@ public class Client extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "applicationId")
     private Application application;
-
     @Column(name = "identifier")
     private String identifier;
 
@@ -50,6 +42,9 @@ public class Client extends BaseEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "client")
     private List<ClientScope> clientScopes;
+
+    @Column(name = "tokenTtl")
+    private Long tokenTtl;
 
     public String getIdentifier() {
         return identifier;
@@ -98,4 +93,21 @@ public class Client extends BaseEntity {
     public void setName(String name) {
         this.name = name;
     }
+
+    public List<ClientScope> getClientScopes() {
+        return clientScopes;
+    }
+
+    public void setClientScopes(List<ClientScope> clientScopes) {
+        this.clientScopes = clientScopes;
+    }
+
+    public Long getTokenTtl() {
+        return tokenTtl;
+    }
+
+    public void setTokenTtl(Long tokenTtl) {
+        this.tokenTtl = tokenTtl;
+    }
+
 }

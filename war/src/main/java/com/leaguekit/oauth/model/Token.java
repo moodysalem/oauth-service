@@ -11,15 +11,19 @@ import java.util.List;
 public class Token extends BaseEntity {
 
     public enum Type {
-        LOGIN, PERMISSION, REFRESH;
-    }
+        LOGIN, PERMISSION, REFRESH, CODE;
 
+    }
     @Column(name = "token")
     private String token;
 
     @ManyToOne
     @JoinColumn(name = "userId")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "clientId")
+    private Client client;
 
     @Column(name = "expires")
     private Date expires;
@@ -36,10 +40,10 @@ public class Token extends BaseEntity {
     )
     private List<AcceptedScope> acceptedScopes;
 
-
     public String getToken() {
         return token;
     }
+
 
     public void setToken(String token) {
         this.token = token;
@@ -79,5 +83,13 @@ public class Token extends BaseEntity {
 
     public void setAcceptedScopes(List<AcceptedScope> acceptedScopes) {
         this.acceptedScopes = acceptedScopes;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 }

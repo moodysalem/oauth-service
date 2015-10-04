@@ -113,6 +113,9 @@
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="tokenTtl" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
       <column name="identifier" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
@@ -179,6 +182,9 @@
         <constraints nullable="false"/>
       </column>
       <column name="userId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="clientId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
       <column name="token" type="VARCHAR(191)">

@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Path("authorize")
@@ -182,7 +183,7 @@ public class AuthorizeResource extends BaseResource {
 
         // they just completed the second step of the login
         if (loginToken != null) {
-            Token t = getPermissionToken(loginToken);
+            Token t = getPermissionToken(loginToken, c);
             if (t == null) {
                 ar.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
             } else {
@@ -194,7 +195,7 @@ public class AuthorizeResource extends BaseResource {
                     // we'll populate this as we loop through the scopes
                     List<AcceptedScope> tokenScopes = new ArrayList<>();
                     // get all the scope ids that were explicitly granted
-                    Set<Long> scopeIds = formParams.keySet().stream().map((s) -> {
+                    Set<Long> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
                         try {
                             return s != null && s.startsWith("SCOPE") &&
                                 "on".equalsIgnoreCase(formParams.getFirst(s)) ?
@@ -204,12 +205,15 @@ public class AuthorizeResource extends BaseResource {
                         }
                     }).filter((i) -> i != null).collect(Collectors.toSet());
                     for (ClientScope cs : clientScopes) {
-                        // if it's not ASK or it's explicitly granted, we shoud use create/find the AcceptedScope record
-                        if (!cs.getPriority().equals(ClientScope.Priority.ASK) || scopeIds.contains(cs.getScope().getId())) {
+                        // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
+                        if (!cs.getPriority().equals(ClientScope.Priority.ASK) || acceptedScopeIds.contains(cs.getScope().getId())) {
                             // create/find the accepted scope for this client scope
                             tokenScopes.add(acceptScope(t.getUser(), cs));
                         }
                     }
+                    Token.Type type = CODE.equalsIgnoreCase(responseType) ? Token.Type.CODE : Token.Type.LOGIN;
+                    // now create the token we will be returning to the user
+                    Token token = generateToken(type, t, tokenScopes);
                 }
             }
         } else {
@@ -227,7 +231,7 @@ public class AuthorizeResource extends BaseResource {
                             List<ClientScope> toAsk = getScopesToRequest(c, u, scopes);
                             if (toAsk.size() > 0) {
                                 // we need to generate a temporary token for them to get to the next step with
-                                Token t = generatePermissionToken(u);
+                                Token t = generatePermissionToken(u, c);
                                 if (t == null) {
                                     ar.setLoginError(INTERNAL_SERVER_ERROR_MESSAGE);
                                 } else {
@@ -250,6 +254,28 @@ public class AuthorizeResource extends BaseResource {
         }
 
         return new Viewable("/templates/Login", ar);
+    }
+
+    private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
+        Token toReturn = new Token();
+        toReturn.setClient(permissionToken.getClient());
+        Date expires = new Date((new Date()).getTime() + permissionToken.getClient().getTokenTtl());
+        toReturn.setExpires(expires);
+        toReturn.setUser(permissionToken.getUser());
+        toReturn.setType(type);
+        toReturn.setRandomToken(64);
+        toReturn.setAcceptedScopes(scopes);
+        try {
+            beginTransaction();
+            em.persist(toReturn);
+            em.flush();
+            commit();
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to create a token", e);
+            rollback();
+            return null;
+        }
+        return toReturn;
     }
 
     private AcceptedScope acceptScope(User user, ClientScope clientScope) {
@@ -284,22 +310,24 @@ public class AuthorizeResource extends BaseResource {
         return em.createQuery(cq.select(rcs).where(cb.equal(rcs.get("client"), c))).getResultList();
     }
 
-    private Token getPermissionToken(String token) {
+    private Token getPermissionToken(String token, Client client) {
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         Root<Token> tk = tq.from(Token.class);
         List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
             cb.equal(tk.get("token"), token),
-            cb.equal(tk.get("type"), Token.Type.PERMISSION)
+            cb.equal(tk.get("type"), Token.Type.PERMISSION),
+            cb.equal(tk.get("client"), client)
         ))).getResultList();
         return tks.size() == 1 ? tks.get(0) : null;
     }
 
-    private Token generatePermissionToken(User user) {
+    private Token generatePermissionToken(User user, Client client) {
         Token t = new Token();
         Date expires = new Date();
         expires.setTime(expires.getTime() + FIVE_MINUTES);
         t.setExpires(expires);
         t.setUser(user);
+        t.setClient(client);
         t.setRandomToken(64);
         t.setType(Token.Type.PERMISSION);
         try {

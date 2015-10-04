@@ -15,6 +15,7 @@
       <column name="identifier">1</column>
       <column name="secret">abc</column>
       <column name="applicationId">1</column>
+      <column name="tokenTtl">3600</column>
     </insert>
 
     <insert tableName="Client_Flow">
