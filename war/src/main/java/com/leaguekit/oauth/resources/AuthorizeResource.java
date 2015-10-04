@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,13 +22,24 @@ import java.util.List;
 public class AuthorizeResource extends BaseResource {
 
     public static final String TOKEN = "token";
-    public static final String TOKEN_SESSION_ATTRIBUTE = "token";
     public static final String CODE = "code";
     public static final String INVALID_E_MAIL_OR_PASSWORD = "Invalid e-mail or password.";
     public static final int FIVE_MINUTES = (1000 * 60 * 5);
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "An internal server error occurred. Please try again later.";
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
+
+
+    @QueryParam("response_type")
+    String responseType;
+    @QueryParam("client_id")
+    String clientId;
+    @QueryParam("redirect_uri")
+    String redirectUri;
+    @QueryParam("state")
+    String state;
+    @QueryParam("scope")
+    List<String> scopes;
 
     // this returns an error view if there are any issues with the response type, client id, or redirect URI
     // these errors are primarily for the developer interfacing with the oauth login
@@ -131,12 +143,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     @GET
-    public Viewable auth(
-        @QueryParam("response_type") String responseType,
-        @QueryParam("client_id") String clientId,
-        @QueryParam("redirect_uri") String redirectUri,
-        @QueryParam("state") String state
-    ) {
+    public Viewable auth() {
         Viewable error = validateParameters(responseType, clientId, redirectUri);
         if (error != null) {
             return error;
@@ -151,16 +158,10 @@ public class AuthorizeResource extends BaseResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Viewable login(
-        @QueryParam("response_type") String responseType,
-        @QueryParam("client_id") String clientId,
-        @QueryParam("redirect_uri") String redirectUri,
-        @QueryParam("state") String state,
-        @QueryParam("scope") List<String> scopes,
-        @FormParam("email") String email,
-        @FormParam("password") String password,
-        @FormParam("login_token") String loginToken
-    ) {
+    public Viewable login(MultivaluedMap<String, String> formParams) {
+        String email = formParams.getFirst("email");
+        String password = formParams.getFirst("password");
+        String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
         Viewable error = validateParameters(responseType, clientId, redirectUri);
         if (error != null) {
@@ -180,8 +181,7 @@ public class AuthorizeResource extends BaseResource {
                 if (t.getExpires().before(new Date())) {
                     ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                 } else {
-                    // they selected permissions to authorize, we should create the associated acceptedscope records and
-                    // then redirect the user
+                    // we need to find all the new scopes they accepted
                 }
             }
         } else {

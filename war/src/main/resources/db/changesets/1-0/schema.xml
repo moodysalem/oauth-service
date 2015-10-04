@@ -47,6 +47,12 @@
       <column name="displayName" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="thumbnail" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="description" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
                              constraintName="FK_Scope_Application"

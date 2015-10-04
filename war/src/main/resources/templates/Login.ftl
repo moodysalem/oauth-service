@@ -27,8 +27,10 @@
             <#if model.loginError??>
                 <div class="alert alert-danger">${model.loginError}</div>
             </#if>
-
-                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">
+                    <i class="fa fa-sign-in"></i>
+                    Sign In
+                </button>
             </form>
         </div>
     </body>

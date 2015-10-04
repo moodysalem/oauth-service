@@ -10,7 +10,7 @@ import java.util.Date;
 public class Token extends BaseEntity {
 
     public enum Type {
-        LOGIN, PERMISSION
+        LOGIN, PERMISSION, REFRESH
     }
 
     @Column(name = "token")

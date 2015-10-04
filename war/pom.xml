@@ -65,6 +65,10 @@
               <name>JDBC_CONNECTION_PASSWORD</name>
               <value>${JDBC_CONNECTION_PASSWORD}</value>
             </systemProperty>
+            <systemProperty>
+              <name>LIQUIBASE_CONTEXT</name>
+              <value>test</value>
+            </systemProperty>
           </systemProperties>
         </configuration>
       </plugin>

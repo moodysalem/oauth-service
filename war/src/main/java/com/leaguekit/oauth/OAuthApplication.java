@@ -20,6 +20,10 @@ public class OAuthApplication extends BaseApplication {
         register(new AbstractBinder() {
             @Override
             protected void configure() {
+                String context = System.getProperty("LIQUIBASE_CONTEXT");
+                if (context == null) {
+                    context = "";
+                }
                 bindFactory(new JAXRSEntityManagerFactory(
                     System.getProperty("JDBC_CONNECTION_STRING"),
                     System.getProperty("JDBC_CONNECTION_USERNAME"),
@@ -27,7 +31,7 @@ public class OAuthApplication extends BaseApplication {
                     "oauth-service",
                     "db/master-changelog.xml",
                     true,
-                    ""
+                    context
                 )).to(EntityManager.class).in(RequestScoped.class);
             }
         });

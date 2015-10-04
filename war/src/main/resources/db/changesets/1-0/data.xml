@@ -1,8 +1,46 @@
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+
+  <changeSet id="Testing Data" author="moody.salem" context="test">
+    <insert tableName="Application">
+      <column name="id">1</column>
+      <column name="name">LeagueKit</column>
+    </insert>
+    <insert tableName="Client">
+      <column name="id">1</column>
+      <column name="name">Website</column>
+      <column name="identifier">1</column>
+      <column name="secret">abc</column>
+      <column name="applicationId">1</column>
+    </insert>
+
+    <insert tableName="Client_Flow">
+      <column name="clientId">1</column>
+      <column name="flow">CODE</column>
+    </insert>
+    
+    <insert tableName="Client_URI">
+      <column name="clientId">1</column>
+      <column name="uri">http://localhost:8080</column>
+    </insert>
+    
+    <insert tableName="Scope">
+      <column name="id">1</column>
+      <column name="applicationId">1</column>
+      <column name="name">user_profile</column>
+      <column name="displayName">User Profile</column>
+      <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
+      <column name="description">This gives the application access to your birthday, work history, etc.</column>
+    </insert>
+
+    <insert tableName="ClientScope">
+      <column name="clientId">1</column>
+      <column name="scopeId">1</column>
+      <column name="priority">ASK</column>
+    </insert>
+  </changeSet>
 
 </databaseChangeLog>
