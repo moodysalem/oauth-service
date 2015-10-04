@@ -9,6 +9,7 @@ public class ClientScope extends BaseEntity {
 
     public enum Priority {
         ALWAYS,
+        REQUIRE,
         ASK
     }
 

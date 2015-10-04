@@ -16,6 +16,9 @@ public class Scope extends BaseEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "displayName")
+    private String displayName;
+
     public Application getApplication() {
         return application;
     }
@@ -30,5 +33,13 @@ public class Scope extends BaseEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

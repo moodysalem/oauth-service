@@ -2,10 +2,7 @@ package com.leaguekit.oauth.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class User extends BaseEntity {

@@ -44,6 +44,9 @@
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="displayName" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
                              constraintName="FK_Scope_Application"
@@ -169,7 +172,7 @@
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="clientId" type="BIGINT">
+      <column name="userId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
       <column name="token" type="VARCHAR(191)">
@@ -178,9 +181,12 @@
       <column name="expires" type="TIMESTAMP">
         <constraints nullable="false"/>
       </column>
+      <column name="type" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="clientId" constraintName="FK_Token_Client"
-                             referencedTableName="Client"
+    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="userId" constraintName="FK_Token_User"
+                             referencedTableName="User"
                              referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
@@ -216,6 +222,38 @@
     <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="scopeId"
                              constraintName="FK_ClientScope_Scope"
                              referencedTableName="Scope"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="ClientScope" columnNames="clientId,scopeId"/>
+  </changeSet>
+
+  <changeSet id="Accepted Scopes Table" author="moody.salem">
+    <createTable tableName="AcceptedScope">
+      <column name="id" autoIncrement="true" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="userId">
+        <constraints nullable="false"/>
+      </column>
+      <column name="clientScopeId">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="AcceptedScope" baseColumnNames="userId"
+                             constraintName="FK_AcceptedScope_User"
+                             referencedTableName="User"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="AcceptedScope" baseColumnNames="clientScopeId"
+                             constraintName="FK_AcceptedScope_ClientScope"
+                             referencedTableName="ClientScope"
                              referencedColumnNames="id"/>
   </changeSet>
 

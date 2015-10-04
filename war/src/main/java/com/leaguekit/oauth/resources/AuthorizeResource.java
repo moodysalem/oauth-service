@@ -1,15 +1,20 @@
 package com.leaguekit.oauth.resources;
 
+import com.leaguekit.oauth.model.AcceptedScope;
 import com.leaguekit.oauth.model.Client;
+import com.leaguekit.oauth.model.ClientScope;
 import com.leaguekit.oauth.model.User;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,6 +23,7 @@ import java.util.List;
 public class AuthorizeResource extends BaseResource {
 
     public static final String TOKEN = "token";
+    public static final String TOKEN_SESSION_ATTRIBUTE = "token";
     public static final String CODE = "code";
     public static final String INVALID_E_MAIL_OR_PASSWORD = "Invalid e-mail or password.";
 
@@ -113,10 +119,11 @@ public class AuthorizeResource extends BaseResource {
             return error;
         }
 
+
         AuthorizeResponse ar = new AuthorizeResponse();
         ar.setClient(getClient(clientId));
 
-        return new Viewable("/templates/Authorize", ar);
+        return new Viewable("/templates/Login", ar);
     }
 
     @POST
@@ -126,6 +133,7 @@ public class AuthorizeResource extends BaseResource {
         @QueryParam("client_id") String clientId,
         @QueryParam("redirect_uri") String redirectUri,
         @QueryParam("state") String state,
+        @QueryParam("scope") List<String> scopes,
         @FormParam("email") String email,
         @FormParam("password") String password
     ) {
@@ -149,7 +157,13 @@ public class AuthorizeResource extends BaseResource {
                     ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                 } else {
                     if (BCrypt.checkpw(password, u.getPassword())) {
-                        // we need to move on to picking the permissions
+                        // successfully authenticated the user
+                        List<ClientScope> toAsk = getScopes(c, u, scopes);
+                        if (toAsk.size() > 0) {
+                            // we need to generate a temporary token for them to get to the next step with
+                        } else {
+                            // redirect with token
+                        }
                     } else {
                         ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                     }
@@ -159,7 +173,48 @@ public class AuthorizeResource extends BaseResource {
             ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
         }
 
-        return new Viewable("/templates/Authorize", ar);
+        return new Viewable("/templates/Login", ar);
+    }
+
+    /**
+     * Get the scopes that we need to show or ask the user for
+     *
+     * @param client client for which we're retrieving scopes
+     * @param user   user for which we're retrieving scopes
+     * @return list of scopes we should ask for
+     */
+    private List<ClientScope> getScopes(Client client, User user, List<String> scopes) {
+        CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
+        Root<ClientScope> rcs = cq.from(ClientScope.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        // scopes for this client
+        predicates.add(cb.equal(rcs.get("client"), client));
+
+        // since a client will always have these scopes, we don't show them
+        predicates.add(cb.notEqual(rcs.get("priority"), ClientScope.Priority.ALWAYS));
+
+        // not already accepted by the user
+        predicates.add(cb.not(rcs.in(acceptedScopes(user))));
+
+        // scope names in this list
+        if (scopes != null && scopes.size() > 0) {
+            predicates.add(rcs.join("scope").get("name").in(scopes));
+        }
+
+        Predicate[] pArray = new Predicate[predicates.size()];
+
+        return em.createQuery(cq.select(rcs).where(pArray)).getResultList();
+    }
+
+    private Subquery<ClientScope> acceptedScopes(User user) {
+        Subquery<ClientScope> sq = cb.createQuery().subquery(ClientScope.class);
+
+        Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
+        sq.select(ras.get("clientScope")).where(cb.equal(ras.get("user"), user));
+
+        return sq;
     }
 
     private Viewable error(String error) {

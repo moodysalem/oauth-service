@@ -2,11 +2,31 @@ package com.leaguekit.oauth.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import java.util.Date;
 
 @Entity
 public class Token extends BaseEntity {
+
+    public enum Type {
+        LOGIN, PERMISSION
+    }
+
+    @Column(name = "token")
     private String token;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private User user;
+
+    @Column(name = "expires")
+    private Date expires;
+
+    @Column(name = "type")
+    private Type type;
 
     public String getToken() {
         return token;
@@ -14,5 +34,29 @@ public class Token extends BaseEntity {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Date getExpires() {
+        return expires;
+    }
+
+    public void setExpires(Date expires) {
+        this.expires = expires;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }
