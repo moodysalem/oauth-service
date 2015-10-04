@@ -45,4 +45,30 @@
   </dependencies>
 
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.3.0.M2</version>
+        <configuration>
+          <systemProperties>
+            <systemProperty>
+              <name>JDBC_CONNECTION_STRING</name>
+              <value>${JDBC_CONNECTION_STRING}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>JDBC_CONNECTION_USERNAME</name>
+              <value>${JDBC_CONNECTION_USERNAME}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>JDBC_CONNECTION_PASSWORD</name>
+              <value>${JDBC_CONNECTION_PASSWORD}</value>
+            </systemProperty>
+          </systemProperties>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

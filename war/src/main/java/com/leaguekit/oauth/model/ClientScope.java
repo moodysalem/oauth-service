@@ -2,13 +2,16 @@ package com.leaguekit.oauth.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class ClientScope extends BaseEntity {
+
+    public enum Priority {
+        ALWAYS,
+        ASK
+    }
+
     @ManyToOne
     @JoinColumn(name = "clientId")
     private Client client;
@@ -17,16 +20,9 @@ public class ClientScope extends BaseEntity {
     @JoinColumn(name = "scopeId")
     private Scope scope;
 
-    @Column(name = "requiresPermission")
-    private boolean requiresPermission;
-
-    public boolean isRequiresPermission() {
-        return requiresPermission;
-    }
-
-    public void setRequiresPermission(boolean requiresPermission) {
-        this.requiresPermission = requiresPermission;
-    }
+    @Column(name = "priority")
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
     public Client getClient() {
         return client;
@@ -42,5 +38,13 @@ public class ClientScope extends BaseEntity {
 
     public void setScope(Scope scope) {
         this.scope = scope;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
     }
 }

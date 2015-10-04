@@ -21,7 +21,7 @@
         <constraints nullable="false" unique="true"/>
       </column>
     </createTable>
-    <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
+    <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="Scopes Table" author="moody.salem">
@@ -50,7 +50,7 @@
                              referencedTableName="Application"
                              referencedColumnNames="id"/>
     <addUniqueConstraint tableName="Scope" columnNames="applicationId,name"/>
-    <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
+    <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="Users Table" author="moody.salem">
@@ -115,7 +115,7 @@
                              constraintName="FK_CLIENT_APPLICATION"
                              referencedTableName="Application"
                              referencedColumnNames="id"/>
-    <sql dbms="mysql">ALTER TABLE Client CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
+    <sql dbms="mysql">ALTER TABLE Client CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="Client Redirect URI table" author="moody.salem">
@@ -182,7 +182,7 @@
     <addForeignKeyConstraint baseTableName="Token" baseColumnNames="clientId" constraintName="FK_Token_Client"
                              referencedTableName="Client"
                              referencedColumnNames="id"/>
-    <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_bin;</sql>
+    <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet author="moody.salem" id="ClientScope Table">
@@ -205,7 +205,7 @@
       <column name="scopeId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="requiresPermission" type="BOOLEAN">
+      <column name="priority" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
     </createTable>

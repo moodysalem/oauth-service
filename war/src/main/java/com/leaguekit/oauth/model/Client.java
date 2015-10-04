@@ -9,8 +9,8 @@ import java.util.Set;
 public class Client extends BaseEntity {
 
     public enum GrantFlow {
-        CODE,
-        IMPLICIT
+        IMPLICIT,
+        CODE
     }
 
     @ManyToOne
@@ -64,5 +64,13 @@ public class Client extends BaseEntity {
 
     public void setUris(Set<String> uris) {
         this.uris = uris;
+    }
+
+    public Set<GrantFlow> getFlows() {
+        return flows;
+    }
+
+    public void setFlows(Set<GrantFlow> flows) {
+        this.flows = flows;
     }
 }
