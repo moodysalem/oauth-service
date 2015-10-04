@@ -3,7 +3,7 @@
 <#include "Head.ftl">
     <body>
         <div class="container">
-            <h2>Authorize These Permissions</h2>
+            <h2>Grant these Permissions?</h2>
 
             <form method="POST">
             <#list model.clientScopes as cScope>

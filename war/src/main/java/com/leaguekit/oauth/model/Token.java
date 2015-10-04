@@ -5,12 +5,13 @@ import com.leaguekit.util.RandomStringUtil;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class Token extends BaseEntity {
 
     public enum Type {
-        LOGIN, PERMISSION, REFRESH
+        LOGIN, PERMISSION, REFRESH;
     }
 
     @Column(name = "token")
@@ -26,6 +27,15 @@ public class Token extends BaseEntity {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private Type type;
+
+    @ManyToMany
+    @JoinTable(
+        name = "Token_AcceptedScope",
+        joinColumns = @JoinColumn(name = "tokenId"),
+        inverseJoinColumns = @JoinColumn(name = "acceptedScopeId")
+    )
+    private List<AcceptedScope> acceptedScopes;
+
 
     public String getToken() {
         return token;
@@ -61,5 +71,13 @@ public class Token extends BaseEntity {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public List<AcceptedScope> getAcceptedScopes() {
+        return acceptedScopes;
+    }
+
+    public void setAcceptedScopes(List<AcceptedScope> acceptedScopes) {
+        this.acceptedScopes = acceptedScopes;
     }
 }

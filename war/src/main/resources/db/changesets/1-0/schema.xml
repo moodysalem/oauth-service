@@ -264,4 +264,24 @@
     <addUniqueConstraint tableName="AcceptedScope" columnNames="userId,clientScopeId"/>
   </changeSet>
 
+  <!-- this table lists all the scopes that are granted with a token -->
+  <changeSet id="Token Accepted Scopes Join Table" author="moody.salem">
+    <createTable tableName="Token_AcceptedScope">
+      <column name="tokenId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="acceptedScopeId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="tokenId"
+                             constraintName="FK_Token_AcceptedScope_Token"
+                             referencedTableName="Token"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="acceptedScopeId"
+                             constraintName="FK_Token_AcceptedScope_AcceptedScope"
+                             referencedTableName="AcceptedScope"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
 </databaseChangeLog>

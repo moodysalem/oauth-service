@@ -3,6 +3,7 @@ package com.leaguekit.oauth;
 
 import com.leaguekit.jaxrs.lib.BaseApplication;
 import com.leaguekit.jaxrs.lib.factories.JAXRSEntityManagerFactory;
+import com.leaguekit.oauth.filter.NoXFrameOptions;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.process.internal.RequestScoped;
 
@@ -14,6 +15,7 @@ public class OAuthApplication extends BaseApplication {
 
     public OAuthApplication() {
         super();
+        register(NoXFrameOptions.class);
 
         packages("com.leaguekit.oauth.resources");
 
