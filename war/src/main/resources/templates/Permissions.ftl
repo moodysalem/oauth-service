@@ -7,6 +7,7 @@
 
             <form method="POST">
             <#list model.clientScopes as cScope>
+                <#escape x as x?html>
                 <div class="row client-scope">
                     <div class="col-sm-2 text-center vcenter">
                         <input id="SCOPE${cScope.scope.id}" name="SCOPE${cScope.scope.id}" type="checkbox" checked/>
@@ -22,6 +23,7 @@
                         </label>
                     </div>
                 </div>
+                </#escape>
             </#list>
                 <div class="row">
                     <div class="col-sm-6">
