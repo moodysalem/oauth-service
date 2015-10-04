@@ -240,10 +240,10 @@
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="userId">
+      <column name="userId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="clientScopeId">
+      <column name="clientScopeId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
     </createTable>

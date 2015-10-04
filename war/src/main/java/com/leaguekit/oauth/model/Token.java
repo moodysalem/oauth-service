@@ -2,10 +2,7 @@ package com.leaguekit.oauth.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -26,6 +23,7 @@ public class Token extends BaseEntity {
     private Date expires;
 
     @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private Type type;
 
     public String getToken() {
