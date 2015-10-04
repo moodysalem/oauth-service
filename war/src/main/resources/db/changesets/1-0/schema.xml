@@ -255,6 +255,7 @@
                              constraintName="FK_AcceptedScope_ClientScope"
                              referencedTableName="ClientScope"
                              referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="AcceptedScope" columnNames="userId,clientScopeId"/>
   </changeSet>
 
 </databaseChangeLog>

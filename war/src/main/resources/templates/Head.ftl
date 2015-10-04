@@ -66,5 +66,8 @@
             border-top-left-radius: 0;
             border-top-right-radius: 0;
         }
+        .scope-thumbnail {
+            width: 100%;
+        }
     </style>
 </head>

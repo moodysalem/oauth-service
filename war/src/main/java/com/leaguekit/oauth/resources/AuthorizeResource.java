@@ -1,9 +1,6 @@
 package com.leaguekit.oauth.resources;
 
-import com.leaguekit.oauth.model.AcceptedScope;
-import com.leaguekit.oauth.model.Client;
-import com.leaguekit.oauth.model.ClientScope;
-import com.leaguekit.oauth.model.User;
+import com.leaguekit.oauth.model.*;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -15,6 +12,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,6 +24,10 @@ public class AuthorizeResource extends BaseResource {
     public static final String TOKEN_SESSION_ATTRIBUTE = "token";
     public static final String CODE = "code";
     public static final String INVALID_E_MAIL_OR_PASSWORD = "Invalid e-mail or password.";
+    public static final int FIVE_MINUTES = (1000 * 60 * 5);
+    public static final String INTERNAL_SERVER_ERROR_MESSAGE = "An internal server error occurred. Please try again later.";
+    public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
+    public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
 
     // this returns an error view if there are any issues with the response type, client id, or redirect URI
     // these errors are primarily for the developer interfacing with the oauth login
@@ -107,6 +109,27 @@ public class AuthorizeResource extends BaseResource {
         }
     }
 
+    public static class PermissionsResponse {
+        private Token token;
+        private List<ClientScope> clientScopes;
+
+        public Token getToken() {
+            return token;
+        }
+
+        public void setToken(Token token) {
+            this.token = token;
+        }
+
+        public List<ClientScope> getClientScopes() {
+            return clientScopes;
+        }
+
+        public void setClientScopes(List<ClientScope> clientScopes) {
+            this.clientScopes = clientScopes;
+        }
+    }
+
     @GET
     public Viewable auth(
         @QueryParam("response_type") String responseType,
@@ -135,7 +158,8 @@ public class AuthorizeResource extends BaseResource {
         @QueryParam("state") String state,
         @QueryParam("scope") List<String> scopes,
         @FormParam("email") String email,
-        @FormParam("password") String password
+        @FormParam("password") String password,
+        @FormParam("login_token") String loginToken
     ) {
         // validate the client id stuff again
         Viewable error = validateParameters(responseType, clientId, redirectUri);
@@ -147,33 +171,86 @@ public class AuthorizeResource extends BaseResource {
         Client c = getClient(clientId);
         ar.setClient(c);
 
-        // validate the username and password
-        if (email != null && password != null) {
-            User u = getUser(email, c.getApplication().getId());
-            if (u == null) {
-                ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+        // they just completed the second step of the login
+        if (loginToken != null) {
+            Token t = getPermissionToken(loginToken);
+            if (t == null) {
+                ar.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
             } else {
-                if (u.getPassword() == null) {
-                    ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+                if (t.getExpires().before(new Date())) {
+                    ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                 } else {
-                    if (BCrypt.checkpw(password, u.getPassword())) {
-                        // successfully authenticated the user
-                        List<ClientScope> toAsk = getScopes(c, u, scopes);
-                        if (toAsk.size() > 0) {
-                            // we need to generate a temporary token for them to get to the next step with
-                        } else {
-                            // redirect with token
-                        }
-                    } else {
-                        ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
-                    }
+                    // they selected permissions to authorize, we should create the associated acceptedscope records and
+                    // then redirect the user
                 }
             }
         } else {
-            ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+            // validate the username and password
+            if (email != null && password != null) {
+                User u = getUser(email, c.getApplication().getId());
+                if (u == null) {
+                    ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+                } else {
+                    if (u.getPassword() == null) {
+                        ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+                    } else {
+                        if (true || BCrypt.checkpw(password, u.getPassword())) {
+                            // successfully authenticated the user
+                            List<ClientScope> toAsk = getScopes(c, u, scopes);
+                            if (toAsk.size() > 0) {
+                                // we need to generate a temporary token for them to get to the next step with
+                                Token t = generatePermissionToken(u);
+                                if (t == null) {
+                                    ar.setLoginError(INTERNAL_SERVER_ERROR_MESSAGE);
+                                } else {
+                                    PermissionsResponse pr = new PermissionsResponse();
+                                    pr.setClientScopes(toAsk);
+                                    pr.setToken(t);
+                                    return new Viewable("/templates/Permissions", pr);
+                                }
+                            } else {
+                                // redirect with token since they've already asked for all the permissions
+                            }
+                        } else {
+                            ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+                        }
+                    }
+                }
+            } else {
+                ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+            }
         }
 
         return new Viewable("/templates/Login", ar);
+    }
+
+    private Token getPermissionToken(String token) {
+        CriteriaQuery<Token> tq = cb.createQuery(Token.class);
+        Root<Token> tk = tq.from(Token.class);
+        List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
+            cb.equal(tk.get("token"), token),
+            cb.equal(tk.get("type"), Token.Type.PERMISSION)
+        ))).getResultList();
+        return tks.size() == 1 ? tks.get(0) : null;
+    }
+
+    private Token generatePermissionToken(User user) {
+        Token t = new Token();
+        Date expires = new Date();
+        expires.setTime(expires.getTime() + FIVE_MINUTES);
+        t.setExpires(expires);
+        t.setUser(user);
+        t.setRandomToken(64);
+        t.setType(Token.Type.PERMISSION);
+        try {
+            beginTransaction();
+            em.persist(t);
+            em.flush();
+            commit();
+        } catch (Exception e) {
+            return null;
+        }
+        return t;
     }
 
     /**
@@ -204,6 +281,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         Predicate[] pArray = new Predicate[predicates.size()];
+        predicates.toArray(pArray);
 
         return em.createQuery(cq.select(rcs).where(pArray)).getResultList();
     }

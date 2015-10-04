@@ -1,6 +1,7 @@
 package com.leaguekit.oauth.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
+import com.leaguekit.util.RandomStringUtil;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -32,6 +33,10 @@ public class Token extends BaseEntity {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public void setRandomToken(int length) {
+        setToken(RandomStringUtil.randomAlphaNumeric(length));
     }
 
     public User getUser() {
