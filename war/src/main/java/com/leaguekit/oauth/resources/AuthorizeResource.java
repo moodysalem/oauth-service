@@ -12,10 +12,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Path("authorize")
 @Produces(MediaType.TEXT_HTML)
@@ -43,7 +41,7 @@ public class AuthorizeResource extends BaseResource {
 
     // this returns an error view if there are any issues with the response type, client id, or redirect URI
     // these errors are primarily for the developer interfacing with the oauth login
-    private Viewable validateParameters(String responseType, String clientId, String redirectUri) {
+    private Viewable validateParameters(String responseType, String clientId, String redirectUri, List<String> scopes) {
         // verify all the query parameters are passed
         if (clientId == null || redirectUri == null || responseType == null) {
             return error("Client ID, redirect URI, and response type are all required for this endpoint.");
@@ -97,6 +95,16 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
+        // verify all the requested scopes are available to the client
+        if (scopes != null && scopes.size() > 0) {
+            Set<String> scopeNames = c.getClientScopes().stream()
+                .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
+            if (!scopeNames.containsAll(scopes)) {
+                String joinedScopes = scopes.stream().filter((s) -> !scopeNames.contains(s)).collect(Collectors.joining(", "));
+                return error("The following scopes are requested but not allowed for this client: " + joinedScopes);
+            }
+        }
+
         return null;
     }
 
@@ -144,7 +152,7 @@ public class AuthorizeResource extends BaseResource {
 
     @GET
     public Viewable auth() {
-        Viewable error = validateParameters(responseType, clientId, redirectUri);
+        Viewable error = validateParameters(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
         }
@@ -163,7 +171,7 @@ public class AuthorizeResource extends BaseResource {
         String password = formParams.getFirst("password");
         String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
-        Viewable error = validateParameters(responseType, clientId, redirectUri);
+        Viewable error = validateParameters(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
         }
@@ -181,7 +189,21 @@ public class AuthorizeResource extends BaseResource {
                 if (t.getExpires().before(new Date())) {
                     ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                 } else {
-                    // we need to find all the new scopes they accepted
+                    // first get all the client scopes we will try to approve or check if are approved
+                    List<ClientScope> clientScopes = getScopes(c);
+                    // we'll populate this as we loop through the scopes
+                    List<AcceptedScope> tokenScopes = new ArrayList<>();
+                    // get all the scope Ids
+                    Set<Integer> scopeIds = formParams.keySet().stream().map((s) -> {
+                        try {
+                            return s != null && s.startsWith("SCOPE") ? Integer.parseInt(s.substring("SCOPE".length())) : null;
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    }).filter((i) -> i != null).collect(Collectors.toSet());
+                    for (ClientScope cs : clientScopes) {
+
+                    }
                 }
             }
         } else {
@@ -196,7 +218,7 @@ public class AuthorizeResource extends BaseResource {
                     } else {
                         if (BCrypt.checkpw(password, u.getPassword())) {
                             // successfully authenticated the user
-                            List<ClientScope> toAsk = getScopes(c, u, scopes);
+                            List<ClientScope> toAsk = getScopesToRequest(c, u, scopes);
                             if (toAsk.size() > 0) {
                                 // we need to generate a temporary token for them to get to the next step with
                                 Token t = generatePermissionToken(u);
@@ -222,6 +244,12 @@ public class AuthorizeResource extends BaseResource {
         }
 
         return new Viewable("/templates/Login", ar);
+    }
+
+    private List<ClientScope> getScopes(Client c) {
+        CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
+        Root<ClientScope> rcs = cq.from(ClientScope.class);
+        return em.createQuery(cq.select(rcs).where(cb.equal(rcs.get("client"), c))).getResultList();
     }
 
     private Token getPermissionToken(String token) {
@@ -260,7 +288,7 @@ public class AuthorizeResource extends BaseResource {
      * @param user   user for which we're retrieving scopes
      * @return list of scopes we should ask for
      */
-    private List<ClientScope> getScopes(Client client, User user, List<String> scopes) {
+    private List<ClientScope> getScopesToRequest(Client client, User user, List<String> scopes) {
         CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
         Root<ClientScope> rcs = cq.from(ClientScope.class);
 

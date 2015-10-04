@@ -1,12 +1,22 @@
 package com.leaguekit.oauth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.leaguekit.hibernate.model.BaseEntity;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 public class Client extends BaseEntity {
+
+    public List<ClientScope> getClientScopes() {
+        return clientScopes;
+    }
+
+    public void setClientScopes(List<ClientScope> clientScopes) {
+        this.clientScopes = clientScopes;
+    }
 
     public enum GrantFlow {
         IMPLICIT,
@@ -36,6 +46,10 @@ public class Client extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "flow")
     private Set<GrantFlow> flows;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    private List<ClientScope> clientScopes;
 
     public String getIdentifier() {
         return identifier;

@@ -8,14 +8,16 @@
             <form method="POST">
             <#list model.clientScopes as cScope>
                 <div class="row client-scope">
-                    <div class="col-sm-2 text-center">
-                        <input id="${cScope.scope.name}" name="${cScope.scope.name}" type="checkbox" checked/>
-                    </div>
-                    <div class="col-sm-2">
-                        <img class="scope-thumbnail" src="${cScope.scope.thumbnail}"/>
-                    </div>
-                    <div class="col-sm-8">
-                        <label for="${cScope.scope.name}">
+                    <div class="col-sm-2 text-center vcenter">
+                        <input id="SCOPE${cScope.scope.id}" name="SCOPE${cScope.scope.id}" type="checkbox" checked/>
+                    </div><!--
+                    --><div class="col-sm-2 vcenter">
+                        <label for="SCOPE${cScope.scope.id}">
+                            <img class="scope-thumbnail" src="${cScope.scope.thumbnail}"/>
+                        </label>
+                    </div><!--
+                    --><div class="col-sm-8 vcenter">
+                        <label for="SCOPE${cScope.scope.id}">
                         ${cScope.scope.displayName}
                         </label>
                     </div>

@@ -70,5 +70,13 @@
         .scope-thumbnail {
             width: 100%;
         }
+        .client-scope {
+            cursor:pointer;
+        }
+        .vcenter {
+            display: inline-block;
+            vertical-align: middle;
+            float: none;
+        }
     </style>
 </head>
