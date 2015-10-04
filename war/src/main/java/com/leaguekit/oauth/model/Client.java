@@ -10,8 +10,11 @@ public class Client extends BaseEntity {
 
     public enum GrantFlow {
         IMPLICIT,
-        CODE
+        CODE;
     }
+
+    @Column(name = "name")
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "applicationId")
@@ -72,5 +75,13 @@ public class Client extends BaseEntity {
 
     public void setFlows(Set<GrantFlow> flows) {
         this.flows = flows;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

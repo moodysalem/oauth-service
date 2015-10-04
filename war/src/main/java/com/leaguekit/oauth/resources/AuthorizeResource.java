@@ -1,7 +1,9 @@
 package com.leaguekit.oauth.resources;
 
 import com.leaguekit.oauth.model.Client;
+import com.leaguekit.oauth.model.User;
 import org.glassfish.jersey.server.mvc.Viewable;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -17,7 +19,10 @@ public class AuthorizeResource extends BaseResource {
 
     public static final String TOKEN = "token";
     public static final String CODE = "code";
+    public static final String INVALID_E_MAIL_OR_PASSWORD = "Invalid e-mail or password.";
 
+    // this returns an error view if there are any issues with the response type, client id, or redirect URI
+    // these errors are primarily for the developer interfacing with the oauth login
     private Viewable validateParameters(String responseType, String clientId, String redirectUri) {
         // verify all the query parameters are passed
         if (clientId == null || redirectUri == null || responseType == null) {
@@ -75,6 +80,27 @@ public class AuthorizeResource extends BaseResource {
         return null;
     }
 
+    public static class AuthorizeResponse {
+        private Client client;
+        private String loginError;
+
+        public Client getClient() {
+            return client;
+        }
+
+        public void setClient(Client client) {
+            this.client = client;
+        }
+
+        public String getLoginError() {
+            return loginError;
+        }
+
+        public void setLoginError(String loginError) {
+            this.loginError = loginError;
+        }
+    }
+
     @GET
     public Viewable auth(
         @QueryParam("response_type") String responseType,
@@ -87,7 +113,10 @@ public class AuthorizeResource extends BaseResource {
             return error;
         }
 
-        return new Viewable("/templates/Authorize");
+        AuthorizeResponse ar = new AuthorizeResponse();
+        ar.setClient(getClient(clientId));
+
+        return new Viewable("/templates/Authorize", ar);
     }
 
     @POST
@@ -106,7 +135,31 @@ public class AuthorizeResource extends BaseResource {
             return error;
         }
 
-        return new Viewable("/templates/Authorize");
+        AuthorizeResponse ar = new AuthorizeResponse();
+        Client c = getClient(clientId);
+        ar.setClient(c);
+
+        // validate the username and password
+        if (email != null && password != null) {
+            User u = getUser(email, c.getApplication().getId());
+            if (u == null) {
+                ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+            } else {
+                if (u.getPassword() == null) {
+                    ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+                } else {
+                    if (BCrypt.checkpw(password, u.getPassword())) {
+                        // we need to move on to picking the permissions
+                    } else {
+                        ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+                    }
+                }
+            }
+        } else {
+            ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
+        }
+
+        return new Viewable("/templates/Authorize", ar);
     }
 
     private Viewable error(String error) {
@@ -122,12 +175,32 @@ public class AuthorizeResource extends BaseResource {
 
         CriteriaQuery<Client> cq = cb.createQuery(Client.class);
         Root<Client> ct = cq.from(Client.class);
+        cq.select(ct);
         cq.where(cb.equal(ct.get("identifier"), clientId));
 
         List<Client> cts = em.createQuery(cq).getResultList();
         Client c = (cts.size() != 1) ? null : cts.get(0);
         clientCache.put(clientId, c);
         return c;
+    }
+
+    private User getUser(String email, Long applicationId) {
+        CriteriaQuery<User> uq = cb.createQuery(User.class);
+        Root<User> u = uq.from(User.class);
+
+        List<User> users = em.createQuery(
+            uq.select(u).where(
+                cb.and(
+                    cb.equal(u.join("application").get("id"), applicationId),
+                    cb.equal(u.get("email"), email)
+                )
+            )
+        ).getResultList();
+
+        if (users.size() != 1) {
+            return null;
+        }
+        return users.get(0);
     }
 
 }
