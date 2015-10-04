@@ -193,16 +193,22 @@ public class AuthorizeResource extends BaseResource {
                     List<ClientScope> clientScopes = getScopes(c);
                     // we'll populate this as we loop through the scopes
                     List<AcceptedScope> tokenScopes = new ArrayList<>();
-                    // get all the scope Ids
-                    Set<Integer> scopeIds = formParams.keySet().stream().map((s) -> {
+                    // get all the scope ids that were explicitly granted
+                    Set<Long> scopeIds = formParams.keySet().stream().map((s) -> {
                         try {
-                            return s != null && s.startsWith("SCOPE") ? Integer.parseInt(s.substring("SCOPE".length())) : null;
+                            return s != null && s.startsWith("SCOPE") &&
+                                "on".equalsIgnoreCase(formParams.getFirst(s)) ?
+                                Long.parseLong(s.substring("SCOPE".length())) : null;
                         } catch (Exception e) {
                             return null;
                         }
                     }).filter((i) -> i != null).collect(Collectors.toSet());
                     for (ClientScope cs : clientScopes) {
-
+                        // if it's not ASK or it's explicitly granted, we shoud use create/find the AcceptedScope record
+                        if (!cs.getPriority().equals(ClientScope.Priority.ASK) || scopeIds.contains(cs.getScope().getId())) {
+                            // create/find the accepted scope for this client scope
+                            tokenScopes.add(acceptScope(t.getUser(), cs));
+                        }
                     }
                 }
             }
@@ -246,6 +252,32 @@ public class AuthorizeResource extends BaseResource {
         return new Viewable("/templates/Login", ar);
     }
 
+    private AcceptedScope acceptScope(User user, ClientScope clientScope) {
+        CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
+        Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
+        List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.get("clientScope"), clientScope)
+        ))).getResultList();
+        if (las.size() == 1) {
+            return las.get(0);
+        }
+        AcceptedScope as = new AcceptedScope();
+        as.setUser(user);
+        as.setClientScope(clientScope);
+
+        try {
+            beginTransaction();
+            em.persist(as);
+            em.flush();
+            commit();
+        } catch (Exception e) {
+            rollback();
+            return null;
+        }
+        return as;
+    }
+
     private List<ClientScope> getScopes(Client c) {
         CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
         Root<ClientScope> rcs = cq.from(ClientScope.class);
@@ -276,6 +308,7 @@ public class AuthorizeResource extends BaseResource {
             em.flush();
             commit();
         } catch (Exception e) {
+            rollback();
             return null;
         }
         return t;

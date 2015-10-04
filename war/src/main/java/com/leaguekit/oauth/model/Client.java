@@ -48,7 +48,7 @@ public class Client extends BaseEntity {
     private Set<GrantFlow> flows;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "client")
     private List<ClientScope> clientScopes;
 
     public String getIdentifier() {
