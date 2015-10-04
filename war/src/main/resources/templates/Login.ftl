@@ -5,8 +5,10 @@
         <div class="container">
             <form class="form-signin" method="POST">
                 <h2 class="form-signin-heading">
-                ${model.client.application.name}
+                    <#escape x as x?html>
+                    ${model.client.application.name}
                     <small>${model.client.name}</small>
+                    </#escape>
                 </h2>
 
                 <label for="inputEmail" class="sr-only">E-mail address</label>
@@ -23,10 +25,12 @@
                     </label>
                 </div>
 
-            <#-- failed to log in -->
-            <#if model.loginError??>
-                <div class="alert alert-danger">${model.loginError}</div>
-            </#if>
+                <#escape x as x?html>
+                <#-- failed to log in -->
+                <#if model.loginError??>
+                    <div class="alert alert-danger">${model.loginError}</div>
+                </#if>
+                </#escape>
                 <button class="btn btn-lg btn-primary btn-block" type="submit">
                     <i class="fa fa-sign-in"></i>
                     Sign In
