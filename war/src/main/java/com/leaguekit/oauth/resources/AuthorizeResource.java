@@ -288,7 +288,9 @@ public class AuthorizeResource extends BaseResource {
 
         if (tkn.getType().equals(Token.Type.CODE)) {
             toRedirect.queryParam("code", tkn.getToken());
-            toRedirect.queryParam("state", state);
+            if (state != null) {
+                toRedirect.queryParam("state", state);
+            }
         }
         throw new RedirectionException(302, toRedirect.build());
     }
