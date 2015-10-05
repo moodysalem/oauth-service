@@ -11,9 +11,9 @@ import java.util.List;
 public class Token extends BaseEntity {
 
     public enum Type {
-        LOGIN, PERMISSION, REFRESH, CODE;
-
+        ACCESS, PERMISSION, REFRESH, CODE
     }
+
     @Column(name = "token")
     private String token;
 

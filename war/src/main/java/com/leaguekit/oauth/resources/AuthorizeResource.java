@@ -263,7 +263,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     private Token.Type getTokenType(String responseType) {
-        return CODE.equalsIgnoreCase(responseType) ? Token.Type.CODE : Token.Type.LOGIN;
+        return CODE.equalsIgnoreCase(responseType) ? Token.Type.CODE : Token.Type.ACCESS;
     }
 
     private void doRedirect(String redirectUri, String state, Token tkn) {
@@ -274,7 +274,7 @@ public class AuthorizeResource extends BaseResource {
             .collect(Collectors.joining(" "));
         String expiresIn = Long.toString((tkn.getExpires().getTime() - (new Date()).getTime()) / 1000);
 
-        if (tkn.getType().equals(Token.Type.LOGIN)) {
+        if (tkn.getType().equals(Token.Type.ACCESS)) {
             Map<String, String> params = new HashMap<>();
             params.put("access_token", tkn.getToken());
             params.put("token_type", BEARER);
@@ -287,7 +287,8 @@ public class AuthorizeResource extends BaseResource {
         }
 
         if (tkn.getType().equals(Token.Type.CODE)) {
-
+            toRedirect.queryParam("code", tkn.getToken());
+            toRedirect.queryParam("state", state);
         }
         throw new RedirectionException(302, toRedirect.build());
     }
