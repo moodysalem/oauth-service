@@ -181,12 +181,12 @@ public class AuthorizeResource extends BaseResource {
         }
 
         AuthorizeResponse ar = new AuthorizeResponse();
-        Client c = getClient(clientId);
-        ar.setClient(c);
+        Client client = getClient(clientId);
+        ar.setClient(client);
 
         // they just completed the second step of the login
         if (loginToken != null) {
-            Token t = getPermissionToken(loginToken, c);
+            Token t = getPermissionToken(loginToken, client);
             if (t == null) {
                 ar.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
             } else {
@@ -194,7 +194,7 @@ public class AuthorizeResource extends BaseResource {
                     ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                 } else {
                     // first get all the client scopes we will try to approve or check if are approved
-                    List<ClientScope> clientScopes = getScopes(c);
+                    List<ClientScope> clientScopes = getScopes(client);
                     // we'll populate this as we loop through the scopes
                     List<AcceptedScope> tokenScopes = new ArrayList<>();
                     // get all the scope ids that were explicitly granted
@@ -223,19 +223,19 @@ public class AuthorizeResource extends BaseResource {
         } else {
             // validate the username and password
             if (email != null && password != null) {
-                User u = getUser(email, c.getApplication().getId());
-                if (u == null) {
+                User user = getUser(email, client.getApplication().getId());
+                if (user == null) {
                     ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                 } else {
-                    if (u.getPassword() == null) {
+                    if (user.getPassword() == null) {
                         ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                     } else {
-                        if (BCrypt.checkpw(password, u.getPassword())) {
+                        if (BCrypt.checkpw(password, user.getPassword())) {
                             // successfully authenticated the user
-                            List<ClientScope> toAsk = getScopesToRequest(c, u, scopes);
+                            List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
                             if (toAsk.size() > 0) {
                                 // we need to generate a temporary token for them to get to the next step with
-                                Token t = generatePermissionToken(u, c);
+                                Token t = generatePermissionToken(user, client);
                                 if (t == null) {
                                     ar.setLoginError(INTERNAL_SERVER_ERROR_MESSAGE);
                                 } else {
@@ -246,7 +246,8 @@ public class AuthorizeResource extends BaseResource {
                                 }
                             } else {
                                 // redirect with token since they've already asked for all the permissions
-                                Token t = generateToken(getTokenType(responseType), c, u, getExpires(c), findAcceptedScopes(u, c));
+                                Token t = generateToken(getTokenType(responseType), client, user, getExpires(client),
+                                    findAcceptedScopes(user, client));
                                 doRedirect(redirectUri, state, t);
                             }
                         } else {
