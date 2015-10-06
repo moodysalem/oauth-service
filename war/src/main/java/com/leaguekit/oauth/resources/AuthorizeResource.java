@@ -424,20 +424,10 @@ public class AuthorizeResource extends BaseResource {
     }
 
     /**
-     * Get all the scopes associated with a client
-     *
-     * @param client to get scopes for
-     * @return a list of all client scopes for a client
-     */
-    private List<ClientScope> getScopes(Client client) {
-        return getScopes(client, null);
-    }
-
-    /**
      * Get a list of client scopes limited to scopes with names in the scopes list
      *
      * @param client client to get the scopes for
-     * @param scopes filter to scopes with these names
+     * @param scopes filter to scopes with these names (null if you want all scopes)
      * @return list of scopes filtered to scopes with the names passed
      */
     private List<ClientScope> getScopes(Client client, List<String> scopes) {
