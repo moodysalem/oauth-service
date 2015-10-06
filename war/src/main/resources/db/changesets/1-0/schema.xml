@@ -200,6 +200,9 @@
     <addForeignKeyConstraint baseTableName="Token" baseColumnNames="userId" constraintName="FK_Token_User"
                              referencedTableName="User"
                              referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="clientId" constraintName="FK_Token_Client"
+                             referencedTableName="Client"
+                             referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 

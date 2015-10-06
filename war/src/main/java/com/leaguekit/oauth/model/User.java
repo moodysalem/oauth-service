@@ -1,5 +1,6 @@
 package com.leaguekit.oauth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.leaguekit.hibernate.model.BaseEntity;
 
 import javax.persistence.*;
@@ -8,12 +9,14 @@ import javax.persistence.*;
 public class User extends BaseEntity {
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "applicationId")
     private Application application;
 
     @Column(name = "email")
     private String email;
 
+    @JsonIgnore
     @Column(name = "password")
     private String password;
 

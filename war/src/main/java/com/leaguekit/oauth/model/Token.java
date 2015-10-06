@@ -1,11 +1,13 @@
 package com.leaguekit.oauth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.leaguekit.hibernate.model.BaseEntity;
 import com.leaguekit.util.RandomStringUtil;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 public class Token extends BaseEntity {
@@ -29,6 +31,7 @@ public class Token extends BaseEntity {
     private User user;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "clientId")
     private Client client;
 
@@ -45,12 +48,31 @@ public class Token extends BaseEntity {
         joinColumns = @JoinColumn(name = "tokenId"),
         inverseJoinColumns = @JoinColumn(name = "acceptedScopeId")
     )
+    @JsonIgnore
     private List<AcceptedScope> acceptedScopes;
+
+    /**
+     * @return a space delimited list of scope names
+     */
+    public String getScope() {
+        if (getAcceptedScopes() == null) {
+            return "";
+        }
+        return getAcceptedScopes().stream()
+            .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
+            .collect(Collectors.joining(" "));
+    }
+
+    /**
+     * @return the number of seconds remaining on the token
+     */
+    public Long getExpiresIn() {
+        return (getExpires().getTime() - (new Date()).getTime()) / 1000L;
+    }
 
     public String getToken() {
         return token;
     }
-
 
     public void setToken(String token) {
         this.token = token;
