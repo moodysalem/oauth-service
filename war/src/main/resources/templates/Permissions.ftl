@@ -10,7 +10,9 @@
                 <#escape x as x?html>
                 <div class="row client-scope">
                     <div class="col-sm-2 text-center vcenter">
-                        <input id="SCOPE${cScope.scope.id}" name="SCOPE${cScope.scope.id}" type="checkbox" checked/>
+                        <#if cScope.priority != "REQUIRE">
+                            <input id="SCOPE${cScope.scope.id}" name="SCOPE${cScope.scope.id}" type="checkbox" checked/>
+                        </#if>
                     </div><!--
                     --><div class="col-sm-2 vcenter">
                         <label for="SCOPE${cScope.scope.id}">
