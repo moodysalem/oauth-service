@@ -213,7 +213,7 @@ public class AuthorizeResource extends BaseResource {
                     ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                 } else {
                     // first get all the client scopes we will try to approve or check if are approved
-                    List<ClientScope> clientScopes = getScopes(client);
+                    List<ClientScope> clientScopes = getScopes(client, scopes);
                     // we'll populate this as we loop through the scopes
                     List<AcceptedScope> tokenScopes = new ArrayList<>();
                     // get all the scope ids that were explicitly granted
@@ -264,9 +264,14 @@ public class AuthorizeResource extends BaseResource {
                                     return new Viewable("/templates/Permissions", pr);
                                 }
                             } else {
+                                // accept all the always permissions
+                                List<ClientScope> clientScopes = getScopes(client, scopes);
+                                List<AcceptedScope> acceptedScopes = new ArrayList<>();
+                                for (ClientScope cs : clientScopes) {
+                                    acceptedScopes.add(acceptScope(user, cs));
+                                }
                                 // redirect with token since they've already asked for all the permissions
-                                Token t = generateToken(getTokenType(responseType), client, user, getExpires(client),
-                                    findAcceptedScopes(user, client));
+                                Token t = generateToken(getTokenType(responseType), client, user, getExpires(client), acceptedScopes);
                                 doRedirect(redirectUri, state, t);
                             }
                         } else {
