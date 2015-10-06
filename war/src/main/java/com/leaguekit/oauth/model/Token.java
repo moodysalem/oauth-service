@@ -11,7 +11,14 @@ import java.util.List;
 public class Token extends BaseEntity {
 
     public enum Type {
-        ACCESS, PERMISSION, REFRESH, CODE
+        // the access token is used with resource servers to identify an authenticated user
+        ACCESS,
+        // the refresh token is shared only with the server as a method of getting new tokens
+        REFRESH,
+        // the permission is an internal token used for when the user is authenticated but not authorized
+        PERMISSION,
+        // the code is used for
+        CODE
     }
 
     @Column(name = "token")

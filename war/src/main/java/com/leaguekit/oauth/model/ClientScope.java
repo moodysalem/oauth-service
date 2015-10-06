@@ -8,8 +8,11 @@ import javax.persistence.*;
 public class ClientScope extends BaseEntity {
 
     public enum Priority {
+        // ALWAYS is the highest level, the user is not asked nor shown the permission when logging in
         ALWAYS,
+        // REQUIRE is the middle level, the user must accept this permission to utilize the client
         REQUIRE,
+        // ASK is the lowest level, the user has the option of accepting this permission or not
         ASK
     }
 
