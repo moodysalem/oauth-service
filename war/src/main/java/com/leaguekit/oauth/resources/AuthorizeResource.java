@@ -548,30 +548,6 @@ public class AuthorizeResource extends BaseResource {
         return new Viewable("/templates/Error", error);
     }
 
-    private HashMap<String, Client> clientCache = new HashMap<>();
-
-    /**
-     * Get the client with a specific client ID
-     *
-     * @param clientId a client identifier
-     * @return the Client corresponding to a client identifier
-     */
-    private Client getClient(String clientId) {
-        if (clientCache.containsKey(clientId)) {
-            return clientCache.get(clientId);
-        }
-
-        CriteriaQuery<Client> cq = cb.createQuery(Client.class);
-        Root<Client> ct = cq.from(Client.class);
-        cq.select(ct);
-        cq.where(cb.equal(ct.get("identifier"), clientId));
-
-        List<Client> cts = em.createQuery(cq).getResultList();
-        Client c = (cts.size() != 1) ? null : cts.get(0);
-        clientCache.put(clientId, c);
-        return c;
-    }
-
     /**
      * Get the user associated with an e-mail and an application
      *
