@@ -23,6 +23,10 @@ public class Token extends BaseEntity {
         CODE
     }
 
+    @ManyToOne
+    @JoinColumn(name = "refreshTokenId")
+    private Token refreshToken;
+
     @Column(name = "token")
     private String token;
 
@@ -41,6 +45,9 @@ public class Token extends BaseEntity {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private Type type;
+
+    @Column(name = "redirectUri")
+    private String redirectUri;
 
     @ManyToMany
     @JoinTable(
@@ -120,5 +127,21 @@ public class Token extends BaseEntity {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
+    public Token getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(Token refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

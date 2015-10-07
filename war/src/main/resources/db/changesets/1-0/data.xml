@@ -14,8 +14,8 @@
     <insert tableName="Client">
       <column name="id">1</column>
       <column name="name">Administration Portal</column>
+      <column name="type">PUBLIC</column>
       <column name="identifier">1</column>
-      <column name="secret">abc</column>
       <column name="applicationId">1</column>
       <column name="tokenTtl">3600</column>
     </insert>

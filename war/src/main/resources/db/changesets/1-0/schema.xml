@@ -113,14 +113,20 @@
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="type" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
       <column name="tokenTtl" type="BIGINT">
         <constraints nullable="false"/>
+      </column>
+      <column name="refreshTokenTtl" type="BIGINT">
+        <constraints nullable="true"/>
       </column>
       <column name="identifier" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
       <column name="secret" type="VARCHAR(191)">
-        <constraints nullable="false" unique="true"/>
+        <constraints nullable="true" unique="true"/>
       </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="Client" baseColumnNames="applicationId"
@@ -190,6 +196,12 @@
       <column name="token" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
+      <column name="refreshTokenId" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="redirectUri" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
       <column name="expires" type="TIMESTAMP">
         <constraints nullable="false"/>
       </column>
@@ -202,6 +214,10 @@
                              referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="Token" baseColumnNames="clientId" constraintName="FK_Token_Client"
                              referencedTableName="Client"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="refreshTokenId"
+                             constraintName="FK_Token_Refresh_Token"
+                             referencedTableName="Token"
                              referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>

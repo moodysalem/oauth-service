@@ -14,7 +14,10 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -254,7 +257,7 @@ public class AuthorizeResource extends BaseResource {
                             List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
                             if (toAsk.size() > 0) {
                                 // we need to generate a temporary token for them to get to the next step with
-                                Token t = generatePermissionToken(user, client);
+                                Token t = generatePermissionToken(user, client, redirectUri);
                                 if (t == null) {
                                     ar.setLoginError(INTERNAL_SERVER_ERROR_MESSAGE);
                                 } else {
@@ -271,7 +274,8 @@ public class AuthorizeResource extends BaseResource {
                                     acceptedScopes.add(acceptScope(user, cs));
                                 }
                                 // redirect with token since they've already asked for all the permissions
-                                Token t = generateToken(getTokenType(responseType), client, user, getExpires(client), acceptedScopes);
+                                Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
+                                    redirectUri, acceptedScopes);
                                 doRedirect(redirectUri, state, t);
                             }
                         } else {
@@ -335,16 +339,6 @@ public class AuthorizeResource extends BaseResource {
     }
 
     /**
-     * Helper function to calculate when a token should expire based on the client's TTL
-     *
-     * @param client for which the token is being generated
-     * @return when the token should expire
-     */
-    private Date getExpires(Client client) {
-        return new Date((new Date()).getTime() + client.getTokenTtl() * 1000);
-    }
-
-    /**
      * Helper function to generate a token from a permission token
      *
      * @param type            type of token to generate
@@ -354,7 +348,7 @@ public class AuthorizeResource extends BaseResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
-            getExpires(permissionToken.getClient()), scopes);
+            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes);
     }
 
     /**
@@ -466,7 +460,7 @@ public class AuthorizeResource extends BaseResource {
      * @param client the client to generate the token for
      * @return a temporary token for use on the permission form
      */
-    private Token generatePermissionToken(User user, Client client) {
+    private Token generatePermissionToken(User user, Client client, String redirectUri) {
         Token t = new Token();
         Date expires = new Date();
         expires.setTime(expires.getTime() + FIVE_MINUTES);
@@ -475,6 +469,7 @@ public class AuthorizeResource extends BaseResource {
         t.setClient(client);
         t.setRandomToken(64);
         t.setType(Token.Type.PERMISSION);
+        t.setRedirectUri(redirectUri);
         try {
             beginTransaction();
             em.persist(t);

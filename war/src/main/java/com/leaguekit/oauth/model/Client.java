@@ -12,16 +12,31 @@ public class Client extends BaseEntity {
 
     public enum GrantFlow {
         IMPLICIT,
-        CODE;
+        CODE,
+        RESOURCE_OWNER_CREDENTIALS,
+        CLIENT_CREDENTIALS;
+    }
 
+
+    public enum Type {
+        CONFIDENTIAL,
+        PUBLIC;
     }
 
     @Column(name = "name")
     private String name;
 
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private Type type;
+
+    @Column(name = "refreshTokenTtl")
+    private Long refreshTokenTtl;
+
     @ManyToOne
     @JoinColumn(name = "applicationId")
     private Application application;
+
     @Column(name = "identifier")
     private String identifier;
 
@@ -109,5 +124,22 @@ public class Client extends BaseEntity {
     public void setTokenTtl(Long tokenTtl) {
         this.tokenTtl = tokenTtl;
     }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public Long getRefreshTokenTtl() {
+        return refreshTokenTtl;
+    }
+
+    public void setRefreshTokenTtl(Long refreshTokenTtl) {
+        this.refreshTokenTtl = refreshTokenTtl;
+    }
+
 
 }
