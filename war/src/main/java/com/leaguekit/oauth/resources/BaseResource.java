@@ -124,6 +124,9 @@ public class BaseResource {
      * @return the Client corresponding to a client identifier
      */
     protected Client getClient(String clientId) {
+        if (clientId == null) {
+            return null;
+        }
         if (clientCache.containsKey(clientId)) {
             return clientCache.get(clientId);
         }

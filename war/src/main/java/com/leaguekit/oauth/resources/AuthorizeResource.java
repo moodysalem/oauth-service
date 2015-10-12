@@ -4,6 +4,7 @@ import com.leaguekit.oauth.model.*;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -46,6 +47,50 @@ public class AuthorizeResource extends BaseResource {
     @QueryParam("scope")
     List<String> scopes;
 
+    @CookieParam(AUTH_SESSION)
+    private Cookie authSession;
+
+    private Token sessionToken;
+
+    @Override
+    @PostConstruct
+    public void init() {
+        super.init();
+        sessionToken = getSessionToken(getClient(clientId));
+    }
+
+    private Token getSessionToken(Client client) {
+        if (client == null) {
+            return null;
+        }
+        Token sessionToken = null;
+        if (authSession != null) {
+            sessionToken = getToken(authSession.getValue(), client, Token.Type.SESSION);
+        }
+        if (sessionToken == null) {
+            sessionToken = generateToken(Token.Type.SESSION, client, null, (new Date(System.currentTimeMillis() + ONE_MONTH)), null, null);
+        }
+        return sessionToken;
+    }
+
+    private NewCookie getSessionCookie(Token sessionToken) {
+        try {
+            boolean isHttps = "HTTPS".equalsIgnoreCase(req.getHeader("X-Forwarded-Proto"));
+            URI reqUri = (new URI(req.getRequestURI()));
+            return new NewCookie(AUTH_SESSION, sessionToken.getToken(), "/", reqUri.getHost(), null,
+                -1, isHttps, true);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    private Response addCookie(Response.ResponseBuilder rb) {
+        if (authSession == null || !sessionToken.getToken().equals(authSession.getValue())) {
+            return rb.cookie(getSessionCookie(sessionToken)).build();
+        }
+        return rb.build();
+    }
+
     /**
      * This method validates all the query parameters and returns an error if anything is wrong with the authorization
      * request
@@ -56,7 +101,7 @@ public class AuthorizeResource extends BaseResource {
      * @param scopes       a list of scopes that the client is requesting
      * @return an error if anything is wrong with the aforementioned parameters
      */
-    private Viewable validateParameters(String responseType, String clientId, String redirectUri, List<String> scopes) {
+    private Response validateParameters(String responseType, String clientId, String redirectUri, List<String> scopes) {
         // verify all the query parameters are passed
         if (clientId == null || redirectUri == null || responseType == null) {
             return error("Client ID, redirect URI, and response type are all required for this endpoint.");
@@ -165,31 +210,6 @@ public class AuthorizeResource extends BaseResource {
         }
     }
 
-    @CookieParam(AUTH_SESSION)
-    private Cookie authSession;
-
-    private Token getSessionToken(Client client) {
-        Token sessionToken = null;
-        if (authSession != null) {
-            sessionToken = getToken(authSession.getValue(), client, Token.Type.SESSION);
-        }
-        if (sessionToken == null) {
-            sessionToken = generateToken(Token.Type.SESSION, client, null, (new Date(System.currentTimeMillis() + ONE_MONTH)), null, null);
-        }
-        return sessionToken;
-    }
-
-    private NewCookie getSessionCookie(Token sessionToken) {
-        try {
-            boolean isHttps = "HTTPS".equalsIgnoreCase(req.getHeader("X-Forwarded-Proto"));
-            URI reqUri = (new URI(req.getRequestURI()));
-            return new NewCookie(AUTH_SESSION, sessionToken.getToken(), "/", reqUri.getHost(), null,
-                -1, isHttps, true);
-        } catch (URISyntaxException e) {
-            return null;
-        }
-    }
-
     /**
      * Validates the request parameters and shows a login screen
      *
@@ -197,26 +217,17 @@ public class AuthorizeResource extends BaseResource {
      */
     @GET
     public Response auth() {
-        Viewable error = validateParameters(responseType, clientId, redirectUri, scopes);
+        Response error = validateParameters(responseType, clientId, redirectUri, scopes);
         if (error != null) {
-            return Response.status(400).entity(error).build();
+            return error;
         }
 
         Client client = getClient(clientId);
 
-        Token sessionToken = getSessionToken(client);
-
         AuthorizeResponse ar = new AuthorizeResponse();
         ar.setClient(client);
 
-        Response.ResponseBuilder rb = Response
-            .ok(new Viewable("/templates/Login", ar));
-
-        if (authSession == null || !sessionToken.getToken().equals(authSession.getValue())) {
-            rb.cookie(getSessionCookie(sessionToken));
-        }
-
-        return rb.build();
+        return addCookie(Response.ok(new Viewable("/templates/Login", ar)));
     }
 
     /**
@@ -232,9 +243,9 @@ public class AuthorizeResource extends BaseResource {
         String password = formParams.getFirst("password");
         String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
-        Viewable error = validateParameters(responseType, clientId, redirectUri, scopes);
+        Response error = validateParameters(responseType, clientId, redirectUri, scopes);
         if (error != null) {
-            return Response.status(400).entity(error).build();
+            return error;
         }
 
         AuthorizeResponse ar = new AuthorizeResponse();
@@ -274,7 +285,7 @@ public class AuthorizeResource extends BaseResource {
                     Token.Type type = getTokenType(responseType);
                     // now create the token we will be returning to the user
                     Token token = generateToken(type, t, tokenScopes);
-                    doRedirect(redirectUri, state, token);
+                    return getRedirectResponse(redirectUri, state, token);
                 }
             }
         } else {
@@ -311,7 +322,7 @@ public class AuthorizeResource extends BaseResource {
                                 // redirect with token since they've already asked for all the permissions
                                 Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
                                     redirectUri, acceptedScopes);
-                                doRedirect(redirectUri, state, t);
+                                return getRedirectResponse(redirectUri, state, t);
                             }
                         } else {
                             ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
@@ -323,7 +334,7 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        return Response.ok(new Viewable("/templates/Login", ar)).build();
+        return addCookie(Response.ok(new Viewable("/templates/Login", ar)));
     }
 
     /**
@@ -343,7 +354,7 @@ public class AuthorizeResource extends BaseResource {
      * @param state       state of the client upon sending to the authorize endpoint, returned in the redirect url
      * @param tkn         access or code token that was generated, depending on the type
      */
-    private void doRedirect(String redirectUri, String state, Token tkn) {
+    private Response getRedirectResponse(String redirectUri, String state, Token tkn) {
         UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
         String scope = tkn.getAcceptedScopes().stream()
@@ -370,7 +381,7 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        throw new RedirectionException(302, toRedirect.build());
+        return Response.status(302).location(toRedirect.build()).build();
     }
 
     /**
@@ -572,10 +583,10 @@ public class AuthorizeResource extends BaseResource {
      * Helper function to generate an error template with a string error
      *
      * @param error indicates what the problem with the request is
-     * @return a viewable that shows the error message to the user
+     * @return error page
      */
-    private Viewable error(String error) {
-        return new Viewable("/templates/Error", error);
+    private Response error(String error) {
+        return Response.status(400).entity(new Viewable("/templates/Error", error)).build();
     }
 
     /**
