@@ -44,6 +44,31 @@ public class BaseResource {
         cb = cb == null ? em.getCriteriaBuilder() : cb;
     }
 
+    /**
+     * Get a token given the token string and the client it's for
+     *
+     * @param token  the token string
+     * @param client the client it was issued to
+     * @return the token or null if it doesn't exist or has expired
+     */
+    protected Token getToken(String token, Client client, Token.Type... types) {
+        if (token == null) {
+            return null;
+        }
+        CriteriaQuery<Token> tq = cb.createQuery(Token.class);
+        Root<Token> t = tq.from(Token.class);
+        tq.select(t).where(
+            cb.and(
+                cb.equal(t.get("token"), token),
+                t.get("type").in(types),
+                cb.greaterThan(t.<Date>get("expires"), new Date()),
+                cb.equal(t.get("client"), client)
+            )
+        );
+
+        List<Token> tkns = em.createQuery(tq).getResultList();
+        return tkns.size() == 1 ? tkns.get(0) : null;
+    }
 
     /**
      * Create and persist a token
@@ -87,7 +112,7 @@ public class BaseResource {
         if (refresh && client.getRefreshTokenTtl() == null) {
             throw new IllegalArgumentException();
         }
-        return new Date((new Date()).getTime() + (refresh ? client.getRefreshTokenTtl() : client.getTokenTtl()) * 1000);
+        return new Date(System.currentTimeMillis() + (refresh ? client.getRefreshTokenTtl() : client.getTokenTtl()) * 1000);
     }
 
     private HashMap<String, Client> clientCache = new HashMap<>();

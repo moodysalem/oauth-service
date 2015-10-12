@@ -9,11 +9,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +31,8 @@ public class AuthorizeResource extends BaseResource {
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
     public static final String BEARER = "bearer";
+    public static final String AUTH_SESSION = "AUTH_SESSION";
+    private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
 
 
     @QueryParam("response_type")
@@ -165,23 +165,58 @@ public class AuthorizeResource extends BaseResource {
         }
     }
 
+    @CookieParam(AUTH_SESSION)
+    private Cookie authSession;
+
+    private Token getSessionToken(Client client) {
+        Token sessionToken = null;
+        if (authSession != null) {
+            sessionToken = getToken(authSession.getValue(), client, Token.Type.SESSION);
+        }
+        if (sessionToken == null) {
+            sessionToken = generateToken(Token.Type.SESSION, client, null, (new Date(System.currentTimeMillis() + ONE_MONTH)), null, null);
+        }
+        return sessionToken;
+    }
+
+    private NewCookie getSessionCookie(Token sessionToken) {
+        try {
+            boolean isHttps = "HTTPS".equalsIgnoreCase(req.getHeader("X-Forwarded-Proto"));
+            URI reqUri = (new URI(req.getRequestURI()));
+            return new NewCookie(AUTH_SESSION, sessionToken.getToken(), "/", reqUri.getHost(), null,
+                -1, isHttps, true);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
     /**
      * Validates the request parameters and shows a login screen
      *
      * @return a login screen
      */
     @GET
-    public Viewable auth() {
+    public Response auth() {
         Viewable error = validateParameters(responseType, clientId, redirectUri, scopes);
         if (error != null) {
-            return error;
+            return Response.status(400).entity(error).build();
         }
 
+        Client client = getClient(clientId);
+
+        Token sessionToken = getSessionToken(client);
 
         AuthorizeResponse ar = new AuthorizeResponse();
-        ar.setClient(getClient(clientId));
+        ar.setClient(client);
 
-        return new Viewable("/templates/Login", ar);
+        Response.ResponseBuilder rb = Response
+            .ok(new Viewable("/templates/Login", ar));
+
+        if (authSession == null || !sessionToken.getToken().equals(authSession.getValue())) {
+            rb.cookie(getSessionCookie(sessionToken));
+        }
+
+        return rb.build();
     }
 
     /**
@@ -192,14 +227,14 @@ public class AuthorizeResource extends BaseResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Viewable login(MultivaluedMap<String, String> formParams) {
+    public Response login(MultivaluedMap<String, String> formParams) {
         String email = formParams.getFirst("email");
         String password = formParams.getFirst("password");
         String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
         Viewable error = validateParameters(responseType, clientId, redirectUri, scopes);
         if (error != null) {
-            return error;
+            return Response.status(400).entity(error).build();
         }
 
         AuthorizeResponse ar = new AuthorizeResponse();
@@ -264,7 +299,7 @@ public class AuthorizeResource extends BaseResource {
                                     PermissionsResponse pr = new PermissionsResponse();
                                     pr.setClientScopes(toAsk);
                                     pr.setToken(t);
-                                    return new Viewable("/templates/Permissions", pr);
+                                    return Response.ok(new Viewable("/templates/Permissions", pr)).build();
                                 }
                             } else {
                                 // accept all the always permissions
@@ -288,7 +323,7 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        return new Viewable("/templates/Login", ar);
+        return Response.ok(new Viewable("/templates/Login", ar)).build();
     }
 
     /**
@@ -314,7 +349,7 @@ public class AuthorizeResource extends BaseResource {
         String scope = tkn.getAcceptedScopes().stream()
             .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
             .collect(Collectors.joining(" "));
-        String expiresIn = Long.toString((tkn.getExpires().getTime() - (new Date()).getTime()) / 1000);
+        String expiresIn = Long.toString(tkn.getExpires().getTime() - System.currentTimeMillis() / 1000L);
 
         if (tkn.getType().equals(Token.Type.ACCESS)) {
             MultivaluedMap<String, String> params = new MultivaluedHashMap<>();

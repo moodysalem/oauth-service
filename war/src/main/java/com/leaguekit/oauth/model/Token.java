@@ -19,8 +19,10 @@ public class Token extends BaseEntity {
         REFRESH,
         // the permission is an internal token used for when the user is authenticated but not authorized
         PERMISSION,
-        // the code is used for
-        CODE
+        // the code is used for the authorization code flow
+        CODE,
+        // this kind of token is used to represent a session and is never communicated to the client
+        SESSION
     }
 
     @ManyToOne
@@ -74,7 +76,7 @@ public class Token extends BaseEntity {
      * @return the number of seconds remaining on the token
      */
     public Long getExpiresIn() {
-        return (getExpires().getTime() - (new Date()).getTime()) / 1000L;
+        return (getExpires().getTime() - System.currentTimeMillis()) / 1000L;
     }
 
     public String getToken() {

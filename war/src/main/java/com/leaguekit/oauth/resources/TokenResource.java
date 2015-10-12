@@ -157,27 +157,4 @@ public class TokenResource extends BaseResource {
         return Response.ok(t).build();
     }
 
-    /**
-     * Get a token given the token string and the client it's for
-     *
-     * @param token  the token string
-     * @param client the client it was issued to
-     * @return the token or null if it doesn't exist or has expired
-     */
-    private Token getToken(String token, Client client, Token.Type... types) {
-        CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        Root<Token> t = tq.from(Token.class);
-        tq.select(t).where(
-            cb.and(
-                cb.equal(t.get("token"), token),
-                t.get("type").in(types),
-                cb.greaterThan(t.<Date>get("expires"), new Date()),
-                cb.equal(t.get("client"), client)
-            )
-        );
-
-        List<Token> tkns = em.createQuery(tq).getResultList();
-        return tkns.size() == 1 ? tkns.get(0) : null;
-    }
-
 }

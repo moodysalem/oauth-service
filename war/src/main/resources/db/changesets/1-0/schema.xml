@@ -188,7 +188,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="userId" type="BIGINT">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="clientId" type="BIGINT">
         <constraints nullable="false"/>
