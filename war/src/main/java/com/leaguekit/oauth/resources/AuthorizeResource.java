@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-@Path("authorize")
 @Produces(MediaType.TEXT_HTML)
 public class AuthorizeResource extends BaseResource {
 
@@ -28,7 +27,6 @@ public class AuthorizeResource extends BaseResource {
     public static final String CODE = "code";
     public static final String INVALID_E_MAIL_OR_PASSWORD = "Invalid e-mail or password.";
     public static final int FIVE_MINUTES = (1000 * 60 * 5);
-    public static final String INTERNAL_SERVER_ERROR_MESSAGE = "An internal server error occurred. Please try again later.";
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
     public static final String BEARER = "bearer";
@@ -68,7 +66,8 @@ public class AuthorizeResource extends BaseResource {
             sessionToken = getToken(authSession.getValue(), client, Token.Type.SESSION);
         }
         if (sessionToken == null) {
-            sessionToken = generateToken(Token.Type.SESSION, client, null, (new Date(System.currentTimeMillis() + ONE_MONTH)), null, null);
+            sessionToken = generateToken(Token.Type.SESSION, client, null, (new Date(System.currentTimeMillis() + ONE_MONTH)),
+                null, null, null);
         }
         return sessionToken;
     }
@@ -91,6 +90,8 @@ public class AuthorizeResource extends BaseResource {
         return rb.build();
     }
 
+    private boolean valid = false;
+
     /**
      * This method validates all the query parameters and returns an error if anything is wrong with the authorization
      * request
@@ -101,7 +102,10 @@ public class AuthorizeResource extends BaseResource {
      * @param scopes       a list of scopes that the client is requesting
      * @return an error if anything is wrong with the aforementioned parameters
      */
-    private Response validateParameters(String responseType, String clientId, String redirectUri, List<String> scopes) {
+    private Response getErrorResponse(String responseType, String clientId, String redirectUri, List<String> scopes) {
+        if (valid) {
+            return null;
+        }
         // verify all the query parameters are passed
         if (clientId == null || redirectUri == null || responseType == null) {
             return error("Client ID, redirect URI, and response type are all required for this endpoint.");
@@ -165,6 +169,7 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
+        valid = true;
         return null;
     }
 
@@ -217,12 +222,16 @@ public class AuthorizeResource extends BaseResource {
      */
     @GET
     public Response auth() {
-        Response error = validateParameters(responseType, clientId, redirectUri, scopes);
+        Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
         }
 
         Client client = getClient(clientId);
+
+        if (sessionToken.getUser() != null) {
+            return getSuccessfulLoginResponse(sessionToken.getUser(), client);
+        }
 
         AuthorizeResponse ar = new AuthorizeResponse();
         ar.setClient(client);
@@ -243,7 +252,7 @@ public class AuthorizeResource extends BaseResource {
         String password = formParams.getFirst("password");
         String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
-        Response error = validateParameters(responseType, clientId, redirectUri, scopes);
+        Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
         }
@@ -299,31 +308,7 @@ public class AuthorizeResource extends BaseResource {
                         ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                     } else {
                         if (BCrypt.checkpw(password, user.getPassword())) {
-                            // successfully authenticated the user
-                            List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
-                            if (toAsk.size() > 0) {
-                                // we need to generate a temporary token for them to get to the next step with
-                                Token t = generatePermissionToken(user, client, redirectUri);
-                                if (t == null) {
-                                    ar.setLoginError(INTERNAL_SERVER_ERROR_MESSAGE);
-                                } else {
-                                    PermissionsResponse pr = new PermissionsResponse();
-                                    pr.setClientScopes(toAsk);
-                                    pr.setToken(t);
-                                    return Response.ok(new Viewable("/templates/Permissions", pr)).build();
-                                }
-                            } else {
-                                // accept all the always permissions
-                                List<ClientScope> clientScopes = getScopes(client, scopes);
-                                List<AcceptedScope> acceptedScopes = new ArrayList<>();
-                                for (ClientScope cs : clientScopes) {
-                                    acceptedScopes.add(acceptScope(user, cs));
-                                }
-                                // redirect with token since they've already asked for all the permissions
-                                Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
-                                    redirectUri, acceptedScopes);
-                                return getRedirectResponse(redirectUri, state, t);
-                            }
+                            return getSuccessfulLoginResponse(user, client);
                         } else {
                             ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                         }
@@ -335,6 +320,45 @@ public class AuthorizeResource extends BaseResource {
         }
 
         return addCookie(Response.ok(new Viewable("/templates/Login", ar)));
+    }
+
+    private Response getSuccessfulLoginResponse(User user, Client client) {
+        // successfully authenticated the user
+        List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
+        if (toAsk.size() > 0) {
+            // we need to generate a temporary token for them to get to the next step with
+            Token t = generatePermissionToken(user, client, redirectUri);
+            PermissionsResponse pr = new PermissionsResponse();
+            pr.setClientScopes(toAsk);
+            pr.setToken(t);
+            return addCookie(Response.ok(new Viewable("/templates/Permissions", pr)));
+        } else {
+            // accept all the always permissions
+            List<ClientScope> clientScopes = getScopes(client, scopes);
+            List<AcceptedScope> acceptedScopes = new ArrayList<>();
+            for (ClientScope cs : clientScopes) {
+                acceptedScopes.add(acceptScope(user, cs));
+            }
+            // redirect with token since they've already asked for all the permissions
+            Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
+                redirectUri, acceptedScopes, null);
+            return getRedirectResponse(redirectUri, state, t);
+        }
+    }
+
+    private void saveUserToSession(User user) {
+        if (user.equals(sessionToken.getUser())) {
+            return;
+        }
+
+        sessionToken.setUser(user);
+        try {
+            beginTransaction();
+            em.merge(sessionToken);
+            commit();
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to save the logged in user to the session cookie.", e);
+        }
     }
 
     /**
@@ -355,6 +379,8 @@ public class AuthorizeResource extends BaseResource {
      * @param tkn         access or code token that was generated, depending on the type
      */
     private Response getRedirectResponse(String redirectUri, String state, Token tkn) {
+        saveUserToSession(tkn.getUser());
+
         UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
         String scope = tkn.getAcceptedScopes().stream()
@@ -394,7 +420,8 @@ public class AuthorizeResource extends BaseResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
-            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes);
+            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes,
+            null);
     }
 
     /**

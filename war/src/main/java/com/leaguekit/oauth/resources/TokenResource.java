@@ -123,10 +123,9 @@ public class TokenResource extends BaseResource {
         Token refreshToken = null;
         // we know the token is valid, so we should generate an access token now
         if (c.getRefreshTokenTtl() != null) {
-            refreshToken = generateToken(Token.Type.REFRESH, c, t.getUser(), getExpires(c, true), redirectUri, new ArrayList<>(t.getAcceptedScopes()));
+            refreshToken = generateToken(Token.Type.REFRESH, c, t.getUser(), getExpires(c, true), redirectUri, new ArrayList<>(t.getAcceptedScopes()), null);
         }
-        Token accessToken = generateToken(Token.Type.ACCESS, c, t.getUser(), getExpires(c, false), redirectUri, new ArrayList<>(t.getAcceptedScopes()));
-        accessToken.setRefreshToken(refreshToken);
+        Token accessToken = generateToken(Token.Type.ACCESS, c, t.getUser(), getExpires(c, false), redirectUri, new ArrayList<>(t.getAcceptedScopes()), refreshToken);
 
         return Response.ok(accessToken).build();
     }

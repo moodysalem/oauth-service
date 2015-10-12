@@ -80,7 +80,8 @@ public class BaseResource {
      * @param scopes  the scopes for which the token is valid
      * @return a Token with the aforementioned properties
      */
-    protected Token generateToken(Token.Type type, Client client, User user, Date expires, String redirectUri, List<AcceptedScope> scopes) {
+    protected Token generateToken(Token.Type type, Client client, User user, Date expires, String redirectUri,
+                                  List<AcceptedScope> scopes, Token refreshToken) {
         Token toReturn = new Token();
         toReturn.setClient(client);
         toReturn.setExpires(expires);
@@ -89,6 +90,7 @@ public class BaseResource {
         toReturn.setRedirectUri(redirectUri);
         toReturn.setRandomToken(64);
         toReturn.setAcceptedScopes(scopes);
+        toReturn.setRefreshToken(refreshToken);
         try {
             beginTransaction();
             em.persist(toReturn);
