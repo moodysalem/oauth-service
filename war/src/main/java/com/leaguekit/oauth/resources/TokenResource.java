@@ -134,8 +134,9 @@ public class TokenResource extends BaseResource {
      * @param clientId the client id for which the token was issued
      * @return the token information
      */
-    @GET
-    public Response get(@QueryParam("token") String token, @QueryParam("clientId") String clientId) {
+    @POST
+    @Path("info")
+    public Response get(@FormParam("token") String token, @FormParam("clientId") String clientId) {
         if (token == null || clientId == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and 'clientId' query parameters are required.");
         }
