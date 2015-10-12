@@ -138,7 +138,7 @@ public class TokenResource extends BaseResource {
     @Path("info")
     public Response get(@FormParam("token") String token, @FormParam("clientId") String clientId) {
         if (token == null || clientId == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and 'clientId' query parameters are required.");
+            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and 'clientId' form parameters are required.");
         }
 
         Client client = getClient(clientId);
