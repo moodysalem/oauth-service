@@ -1,10 +1,10 @@
 package com.leaguekit.oauth.resources;
 
 import com.leaguekit.oauth.model.*;
+import com.leaguekit.oauth.model.Application;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -12,7 +12,6 @@ import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Produces(MediaType.TEXT_HTML)
+@Path("authorize")
 public class AuthorizeResource extends BaseResource {
 
     public static final String TOKEN = "token";
@@ -30,9 +30,6 @@ public class AuthorizeResource extends BaseResource {
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
     public static final String BEARER = "bearer";
-    public static final String AUTH_SESSION = "AUTH_SESSION";
-    private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
-
 
     @QueryParam("response_type")
     String responseType;
@@ -45,51 +42,7 @@ public class AuthorizeResource extends BaseResource {
     @QueryParam("scope")
     List<String> scopes;
 
-    @CookieParam(AUTH_SESSION)
-    private Cookie authSession;
-
-    private Token sessionToken;
-
-    @Override
-    @PostConstruct
-    public void init() {
-        super.init();
-        sessionToken = getSessionToken(getClient(clientId));
-    }
-
-    private Token getSessionToken(Client client) {
-        if (client == null) {
-            return null;
-        }
-        Token sessionToken = null;
-        if (authSession != null) {
-            sessionToken = getToken(authSession.getValue(), client, Token.Type.SESSION);
-        }
-        if (sessionToken == null) {
-            sessionToken = generateToken(Token.Type.SESSION, client, null, (new Date(System.currentTimeMillis() + ONE_MONTH)),
-                null, null, null);
-        }
-        return sessionToken;
-    }
-
-    private NewCookie getSessionCookie(Token sessionToken) {
-        try {
-            boolean isHttps = "HTTPS".equalsIgnoreCase(req.getHeader("X-Forwarded-Proto"));
-            URI reqUri = (new URI(req.getRequestURI()));
-            return new NewCookie(AUTH_SESSION, sessionToken.getToken(), "/", reqUri.getHost(), null,
-                -1, isHttps, true);
-        } catch (URISyntaxException e) {
-            return null;
-        }
-    }
-
-    private Response addCookie(Response.ResponseBuilder rb) {
-        if (authSession == null || !sessionToken.getToken().equals(authSession.getValue())) {
-            return rb.cookie(getSessionCookie(sessionToken)).build();
-        }
-        return rb.build();
-    }
-
+    // so we don't rerun the getErrorResponse logic for a valid request, just store whether it's valid in this variable
     private boolean valid = false;
 
     /**
@@ -173,7 +126,7 @@ public class AuthorizeResource extends BaseResource {
         return null;
     }
 
-    public static class AuthorizeResponse {
+    public static class AuthorizeModel {
         private Client client;
         private String loginError;
 
@@ -194,7 +147,7 @@ public class AuthorizeResource extends BaseResource {
         }
     }
 
-    public static class PermissionsResponse {
+    public static class PermissionsModel {
         private Token token;
         private List<ClientScope> clientScopes;
 
@@ -229,14 +182,15 @@ public class AuthorizeResource extends BaseResource {
 
         Client client = getClient(clientId);
 
-        if (sessionToken.getUser() != null) {
-            return getSuccessfulLoginResponse(sessionToken.getUser(), client);
-        }
-
-        AuthorizeResponse ar = new AuthorizeResponse();
+        AuthorizeModel ar = new AuthorizeModel();
         ar.setClient(client);
 
         return addCookie(Response.ok(new Viewable("/templates/Login", ar)));
+    }
+
+    private boolean hasLoggedIn(Token sessionToken, Application application) {
+
+        return false;
     }
 
     /**
@@ -257,7 +211,7 @@ public class AuthorizeResource extends BaseResource {
             return error;
         }
 
-        AuthorizeResponse ar = new AuthorizeResponse();
+        AuthorizeModel ar = new AuthorizeModel();
         Client client = getClient(clientId);
         ar.setClient(client);
 
@@ -328,7 +282,7 @@ public class AuthorizeResource extends BaseResource {
         if (toAsk.size() > 0) {
             // we need to generate a temporary token for them to get to the next step with
             Token t = generatePermissionToken(user, client, redirectUri);
-            PermissionsResponse pr = new PermissionsResponse();
+            PermissionsModel pr = new PermissionsModel();
             pr.setClientScopes(toAsk);
             pr.setToken(t);
             return addCookie(Response.ok(new Viewable("/templates/Permissions", pr)));
@@ -343,21 +297,6 @@ public class AuthorizeResource extends BaseResource {
             Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
                 redirectUri, acceptedScopes, null);
             return getRedirectResponse(redirectUri, state, t);
-        }
-    }
-
-    private void saveUserToSession(User user) {
-        if (user.equals(sessionToken.getUser())) {
-            return;
-        }
-
-        sessionToken.setUser(user);
-        try {
-            beginTransaction();
-            em.merge(sessionToken);
-            commit();
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to save the logged in user to the session cookie.", e);
         }
     }
 
@@ -379,8 +318,6 @@ public class AuthorizeResource extends BaseResource {
      * @param tkn         access or code token that was generated, depending on the type
      */
     private Response getRedirectResponse(String redirectUri, String state, Token tkn) {
-        saveUserToSession(tkn.getUser());
-
         UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
         String scope = tkn.getAcceptedScopes().stream()
@@ -420,8 +357,7 @@ public class AuthorizeResource extends BaseResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
-            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes,
-            null);
+            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes, null);
     }
 
     /**

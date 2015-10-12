@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @Entity
 public class Token extends BaseEntity {
 
+
     public enum Type {
         // the access token is used with resource servers to identify an authenticated user
         ACCESS,
@@ -20,9 +21,7 @@ public class Token extends BaseEntity {
         // the permission is an internal token used for when the user is authenticated but not authorized
         PERMISSION,
         // the code is used for the authorization code flow
-        CODE,
-        // this kind of token is used to represent a session and is never communicated to the client
-        SESSION
+        CODE
     }
 
     @ManyToOne

@@ -302,11 +302,55 @@
     <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="tokenId"
                              constraintName="FK_Token_AcceptedScope_Token"
                              referencedTableName="Token"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="acceptedScopeId"
                              constraintName="FK_Token_AcceptedScope_AcceptedScope"
                              referencedTableName="AcceptedScope"
                              referencedColumnNames="id"/>
+  </changeSet>
+
+  <changeSet id="Session Table" author="moody.salem">
+    <createTable tableName="Session">
+      <column name="id" autoIncrement="true" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="secret" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expires" type="TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="Session_User Table" author="moody.salem">
+    <createTable tableName="Session_User">
+      <column name="sessionId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="userId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="Session_User" baseColumnNames="sessionId"
+                             constraintName="FK_Session_User_Session"
+                             referencedTableName="Session"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="Session_User" baseColumnNames="userId"
+                             constraintName="FK_Session_User_User"
+                             referencedTableName="User"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="Session_User" columnNames="sessionId,userId"/>
   </changeSet>
 
 </databaseChangeLog>

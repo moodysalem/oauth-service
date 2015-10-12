@@ -5,8 +5,6 @@ import com.leaguekit.oauth.model.Client;
 import com.leaguekit.oauth.model.Token;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -15,7 +13,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 
 @Path("token")
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,9 +51,7 @@ public class TokenResource extends BaseResource {
     }
 
     @POST
-    public Response post(
-        MultivaluedMap<String, String> formParams
-    ) {
+    public Response post(MultivaluedMap<String, String> formParams) {
         if (formParams == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid request body.");
         }
@@ -123,9 +118,11 @@ public class TokenResource extends BaseResource {
         Token refreshToken = null;
         // we know the token is valid, so we should generate an access token now
         if (c.getRefreshTokenTtl() != null) {
-            refreshToken = generateToken(Token.Type.REFRESH, c, t.getUser(), getExpires(c, true), redirectUri, new ArrayList<>(t.getAcceptedScopes()), null);
+            refreshToken = generateToken(Token.Type.REFRESH, c, t.getUser(), getExpires(c, true), redirectUri,
+                new ArrayList<>(t.getAcceptedScopes()), null);
         }
-        Token accessToken = generateToken(Token.Type.ACCESS, c, t.getUser(), getExpires(c, false), redirectUri, new ArrayList<>(t.getAcceptedScopes()), refreshToken);
+        Token accessToken = generateToken(Token.Type.ACCESS, c, t.getUser(), getExpires(c, false), redirectUri,
+            new ArrayList<>(t.getAcceptedScopes()), refreshToken);
 
         return Response.ok(accessToken).build();
     }
