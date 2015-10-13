@@ -154,4 +154,8 @@ public class TokenResource extends BaseResource {
         return Response.ok(t).build();
     }
 
+    @Override
+    protected boolean usesSessions() {
+        return false;
+    }
 }

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BaseResource {
+public abstract class BaseResource {
     private static final String AUTH_SESSION = "AUTH_SESSION";
     private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
 
@@ -52,13 +52,17 @@ public class BaseResource {
     }
 
     private void initSession() {
-        if (authCookie != null && authCookie.getValue() != null) {
-            cookie = getSession(authCookie.getValue());
-        }
-        if (cookie == null) {
-            cookie = makeSession();
+        if (usesSessions()) {
+            if (authCookie != null && authCookie.getValue() != null) {
+                cookie = getSession(authCookie.getValue());
+            }
+            if (cookie == null) {
+                cookie = makeSession();
+            }
         }
     }
+
+    protected abstract boolean usesSessions();
 
     private Cookie getSession(String secret) {
         CriteriaQuery<Cookie> cq = cb.createQuery(Cookie.class);

@@ -18,8 +18,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-@Produces(MediaType.TEXT_HTML)
 @Path("authorize")
+@Produces(MediaType.TEXT_HTML)
 public class AuthorizeResource extends BaseResource {
 
     public static final String TOKEN = "token";
@@ -123,6 +123,11 @@ public class AuthorizeResource extends BaseResource {
 
         valid = true;
         return null;
+    }
+
+    @Override
+    protected boolean usesSessions() {
+        return true;
     }
 
     public static class AuthorizeModel {
