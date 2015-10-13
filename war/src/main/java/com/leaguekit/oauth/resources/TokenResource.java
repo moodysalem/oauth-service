@@ -26,7 +26,6 @@ public class TokenResource extends BaseResource {
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String PASSWORD = "password";
-    private static final long THREE_SECONDS = 3000L;
     public static final String CLIENT_CREDENTIALS = "client_credentials";
 
     @HeaderParam("Authorization")

@@ -259,6 +259,8 @@ public class AuthorizeResource extends BaseResource {
         } else {
             // validate the username and password
             if (email != null && password != null) {
+                long t1 = System.currentTimeMillis();
+                boolean success = false;
                 User user = getUser(email, client.getApplication().getId());
                 if (user == null) {
                     ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
@@ -267,11 +269,22 @@ public class AuthorizeResource extends BaseResource {
                         ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                     } else {
                         if (BCrypt.checkpw(password, user.getPassword())) {
-                            return getSuccessfulLoginResponse(user, client);
+                            success = true;
                         } else {
                             ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                         }
                     }
+                }
+                long t2 = System.currentTimeMillis();
+                if (t2 - t1 < THREE_SECONDS) {
+                    try {
+                        Thread.sleep(THREE_SECONDS - (t2 -t1));
+                    } catch (InterruptedException e) {
+                        LOG.log(Level.SEVERE, "Thread sleep interrupted", e);
+                    }
+                }
+                if (success) {
+                    return getSuccessfulLoginResponse(user, client);
                 }
             } else {
                 ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
