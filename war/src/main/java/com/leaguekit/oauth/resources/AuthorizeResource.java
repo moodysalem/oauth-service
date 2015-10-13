@@ -302,7 +302,7 @@ public class AuthorizeResource extends BaseResource {
             }
             // redirect with token since they've already asked for all the permissions
             Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
-                redirectUri, acceptedScopes, null);
+                redirectUri, acceptedScopes, null, null);
             return getRedirectResponse(redirectUri, state, t);
         }
     }
@@ -364,7 +364,7 @@ public class AuthorizeResource extends BaseResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
-            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes, null);
+            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes, null, null);
     }
 
     /**

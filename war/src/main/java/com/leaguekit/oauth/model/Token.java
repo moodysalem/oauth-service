@@ -21,7 +21,9 @@ public class Token extends BaseEntity {
         // the permission is an internal token used for when the user is authenticated but not authorized
         PERMISSION,
         // the code is used for the authorization code flow
-        CODE
+        CODE,
+        // a token given in response to client credentials
+        CLIENT
     }
 
     @ManyToOne
@@ -59,15 +61,37 @@ public class Token extends BaseEntity {
     @JsonIgnore
     private List<AcceptedScope> acceptedScopes;
 
+    @ManyToMany
+    @JoinTable(
+        name = "Token_ClientScope",
+        joinColumns = @JoinColumn(name = "tokenId"),
+        inverseJoinColumns = @JoinColumn(name = "clientScopeId")
+    )
+    @JsonIgnore
+    private List<ClientScope> clientScopes;
+
     /**
      * @return a space delimited list of scope names
      */
     public String getScope() {
-        if (getAcceptedScopes() == null) {
+        List<ClientScope> clientScopeList = null;
+
+        if (getType().equals(Type.CLIENT)) {
+            // client credential tokens only point to client scopes
+            clientScopeList = getClientScopes();
+        } else {
+            // otherwise get the accepted scopes
+            if (getAcceptedScopes() != null && getAcceptedScopes().size() > 0) {
+                clientScopeList = getAcceptedScopes().stream().map(AcceptedScope::getClientScope).collect(Collectors.toList());
+            }
+        }
+
+        if (clientScopeList == null) {
             return "";
         }
-        return getAcceptedScopes().stream()
-            .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
+
+        return clientScopeList.stream()
+            .map(ClientScope::getScope).map(Scope::getName)
             .collect(Collectors.joining(" "));
     }
 
@@ -145,4 +169,13 @@ public class Token extends BaseEntity {
     public void setRefreshToken(Token refreshToken) {
         this.refreshToken = refreshToken;
     }
+
+    public List<ClientScope> getClientScopes() {
+        return clientScopes;
+    }
+
+    public void setClientScopes(List<ClientScope> clientScopes) {
+        this.clientScopes = clientScopes;
+    }
+
 }

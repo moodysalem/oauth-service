@@ -151,7 +151,7 @@ public abstract class BaseResource {
      * @return a Token with the aforementioned properties
      */
     protected Token generateToken(Token.Type type, Client client, User user, Date expires, String redirectUri,
-                                  List<AcceptedScope> scopes, Token refreshToken) {
+                                  List<AcceptedScope> scopes, Token refreshToken, List<ClientScope> clientScopes) {
         Token toReturn = new Token();
         toReturn.setClient(client);
         toReturn.setExpires(expires);

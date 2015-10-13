@@ -289,7 +289,7 @@
     <addUniqueConstraint tableName="AcceptedScope" columnNames="userId,clientScopeId"/>
   </changeSet>
 
-  <!-- this table lists all the scopes that are granted with a token -->
+  <!-- this table lists all the user scopes that are granted with a token -->
   <changeSet id="Token Accepted Scopes Join Table" author="moody.salem">
     <createTable tableName="Token_AcceptedScope">
       <column name="tokenId" type="BIGINT">
@@ -307,6 +307,27 @@
     <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="acceptedScopeId"
                              constraintName="FK_Token_AcceptedScope_AcceptedScope"
                              referencedTableName="AcceptedScope"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
+  <!-- this table lists all the client scopes that are granted with a token -->
+  <changeSet id="Token Client Scopes Join Table" author="moody.salem">
+    <createTable tableName="Token_ClientScope">
+      <column name="tokenId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="clientScopeId" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="Token_ClientScope" baseColumnNames="tokenId"
+                             constraintName="FK_Token_ClientScope_Token"
+                             referencedTableName="Token"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseTableName="Token_ClientScope" baseColumnNames="clientScopeId"
+                             constraintName="FK_Token_ClientScope_ClientScope"
+                             referencedTableName="ClientScope"
                              referencedColumnNames="id"/>
   </changeSet>
 
