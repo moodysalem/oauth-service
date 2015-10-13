@@ -98,6 +98,14 @@ public class TokenResource extends BaseResource {
             return error(ErrorResponse.Type.invalid_client, "Client authorization failed.");
         }
 
+        if (!client.getFlows().contains(Client.GrantFlow.CLIENT_CREDENTIALS)) {
+            return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + CLIENT_CREDENTIALS + "' grant flow.");
+        }
+
+        if (!client.getType().equals(Client.Type.CONFIDENTIAL)) {
+            return error(ErrorResponse.Type.unauthorized_client, "Client must be CONFIDENTIAL for the '" + CLIENT_CREDENTIALS + "' grant flow.");
+        }
+
         List<String> scopes = scopeList(scope);
 
         List<ClientScope> clientScopes = getScopes(client, scopes);
