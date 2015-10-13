@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.CookieParam;
@@ -27,6 +28,7 @@ import java.util.logging.Logger;
 public abstract class BaseResource {
     private static final String AUTH_SESSION = "AUTH_SESSION";
     private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
+    public static final String BEARER = "bearer";
 
     @CookieParam(AUTH_SESSION)
     private javax.ws.rs.core.Cookie authCookie;
@@ -234,6 +236,72 @@ public abstract class BaseResource {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Find the accepted scope or return null if it's not yet accepted
+     *
+     * @param user        that has accepted the scope
+     * @param clientScope to look for
+     * @return AcceptedScope for the user/clientScope
+     */
+    protected AcceptedScope findAcceptedScope(User user, ClientScope clientScope) {
+        CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
+        Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
+        List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.get("clientScope"), clientScope)
+        ))).getResultList();
+        if (las.size() == 1) {
+            return las.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * Accept a scope for a user
+     *
+     * @param user        accepting the scope
+     * @param clientScope that is being accepted
+     * @return the AcceptedScope that is created/found for the user/clientscope
+     */
+    protected AcceptedScope acceptScope(User user, ClientScope clientScope) {
+        AcceptedScope as = findAcceptedScope(user, clientScope);
+        if (as != null) {
+            return as;
+        }
+        as = new AcceptedScope();
+        as.setUser(user);
+        as.setClientScope(clientScope);
+
+        try {
+            beginTransaction();
+            em.persist(as);
+            em.flush();
+            commit();
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to accept a scope", e);
+            rollback();
+            return null;
+        }
+        return as;
+    }
+
+    /**
+     * Get a list of client scopes limited to scopes with names in the scopes list
+     *
+     * @param client client to get the scopes for
+     * @param scopes filter to scopes with these names (null if you want all scopes)
+     * @return list of scopes filtered to scopes with the names passed
+     */
+    protected List<ClientScope> getScopes(Client client, List<String> scopes) {
+        CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
+        Root<ClientScope> rcs = cq.from(ClientScope.class);
+        Predicate p = cb.equal(rcs.get("client"), client);
+        if (scopes != null && scopes.size() > 0) {
+            p = cb.and(p, rcs.join("scope").get("name").in(scopes));
+        }
+        return em.createQuery(cq.select(rcs).where(p)).getResultList();
     }
 
     protected User getLoggedInUser(Client client) {

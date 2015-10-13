@@ -1,18 +1,20 @@
 package com.leaguekit.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
-import com.leaguekit.oauth.model.Client;
-import com.leaguekit.oauth.model.Token;
+import com.leaguekit.oauth.model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Path("token")
 @Produces(MediaType.APPLICATION_JSON)
@@ -23,6 +25,8 @@ public class TokenResource extends BaseResource {
     private static final int BASIC_LENGTH = BASIC.length();
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private static final String AUTHORIZATION_CODE = "authorization_code";
+    public static final String PASSWORD = "password";
+    private static final long THREE_SECONDS = 3000L;
 
     @HeaderParam("Authorization")
     private String authorizationHeader;
@@ -48,22 +52,40 @@ public class TokenResource extends BaseResource {
         }
     }
 
+    private Response error(int statusCode, ErrorResponse.Type type, String description, String uri) {
+        ErrorResponse er = new ErrorResponse();
+        er.setError(type);
+        er.setErrorDescription(description);
+        er.setErrorUri(uri);
+        return Response.status(statusCode).entity(er).build();
+    }
+
+    private Response error(ErrorResponse.Type type, String description, String uri) {
+        return error(400, type, description, uri);
+    }
+
+    private Response error(ErrorResponse.Type type, String description) {
+        return error(400, type, description, null);
+    }
+
     @POST
     public Response post(MultivaluedMap<String, String> formParams) {
         if (formParams == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid request body.");
+            return error(ErrorResponse.Type.invalid_request, "Invalid request body");
         }
 
         String grantType = formParams.getFirst("grant_type");
         if (grantType == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'grant_type' is required.");
+            return error(ErrorResponse.Type.invalid_request, "'grant_type' is required.");
         }
 
         switch (grantType) {
             case AUTHORIZATION_CODE:
                 return authorizationCodeGrantType(formParams);
+            case PASSWORD:
+                return passwordGrantType(formParams);
             default:
-                throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid 'grant_type' specified.");
+                return error(ErrorResponse.Type.invalid_grant, "Invalid 'grant_type' specified.");
         }
     }
 
@@ -73,32 +95,34 @@ public class TokenResource extends BaseResource {
         String clientId = formParams.getFirst("client_id");
 
         if (code == null || redirectUri == null || clientId == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST,
+            return error(ErrorResponse.Type.invalid_request,
                 "'code', 'redirect_uri', and 'client_id' are all required for the " + AUTHORIZATION_CODE + " grant type.");
         }
 
         Client client = getClient(clientId);
         if (client == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client ID.");
+            return error(ErrorResponse.Type.invalid_client, "Invalid client ID.");
+        }
+
+        if (!client.getFlows().contains(Client.GrantFlow.CODE)) {
+            return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + AUTHORIZATION_CODE + "' grant type.");
         }
 
         if (this.client != null && !this.client.equals(client)) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Client authentication does not match client ID.");
+            return error(ErrorResponse.Type.invalid_client, "Client authentication does not match client ID.");
         }
 
         if (client.getType().equals(Client.Type.CONFIDENTIAL) && this.client == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST,
-                "Client authentication is required for confidential clients.");
+            return error(ErrorResponse.Type.invalid_client, "Client authentication is required for confidential clients.");
         }
 
         Token codeToken = getToken(code, client, Token.Type.CODE);
         if (codeToken == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid token.");
+            return error(ErrorResponse.Type.invalid_grant, "Invalid token.");
         }
 
         if (!redirectUri.equals(codeToken.getRedirectUri())) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST,
-                "Redirect URI must exactly match the original redirect URI.");
+            return error(ErrorResponse.Type.invalid_grant, "Redirect URI must exactly match the original redirect URI.");
         }
 
         // first expire the token
@@ -107,14 +131,105 @@ public class TokenResource extends BaseResource {
         Token refreshToken = null;
         // we know the token is valid, so we should generate an access token now
         // only confidential clients may receive refresh tokens
-        if (client.getRefreshTokenTtl() != null && !client.getType().equals(Client.Type.CONFIDENTIAL)) {
+        if (client.getRefreshTokenTtl() != null && client.getType().equals(Client.Type.CONFIDENTIAL)) {
             refreshToken = generateToken(Token.Type.REFRESH, client, codeToken.getUser(), getExpires(client, true), redirectUri,
                 new ArrayList<>(codeToken.getAcceptedScopes()), null);
         }
         Token accessToken = generateToken(Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, false), redirectUri,
             new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken);
 
-        return Response.ok(accessToken).build();
+        return Response.ok(makeTokenResponse(accessToken)).build();
+    }
+
+    private Response passwordGrantType(MultivaluedMap<String, String> formParams) {
+        String username = formParams.getFirst("username");
+        String password = formParams.getFirst("password");
+        String scope = formParams.getFirst("scope");
+
+        if (username == null || password == null) {
+            return error(ErrorResponse.Type.invalid_request, "'username' and 'password' are required parameters.");
+        }
+
+        if (client == null) {
+            return error(ErrorResponse.Type.invalid_client, "Client authentication is ALWAYS required for the '" + PASSWORD + "' grant type.");
+        }
+
+        if (!client.getType().equals(Client.Type.CONFIDENTIAL)) {
+            return error(ErrorResponse.Type.invalid_client, "Client must be CONFIDENTIAL to use this the '" + PASSWORD + "' grant type.");
+        }
+
+        if (!client.getFlows().contains(Client.GrantFlow.RESOURCE_OWNER_CREDENTIALS)) {
+            return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + PASSWORD + "' grant type.");
+        }
+
+        boolean valid = false;
+        // this part of the code ALWAYS takes one second because it checks the user credentials, preventing against brute
+        // forcing and timing attacks
+        long t1 = System.currentTimeMillis();
+        User user = getUser(username, client);
+        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
+            valid = true;
+        }
+        long t2 = System.currentTimeMillis();
+        try {
+            long sleepTime = THREE_SECONDS - (t2 - t1);
+            if (sleepTime > 0) {
+                Thread.sleep(sleepTime);
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Thread interrupted during wait.", e);
+        }
+
+        if (!valid) {
+            return error(ErrorResponse.Type.invalid_grant, "Invalid username or password.");
+        }
+
+        List<String> scopes = new ArrayList<>();
+        if (scope != null) {
+            String[] splitScopes = scope.split(" ");
+            for (String s : splitScopes) {
+                if (s != null && s.trim().length() > 0) {
+                    scopes.add(s.trim());
+                }
+            }
+        }
+
+        List<ClientScope> clientScopes = getScopes(client, scopes);
+
+        if (scopes.size() > 0 && clientScopes.size() < scopes.size()) {
+            // list of client scope names returned
+            Set<String> clientScopeNames = clientScopes.stream().map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
+            // list of scopes requested minus the client scope names returned
+            String invalidScopes = scopes.stream().filter((s) -> !clientScopeNames.contains(s)).collect(Collectors.joining("; "));
+            return error(ErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + invalidScopes);
+        }
+
+
+        List<AcceptedScope> acceptedScopes = new ArrayList<>();
+        for (ClientScope cs : clientScopes) {
+            acceptedScopes.add(acceptScope(user, cs));
+        }
+
+        Token refreshToken = null;
+        if (client.getRefreshTokenTtl() != null) {
+            refreshToken = generateToken(Token.Type.REFRESH, client, user, getExpires(client, true), null,
+                new ArrayList<>(acceptedScopes), null);
+        }
+        Token accessToken = generateToken(Token.Type.ACCESS, client, user, getExpires(client, false), null,
+            new ArrayList<>(acceptedScopes), refreshToken);
+
+        return Response.ok(makeTokenResponse(accessToken)).build();
+    }
+
+    private User getUser(String username, Client client) {
+        CriteriaQuery<User> uq = cb.createQuery(User.class);
+        Root<User> ur = uq.from(User.class);
+        uq.select(ur).where(
+            cb.equal(ur.get("email"), username),
+            cb.equal(ur.join("application"), client.getApplication())
+        );
+        List<User> users = em.createQuery(uq).getResultList();
+        return users.size() == 1 ? users.get(0) : null;
     }
 
     private void expireToken(Token t) {
@@ -128,6 +243,18 @@ public class TokenResource extends BaseResource {
             rollback();
             throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to expire the token.");
         }
+    }
+
+    private TokenResponse makeTokenResponse(Token accessToken) {
+        TokenResponse tr = new TokenResponse();
+        tr.setAccessToken(accessToken.getToken());
+        tr.setExpiresIn(accessToken.getExpiresIn());
+        if (accessToken.getRefreshToken() != null) {
+            tr.setRefreshToken(accessToken.getRefreshToken().getToken());
+        }
+        tr.setScope(accessToken.getScope());
+        tr.setTokenType(BEARER);
+        return tr;
     }
 
     /**

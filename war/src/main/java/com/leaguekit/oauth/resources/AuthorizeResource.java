@@ -28,7 +28,6 @@ public class AuthorizeResource extends BaseResource {
     public static final int FIVE_MINUTES = (1000 * 60 * 5);
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
-    public static final String BEARER = "bearer";
 
     @QueryParam("response_type")
     String responseType;
@@ -366,72 +365,6 @@ public class AuthorizeResource extends BaseResource {
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
             getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes, null);
-    }
-
-    /**
-     * Find the accepted scope or return null if it's not yet accepted
-     *
-     * @param user        that has accepted the scope
-     * @param clientScope to look for
-     * @return AcceptedScope for the user/clientScope
-     */
-    private AcceptedScope findAcceptedScope(User user, ClientScope clientScope) {
-        CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
-        Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
-        List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-            cb.equal(ras.get("user"), user),
-            cb.equal(ras.get("clientScope"), clientScope)
-        ))).getResultList();
-        if (las.size() == 1) {
-            return las.get(0);
-        }
-        return null;
-    }
-
-    /**
-     * Accept a scope for a user
-     *
-     * @param user        accepting the scope
-     * @param clientScope that is being accepted
-     * @return the AcceptedScope that is created/found for the user/clientscope
-     */
-    private AcceptedScope acceptScope(User user, ClientScope clientScope) {
-        AcceptedScope as = findAcceptedScope(user, clientScope);
-        if (as != null) {
-            return as;
-        }
-        as = new AcceptedScope();
-        as.setUser(user);
-        as.setClientScope(clientScope);
-
-        try {
-            beginTransaction();
-            em.persist(as);
-            em.flush();
-            commit();
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to accept a scope", e);
-            rollback();
-            return null;
-        }
-        return as;
-    }
-
-    /**
-     * Get a list of client scopes limited to scopes with names in the scopes list
-     *
-     * @param client client to get the scopes for
-     * @param scopes filter to scopes with these names (null if you want all scopes)
-     * @return list of scopes filtered to scopes with the names passed
-     */
-    private List<ClientScope> getScopes(Client client, List<String> scopes) {
-        CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
-        Root<ClientScope> rcs = cq.from(ClientScope.class);
-        Predicate p = cb.equal(rcs.get("client"), client);
-        if (scopes != null && scopes.size() > 0) {
-            p = cb.and(p, rcs.join("scope").get("name").in(scopes));
-        }
-        return em.createQuery(cq.select(rcs).where(p)).getResultList();
     }
 
     /**
