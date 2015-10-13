@@ -1,7 +1,6 @@
 package com.leaguekit.oauth.resources;
 
 import com.leaguekit.oauth.model.*;
-import com.leaguekit.oauth.model.Application;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -182,16 +181,18 @@ public class AuthorizeResource extends BaseResource {
 
         Client client = getClient(clientId);
 
+        // user is already logged in
+        User user = getLoggedInUser(client);
+        if (user != null) {
+            return getSuccessfulLoginResponse(user, client);
+        }
+
         AuthorizeModel ar = new AuthorizeModel();
         ar.setClient(client);
 
         return addCookie(Response.ok(new Viewable("/templates/Login", ar)));
     }
 
-    private boolean hasLoggedIn(Token sessionToken, Application application) {
-
-        return false;
-    }
 
     /**
      * Processes either a login attempt or granted permissions, doing the appropriate redirect on success
@@ -277,6 +278,8 @@ public class AuthorizeResource extends BaseResource {
     }
 
     private Response getSuccessfulLoginResponse(User user, Client client) {
+        addLoggedInUser(user);
+
         // successfully authenticated the user
         List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
         if (toAsk.size() > 0) {
@@ -358,23 +361,6 @@ public class AuthorizeResource extends BaseResource {
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
             getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes, null);
-    }
-
-    /**
-     * Find all the scopes the user has accepted for a client
-     *
-     * @param user   to find accepted scopes for
-     * @param client that has the scopes
-     * @return list of scopes the user has accepted for the client
-     */
-    private List<AcceptedScope> findAcceptedScopes(User user, Client client) {
-        CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
-        Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
-        List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-            cb.equal(ras.get("user"), user),
-            cb.equal(ras.join("clientScope").get("client"), client)
-        ))).getResultList();
-        return las;
     }
 
     /**

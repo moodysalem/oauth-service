@@ -310,8 +310,8 @@
                              referencedColumnNames="id"/>
   </changeSet>
 
-  <changeSet id="Session Table" author="moody.salem">
-    <createTable tableName="Session">
+  <changeSet id="Cookie Table" author="moody.salem">
+    <createTable tableName="Cookie">
       <column name="id" autoIncrement="true" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
       </column>
@@ -333,24 +333,24 @@
     </createTable>
   </changeSet>
 
-  <changeSet id="Session_User Table" author="moody.salem">
-    <createTable tableName="Session_User">
-      <column name="sessionId" type="BIGINT">
+  <changeSet id="Cookie_User Table" author="moody.salem">
+    <createTable tableName="Cookie_User">
+      <column name="cookieId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
       <column name="userId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Session_User" baseColumnNames="sessionId"
-                             constraintName="FK_Session_User_Session"
-                             referencedTableName="Session"
+    <addForeignKeyConstraint baseTableName="Cookie_User" baseColumnNames="cookieId"
+                             constraintName="FK_Cookie_User_Cookie"
+                             referencedTableName="Cookie"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Session_User" baseColumnNames="userId"
-                             constraintName="FK_Session_User_User"
+    <addForeignKeyConstraint baseTableName="Cookie_User" baseColumnNames="userId"
+                             constraintName="FK_Cookie_User_User"
                              referencedTableName="User"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="Session_User" columnNames="sessionId,userId"/>
+    <addUniqueConstraint tableName="Cookie_User" columnNames="cookieId,userId"/>
   </changeSet>
 
 </databaseChangeLog>

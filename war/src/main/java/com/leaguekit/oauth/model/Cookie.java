@@ -8,7 +8,7 @@ import java.util.Set;
 
 // we use the DB to store http sessions
 @Entity
-public class Session extends BaseEntity {
+public class Cookie extends BaseEntity {
 
     @Column(name = "secret")
     private String secret;
@@ -18,8 +18,8 @@ public class Session extends BaseEntity {
 
     @ManyToMany
     @JoinTable(
-        name = "Session_User",
-        joinColumns = @JoinColumn(name = "sessionId"),
+        name = "Cookie_User",
+        joinColumns = @JoinColumn(name = "cookieId"),
         inverseJoinColumns = @JoinColumn(name = "userId")
     )
     private Set<User> users;
