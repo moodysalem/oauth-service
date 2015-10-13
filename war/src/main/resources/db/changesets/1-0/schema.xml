@@ -331,6 +331,7 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+    <sql dbms="mysql">ALTER TABLE Cookie CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="Cookie_User Table" author="moody.salem">

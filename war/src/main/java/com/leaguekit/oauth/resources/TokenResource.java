@@ -26,14 +26,12 @@ public class TokenResource extends BaseResource {
 
     @HeaderParam("Authorization")
     private String authorizationHeader;
-    private boolean includedAuthentication;
 
     private Client client = null;
 
     @PostConstruct
     public void initClient() {
         if (authorizationHeader != null) {
-            includedAuthentication = true;
             if (authorizationHeader.startsWith(BASIC)) {
                 String credentials = authorizationHeader.substring(BASIC_LENGTH);
                 String decoded = new String(Base64.getDecoder().decode(credentials.getBytes(UTF8)), UTF8);
@@ -79,31 +77,47 @@ public class TokenResource extends BaseResource {
                 "'code', 'redirect_uri', and 'client_id' are all required for the " + AUTHORIZATION_CODE + " grant type.");
         }
 
-        Client c = getClient(clientId);
-        if (c == null) {
+        Client client = getClient(clientId);
+        if (client == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client ID.");
         }
 
-        if (client != null && !client.equals(c)) {
+        if (this.client != null && !this.client.equals(client)) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Client authentication does not match client ID.");
         }
 
-        if (c.getType().equals(Client.Type.CONFIDENTIAL) && client == null) {
+        if (client.getType().equals(Client.Type.CONFIDENTIAL) && this.client == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST,
                 "Client authentication is required for confidential clients.");
         }
 
-        Token t = getToken(code, c, Token.Type.CODE);
-        if (t == null) {
+        Token codeToken = getToken(code, client, Token.Type.CODE);
+        if (codeToken == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid token.");
         }
 
-        if (!redirectUri.equals(t.getRedirectUri())) {
+        if (!redirectUri.equals(codeToken.getRedirectUri())) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST,
                 "Redirect URI must exactly match the original redirect URI.");
         }
 
         // first expire the token
+        expireToken(codeToken);
+
+        Token refreshToken = null;
+        // we know the token is valid, so we should generate an access token now
+        // only confidential clients may receive refresh tokens
+        if (client.getRefreshTokenTtl() != null && !client.getType().equals(Client.Type.CONFIDENTIAL)) {
+            refreshToken = generateToken(Token.Type.REFRESH, client, codeToken.getUser(), getExpires(client, true), redirectUri,
+                new ArrayList<>(codeToken.getAcceptedScopes()), null);
+        }
+        Token accessToken = generateToken(Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, false), redirectUri,
+            new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken);
+
+        return Response.ok(accessToken).build();
+    }
+
+    private void expireToken(Token t) {
         t.setExpires(new Date());
         try {
             beginTransaction();
@@ -114,17 +128,6 @@ public class TokenResource extends BaseResource {
             rollback();
             throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to expire the token.");
         }
-
-        Token refreshToken = null;
-        // we know the token is valid, so we should generate an access token now
-        if (c.getRefreshTokenTtl() != null) {
-            refreshToken = generateToken(Token.Type.REFRESH, c, t.getUser(), getExpires(c, true), redirectUri,
-                new ArrayList<>(t.getAcceptedScopes()), null);
-        }
-        Token accessToken = generateToken(Token.Type.ACCESS, c, t.getUser(), getExpires(c, false), redirectUri,
-            new ArrayList<>(t.getAcceptedScopes()), refreshToken);
-
-        return Response.ok(accessToken).build();
     }
 
     /**
@@ -136,7 +139,7 @@ public class TokenResource extends BaseResource {
      */
     @POST
     @Path("info")
-    public Response get(@FormParam("token") String token, @FormParam("clientId") String clientId) {
+    public Response tokenInfo(@FormParam("token") String token, @FormParam("clientId") String clientId) {
         if (token == null || clientId == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and 'clientId' form parameters are required.");
         }
