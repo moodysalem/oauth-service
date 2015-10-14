@@ -124,11 +124,6 @@ public class AuthorizeResource extends BaseResource {
         return null;
     }
 
-    @Override
-    protected boolean usesSessions() {
-        return true;
-    }
-
     public static class AuthorizeModel {
         private Client client;
         private String loginError;
@@ -185,16 +180,10 @@ public class AuthorizeResource extends BaseResource {
 
         Client client = getClient(clientId);
 
-        // user is already logged in
-        User user = getLoggedInUser(client);
-        if (user != null) {
-            return getSuccessfulLoginResponse(user, client);
-        }
-
         AuthorizeModel ar = new AuthorizeModel();
         ar.setClient(client);
 
-        return addCookie(Response.ok(new Viewable("/templates/Login", ar)));
+        return Response.ok(new Viewable("/templates/Login", ar)).build();
     }
 
 
@@ -291,12 +280,10 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        return addCookie(Response.ok(new Viewable("/templates/Login", ar)));
+        return Response.ok(new Viewable("/templates/Login", ar)).build();
     }
 
     private Response getSuccessfulLoginResponse(User user, Client client) {
-        addLoggedInUser(user);
-
         // successfully authenticated the user
         List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
         if (toAsk.size() > 0) {
@@ -305,7 +292,7 @@ public class AuthorizeResource extends BaseResource {
             PermissionsModel pr = new PermissionsModel();
             pr.setClientScopes(toAsk);
             pr.setToken(t);
-            return addCookie(Response.ok(new Viewable("/templates/Permissions", pr)));
+            return Response.ok(new Viewable("/templates/Permissions", pr)).build();
         } else {
             // accept all the always permissions
             List<ClientScope> clientScopes = getScopes(client, scopes);
@@ -373,7 +360,7 @@ public class AuthorizeResource extends BaseResource {
      * @param type            type of token to generate
      * @param permissionToken the token that triggered the generation
      * @param scopes          the list of scopes for the token
-     * @return
+     * @return generated token
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
@@ -486,7 +473,7 @@ public class AuthorizeResource extends BaseResource {
      * @return error page
      */
     private Response error(String error) {
-        return addCookie(Response.status(400).entity(new Viewable("/templates/Error", error)));
+        return Response.status(400).entity(new Viewable("/templates/Error", error)).build();
     }
 
     /**

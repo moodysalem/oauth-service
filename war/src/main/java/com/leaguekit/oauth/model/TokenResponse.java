@@ -3,8 +3,26 @@ package com.leaguekit.oauth.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The OAauth2 spec for an token response
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TokenResponse {
+
+    public static final String BEARER = "bearer";
+
+    public static TokenResponse from(Token accessToken) {
+        TokenResponse tr = new TokenResponse();
+        tr.setAccessToken(accessToken.getToken());
+        tr.setExpiresIn(accessToken.getExpiresIn());
+        if (accessToken.getRefreshToken() != null) {
+            tr.setRefreshToken(accessToken.getRefreshToken().getToken());
+        }
+        tr.setScope(accessToken.getScope());
+        tr.setTokenType(BEARER);
+        return tr;
+    }
+
     @JsonProperty("access_token")
     private String accessToken;
 
@@ -35,7 +53,6 @@ public class TokenResponse {
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
     }
-
 
     public String getRefreshToken() {
         return refreshToken;

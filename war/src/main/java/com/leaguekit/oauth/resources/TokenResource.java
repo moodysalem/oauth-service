@@ -110,9 +110,9 @@ public class TokenResource extends BaseResource {
             return error(ErrorResponse.Type.invalid_request, "'refresh_token' parameter is required.");
         }
 
-        Token refreshToken = getToken(token, client);
-        if (refreshToken == null || !refreshToken.getType().equals(Token.Type.REFRESH)) {
-            return error(ErrorResponse.Type.invalid_grant, "Invalid token.");
+        Token refreshToken = getToken(token, client, Token.Type.REFRESH);
+        if (refreshToken == null) {
+            return error(ErrorResponse.Type.invalid_grant, "Invalid or expired refresh token.");
         }
 
         List<AcceptedScope> newTokenScopes = new ArrayList<>(refreshToken.getAcceptedScopes());
@@ -132,7 +132,7 @@ public class TokenResource extends BaseResource {
         Token accessToken = generateToken(Token.Type.ACCESS, client, refreshToken.getUser(), getExpires(client, false),
             refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null);
 
-        return noCache(Response.ok(makeResponseObject(accessToken))).build();
+        return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
 
     private Response clientCredentiaslGrantType(MultivaluedMap<String, String> formParams) {
@@ -160,7 +160,7 @@ public class TokenResource extends BaseResource {
 
         Token token = generateToken(Token.Type.CLIENT, client, null, getExpires(client, false), null, null, null, clientScopes);
 
-        return noCache(Response.ok(makeResponseObject(token))).build();
+        return noCache(Response.ok(TokenResponse.from(token))).build();
     }
 
     private List<String> scopeList(String scope) {
@@ -225,7 +225,7 @@ public class TokenResource extends BaseResource {
         Token accessToken = generateToken(Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, false), redirectUri,
             new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken, null);
 
-        return noCache(Response.ok(makeResponseObject(accessToken))).build();
+        return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
 
     private Response passwordGrantType(MultivaluedMap<String, String> formParams) {
@@ -294,7 +294,7 @@ public class TokenResource extends BaseResource {
         Token accessToken = generateToken(Token.Type.ACCESS, client, user, getExpires(client, false), null,
             new ArrayList<>(acceptedScopes), refreshToken, null);
 
-        return noCache(Response.ok(makeResponseObject(accessToken))).build();
+        return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
 
     private String getMissingScopes(List<ClientScope> clientScopes, List<String> requestedScopes) {
@@ -328,18 +328,6 @@ public class TokenResource extends BaseResource {
         }
     }
 
-    private TokenResponse makeResponseObject(Token accessToken) {
-        TokenResponse tr = new TokenResponse();
-        tr.setAccessToken(accessToken.getToken());
-        tr.setExpiresIn(accessToken.getExpiresIn());
-        if (accessToken.getRefreshToken() != null) {
-            tr.setRefreshToken(accessToken.getRefreshToken().getToken());
-        }
-        tr.setScope(accessToken.getScope());
-        tr.setTokenType(BEARER);
-        return tr;
-    }
-
     /**
      * Get the info for a token for a specific client
      *
@@ -364,15 +352,11 @@ public class TokenResource extends BaseResource {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }
 
-        return noCache(Response.ok(makeResponseObject(t))).build();
+        return noCache(Response.ok(TokenResponse.from(t))).build();
     }
 
     private Response.ResponseBuilder noCache(Response.ResponseBuilder rb) {
         return rb.header("Cache-Control", "no-store").header("Pragma", "no-cache");
     }
 
-    @Override
-    protected boolean usesSessions() {
-        return false;
-    }
 }

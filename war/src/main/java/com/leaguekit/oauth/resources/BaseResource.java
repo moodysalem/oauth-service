@@ -2,7 +2,6 @@ package com.leaguekit.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.oauth.model.*;
-import com.leaguekit.oauth.model.Cookie;
 import com.leaguekit.util.RandomStringUtil;
 
 import javax.annotation.PostConstruct;
@@ -14,8 +13,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.CookieParam;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -29,10 +30,6 @@ public abstract class BaseResource {
     private static final String AUTH_SESSION = "AUTH_SESSION";
     private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     public static final long THREE_SECONDS = 3000L;
-    public static final String BEARER = "bearer";
-
-    @CookieParam(AUTH_SESSION)
-    private javax.ws.rs.core.Cookie authCookie;
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
@@ -46,73 +43,9 @@ public abstract class BaseResource {
 
     private EntityTransaction etx;
 
-    private Cookie cookie;
-
     @PostConstruct
     public void init() {
         cb = cb == null ? em.getCriteriaBuilder() : cb;
-        initSession();
-    }
-
-    private void initSession() {
-        if (usesSessions()) {
-            if (authCookie != null && authCookie.getValue() != null) {
-                cookie = getSession(authCookie.getValue());
-            }
-            if (cookie == null) {
-                cookie = makeSession();
-            }
-        }
-    }
-
-    protected abstract boolean usesSessions();
-
-    private Cookie getSession(String secret) {
-        CriteriaQuery<Cookie> cq = cb.createQuery(Cookie.class);
-        Root<Cookie> sr = cq.from(Cookie.class);
-        List<Cookie> ls = em.createQuery(cq.select(sr).where(
-            cb.equal(sr.get("secret"), secret),
-            cb.greaterThan(sr.<Date>get("expires"), new Date())
-        )).getResultList();
-        if (ls.size() == 1) {
-            return ls.get(0);
-        }
-        return null;
-    }
-
-    private Cookie makeSession() {
-        Cookie s = new Cookie();
-        s.setSecret(RandomStringUtil.randomAlphaNumeric(64));
-        s.setExpires(new Date(System.currentTimeMillis() + ONE_MONTH));
-        try {
-            beginTransaction();
-            em.persist(s);
-            commit();
-        } catch (Exception e) {
-            rollback();
-            LOG.log(Level.SEVERE, "Failed to generate a cookie.", e);
-        }
-        return s;
-    }
-
-    private NewCookie getSessionCookie() {
-        try {
-            boolean isHTTPS = "HTTPS".equalsIgnoreCase(req.getHeader("X-Forwarded-Proto"));
-            URI reqUri = (new URI(req.getRequestURI()));
-            return new NewCookie(AUTH_SESSION, cookie.getSecret(), "/", reqUri.getHost(), null,
-                -1, isHTTPS, true);
-        } catch (URISyntaxException e) {
-            return null;
-        }
-    }
-
-    protected Response addCookie(Response.ResponseBuilder rb) {
-        if (cookie != null) {
-            if (authCookie == null || !cookie.getSecret().equals(authCookie.getValue())) {
-                return rb.cookie(getSessionCookie()).build();
-            }
-        }
-        return rb.build();
     }
 
     /**
@@ -303,43 +236,6 @@ public abstract class BaseResource {
             p = cb.and(p, rcs.join("scope").get("name").in(scopes));
         }
         return em.createQuery(cq.select(rcs).where(p)).getResultList();
-    }
-
-    protected User getLoggedInUser(Client client) {
-        if (cookie.getUsers() == null) {
-            return null;
-        }
-        return cookie.getUsers().stream()
-            .filter((u) -> u.getApplication().equals(client.getApplication()))
-            .findFirst().orElse(null);
-    }
-
-    protected void addLoggedInUser(User user) {
-        if (!cookie.getUsers().add(user)) {
-            return;
-        }
-        try {
-            beginTransaction();
-            em.merge(cookie);
-            commit();
-        } catch (Exception e) {
-            rollback();
-            LOG.log(Level.SEVERE, "Failed to add user with ID: " + user.getId() + "; to cookie ID: " + cookie.getId(), e);
-        }
-    }
-
-    protected void removeLoggedInUser(User user) {
-        if (!cookie.getUsers().remove(user)) {
-            return;
-        }
-        try {
-            beginTransaction();
-            em.merge(cookie);
-            commit();
-        } catch (Exception e) {
-            rollback();
-            LOG.log(Level.SEVERE,  "Failed to remove user with ID: " + user.getId() + "; to cookie ID: " + cookie.getId(), e);
-        }
     }
 
     protected void beginTransaction() {

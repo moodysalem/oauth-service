@@ -20,8 +20,4 @@ public class StatusResource extends BaseResource {
         return Response.ok(OK).build();
     }
 
-    @Override
-    protected boolean usesSessions() {
-        return false;
-    }
 }

@@ -348,6 +348,12 @@
       <column name="secret" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="userId" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="rememberMe" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
       <column name="expires" type="TIMESTAMP">
         <constraints nullable="false"/>
       </column>
@@ -355,24 +361,5 @@
     <sql dbms="mysql">ALTER TABLE Cookie CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
-  <changeSet id="Cookie_User Table" author="moody.salem">
-    <createTable tableName="Cookie_User">
-      <column name="cookieId" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="userId" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-    </createTable>
-    <addForeignKeyConstraint baseTableName="Cookie_User" baseColumnNames="cookieId"
-                             constraintName="FK_Cookie_User_Cookie"
-                             referencedTableName="Cookie"
-                             referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Cookie_User" baseColumnNames="userId"
-                             constraintName="FK_Cookie_User_User"
-                             referencedTableName="User"
-                             referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="Cookie_User" columnNames="cookieId,userId"/>
-  </changeSet>
 
 </databaseChangeLog>

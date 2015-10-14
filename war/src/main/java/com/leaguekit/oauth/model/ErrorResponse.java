@@ -3,6 +3,9 @@ package com.leaguekit.oauth.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The OAauth2 spec for an error response
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
     public enum Type {
