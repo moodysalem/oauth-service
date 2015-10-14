@@ -25,16 +25,19 @@
                     </label>
                 </div>
 
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">
+                        <i class="fa fa-sign-in"></i>
+                        Sign In
+                    </button>
+                </div>
+
                 <#escape x as x?html>
                 <#-- failed to log in -->
-                <#if model.loginError??>
-                    <div class="alert alert-danger">${model.loginError}</div>
-                </#if>
+                    <#if model.loginError??>
+                        <div class="alert alert-danger">${model.loginError}</div>
+                    </#if>
                 </#escape>
-                <button class="btn btn-lg btn-primary btn-block" type="submit">
-                    <i class="fa fa-sign-in"></i>
-                    Sign In
-                </button>
             </form>
         </div>
     </body>

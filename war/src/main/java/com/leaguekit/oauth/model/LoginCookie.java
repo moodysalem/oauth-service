@@ -8,9 +8,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import java.util.Date;
 
-// we use the DB to store http sessions
+// we use this to represent a logged in user
 @Entity
-public class Cookie extends BaseEntity {
+public class LoginCookie extends BaseEntity {
 
     @Column(name = "secret")
     private String secret;
@@ -21,9 +21,6 @@ public class Cookie extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "userId")
     private User user;
-
-    @Column(name = "rememberMe")
-    private boolean rememberMe;
 
     public String getSecret() {
         return secret;
@@ -47,13 +44,5 @@ public class Cookie extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public boolean isRememberMe() {
-        return rememberMe;
-    }
-
-    public void setRememberMe(boolean rememberMe) {
-        this.rememberMe = rememberMe;
     }
 }

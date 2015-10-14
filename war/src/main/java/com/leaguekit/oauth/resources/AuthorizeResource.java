@@ -1,6 +1,7 @@
 package com.leaguekit.oauth.resources;
 
 import com.leaguekit.oauth.model.*;
+import com.leaguekit.util.RandomStringUtil;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -8,6 +9,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import javax.servlet.http.Cookie;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
@@ -28,6 +30,7 @@ public class AuthorizeResource extends BaseResource {
     public static final int FIVE_MINUTES = (1000 * 60 * 5);
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
+    public static final String COOKIE_NAME_PREFIX = "_AID_";
 
     @QueryParam("response_type")
     String responseType;
@@ -124,6 +127,38 @@ public class AuthorizeResource extends BaseResource {
         return null;
     }
 
+    private User getLoggedInUser(Client client) {
+        String cookieName = COOKIE_NAME_PREFIX + client.getApplication().getId();
+        if (req.getCookies() != null) {
+            for (Cookie c : req.getCookies()) {
+                String name = c.getName().trim();
+                if (!name.equals(cookieName)) {
+                    continue;
+                }
+                String secret = c.getValue().trim();
+                LoginCookie lc = getCookie(secret, client);
+                if (lc != null) {
+                    return lc.getUser();
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private LoginCookie getCookie(String secret, Client client) {
+        CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
+        Root<LoginCookie> rlc = lc.from(LoginCookie.class);
+        lc.select(rlc).where(
+            cb.equal(rlc.get("secret"), secret),
+            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+            cb.equal(rlc.join("user").get("application"), client.getApplication())
+        );
+        List<LoginCookie> lcL = em.createQuery(lc).getResultList();
+        return (lcL.size() == 1) ? lcL.get(0) : null;
+    }
+
     public static class AuthorizeModel {
         private Client client;
         private String loginError;
@@ -148,6 +183,7 @@ public class AuthorizeResource extends BaseResource {
     public static class PermissionsModel {
         private Token token;
         private List<ClientScope> clientScopes;
+        private boolean rememberMe;
 
         public Token getToken() {
             return token;
@@ -164,6 +200,14 @@ public class AuthorizeResource extends BaseResource {
         public void setClientScopes(List<ClientScope> clientScopes) {
             this.clientScopes = clientScopes;
         }
+
+        public boolean isRememberMe() {
+            return rememberMe;
+        }
+
+        public void setRememberMe(boolean rememberMe) {
+            this.rememberMe = rememberMe;
+        }
     }
 
     /**
@@ -179,6 +223,11 @@ public class AuthorizeResource extends BaseResource {
         }
 
         Client client = getClient(clientId);
+
+        User user = getLoggedInUser(client);
+        if (user != null) {
+            return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, false);
+        }
 
         AuthorizeModel ar = new AuthorizeModel();
         ar.setClient(client);
@@ -198,6 +247,8 @@ public class AuthorizeResource extends BaseResource {
     public Response login(MultivaluedMap<String, String> formParams) {
         String email = formParams.getFirst("email");
         String password = formParams.getFirst("password");
+        boolean rememberMe = "true".equalsIgnoreCase(formParams.getFirst("rememberMe"));
+
         String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
         Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
@@ -242,7 +293,7 @@ public class AuthorizeResource extends BaseResource {
                     Token.Type type = getTokenType(responseType);
                     // now create the token we will be returning to the user
                     Token token = generateToken(type, t, tokenScopes);
-                    return getRedirectResponse(redirectUri, state, token);
+                    return getRedirectResponse(redirectUri, state, token, rememberMe);
                 }
             }
         } else {
@@ -267,13 +318,13 @@ public class AuthorizeResource extends BaseResource {
                 long t2 = System.currentTimeMillis();
                 if (t2 - t1 < THREE_SECONDS) {
                     try {
-                        Thread.sleep(THREE_SECONDS - (t2 -t1));
+                        Thread.sleep(THREE_SECONDS - (t2 - t1));
                     } catch (InterruptedException e) {
                         LOG.log(Level.SEVERE, "Thread sleep interrupted", e);
                     }
                 }
                 if (success) {
-                    return getSuccessfulLoginResponse(user, client);
+                    return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
                 }
             } else {
                 ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
@@ -283,7 +334,8 @@ public class AuthorizeResource extends BaseResource {
         return Response.ok(new Viewable("/templates/Login", ar)).build();
     }
 
-    private Response getSuccessfulLoginResponse(User user, Client client) {
+    private Response getSuccessfulLoginResponse(User user, Client client, List<String> scopes, String redirectUri,
+                                                String responseType, String state, boolean rememberMe) {
         // successfully authenticated the user
         List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
         if (toAsk.size() > 0) {
@@ -292,6 +344,7 @@ public class AuthorizeResource extends BaseResource {
             PermissionsModel pr = new PermissionsModel();
             pr.setClientScopes(toAsk);
             pr.setToken(t);
+            pr.setRememberMe(rememberMe);
             return Response.ok(new Viewable("/templates/Permissions", pr)).build();
         } else {
             // accept all the always permissions
@@ -303,7 +356,7 @@ public class AuthorizeResource extends BaseResource {
             // redirect with token since they've already asked for all the permissions
             Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
                 redirectUri, acceptedScopes, null, null);
-            return getRedirectResponse(redirectUri, state, t);
+            return getRedirectResponse(redirectUri, state, t, rememberMe);
         }
     }
 
@@ -324,7 +377,7 @@ public class AuthorizeResource extends BaseResource {
      * @param state       state of the client upon sending to the authorize endpoint, returned in the redirect url
      * @param tkn         access or code token that was generated, depending on the type
      */
-    private Response getRedirectResponse(String redirectUri, String state, Token tkn) {
+    private Response getRedirectResponse(String redirectUri, String state, Token tkn, boolean rememberMe) {
         UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
         String scope = tkn.getAcceptedScopes().stream()
@@ -335,7 +388,7 @@ public class AuthorizeResource extends BaseResource {
         if (tkn.getType().equals(Token.Type.ACCESS)) {
             MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
             params.putSingle("access_token", tkn.getToken());
-            params.putSingle("token_type", BEARER);
+            params.putSingle("token_type", TokenResponse.BEARER);
             if (state != null) {
                 params.putSingle("state", state);
             }
@@ -351,7 +404,47 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        return Response.status(302).location(toRedirect.build()).build();
+        return Response.status(Response.Status.FOUND)
+            .location(toRedirect.build())
+            .cookie(getNewCookie(tkn, rememberMe))
+            .build();
+    }
+
+    @HeaderParam("X-Forwarded-Proto")
+    private String forwardedProto;
+
+    private NewCookie getNewCookie(Token tkn, boolean rememberMe) {
+        String appId = tkn.getClient().getApplication().getId().toString();
+        String name = COOKIE_NAME_PREFIX + appId;
+
+        Date expires = new Date(System.currentTimeMillis() + ONE_MONTH);
+        LoginCookie lc = makeLoginCookie(tkn.getUser(), RandomStringUtil.randomAlphaNumeric(64), expires);
+
+        int maxAge = rememberMe ? (new Long(ONE_MONTH / 1000L)).intValue() : NewCookie.DEFAULT_MAX_AGE;
+        Date expiry = rememberMe ? expires : null;
+
+        boolean isHTTPS = "HTTPS".equalsIgnoreCase(forwardedProto);
+
+        return new NewCookie(name, lc.getSecret(), "/", null, NewCookie.DEFAULT_VERSION,
+            "login cookie for application " + appId, maxAge, expiry, isHTTPS, true);
+    }
+
+    private LoginCookie makeLoginCookie(User user, String secret, Date expires) {
+        LoginCookie lc = new LoginCookie();
+        lc.setUser(user);
+        lc.setSecret(secret);
+        lc.setExpires(expires);
+        try {
+            beginTransaction();
+            em.persist(lc);
+            em.flush();
+            commit();
+        } catch (Exception e) {
+            rollback();
+            LOG.log(Level.SEVERE, "Failed to create a login cookie", e);
+            lc = null;
+        }
+        return lc;
     }
 
     /**

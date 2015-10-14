@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 public abstract class BaseResource {
     private static final String AUTH_SESSION = "AUTH_SESSION";
-    private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
+    public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     public static final long THREE_SECONDS = 3000L;
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());

@@ -331,8 +331,8 @@
                              referencedColumnNames="id"/>
   </changeSet>
 
-  <changeSet id="Cookie Table" author="moody.salem">
-    <createTable tableName="Cookie">
+  <changeSet id="LoginCookie Table" author="moody.salem">
+    <createTable tableName="LoginCookie">
       <column name="id" autoIncrement="true" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
       </column>
@@ -351,14 +351,11 @@
       <column name="userId" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="rememberMe" type="BOOLEAN">
-        <constraints nullable="false"/>
-      </column>
       <column name="expires" type="TIMESTAMP">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <sql dbms="mysql">ALTER TABLE Cookie CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
+    <sql dbms="mysql">ALTER TABLE LoginCookie CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
 
