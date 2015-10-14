@@ -348,7 +348,7 @@
       <column name="secret" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="userId" type="VARCHAR(191)">
+      <column name="userId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
       <column name="expires" type="TIMESTAMP">
