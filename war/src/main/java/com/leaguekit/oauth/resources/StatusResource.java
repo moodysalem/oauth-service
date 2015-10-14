@@ -11,13 +11,13 @@ public class StatusResource extends BaseResource {
 
     @GET
     public Response status() {
-        Integer integer = (Integer) em.createNativeQuery("SELECT 1 FROM DUAL").getSingleResult();
+        String OK = (String) em.createNativeQuery("SELECT 'OK' FROM DUAL").getSingleResult();
 
-        if (integer == null) {
-            throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to select 1 from database.");
+        if (OK == null) {
+            throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to select OK from database.");
         }
 
-        return Response.ok().build();
+        return Response.ok(OK).build();
     }
 
     @Override
