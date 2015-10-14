@@ -486,7 +486,7 @@ public class AuthorizeResource extends BaseResource {
      * @return error page
      */
     private Response error(String error) {
-        return Response.status(400).entity(new Viewable("/templates/Error", error)).build();
+        return addCookie(Response.status(400).entity(new Viewable("/templates/Error", error)));
     }
 
     /**
