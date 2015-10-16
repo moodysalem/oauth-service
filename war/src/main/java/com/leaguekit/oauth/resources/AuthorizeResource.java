@@ -129,9 +129,12 @@ public class AuthorizeResource extends BaseResource {
     private Cookie getCookie(String name) {
         if (cookieMap == null) {
             cookieMap = new HashMap<>();
-            for (Cookie c : req.getCookies()) {
-                String cName = c.getName();
-                cookieMap.put(cName, c);
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                for (Cookie c : req.getCookies()) {
+                    String cName = c.getName();
+                    cookieMap.put(cName, c);
+                }
             }
         }
         return cookieMap.get(name);
