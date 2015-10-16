@@ -22,6 +22,10 @@ public class LoginCookie extends BaseEntity {
     @JoinColumn(name = "userId")
     private User user;
 
+
+    @Column(name = "rememberMe")
+    private boolean rememberMe;
+
     public String getSecret() {
         return secret;
     }
@@ -44,5 +48,13 @@ public class LoginCookie extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public boolean isRememberMe() {
+        return rememberMe;
+    }
+
+    public void setRememberMe(boolean rememberMe) {
+        this.rememberMe = rememberMe;
     }
 }

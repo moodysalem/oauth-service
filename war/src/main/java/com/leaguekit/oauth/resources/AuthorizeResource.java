@@ -13,10 +13,7 @@ import javax.servlet.http.Cookie;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -127,27 +124,54 @@ public class AuthorizeResource extends BaseResource {
         return null;
     }
 
-    private User getLoggedInUser(Client client) {
-        String cookieName = COOKIE_NAME_PREFIX + client.getApplication().getId();
-        if (req.getCookies() != null) {
+    private HashMap<String, Cookie> cookieMap;
+
+    private Cookie getCookie(String name) {
+        if (cookieMap == null) {
+            cookieMap = new HashMap<>();
             for (Cookie c : req.getCookies()) {
-                String name = c.getName().trim();
-                if (!name.equals(cookieName)) {
-                    continue;
-                }
-                String secret = c.getValue().trim();
-                LoginCookie lc = getCookie(secret, client);
-                if (lc != null) {
-                    return lc.getUser();
-                } else {
-                    return null;
-                }
+                String cName = c.getName();
+                cookieMap.put(cName, c);
             }
+        }
+        return cookieMap.get(name);
+    }
+
+    private String getCookieName(Client client) {
+        return COOKIE_NAME_PREFIX + client.getApplication().getId();
+    }
+
+    private Cookie getCookie(Client client) {
+        if (client == null) {
+            return null;
+        }
+        return getCookie(getCookieName(client));
+    }
+
+    private HashMap<Client, LoginCookie> loginCookieLookupMap = new HashMap<>();
+    private LoginCookie getLoginCookie(Client client) {
+        if (loginCookieLookupMap.containsKey(client)) {
+            return loginCookieLookupMap.get(client);
+        }
+        Cookie c = getCookie(client);
+        if (c == null) {
+            return null;
+        }
+        String secret = c.getValue();
+        LoginCookie lc = getLoginCookie(secret, client);
+        loginCookieLookupMap.put(client, lc);
+        return lc;
+    }
+
+    private User getLoggedInUser(Client client) {
+        LoginCookie lc = getLoginCookie(client);
+        if (lc != null) {
+            return lc.getUser();
         }
         return null;
     }
 
-    private LoginCookie getCookie(String secret, Client client) {
+    private LoginCookie getLoginCookie(String secret, Client client) {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
         Root<LoginCookie> rlc = lc.from(LoginCookie.class);
         lc.select(rlc).where(
@@ -224,9 +248,10 @@ public class AuthorizeResource extends BaseResource {
 
         Client client = getClient(clientId);
 
-        User user = getLoggedInUser(client);
-        if (user != null) {
-            return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, false);
+        LoginCookie loginCookie = getLoginCookie(client);
+        if (loginCookie != null) {
+            return getSuccessfulLoginResponse(loginCookie.getUser(), client, scopes, redirectUri, responseType, state,
+                loginCookie.isRememberMe());
         }
 
         AuthorizeModel ar = new AuthorizeModel();
@@ -247,7 +272,7 @@ public class AuthorizeResource extends BaseResource {
     public Response login(MultivaluedMap<String, String> formParams) {
         String email = formParams.getFirst("email");
         String password = formParams.getFirst("password");
-        boolean rememberMe = "true".equalsIgnoreCase(formParams.getFirst("rememberMe"));
+        boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
 
         String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
@@ -413,27 +438,33 @@ public class AuthorizeResource extends BaseResource {
     @HeaderParam("X-Forwarded-Proto")
     private String forwardedProto;
 
-    private NewCookie getNewCookie(Token tkn, boolean rememberMe) {
-        String appId = tkn.getClient().getApplication().getId().toString();
-        String name = COOKIE_NAME_PREFIX + appId;
-
-        Date expires = new Date(System.currentTimeMillis() + ONE_MONTH);
-        LoginCookie lc = makeLoginCookie(tkn.getUser(), RandomStringUtil.randomAlphaNumeric(64), expires);
+    private NewCookie getNewCookie(Token tkn, Boolean rememberMe) {
+        Date expires;
+        LoginCookie lc = getLoginCookie(tkn.getClient());
+        if (lc != null) {
+            // we should re-use the same values
+            expires = lc.getExpires();
+        } else {
+            expires = new Date(System.currentTimeMillis() + ONE_MONTH);
+            // we should issue a new cookie
+            lc = makeLoginCookie(tkn.getUser(), RandomStringUtil.randomAlphaNumeric(64), expires, rememberMe);
+        }
 
         int maxAge = rememberMe ? (new Long(ONE_MONTH / 1000L)).intValue() : NewCookie.DEFAULT_MAX_AGE;
         Date expiry = rememberMe ? expires : null;
 
         boolean isHTTPS = "HTTPS".equalsIgnoreCase(forwardedProto);
 
-        return new NewCookie(name, lc.getSecret(), "/", null, NewCookie.DEFAULT_VERSION,
-            "login cookie for application " + appId, maxAge, expiry, isHTTPS, true);
+        return new NewCookie(getCookieName(tkn.getClient()), lc.getSecret(), "/", null, NewCookie.DEFAULT_VERSION,
+            "login cookie", maxAge, expiry, isHTTPS, true);
     }
 
-    private LoginCookie makeLoginCookie(User user, String secret, Date expires) {
+    private LoginCookie makeLoginCookie(User user, String secret, Date expires, boolean rememberMe) {
         LoginCookie lc = new LoginCookie();
         lc.setUser(user);
         lc.setSecret(secret);
         lc.setExpires(expires);
+        lc.setRememberMe(rememberMe);
         try {
             beginTransaction();
             em.persist(lc);
