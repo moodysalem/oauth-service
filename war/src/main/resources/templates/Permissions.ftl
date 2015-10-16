@@ -27,7 +27,7 @@
                 </div>
                 </#escape>
             </#list>
-                <input type="hidden" name="rememberMe" value="${model.rememberMe?c}" />
+                <input type="hidden" name="rememberMe" value="${model.rememberMe?then("on", "off")}}" />
                 <div class="row">
                     <div class="col-sm-6">
                         <button onclick="window.location = window.location" class="btn btn-danger btn-block">
