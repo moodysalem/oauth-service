@@ -28,6 +28,7 @@ public abstract class BaseResource {
     public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     public static final long THREE_SECONDS = 3000L;
     public static final String COOKIE_NAME_PREFIX = "_AID_";
+    public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
@@ -112,11 +113,21 @@ public abstract class BaseResource {
      * @param client for which the token is being generated
      * @return when the token should expire
      */
-    protected Date getExpires(Client client, boolean refresh) {
-        if (refresh && client.getRefreshTokenTtl() == null) {
-            throw new IllegalArgumentException();
+    protected Date getExpires(Client client, Token.Type type) {
+        Long milliseconds = client.getTokenTtl() * 1000L;
+
+        if (Token.Type.REFRESH.equals(type)) {
+            if (client.getRefreshTokenTtl() == null) {
+                throw new IllegalArgumentException();
+            }
+            milliseconds = client.getRefreshTokenTtl() * 1000L;
         }
-        return new Date(System.currentTimeMillis() + (refresh ? client.getRefreshTokenTtl() : client.getTokenTtl()) * 1000);
+
+        if (Token.Type.CODE.equals(type) || Token.Type.PERMISSION.equals(type)) {
+            milliseconds = FIVE_MINUTES;
+        }
+
+        return new Date(System.currentTimeMillis() + milliseconds);
     }
 
     private HashMap<String, Client> clientCache = new HashMap<>();

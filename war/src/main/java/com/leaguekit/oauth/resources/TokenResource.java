@@ -342,7 +342,7 @@ public class TokenResource extends BaseResource {
      */
     @POST
     @Path("info")
-    public Response tokenInfo(@FormParam("token") String token, @FormParam("clientId") String clientId) {
+    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId) {
         if (token == null || clientId == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and 'clientId' form parameters are required.");
         }

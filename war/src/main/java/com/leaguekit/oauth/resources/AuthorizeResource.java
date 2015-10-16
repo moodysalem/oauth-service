@@ -26,7 +26,6 @@ public class AuthorizeResource extends BaseResource {
     public static final String TOKEN = "token";
     public static final String CODE = "code";
     public static final String INVALID_E_MAIL_OR_PASSWORD = "Invalid e-mail or password.";
-    public static final int FIVE_MINUTES = (1000 * 60 * 5);
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
 
@@ -363,8 +362,9 @@ public class AuthorizeResource extends BaseResource {
             for (ClientScope cs : clientScopes) {
                 acceptedScopes.add(acceptScope(user, cs));
             }
+            Token.Type type = getTokenType(responseType);
             // redirect with token since they've already asked for all the permissions
-            Token t = generateToken(getTokenType(responseType), client, user, getExpires(client, false),
+            Token t = generateToken(type, client, user, getExpires(client, type),
                 redirectUri, acceptedScopes, null, null);
             return getRedirectResponse(redirectUri, state, t, rememberMe);
         }
@@ -473,7 +473,7 @@ public class AuthorizeResource extends BaseResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
-            getExpires(permissionToken.getClient(), false), permissionToken.getRedirectUri(), scopes, null, null);
+            getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null);
     }
 
     /**
