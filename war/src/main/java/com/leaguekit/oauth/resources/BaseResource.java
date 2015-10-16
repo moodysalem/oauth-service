@@ -2,9 +2,9 @@ package com.leaguekit.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.oauth.model.*;
-import com.leaguekit.util.RandomStringUtil;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -12,13 +12,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,9 +25,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class BaseResource {
-    private static final String AUTH_SESSION = "AUTH_SESSION";
     public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     public static final long THREE_SECONDS = 3000L;
+    public static final String COOKIE_NAME_PREFIX = "_AID_";
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
@@ -238,6 +236,99 @@ public abstract class BaseResource {
         return em.createQuery(cq.select(rcs).where(p)).getResultList();
     }
 
+
+    private HashMap<String, Cookie> cookieMap;
+
+    /**
+     * Get the cookie given by the name
+     *
+     * @param name name of the cookie to look up
+     * @return a Cookie
+     */
+    protected Cookie getCookie(String name) {
+        if (cookieMap == null) {
+            cookieMap = new HashMap<>();
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                for (Cookie c : req.getCookies()) {
+                    String cName = c.getName();
+                    cookieMap.put(cName, c);
+                }
+            }
+        }
+        return cookieMap.get(name);
+    }
+
+
+    /**
+     * Get the name of a cookie that a client should be using
+     */
+    protected String getCookieName(Client client) {
+        return COOKIE_NAME_PREFIX + client.getApplication().getId();
+    }
+
+    /**
+     * Get the Cookie object for a specific client
+     *
+     * @param client
+     * @return
+     */
+    protected Cookie getCookie(Client client) {
+        if (client == null) {
+            return null;
+        }
+        return getCookie(getCookieName(client));
+    }
+
+    private HashMap<Client, LoginCookie> loginCookieLookupMap;
+
+    /**
+     * Get the LoginCookie for a specific client
+     *
+     * @param client to find the login cookie for
+     * @return the login cookie
+     */
+    protected LoginCookie getLoginCookie(Client client) {
+        if (loginCookieLookupMap == null) {
+            loginCookieLookupMap = new HashMap<>();
+        } else {
+            if (loginCookieLookupMap.containsKey(client)) {
+                return loginCookieLookupMap.get(client);
+            }
+        }
+        Cookie c = getCookie(client);
+        if (c == null) {
+            return null;
+        }
+        String secret = c.getValue();
+        LoginCookie lc = getLoginCookie(secret, client);
+        loginCookieLookupMap.put(client, lc);
+        return lc;
+    }
+
+    /**
+     * Look up a login cookie by the cookie value and the client (joined to application)
+     *
+     * @param secret secret of the cookie
+     * @param client requesting client
+     * @return LoginCookie for the secret and client
+     */
+    private LoginCookie getLoginCookie(String secret, Client client) {
+        CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
+        Root<LoginCookie> rlc = lc.from(LoginCookie.class);
+        lc.select(rlc).where(
+            cb.equal(rlc.get("secret"), secret),
+            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+            cb.equal(rlc.join("user").get("application"), client.getApplication())
+        );
+        List<LoginCookie> lcL = em.createQuery(lc).getResultList();
+        return (lcL.size() == 1) ? lcL.get(0) : null;
+    }
+
+
+    /**
+     * Begin a hibernate transaction
+     */
     protected void beginTransaction() {
         if (etx != null) {
             throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Nested Transactions Opened");
@@ -247,6 +338,9 @@ public abstract class BaseResource {
         etx.begin();
     }
 
+    /**
+     * Commit the in-process transaction
+     */
     protected void commit() {
         if (etx == null) {
             throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Transaction committed while not open");
@@ -256,11 +350,23 @@ public abstract class BaseResource {
         etx = null;
     }
 
+    /**
+     * Rollback a transaction if one exists
+     */
     protected void rollback() {
         if (etx != null) {
             LOG.info("Rolling back transaction");
             etx.rollback();
             etx = null;
+        }
+    }
+
+
+    @PreDestroy
+    public void cleanUp() {
+        if (etx != null) {
+            LOG.log(Level.SEVERE, "A transaction was not closed at the end of a request.");
+            rollback();
         }
     }
 

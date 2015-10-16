@@ -9,11 +9,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import javax.servlet.http.Cookie;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -27,7 +29,6 @@ public class AuthorizeResource extends BaseResource {
     public static final int FIVE_MINUTES = (1000 * 60 * 5);
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
-    public static final String COOKIE_NAME_PREFIX = "_AID_";
 
     @QueryParam("response_type")
     String responseType;
@@ -42,6 +43,34 @@ public class AuthorizeResource extends BaseResource {
 
     // so we don't rerun the getErrorResponse logic for a valid request, just store whether it's valid in this variable
     private boolean valid = false;
+
+    @GET
+    @Path("logout")
+    private Response logout() {
+        if (clientId == null) {
+            return error("Client ID is a required query parameter to log out.");
+        }
+
+        Client c = getClient(clientId);
+        if (c == null) {
+            return error("Invalid client ID.");
+        }
+
+        LoginCookie lc = getLoginCookie(c);
+        if (lc != null) {
+            lc.setExpires(new Date());
+            try {
+                beginTransaction();
+                em.merge(lc);
+                commit();
+            } catch (Exception e) {
+                rollback();
+                LOG.log(Level.SEVERE, "Failed to log user out, LCID: " + lc.getId(), e);
+            }
+        }
+
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
 
     /**
      * This method validates all the query parameters and returns an error if anything is wrong with the authorization
@@ -122,68 +151,6 @@ public class AuthorizeResource extends BaseResource {
 
         valid = true;
         return null;
-    }
-
-    private HashMap<String, Cookie> cookieMap;
-
-    private Cookie getCookie(String name) {
-        if (cookieMap == null) {
-            cookieMap = new HashMap<>();
-            Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                for (Cookie c : req.getCookies()) {
-                    String cName = c.getName();
-                    cookieMap.put(cName, c);
-                }
-            }
-        }
-        return cookieMap.get(name);
-    }
-
-    private String getCookieName(Client client) {
-        return COOKIE_NAME_PREFIX + client.getApplication().getId();
-    }
-
-    private Cookie getCookie(Client client) {
-        if (client == null) {
-            return null;
-        }
-        return getCookie(getCookieName(client));
-    }
-
-    private HashMap<Client, LoginCookie> loginCookieLookupMap = new HashMap<>();
-    private LoginCookie getLoginCookie(Client client) {
-        if (loginCookieLookupMap.containsKey(client)) {
-            return loginCookieLookupMap.get(client);
-        }
-        Cookie c = getCookie(client);
-        if (c == null) {
-            return null;
-        }
-        String secret = c.getValue();
-        LoginCookie lc = getLoginCookie(secret, client);
-        loginCookieLookupMap.put(client, lc);
-        return lc;
-    }
-
-    private User getLoggedInUser(Client client) {
-        LoginCookie lc = getLoginCookie(client);
-        if (lc != null) {
-            return lc.getUser();
-        }
-        return null;
-    }
-
-    private LoginCookie getLoginCookie(String secret, Client client) {
-        CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
-        Root<LoginCookie> rlc = lc.from(LoginCookie.class);
-        lc.select(rlc).where(
-            cb.equal(rlc.get("secret"), secret),
-            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-            cb.equal(rlc.join("user").get("application"), client.getApplication())
-        );
-        List<LoginCookie> lcL = em.createQuery(lc).getResultList();
-        return (lcL.size() == 1) ? lcL.get(0) : null;
     }
 
     public static class AuthorizeModel {
