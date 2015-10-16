@@ -36,7 +36,9 @@ public class TokenResource extends BaseResource {
 
     @PostConstruct
     public void initClient() {
+        LOG.log(Level.INFO, "Initializing client...");
         if (authorizationHeader != null) {
+            LOG.log(Level.INFO, "Received credentials, decoding...");
             if (authorizationHeader.startsWith(BASIC)) {
                 String credentials = authorizationHeader.substring(BASIC_LENGTH);
                 String decoded = new String(Base64.getDecoder().decode(credentials.getBytes(UTF8)), UTF8);
@@ -45,9 +47,11 @@ public class TokenResource extends BaseResource {
                     String clientId = pieces[0].trim();
                     String secret = pieces[1].trim();
                     Client tempClient = getClient(clientId);
-                    if (secret.equals(tempClient.getSecret())) {
+                    if (tempClient != null && secret.equals(tempClient.getSecret())) {
                         client = tempClient;
                     }
+                } else {
+                    LOG.log(Level.INFO, "Failed to authorize client on token endpoint because format did not match clientId:secret");
                 }
             }
         }
