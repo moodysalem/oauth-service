@@ -34,35 +34,50 @@
       <column name="clientId">1</column>
       <column name="uri">http://localhost:8080</column>
     </insert>
-    
+
     <insert tableName="Scope">
       <column name="id">1</column>
       <column name="applicationId">1</column>
-      <column name="name">list_applications</column>
-      <column name="displayName">List Applications</column>
+      <column name="name">user_profile</column>
+      <column name="displayName">User Profile</column>
       <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
-      <column name="description">This gives the application access to list all your applications.</column>
+      <column name="description">This gives the application access to view your user details</column>
     </insert>
 
     <insert tableName="Scope">
       <column name="id">2</column>
       <column name="applicationId">1</column>
-      <column name="name">user_profile</column>
-      <column name="displayName">User Profile</column>
+      <column name="name">list_applications</column>
+      <column name="displayName">List Applications</column>
       <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
-      <column name="description">This gives the application access to view your user details.</column>
+      <column name="description">This gives the application access to list all your applications</column>
+    </insert>
+
+    <insert tableName="Scope">
+      <column name="id">3</column>
+      <column name="applicationId">1</column>
+      <column name="name">list_scopes</column>
+      <column name="displayName">List Scopes</column>
+      <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
+      <column name="description">List the scopes that your application has defined</column>
     </insert>
 
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">1</column>
-      <column name="priority">REQUIRE</column>
+      <column name="priority">ALWAYS</column>
     </insert>
 
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">2</column>
       <column name="priority">ASK</column>
+    </insert>
+
+    <insert tableName="ClientScope">
+      <column name="clientId">1</column>
+      <column name="scopeId">3</column>
+      <column name="priority">REQUIRE</column>
     </insert>
 
     <insert tableName="User">

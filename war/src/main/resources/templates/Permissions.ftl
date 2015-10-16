@@ -35,7 +35,7 @@
                                     <div class="col-sm-2 text-center">
                                         <div class="green-circle-checkbox">
                                             <input type="checkbox" checked
-                                                   id="SCOPE${cScope.scope.id}" name="scope1"
+                                                   id="SCOPE${cScope.scope.id}" name="SCOPE${cScope.scope.id}"
                                                    name="SCOPE${cScope.scope.id}"
                                             ${(cScope.priority=="REQUIRE")?then("disabled","")} />
                                             <label for="SCOPE${cScope.scope.id}"></label>

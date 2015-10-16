@@ -23,9 +23,13 @@
         display: inline-block;
         border-radius: 100%;
         position: relative;
-        -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5);
-        -moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5);
-        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5);
+        -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .green-circle-checkbox input[type=checkbox] {
+        visibility: hidden;
     }
 
     .green-circle-checkbox label {
@@ -47,12 +51,16 @@
 
         background: #333;
 
-        -webkit-box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.5);
-        -moz-box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.5);
-        box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.5);
+        -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        -moz-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .green-circle-checkbox input[type=checkbox]:checked + label {
         background: #26ca28;
+    }
+
+    .green-circle-checkbox input[type=checkbox]:checked:disabled + label {
+        background: darkgreen;
     }
 </style>
