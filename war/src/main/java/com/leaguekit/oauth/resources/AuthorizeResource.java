@@ -51,7 +51,7 @@ public class AuthorizeResource extends BaseResource {
 
     @GET
     @Path("logout")
-    private Response logout() {
+    public Response logout() {
         if (clientId == null) {
             return error("Client ID is a required query parameter to log out.");
         }
@@ -185,6 +185,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     public static class PermissionsModel {
+        private Client client;
         private Token token;
         private List<ClientScope> clientScopes;
         private boolean rememberMe;
@@ -211,6 +212,14 @@ public class AuthorizeResource extends BaseResource {
 
         public void setRememberMe(boolean rememberMe) {
             this.rememberMe = rememberMe;
+        }
+
+        public Client getClient() {
+            return client;
+        }
+
+        public void setClient(Client client) {
+            this.client = client;
         }
     }
 
@@ -354,6 +363,7 @@ public class AuthorizeResource extends BaseResource {
             pr.setClientScopes(toAsk);
             pr.setToken(t);
             pr.setRememberMe(rememberMe);
+            pr.setClient(client);
             return Response.ok(new Viewable("/templates/Permissions", pr)).build();
         } else {
             // accept all the always permissions

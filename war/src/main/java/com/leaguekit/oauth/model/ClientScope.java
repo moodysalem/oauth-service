@@ -7,6 +7,7 @@ import javax.persistence.*;
 @Entity
 public class ClientScope extends BaseEntity {
 
+
     public enum Priority {
         // ALWAYS is the highest level, the user is not asked nor shown the permission when logging in
         ALWAYS,
@@ -27,6 +28,10 @@ public class ClientScope extends BaseEntity {
     @Column(name = "priority")
     @Enumerated(EnumType.STRING)
     private Priority priority;
+
+    @Lob
+    @Column(name = "reason")
+    private String reason;
 
     public Client getClient() {
         return client;
@@ -50,5 +55,13 @@ public class ClientScope extends BaseEntity {
 
     public void setPriority(Priority priority) {
         this.priority = priority;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

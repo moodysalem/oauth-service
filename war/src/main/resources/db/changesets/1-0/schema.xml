@@ -245,6 +245,7 @@
       <column name="priority" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="reason" type="${TEXT}"/>
     </createTable>
     <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="clientId"
                              constraintName="FK_ClientScope_Client"
