@@ -15,7 +15,8 @@
       <column name="id">1</column>
       <column name="name">Administration</column>
       <column name="type">PUBLIC</column>
-      <column name="identifier">UXFGo52vNts2TzY8CjOemX2ZVC2N5CZ2k1rmsxzDyYPO/gANQsqROjm1OLFa1/Ufk8vIXDEaUKmVM8TWHK30EpqbLHJDr26toytfDLDsd9NDTHTXFWqXp95ZrPqi3QxUsl8LRhoBZUIlegbLMtjCkwIkWWBa5d7fycgbOGQY0XkJ</column>
+      <column name="identifier">6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4</column>
+      <column name="secret">0457a1fe452b7f32e4b84db9db139d9a572bad7599544ac368a079bbe8069714</column>
       <column name="applicationId">1</column>
       <column name="tokenTtl">86400</column>
     </insert>
@@ -23,6 +24,10 @@
     <insert tableName="Client_Flow">
       <column name="clientId">1</column>
       <column name="flow">IMPLICIT</column>
+    </insert>
+    <insert tableName="Client_Flow">
+      <column name="clientId">1</column>
+      <column name="flow">CODE</column>
     </insert>
 
     <insert tableName="Client_URI">
