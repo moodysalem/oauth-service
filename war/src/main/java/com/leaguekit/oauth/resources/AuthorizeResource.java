@@ -41,6 +41,12 @@ public class AuthorizeResource extends BaseResource {
     @QueryParam("scope")
     List<String> scopes;
 
+    /**
+     * An extra query parameter that can be passed on to the GET request to log the user out
+     */
+    @QueryParam("logout")
+    boolean logout;
+
     // so we don't rerun the getErrorResponse logic for a valid request, just store whether it's valid in this variable
     private boolean valid = false;
 
@@ -56,20 +62,25 @@ public class AuthorizeResource extends BaseResource {
             return error("Invalid client ID.");
         }
 
-        LoginCookie lc = getLoginCookie(c);
-        if (lc != null) {
-            lc.setExpires(new Date());
-            try {
-                beginTransaction();
-                em.merge(lc);
-                commit();
-            } catch (Exception e) {
-                rollback();
-                LOG.log(Level.SEVERE, "Failed to log user out, LCID: " + lc.getId(), e);
-            }
-        }
+        LoginCookie loginCookie = getLoginCookie(c);
+        deleteLoginCookie(loginCookie);
 
         return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    private void deleteLoginCookie(LoginCookie loginCookie) {
+        if (loginCookie == null) {
+            return;
+        }
+        loginCookie.setExpires(new Date());
+        try {
+            beginTransaction();
+            em.merge(loginCookie);
+            commit();
+        } catch (Exception e) {
+            rollback();
+            LOG.log(Level.SEVERE, "Failed to log user out, LCID: " + loginCookie.getId(), e);
+        }
     }
 
     /**
@@ -220,8 +231,12 @@ public class AuthorizeResource extends BaseResource {
 
         LoginCookie loginCookie = getLoginCookie(client);
         if (loginCookie != null) {
-            return getSuccessfulLoginResponse(loginCookie.getUser(), client, scopes, redirectUri, responseType, state,
-                loginCookie.isRememberMe());
+            if (logout) {
+                deleteLoginCookie(loginCookie);
+            } else {
+                return getSuccessfulLoginResponse(loginCookie.getUser(), client, scopes, redirectUri, responseType, state,
+                    loginCookie.isRememberMe());
+            }
         }
 
         AuthorizeModel ar = new AuthorizeModel();
@@ -410,14 +425,14 @@ public class AuthorizeResource extends BaseResource {
 
     private NewCookie getNewCookie(Token tkn, Boolean rememberMe) {
         Date expires;
-        LoginCookie lc = getLoginCookie(tkn.getClient());
-        if (lc != null) {
+        LoginCookie loginCookie = getLoginCookie(tkn.getClient());
+        if (loginCookie != null) {
             // we should re-use the same values
-            expires = lc.getExpires();
+            expires = loginCookie.getExpires();
         } else {
             expires = new Date(System.currentTimeMillis() + ONE_MONTH);
             // we should issue a new cookie
-            lc = makeLoginCookie(tkn.getUser(), RandomStringUtil.randomAlphaNumeric(64), expires, rememberMe);
+            loginCookie = makeLoginCookie(tkn.getUser(), RandomStringUtil.randomAlphaNumeric(64), expires, rememberMe);
         }
 
         int maxAge = rememberMe ? (new Long(ONE_MONTH / 1000L)).intValue() : NewCookie.DEFAULT_MAX_AGE;
@@ -425,27 +440,27 @@ public class AuthorizeResource extends BaseResource {
 
         boolean isHTTPS = "HTTPS".equalsIgnoreCase(forwardedProto);
 
-        return new NewCookie(getCookieName(tkn.getClient()), lc.getSecret(), "/", null, NewCookie.DEFAULT_VERSION,
+        return new NewCookie(getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", null, NewCookie.DEFAULT_VERSION,
             "login cookie", maxAge, expiry, isHTTPS, true);
     }
 
     private LoginCookie makeLoginCookie(User user, String secret, Date expires, boolean rememberMe) {
-        LoginCookie lc = new LoginCookie();
-        lc.setUser(user);
-        lc.setSecret(secret);
-        lc.setExpires(expires);
-        lc.setRememberMe(rememberMe);
+        LoginCookie loginCookie = new LoginCookie();
+        loginCookie.setUser(user);
+        loginCookie.setSecret(secret);
+        loginCookie.setExpires(expires);
+        loginCookie.setRememberMe(rememberMe);
         try {
             beginTransaction();
-            em.persist(lc);
+            em.persist(loginCookie);
             em.flush();
             commit();
         } catch (Exception e) {
             rollback();
             LOG.log(Level.SEVERE, "Failed to create a login cookie", e);
-            lc = null;
+            loginCookie = null;
         }
-        return lc;
+        return loginCookie;
     }
 
     /**
