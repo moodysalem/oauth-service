@@ -2,6 +2,7 @@ package com.leaguekit.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.oauth.model.*;
+import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -370,6 +371,16 @@ public abstract class BaseResource {
             etx.rollback();
             etx = null;
         }
+    }
+
+    /**
+     * Helper function to generate an error template with a string error
+     *
+     * @param error indicates what the problem with the request is
+     * @return error page
+     */
+    protected Response error(String error) {
+        return Response.status(400).entity(new Viewable("/templates/Error", error)).build();
     }
 
 

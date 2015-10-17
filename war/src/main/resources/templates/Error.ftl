@@ -3,9 +3,8 @@
 <#include "Head.ftl">
     <body>
         <div class="container">
-        <#escape x as x?html>
-            <div class="alert alert-danger"><strong>Error!</strong> ${model}</div>
-        </#escape>
+            <h2 class="page-header">Something went wrong...</h2>
+            <div class="alert alert-danger">${model?html}</div>
         </div>
     </body>
 </html>

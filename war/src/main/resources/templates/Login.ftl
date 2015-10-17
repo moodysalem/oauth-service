@@ -33,11 +33,44 @@
                             </label>
                         </div>
 
-                        <button class="btn btn-lg btn-primary btn-block" id="submitLogin" type="submit">
-                            <i class="fa fa-sign-in"></i>
-                            <span>Sign In</span>
-                        </button>
+                        <div class="form-group">
+                            <button class="btn btn-lg btn-primary btn-block" id="submitLogin" type="submit">
+                                <i class="fa fa-sign-in"></i>
+                                <span>Sign In</span>
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <a href="/reset?applicationId=${model.client.application.id}">Forgot Password?</a>
+                        </div>
+
+                        <div class="center-line text-center form-group">
+                            <div class="or-block bg-info">OR</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <button class="btn btn-sm btn-primary btn-block" id="facebookLogin">
+                                    <i class="fa fa-facebook"></i>
+                                    <span class="login-btn-text" id="facebookButtonText">via Facebook</span>
+                                </button>
+                            </div>
+                            <div class="col-xs-4">
+                                <button class="btn btn-sm btn-danger btn-block" id="googleLogin">
+                                    <i class="fa fa-google"></i>
+                                    <span class="login-btn-text" id="googleButtonText">via Google</span>
+                                </button>
+                            </div>
+                            <div class="col-xs-4">
+                                <button class="btn btn-sm btn-info btn-block" id="googleLogin">
+                                    <i class="fa fa-twitter"></i>
+                                    <span class="login-btn-text" id="twitterButtonText">via Twitter</span>
+                                </button>
+                            </div>
+                        </div>
+
                     </form>
+
 
                 <#-- something happened while logging in -->
                 <#if model.loginError??>
@@ -83,7 +116,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label" for="confirmPassword">Password</label>
+                            <label class="control-label" for="confirmPassword">Confirm Password</label>
                             <input type="password" id="confirmPassword" class="form-control input-lg"
                                    placeholder="Confirm Password" required>
                         </div>
@@ -102,8 +135,8 @@
                 $("#form-signin").submit(function () {
                     $("#form-signin").find("input").prop("readOnly", true).end()
                             .find("#submitLogin").prop("disabled", true)
-                                .find("span").text("Signing in...").end()
-                                .find("i").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
+                            .find("span").text("Signing in...").end()
+                            .find("i").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
                 });
 
                 $("#form-register").submit(function () {

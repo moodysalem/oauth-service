@@ -586,16 +586,6 @@ public class AuthorizeResource extends BaseResource {
     }
 
     /**
-     * Helper function to generate an error template with a string error
-     *
-     * @param error indicates what the problem with the request is
-     * @return error page
-     */
-    private Response error(String error) {
-        return Response.status(400).entity(new Viewable("/templates/Error", error)).build();
-    }
-
-    /**
      * Get the user associated with an e-mail and an application
      *
      * @param email         user e-mail address
