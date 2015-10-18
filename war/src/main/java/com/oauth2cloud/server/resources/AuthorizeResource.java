@@ -1,7 +1,8 @@
 package com.oauth2cloud.server.resources;
 
-import com.oauth2cloud.server.model.*;
 import com.leaguekit.util.RandomStringUtil;
+import com.oauth2cloud.server.model.*;
+import com.oauth2cloud.server.model.Application;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -26,7 +27,7 @@ public class AuthorizeResource extends BaseResource {
 
     public static final String TOKEN = "token";
     public static final String CODE = "code";
-    public static final String INVALID_E_MAIL_OR_PASSWORD = "Invalid e-mail or password.";
+    public static final String INVALID_LOGIN_CREDENTIALS = "Invalid login credentials.";
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
 
@@ -166,6 +167,7 @@ public class AuthorizeResource extends BaseResource {
 
     public static class AuthorizeModel {
         private String requestUrl;
+        private String baseUrl;
         private Client client;
         private String loginError;
 
@@ -193,11 +195,20 @@ public class AuthorizeResource extends BaseResource {
             this.requestUrl = requestUrl;
         }
 
-        public void setRequestUrl(ContainerRequestContext containerRequestContext) {
+        public String getBaseUrl() {
+            return baseUrl;
+        }
+
+        public void setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+        }
+
+        public void setURLs(ContainerRequestContext containerRequestContext) {
             if (containerRequestContext == null) {
                 return;
             }
             setRequestUrl(containerRequestContext.getUriInfo().getRequestUri().toString());
+            setBaseUrl(containerRequestContext.getUriInfo().getBaseUri().toString());
         }
     }
 
@@ -266,7 +277,7 @@ public class AuthorizeResource extends BaseResource {
 
         AuthorizeModel ar = new AuthorizeModel();
         ar.setClient(client);
-        ar.setRequestUrl(containerRequestContext);
+        ar.setURLs(containerRequestContext);
 
         return Response.ok(new Viewable("/templates/Login", ar)).build();
     }
@@ -281,8 +292,6 @@ public class AuthorizeResource extends BaseResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response login(MultivaluedMap<String, String> formParams) {
-        String email = formParams.getFirst("email");
-        String password = formParams.getFirst("password");
         boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
 
         String loginToken = formParams.getFirst("login_token");
@@ -293,7 +302,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         AuthorizeModel ar = new AuthorizeModel();
-        ar.setRequestUrl(containerRequestContext);
+        ar.setURLs(containerRequestContext);
         Client client = getClient(clientId);
         ar.setClient(client);
 
@@ -334,41 +343,106 @@ public class AuthorizeResource extends BaseResource {
                 }
             }
         } else {
-            // validate the username and password
-            if (email != null && password != null) {
-                long t1 = System.currentTimeMillis();
-                boolean success = false;
-                User user = getUser(email, client.getApplication());
-                if (user == null) {
-                    ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
-                } else {
-                    if (user.getPassword() == null) {
-                        ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
-                    } else {
-                        if (BCrypt.checkpw(password, user.getPassword())) {
-                            success = true;
-                        } else {
-                            ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
-                        }
-                    }
+            // get the kind of login we should attempt
+            Provider p = getProvider(formParams);
+
+            // by default, the credentials are invalid
+            ar.setLoginError(INVALID_LOGIN_CREDENTIALS);
+
+            if (p != null) {
+                User user = null;
+                switch (p) {
+                    case EMAIL:
+                        user = doEmailLogin(client.getApplication(), formParams);
+                        break;
+                    case GOOGLE:
+                        user = doGoogleLogin(client.getApplication(), formParams);
+                        break;
+                    case FACEBOOK:
+                        user = doFacebookLogin(client.getApplication(), formParams);
+                        break;
+                    case AMAZON:
+                        user = doAmazonLogin(client.getApplication(), formParams);
+                        break;
                 }
-                long t2 = System.currentTimeMillis();
-                if (t2 - t1 < THREE_SECONDS) {
-                    try {
-                        Thread.sleep(THREE_SECONDS - (t2 - t1));
-                    } catch (InterruptedException e) {
-                        LOG.log(Level.SEVERE, "Thread sleep interrupted", e);
-                    }
-                }
-                if (success) {
+                if (user != null) {
                     return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
                 }
-            } else {
-                ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
             }
         }
 
         return Response.ok(new Viewable("/templates/Login", ar)).build();
+    }
+
+    private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
+        if (application.getAmazonClientId() == null || application.getAmazonClientSecret() == null) {
+            return null;
+        }
+        return null;
+    }
+
+    private User doFacebookLogin(Application application, MultivaluedMap<String, String> formParams) {
+        if (application.getFacebookAppId() == null || application.getFacebookAppSecret() == null) {
+            return null;
+        }
+        return null;
+    }
+
+    private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
+        if (application.getGoogleClientId() == null || application.getGoogleClientSecret() == null) {
+            return null;
+        }
+
+        return null;
+    }
+
+    public enum Provider {
+        EMAIL, FACEBOOK, GOOGLE, AMAZON
+    }
+
+    public Provider getProvider(MultivaluedMap<String, String> formParams) {
+        if (formParams.getFirst("email") != null && formParams.getFirst("password") != null) {
+            return Provider.EMAIL;
+        }
+        if (formParams.getFirst("facebookToken") != null) {
+            return Provider.FACEBOOK;
+        }
+        if (formParams.getFirst("googleToken") != null) {
+            return Provider.GOOGLE;
+        }
+        if (formParams.getFirst("amazonToken") != null) {
+            return Provider.AMAZON;
+        }
+        return null;
+    }
+
+    public User doEmailLogin(Application app, MultivaluedMap<String, String> formParams) {
+        long t1 = System.currentTimeMillis();
+
+        String email = formParams.getFirst("email");
+        String password = formParams.getFirst("password");
+        User user = getUser(email, app);
+
+        if (user != null) {
+            if (user.getPassword() == null) {
+                user = null;
+            } else {
+                if (!BCrypt.checkpw(password, user.getPassword())) {
+                    user = null;
+                }
+            }
+        }
+
+        // prevent timing attacks and brute forcing by making this type of request take 3 seconds
+        long t2 = System.currentTimeMillis();
+        if (t2 - t1 < THREE_SECONDS) {
+            try {
+                Thread.sleep(THREE_SECONDS - (t2 - t1));
+            } catch (InterruptedException e) {
+                LOG.log(Level.SEVERE, "Thread sleep interrupted", e);
+            }
+        }
+        return user;
     }
 
     private Response getSuccessfulLoginResponse(User user, Client client, List<String> scopes, String redirectUri,

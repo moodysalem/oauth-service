@@ -22,6 +22,12 @@ public class Application extends BaseEntity {
     @Column(name = "googleClientSecret")
     private String googleClientSecret;
 
+    @Column(name = "amazonClientId")
+    private String amazonClientId;
+
+    @Column(name = "amazonClientSecret")
+    private String amazonClientSecret;
+
     public String getName() {
         return name;
     }
@@ -60,5 +66,21 @@ public class Application extends BaseEntity {
 
     public void setGoogleClientSecret(String googleClientSecret) {
         this.googleClientSecret = googleClientSecret;
+    }
+
+    public String getAmazonClientId() {
+        return amazonClientId;
+    }
+
+    public void setAmazonClientId(String amazonClientId) {
+        this.amazonClientId = amazonClientId;
+    }
+
+    public String getAmazonClientSecret() {
+        return amazonClientSecret;
+    }
+
+    public void setAmazonClientSecret(String amazonClientSecret) {
+        this.amazonClientSecret = amazonClientSecret;
     }
 }

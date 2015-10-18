@@ -32,9 +32,16 @@
       <column name="googleClientSecret" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
+      <column name="amazonClientId" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="amazonClientSecret" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
     </createTable>
     <addUniqueConstraint tableName="Application" columnNames="facebookAppId,facebookAppSecret"/>
     <addUniqueConstraint tableName="Application" columnNames="googleClientId,googleClientSecret"/>
+    <addUniqueConstraint tableName="Application" columnNames="amazonClientId,amazonClientSecret"/>
     <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 

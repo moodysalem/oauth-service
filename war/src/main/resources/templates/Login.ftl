@@ -56,12 +56,12 @@
                             <#if model.client.application.facebookAppId??>
                                 <input type="hidden" id="facebookToken" name="facebookToken"/>
                                 <button class="btn btn-sm btn-primary btn-block" id="facebookLogin" type="button">
-                                    <i class="fa fa-facebook"></i>
+                                    <i class="fa fa-facebook fa-2x"></i>
                                 </button>
                                 <script>
                                     window.fbAsyncInit = function () {
                                         FB.init({
-                                            appId: '${model.client.application.facebookAppId?c}',
+                                            appId: "${model.client.application.facebookAppId?c}",
                                             xfbml: false,
                                             version: 'v2.5'
                                         });
@@ -97,7 +97,7 @@
                             <#if model.client.application.googleClientId??>
                                 <input type="hidden" id="googleToken" name="googleToken"/>
                                 <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
-                                    <i class="fa fa-google"></i>
+                                    <i class="fa fa-google fa-2x"></i>
                                 </button>
                                 <script src="//apis.google.com/js/platform.js" onload="initGoogle();" async
                                         defer></script>
@@ -105,7 +105,7 @@
                                     var initGoogle = function () {
                                         gapi.load('auth2', function () {
                                             var auth2 = gapi.auth2.init({
-                                                client_id: '${model.client.application.googleClientId}',
+                                                client_id: "${model.client.application.googleClientId?js_string}",
                                                 fetch_basic_profile: true,
                                                 scope: 'profile'
                                             });
@@ -127,9 +127,22 @@
                             </#if>
                             </div>
                             <div class="col-xs-4">
-                                <button class="btn btn-sm btn-info btn-block" id="twitterLogin" type="button">
-                                    <i class="fa fa-twitter"></i>
+                            <#if model.client.application.twitterConsumerSecret??>
+                                <input type="hidden" id="amazonToken" name="amazonToken"/>
+                                <button class="btn btn-sm btn-info btn-block" id="amazonLogin" type="button">
+                                    <i class="fa fa-amazon fa-2x"></i>
                                 </button>
+                                <script>
+                                    // this is custom code for opening a popup to the twitter page
+                                    $(function () {
+                                        $("#amazonLogin").click(function () {
+                                            window.twitterLogin =
+                                                    window.open("${model.baseUrl?js_string}twitter?clientId=${model.client.identifier?js_string}",
+                                                            "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=800, height=800");
+                                        });
+                                    });
+                                </script>
+                            </#if>
                             </div>
                         </div>
 
