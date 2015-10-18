@@ -2,6 +2,7 @@ package com.oauth2cloud.server.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.model.*;
+import com.oauth2cloud.util.CSSInliner;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -437,7 +438,7 @@ public abstract class BaseResource {
             m.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
             m.setFrom(new InternetAddress(from));
             m.setSubject(subject);
-            m.setContent(processTemplate(template, model), "text/html");
+            m.setContent(CSSInliner.process(processTemplate(template, model)), "text/html");
             Transport.send(m);
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to send e-mail message", e);

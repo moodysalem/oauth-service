@@ -9,14 +9,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CSSInliner {
     private static final String STYLE = "style";
     private static final String DELIMS = "{}";
+    private static final Logger LOG = Logger.getLogger(CSSInliner.class.getName());
 
     private static final Priority STYLE_PRIORITY = new Priority(1, 0, 0, 0);
 
     public static String process(String html) {
+        long t1 = System.nanoTime();
         // process the html doc
         Document doc = Jsoup.parse(html);
 
@@ -67,6 +71,8 @@ public class CSSInliner {
             }
         }
 
+        long t2 = System.nanoTime();
+        LOG.log(Level.FINE, "Spent " + ((t2 - t1) / 1000L) + " inlining CSS");
         return doc.toString();
     }
 
