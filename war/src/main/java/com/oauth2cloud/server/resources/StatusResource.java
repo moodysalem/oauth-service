@@ -1,4 +1,4 @@
-package com.leaguekit.oauth.resources;
+package com.oauth2cloud.server.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 

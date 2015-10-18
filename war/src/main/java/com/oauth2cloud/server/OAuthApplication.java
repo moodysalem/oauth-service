@@ -1,10 +1,10 @@
-package com.leaguekit.oauth;
+package com.oauth2cloud.server;
 
 
 import com.leaguekit.jaxrs.lib.BaseApplication;
 import com.leaguekit.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.leaguekit.jaxrs.lib.factories.MailSessionFactory;
-import com.leaguekit.oauth.filter.NoXFrameOptions;
+import com.oauth2cloud.server.filter.NoXFrameOptions;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -21,7 +21,7 @@ public class OAuthApplication extends BaseApplication {
         super();
         register(NoXFrameOptions.class);
 
-        packages("com.leaguekit.oauth.resources");
+        packages("com.oauth2cloud.server");
 
         register(new AbstractBinder() {
             @Override
@@ -57,7 +57,6 @@ public class OAuthApplication extends BaseApplication {
                         port
                     )
                 ).to(Session.class).in(RequestScoped.class);
-
 
                 Configuration fmConfig = new Configuration(Configuration.VERSION_2_3_23);
                 fmConfig.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));

@@ -1,4 +1,4 @@
-package com.leaguekit.oauth;
+package com.oauth2cloud.server;
 
 import org.testng.annotations.Test;
 

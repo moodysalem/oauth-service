@@ -1,8 +1,8 @@
-package com.leaguekit.oauth.resources;
+package com.oauth2cloud.server.resources;
 
-import com.leaguekit.oauth.model.Application;
-import com.leaguekit.oauth.model.PasswordResetCode;
-import com.leaguekit.oauth.model.User;
+import com.oauth2cloud.server.model.Application;
+import com.oauth2cloud.server.model.PasswordResetCode;
+import com.oauth2cloud.server.model.User;
 import com.leaguekit.util.RandomStringUtil;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;

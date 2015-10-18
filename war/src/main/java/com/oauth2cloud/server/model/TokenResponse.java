@@ -1,4 +1,4 @@
-package com.leaguekit.oauth.model;
+package com.oauth2cloud.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
