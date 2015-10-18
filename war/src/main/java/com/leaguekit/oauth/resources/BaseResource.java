@@ -380,6 +380,33 @@ public abstract class BaseResource {
         return Response.status(400).entity(new Viewable("/templates/Error", error)).build();
     }
 
+    /**
+     * Get the user associated with an e-mail and an application
+     *
+     * @param email       user e-mail address
+     * @param application the application for which we're searching the user base
+     * @return the User record
+     */
+    protected User getUser(String email, Application application) {
+        CriteriaQuery<User> uq = cb.createQuery(User.class);
+        Root<User> u = uq.from(User.class);
+
+        List<User> users = em.createQuery(
+            uq.select(u).where(
+                cb.and(
+                    cb.equal(u.get("application"), application),
+                    cb.equal(u.get("email"), email),
+                    cb.equal(u.get("deleted"), false)
+                )
+            )
+        ).getResultList();
+
+        if (users.size() != 1) {
+            return null;
+        }
+        return users.get(0);
+    }
+
 
     @PreDestroy
     public void cleanUp() {
@@ -395,6 +422,15 @@ public abstract class BaseResource {
     @Inject
     private Configuration cfg;
 
+    /**
+     * Send an e-mail using the template in the resources templates.email package
+     *
+     * @param from     who to send from
+     * @param to       who to send to
+     * @param subject  of the email
+     * @param template to build the e-mail
+     * @param model    object to pass into template
+     */
     protected void sendEmail(String from, String to, String subject, String template, Object model) {
         try {
             MimeMessage m = new MimeMessage(mailSession);
@@ -408,6 +444,15 @@ public abstract class BaseResource {
         }
     }
 
+    /**
+     * Process a mail template
+     *
+     * @param template template to process
+     * @param model    object to inject into template
+     * @return
+     * @throws IOException
+     * @throws TemplateException
+     */
     private String processTemplate(String template, Object model) throws IOException, TemplateException {
         StringWriter sw = new StringWriter();
         cfg.getTemplate(template).process(model, sw);

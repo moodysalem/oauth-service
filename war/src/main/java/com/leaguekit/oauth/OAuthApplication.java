@@ -36,7 +36,7 @@ public class OAuthApplication extends BaseApplication {
                     System.getProperty("JDBC_CONNECTION_PASSWORD"),
                     "oauth-service",
                     "db/master-changelog.xml",
-                    true,
+                    System.getProperty("SHOW_SQL") != null,
                     context
                 )).to(EntityManager.class).in(RequestScoped.class);
 

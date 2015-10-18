@@ -319,7 +319,7 @@ public class AuthorizeResource extends BaseResource {
             if (email != null && password != null) {
                 long t1 = System.currentTimeMillis();
                 boolean success = false;
-                User user = getUser(email, client.getApplication().getId());
+                User user = getUser(email, client.getApplication());
                 if (user == null) {
                     ar.setLoginError(INVALID_E_MAIL_OR_PASSWORD);
                 } else {
@@ -583,32 +583,6 @@ public class AuthorizeResource extends BaseResource {
         sq.select(ras.get("clientScope")).where(cb.equal(ras.get("user"), user));
 
         return sq;
-    }
-
-    /**
-     * Get the user associated with an e-mail and an application
-     *
-     * @param email         user e-mail address
-     * @param applicationId the application for which we're searching the user base
-     * @return the User record
-     */
-    private User getUser(String email, Long applicationId) {
-        CriteriaQuery<User> uq = cb.createQuery(User.class);
-        Root<User> u = uq.from(User.class);
-
-        List<User> users = em.createQuery(
-            uq.select(u).where(
-                cb.and(
-                    cb.equal(u.join("application").get("id"), applicationId),
-                    cb.equal(u.get("email"), email)
-                )
-            )
-        ).getResultList();
-
-        if (users.size() != 1) {
-            return null;
-        }
-        return users.get(0);
     }
 
 }

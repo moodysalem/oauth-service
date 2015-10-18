@@ -13,6 +13,10 @@ public class OAuthTest extends BaseTest {
         System.setProperty("JDBC_CONNECTION_USERNAME", "sa");
         System.setProperty("JDBC_CONNECTION_PASSWORD", "sa");
 
+        System.setProperty("SMTP_HOST", "localhost");
+        System.setProperty("SMTP_USERNAME", "fake");
+        System.setProperty("SMTP_PASSWORD", "fake");
+
         return new OAuthApplication();
     }
 }

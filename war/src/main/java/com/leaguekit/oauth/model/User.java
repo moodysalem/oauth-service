@@ -29,6 +29,9 @@ public class User extends BaseEntity {
     @Column(name = "lastName")
     private String lastName;
 
+    @Column(name = "deleted")
+    private boolean deleted;
+
     public String getFirstName() {
         return firstName;
     }
@@ -67,5 +70,13 @@ public class User extends BaseEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

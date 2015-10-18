@@ -94,14 +94,6 @@ public class PasswordResetResource extends BaseResource {
         return lp.size() == 1 ? lp.get(0) : null;
     }
 
-    private User getUser(String email) {
-        CriteriaQuery<User> uq = cb.createQuery(User.class);
-        Root<User> ru = uq.from(User.class);
-        uq.select(ru).where(cb.equal(ru.get("email"), email));
-        List<User> lu = em.createQuery(uq).getResultList();
-        return lu.size() == 1 ? lu.get(0) : null;
-    }
-
     private PasswordResetCode makeCode(User user) {
         PasswordResetCode pw = new PasswordResetCode();
         pw.setExpires(new Date(System.currentTimeMillis() + FIVE_MINUTES));
@@ -179,7 +171,7 @@ public class PasswordResetResource extends BaseResource {
 
         rm.setApplication(application);
 
-        User u = getUser(email);
+        User u = getUser(email, application);
         if (u != null) {
             PasswordResetCode pc = makeCode(u);
             // do the e-mail

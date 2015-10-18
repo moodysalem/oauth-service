@@ -91,6 +91,9 @@
       <column name="lastName" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="deleted" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="User" baseColumnNames="applicationId" constraintName="FK_User_Application"
                              referencedTableName="Application"

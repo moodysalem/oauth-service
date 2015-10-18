@@ -98,6 +98,11 @@
             </systemProperty>
 
             <systemProperty>
+              <name>SHOW_SQL</name>
+              <value>1</value>
+            </systemProperty>
+
+            <systemProperty>
               <name>LIQUIBASE_CONTEXT</name>
               <value>test</value>
             </systemProperty>
