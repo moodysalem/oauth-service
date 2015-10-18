@@ -1,239 +1,40 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- Inliner Build Version 4380b7741bb759d6cb997545f3add21ad48f010b -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
     <head>
-        <meta name="viewport" content="width=device-width"/>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta name="viewport" content="width=device-width" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Reset Password</title>
-
-        <style>
-            /* -------------------------------------
-                GLOBAL
-                A very basic CSS reset
-            ------------------------------------- */
-            * {
-                margin: 0;
-                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-                box-sizing: border-box;
-                font-size: 14px;
-            }
-
-            img {
-                max-width: 100%;
-            }
-
-            body {
-                -webkit-font-smoothing: antialiased;
-                -webkit-text-size-adjust: none;
-                width: 100% !important;
-                height: 100%;
-                line-height: 1.6em;
-                /* 1.6em * 14px = 22.4px, use px to get airier line-height also in Thunderbird, and Yahoo!, Outlook.com, AOL webmail clients */
-                /*line-height: 22px;*/
-            }
-
-            /* Let's make sure all tables have defaults */
-            table td {
-                vertical-align: top;
-            }
-
-            /* -------------------------------------
-                BODY & CONTAINER
-            ------------------------------------- */
-            body {
-                background-color: #f6f6f6;
-            }
-
-            .body-wrap {
-                background-color: #f6f6f6;
-                width: 100%;
-            }
-
-            .container {
-                display: block !important;
-                max-width: 600px !important;
-                margin: 0 auto !important;
-                /* makes it centered */
-                clear: both !important;
-            }
-
-            .content {
-                max-width: 600px;
-                margin: 0 auto;
-                display: block;
-                padding: 20px;
-            }
-
-            /* -------------------------------------
-                HEADER, FOOTER, MAIN
-            ------------------------------------- */
-            .main {
-                background-color: #fff;
-                border: 1px solid #e9e9e9;
-                border-radius: 3px;
-            }
-
-            .content-wrap {
-                padding: 20px;
-            }
-
-            .content-block {
-                padding: 0 0 20px;
-            }
-
-            .header {
-                width: 100%;
-                margin-bottom: 20px;
-            }
-
-            .footer {
-                width: 100%;
-                clear: both;
-                color: #999;
-                padding: 20px;
-            }
-
-            .footer p, .footer a, .footer td {
-                color: #999;
-                font-size: 12px;
-            }
-
-            /* -------------------------------------
-                TYPOGRAPHY
-            ------------------------------------- */
-            h1, h2, h3 {
-                font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-                color: #000;
-                margin: 40px 0 0;
-                line-height: 1.2em;
-                font-weight: 400;
-            }
-
-            h1 {
-                font-size: 32px;
-                font-weight: 500;
-                /* 1.2em * 32px = 38.4px, use px to get airier line-height also in Thunderbird, and Yahoo!, Outlook.com, AOL webmail clients */
-                /*line-height: 38px;*/
-            }
-
-            h2 {
-                font-size: 24px;
-                /* 1.2em * 24px = 28.8px, use px to get airier line-height also in Thunderbird, and Yahoo!, Outlook.com, AOL webmail clients */
-                /*line-height: 29px;*/
-            }
-
-            h3 {
-                font-size: 18px;
-                /* 1.2em * 18px = 21.6px, use px to get airier line-height also in Thunderbird, and Yahoo!, Outlook.com, AOL webmail clients */
-                /*line-height: 22px;*/
-            }
-
-            h4 {
-                font-size: 14px;
-                font-weight: 600;
-            }
-
-            p, ul, ol {
-                margin-bottom: 10px;
-                font-weight: normal;
-            }
-
-            p li, ul li, ol li {
-                margin-left: 5px;
-                list-style-position: inside;
-            }
-
-            /* -------------------------------------
-                LINKS & BUTTONS
-            ------------------------------------- */
-            a {
-                color: #348eda;
-                text-decoration: underline;
-            }
-
-            .btn-primary {
-                text-decoration: none;
-                color: #FFF;
-                background-color: #348eda;
-                border: solid #348eda;
-                border-width: 10px 20px;
-                line-height: 2em;
-                font-weight: bold;
-                text-align: center;
-                cursor: pointer;
-                display: inline-block;
-                border-radius: 5px;
-                text-transform: capitalize;
-            }
-
-
-            .alert a {
-                color: #fff;
-                text-decoration: none;
-                font-weight: 500;
-                font-size: 16px;
-            }
-        </style>
     </head>
+    <body itemscope="" itemtype="http://schema.org/EmailMessage" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.6em; background: #f6f6f6; margin: 0;" bgcolor="#f6f6f6">
 
-    <body itemscope itemtype="http://schema.org/EmailMessage">
-
-        <table class="body-wrap">
-            <tr>
-                <td></td>
-                <td class="container" width="600">
-                    <div class="content">
-                        <table class="main" width="100%" cellpadding="0" cellspacing="0" itemprop="action" itemscope
-                               itemtype="http://schema.org/ConfirmAction">
-                            <tr>
-                                <td class="content-wrap">
-                                    <meta itemprop="name" content="Confirm Email"/>
-                                    <table width="100%" cellpadding="0" cellspacing="0">
-                                        <tr>
-                                            <td class="content-block">
-                                                Hello ${passwordResetCode.user.firstName},
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="content-block">
-                                                Click here to change your password. This link will work for the next 5 minutes.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="content-block" itemprop="handler" itemscope
-                                                itemtype="http://schema.org/HttpActionHandler">
-                                                <a href="${url}" class="btn-primary" itemprop="url">
-                                                    Change Password
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="content-block">
-                                                If you did not request a password reset, please ignore this e-mail.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="content-block">
-                                                -${passwordResetCode.user.application.name}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                        <div class="footer">
-                            <table width="100%">
-                                <tr>
-                                <#--<td class="aligncenter content-block">Follow <a href="http://twitter.com/mail_gun">@Mail_Gun</a>-->
-                                        <#--on Twitter.-->
-                                    <#--</td>-->
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-    </body>
+        <table class="body-wrap" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background: #f6f6f6; margin: 0;" bgcolor="#f6f6f6"><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
+            <td class="container" width="600" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto;" valign="top">
+                <div class="content" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" itemprop="action" itemscope="" itemtype="http://schema.org/ConfirmAction" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background: #fff; margin: 0; border: 1px solid #e9e9e9;" bgcolor="#fff"><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-wrap" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 20px;" valign="top">
+                        <meta itemprop="name" content="Confirm Email" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;" /><table width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-block" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                        Hello ${passwordResetCode.user.firstName},
+                    </td>
+                    </tr><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-block" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                        Click here to change your password. This link will work for the next 5 minutes.
+                    </td>
+                    </tr><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-block" itemprop="handler" itemscope="" itemtype="http://schema.org/HttpActionHandler" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                        <a href="${url}" class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;">
+                            Change Password
+                        </a>
+                    </td>
+                    </tr><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-block" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                        If you did not request a password reset, please ignore this e-mail.
+                    </td>
+                    </tr><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-block" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                        -${passwordResetCode.user.application.name}
+                    </td>
+                    </tr></table></td>
+                    </tr></table><div class="footer" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;">
+                    <table width="100%" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><tr style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="aligncenter content-block" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; color: #999; text-align: center; margin: 0; padding: 0 0 20px;" align="center" valign="top"><a href="http://twitter.com/mail_gun" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;"></a>
+                    </td>
+                    </tr></table></div>
+                </div>
+            </td>
+        </tr></table></body>
 </html>

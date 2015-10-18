@@ -28,7 +28,7 @@ public class CSSInliner {
         Elements styleTags = doc.select(STYLE);
 
         // this map stores all the styles we need to apply to the elements
-        HashMap<Element, HashMap<String, ValueWithPriority>> stylesToApply = new HashMap<>();
+        HashMap<String, HashMap<String, ValueWithPriority>> stylesToApply = new HashMap<>();
 
         for (Element style : styleTags) {
             String rules = style.getAllElements().get(0).data()
@@ -37,25 +37,30 @@ public class CSSInliner {
                 .trim();
             StringTokenizer st = new StringTokenizer(rules, DELIMS);
             while (st.countTokens() > 1) {
-                String selector = st.nextToken();
+                String selector = st.nextToken().trim();
                 // the list of css styles for the selector
-                String properties = st.nextToken();
+                String properties = st.nextToken().trim();
                 String[] splitSelectors = selector.split(",");
                 for (String sel : splitSelectors) {
-                    Elements selectedElements = doc.select(sel);
+                    String trimmedSel = sel.trim();
+                    Elements selectedElements = doc.select(trimmedSel);
                     for (Element selElem : selectedElements) {
+                        if (selElem.equals(style)) {
+                            LOG.log(Level.SEVERE, "Style tag selected by " + trimmedSel);
+                            continue;
+                        }
                         HashMap<String, ValueWithPriority> existingStyles;
-                        if (!stylesToApply.containsKey(selElem)) {
+                        String exactSel = selElem.cssSelector();
+                        if (!stylesToApply.containsKey(exactSel)) {
                             existingStyles = stylesOf(STYLE_PRIORITY, selElem.attr(STYLE));
-                            stylesToApply.put(selElem, existingStyles);
                         } else {
-                            existingStyles = stylesToApply.get(selElem);
+                            existingStyles = stylesToApply.get(exactSel);
                         }
 
-                        stylesToApply.put(selElem,
+                        stylesToApply.put(exactSel,
                             mergeStyle(
                                 existingStyles,
-                                stylesOf(getPriority(sel), properties)
+                                stylesOf(getPriority(trimmedSel), properties)
                             )
                         );
                     }
@@ -65,14 +70,22 @@ public class CSSInliner {
         }
 
         // apply the styles
-        for (Element e : stylesToApply.keySet()) {
-            for (String property : stylesToApply.get(e).keySet()) {
-                e.attr(STYLE, property);
+        for (String exactSelector : stylesToApply.keySet()) {
+            Element toApply = doc.select(exactSelector).first();
+            if (toApply == null) {
+                LOG.log(Level.SEVERE, "Failed to find " + exactSelector);
+                continue;
             }
+            HashMap<String, ValueWithPriority> styles = stylesToApply.get(exactSelector);
+            StringBuilder sb = new StringBuilder();
+            for (String property : styles.keySet()) {
+                sb.append(property).append(":").append(styles.get(property).getValue()).append(";");
+            }
+            toApply.attr(STYLE, sb.toString());
         }
 
         long t2 = System.nanoTime();
-        LOG.log(Level.FINE, "Spent " + ((t2 - t1) / 1000L) + " inlining CSS");
+        LOG.log(Level.INFO, "Spent " + ((t2 - t1) / 1000L) + " milliseconds inlining CSS");
         return doc.toString();
     }
 
@@ -132,6 +145,9 @@ public class CSSInliner {
 
         @Override
         public int compareTo(Priority o) {
+            if (o == this) {
+                return 0;
+            }
             int comp = Integer.compare(getA(), o.getA());
             if (comp != 0) {
                 return comp;
@@ -169,10 +185,20 @@ public class CSSInliner {
         }
     }
 
+    private static final HashMap<String, Priority> PRIORITY_CACHE = new HashMap<>();
+
     private static Priority getPriority(String selector) {
+        selector = selector.trim();
+        if (PRIORITY_CACHE.containsKey(selector)) {
+            return PRIORITY_CACHE.get(selector);
+        }
         int b = 0, c = 0, d = 0;
         String[] pieces = selector.split(" ");
         for (String pc : pieces) {
+            if (pc == null || pc.trim().length() == 0) {
+                continue;
+            }
+            pc = pc.trim();
             if (pc.startsWith("#")) {
                 b++;
                 continue;
@@ -183,22 +209,29 @@ public class CSSInliner {
             }
             d++;
         }
-        return new Priority(0, b, c, d);
+        Priority p = new Priority(0, b, c, d);
+        PRIORITY_CACHE.put(selector, p);
+        return p;
     }
 
     private static HashMap<String, ValueWithPriority> stylesOf(Priority priority, String properties) {
         HashMap<String, ValueWithPriority> vp = new HashMap<>();
+        if (properties == null || properties.trim().length() == 0) {
+            return vp;
+        }
         String[] props = properties.split(";");
-        for (String p : props) {
-            String[] pcs = p.split(":");
-            String name = pcs[0], value = pcs[1];
-            if (pcs.length != 2) {
-                continue;
+        if (props.length > 1) {
+            for (String p : props) {
+                String[] pcs = p.split(":");
+                if (pcs.length != 2) {
+                    continue;
+                }
+                String name = pcs[0].trim(), value = pcs[1].trim();
+                ValueWithPriority vwp = new ValueWithPriority();
+                vwp.setPriority(priority);
+                vwp.setValue(value);
+                vp.put(name, vwp);
             }
-            ValueWithPriority vwp = new ValueWithPriority();
-            vwp.setPriority(priority);
-            vwp.setValue(value);
-            vp.put(name, vwp);
         }
         return vp;
     }

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<#include "Head.ftl">
+    <head>
+        <#include "Head.ftl">
+        <title>${model.client.application.name?html} Log In</title>
+    </head>
     <body>
         <div class="container-fluid">
             <div class="row">
