@@ -85,6 +85,12 @@
       <column name="password" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
+      <column name="firstName" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="lastName" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="User" baseColumnNames="applicationId" constraintName="FK_User_Application"
                              referencedTableName="Application"
@@ -383,6 +389,9 @@
         <constraints nullable="false"/>
       </column>
       <column name="expires" type="TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="used" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
     </createTable>

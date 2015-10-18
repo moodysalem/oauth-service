@@ -21,6 +21,8 @@ public class PasswordResetCode extends BaseEntity {
     @Column(name = "expires")
     private Date expires;
 
+    private boolean used;
+
     public User getUser() {
         return user;
     }
@@ -45,4 +47,11 @@ public class PasswordResetCode extends BaseEntity {
         this.expires = expires;
     }
 
+    public boolean isUsed() {
+        return used;
+    }
+
+    public void setUsed(boolean used) {
+        this.used = used;
+    }
 }

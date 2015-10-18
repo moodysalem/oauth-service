@@ -3,7 +3,10 @@ package com.leaguekit.oauth.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.leaguekit.hibernate.model.BaseEntity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class User extends BaseEntity {
@@ -19,6 +22,28 @@ public class User extends BaseEntity {
     @JsonIgnore
     @Column(name = "password")
     private String password;
+
+    @Column(name = "firstName")
+    private String firstName;
+
+    @Column(name = "lastName")
+    private String lastName;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
     public Application getApplication() {
         return application;

@@ -2,18 +2,14 @@ package com.leaguekit.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.oauth.model.*;
-import freemarker.core.ParseException;
 import freemarker.template.Configuration;
-import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateNotFoundException;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -24,15 +20,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +43,7 @@ public abstract class BaseResource {
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
     @Context
-    HttpServletRequest req;
+    ContainerRequestContext containerRequestContext;
 
     @Inject
     protected EntityManager em;
@@ -263,8 +258,6 @@ public abstract class BaseResource {
     }
 
 
-    private HashMap<String, Cookie> cookieMap;
-
     /**
      * Get the cookie given by the name
      *
@@ -272,17 +265,7 @@ public abstract class BaseResource {
      * @return a Cookie
      */
     protected Cookie getCookie(String name) {
-        if (cookieMap == null) {
-            cookieMap = new HashMap<>();
-            Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                for (Cookie c : req.getCookies()) {
-                    String cName = c.getName();
-                    cookieMap.put(cName, c);
-                }
-            }
-        }
-        return cookieMap.get(name);
+        return containerRequestContext.getCookies().get(name);
     }
 
 

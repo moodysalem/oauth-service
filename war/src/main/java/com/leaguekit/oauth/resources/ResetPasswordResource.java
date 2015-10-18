@@ -5,6 +5,7 @@ import com.leaguekit.oauth.model.PasswordResetCode;
 import com.leaguekit.oauth.model.User;
 import com.leaguekit.util.RandomStringUtil;
 import org.glassfish.jersey.server.mvc.Viewable;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -22,10 +23,14 @@ public class ResetPasswordResource extends BaseResource {
 
     public static final String INVALID_RESET_PASSWORD_URL = "Invalid reset password URL.";
     private static final String FROM_EMAIL = "moody@leaguekit.com";
+    public static final String INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL = "Invalid or expired link. Please request another reset password e-mail.";
+    public static final String PASSWORD_IS_REQUIRED_AND_WAS_NOT_INCLUDED = "Password is required and was not included.";
+    public static final String AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD = "An internal server error prevented you from changing your password.";
 
     public static class ResetPasswordModel {
         private Application application;
         private String error;
+        private PasswordResetCode passwordResetCode;
         private boolean success;
 
         public String getError() {
@@ -51,6 +56,14 @@ public class ResetPasswordResource extends BaseResource {
         public void setSuccess(boolean success) {
             this.success = success;
         }
+
+        public PasswordResetCode getPasswordResetCode() {
+            return passwordResetCode;
+        }
+
+        public void setPasswordResetCode(PasswordResetCode passwordResetCode) {
+            this.passwordResetCode = passwordResetCode;
+        }
     }
 
     @QueryParam("applicationId")
@@ -66,13 +79,17 @@ public class ResetPasswordResource extends BaseResource {
     }
 
 
-    private PasswordResetCode getCode() {
+    private PasswordResetCode getCode(String code) {
         if (code == null) {
             return null;
         }
         CriteriaQuery<PasswordResetCode> pw = cb.createQuery(PasswordResetCode.class);
         Root<PasswordResetCode> rp = pw.from(PasswordResetCode.class);
-        pw.select(rp).where(cb.equal(rp.get("code"), code), cb.greaterThan(rp.<Date>get("expires"), new Date()));
+        pw.select(rp).where(
+            cb.equal(rp.get("code"), code),
+            cb.greaterThan(rp.<Date>get("expires"), new Date()),
+            cb.equal(rp.get("used"), false)
+        );
         List<PasswordResetCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;
     }
@@ -104,25 +121,59 @@ public class ResetPasswordResource extends BaseResource {
 
 
     @GET
-    public Response sendEmailPage(@QueryParam("token") String token) {
+    public Response sendEmailPage(@QueryParam("code") String code) {
         Application application = getApplication();
         if (application == null) {
             return error(INVALID_RESET_PASSWORD_URL);
         }
 
+
         ResetPasswordModel rm = new ResetPasswordModel();
         rm.setApplication(application);
+
+        if (code != null) {
+            PasswordResetCode pcode = getCode(code);
+            if (pcode != null) {
+                rm.setPasswordResetCode(pcode);
+                return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
+            } else {
+                return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
+            }
+        }
 
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
     }
 
     @POST
-    public Response doSendEmail(@FormParam("email") String email) {
+    public Response doPost(@FormParam("code") String code, @FormParam("password") String password, @FormParam("email") String email) {
+        ResetPasswordModel rm = new ResetPasswordModel();
+
+        if (code != null) {
+            PasswordResetCode pc = getCode(code);
+            if (pc == null) {
+                return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
+            }
+            if (password == null) {
+                return error(PASSWORD_IS_REQUIRED_AND_WAS_NOT_INCLUDED);
+            }
+            pc.getUser().setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+            pc.setUsed(true);
+            try {
+                beginTransaction();
+                em.merge(pc.getUser());
+                em.merge(pc);
+                commit();
+            } catch (Exception e) {
+                rollback();
+                LOG.log(Level.SEVERE, "Failed to change user password", e);
+                return error(AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD);
+            }
+        }
+
         Application application = getApplication();
         if (application == null) {
             return error(INVALID_RESET_PASSWORD_URL);
         }
-        ResetPasswordModel rm = new ResetPasswordModel();
         rm.setApplication(application);
 
         User u = getUser(email);
@@ -137,9 +188,35 @@ public class ResetPasswordResource extends BaseResource {
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
     }
 
+    public static class EmailModel {
+        private PasswordResetCode passwordResetCode;
+        private String url;
+
+        public PasswordResetCode getPasswordResetCode() {
+            return passwordResetCode;
+        }
+
+        public void setPasswordResetCode(PasswordResetCode passwordResetCode) {
+            this.passwordResetCode = passwordResetCode;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+    }
+
     private void emailCode(PasswordResetCode pc) {
+        String url = containerRequestContext.getUriInfo().getRequestUriBuilder().replacePath("reset")
+            .replaceQuery("").queryParam("code", pc.getCode()).toString();
+        EmailModel em = new EmailModel();
+        em.setPasswordResetCode(pc);
+        em.setUrl(url);
         sendEmail(FROM_EMAIL, pc.getUser().getEmail(), "Your password reset code from " + pc.getUser().getApplication().getName(),
-            "PasswordReset.ftl", pc);
+            "PasswordReset.ftl", em);
     }
 
 
