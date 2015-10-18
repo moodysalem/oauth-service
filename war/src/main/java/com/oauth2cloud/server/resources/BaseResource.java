@@ -9,6 +9,7 @@ import org.glassfish.jersey.server.mvc.Viewable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -40,6 +41,9 @@ public abstract class BaseResource {
     public static final String COOKIE_NAME_PREFIX = "_AID_";
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
     private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
+
+    protected static final String FROM_EMAIL = "moody@leaguekit.com";
+    protected static final String REPLY_TO_EMAIL = "moody@leaguekit.com";
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
@@ -423,6 +427,10 @@ public abstract class BaseResource {
     @Inject
     private Configuration cfg;
 
+    protected void sendEmail(String to, String subject, String template, Object model) {
+        sendEmail(FROM_EMAIL, to, subject, template, model);
+    }
+
     /**
      * Send an e-mail using the template in the resources templates.email package
      *
@@ -436,7 +444,9 @@ public abstract class BaseResource {
         try {
             final MimeMessage m = new MimeMessage(mailSession);
             m.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            m.setFrom(new InternetAddress(from));
+            Address fromAddress = new InternetAddress(from);
+            m.setFrom(fromAddress);
+            m.setReplyTo(new Address[]{fromAddress});
             m.setSubject(subject);
             m.setContent(processTemplate(template, model), "text/html");
             new Thread(() -> {

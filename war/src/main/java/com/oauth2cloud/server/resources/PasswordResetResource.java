@@ -22,7 +22,6 @@ import java.util.logging.Level;
 public class PasswordResetResource extends BaseResource {
 
     public static final String INVALID_RESET_PASSWORD_URL = "Invalid reset password URL.";
-    private static final String FROM_EMAIL = "moody@leaguekit.com";
     public static final String INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL = "Invalid or expired link. Please request another reset password e-mail.";
     public static final String PASSWORD_IS_REQUIRED_AND_WAS_NOT_INCLUDED = "Password is required and was not included.";
     public static final String AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD = "An internal server error prevented you from changing your password.";
@@ -210,7 +209,7 @@ public class PasswordResetResource extends BaseResource {
         EmailModel em = new EmailModel();
         em.setPasswordResetCode(pc);
         em.setUrl(url);
-        sendEmail(FROM_EMAIL, pc.getUser().getEmail(), "Your password reset code from " + pc.getUser().getApplication().getName(),
+        sendEmail(pc.getUser().getEmail(), "Your password reset code from " + pc.getUser().getApplication().getName(),
             "PasswordReset.ftl", em);
     }
 
