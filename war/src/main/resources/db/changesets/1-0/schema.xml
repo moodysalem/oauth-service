@@ -20,7 +20,21 @@
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
+      <column name="facebookAppId" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="facebookAppSecret" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="googleClientId" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="googleClientSecret" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
     </createTable>
+    <addUniqueConstraint tableName="Application" columnNames="facebookAppId,facebookAppSecret"/>
+    <addUniqueConstraint tableName="Application" columnNames="googleClientId,googleClientSecret"/>
     <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <#include "Head.ftl">
+    <#include "Head.ftl">
         <title>${model.client.application.name?html} Log In</title>
     </head>
     <body>
@@ -53,21 +53,82 @@
 
                         <div class="row">
                             <div class="col-xs-4">
-                                <button class="btn btn-sm btn-primary btn-block" id="facebookLogin">
+                            <#if model.client.application.facebookAppId??>
+                                <input type="hidden" id="facebookToken" name="facebookToken"/>
+                                <button class="btn btn-sm btn-primary btn-block" id="facebookLogin" type="button">
                                     <i class="fa fa-facebook"></i>
-                                    <span class="login-btn-text" id="facebookButtonText">via Facebook</span>
                                 </button>
+                                <script>
+                                    window.fbAsyncInit = function () {
+                                        FB.init({
+                                            appId: '${model.client.application.facebookAppId?c}',
+                                            xfbml: false,
+                                            version: 'v2.5'
+                                        });
+                                    };
+
+                                    (function (d, s, id) {
+                                        var js, fjs = d.getElementsByTagName(s)[ 0 ];
+                                        if (d.getElementById(id)) {
+                                            return;
+                                        }
+                                        js = d.createElement(s);
+                                        js.id = id;
+                                        js.src = "//connect.facebook.net/en_US/sdk.js";
+                                        fjs.parentNode.insertBefore(js, fjs);
+                                    }(document, 'script', 'facebook-jssdk'));
+
+                                    $(function () {
+                                        $("#facebookLogin").click(function () {
+                                            FB.login(function (response) {
+                                                console.log(response);
+                                                if (response.status === 'connected') {
+                                                    // Logged into your app and Facebook.
+                                                    $("#facebookToken").val(response.authResponse.accessToken)
+                                                            .closest("form").submit();
+                                                }
+                                            }, { scope: "public_profile,email" });
+                                        });
+                                    });
+                                </script>
+                            </#if>
                             </div>
                             <div class="col-xs-4">
-                                <button class="btn btn-sm btn-danger btn-block" id="googleLogin">
+                            <#if model.client.application.googleClientId??>
+                                <input type="hidden" id="googleToken" name="googleToken"/>
+                                <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
                                     <i class="fa fa-google"></i>
-                                    <span class="login-btn-text" id="googleButtonText">via Google</span>
                                 </button>
+                                <script src="//apis.google.com/js/platform.js" onload="initGoogle();" async
+                                        defer></script>
+                                <script>
+                                    var initGoogle = function () {
+                                        gapi.load('auth2', function () {
+                                            var auth2 = gapi.auth2.init({
+                                                client_id: '${model.client.application.googleClientId}',
+                                                fetch_basic_profile: true,
+                                                scope: 'profile'
+                                            });
+                                            $(function () {
+                                                $("#googleLogin").click(function () {
+                                                    // Sign the user in, and then retrieve their ID token for the server
+                                                    // to validate
+                                                    auth2.signIn().then(function () {
+                                                        var token = auth2.currentUser.get().getAuthResponse().id_token;
+                                                        if (token) {
+                                                            $("#googleToken").val(token).closest("form").submit();
+                                                        }
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    };
+                                </script>
+                            </#if>
                             </div>
                             <div class="col-xs-4">
-                                <button class="btn btn-sm btn-info btn-block" id="googleLogin">
+                                <button class="btn btn-sm btn-info btn-block" id="twitterLogin" type="button">
                                     <i class="fa fa-twitter"></i>
-                                    <span class="login-btn-text" id="twitterButtonText">via Twitter</span>
                                 </button>
                             </div>
                         </div>
@@ -137,16 +198,16 @@
             $(function () {
                 $("#form-signin").submit(function () {
                     $("#form-signin").find("input").prop("readOnly", true).end()
-                            .find("#submitLogin").prop("disabled", true)
-                            .find("span").text("Signing in...").end()
-                            .find("i").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
+                            .find("button").prop("disabled", true)
+                            .find("#submitLogin span").text("Signing in...").end()
+                            .find("i.fa-sign-in").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
                 });
 
                 $("#form-register").submit(function () {
                     $("#form-register").find("input").prop("readOnly", true).end()
                             .find("#submitRegister").prop("disabled", true)
                             .find("span").text("Submitting...").end()
-                            .find("i").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
+                            .find("i").removeClass("fa-user-plus").addClass("fa-pulse fa-spinner");
                 });
             });
         </script>

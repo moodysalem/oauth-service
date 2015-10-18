@@ -9,6 +9,8 @@
     <insert tableName="Application">
       <column name="id">1</column>
       <column name="name">OAuth Cloud</column>
+      <column name="facebookAppId">725381047606159</column>
+      <column name="googleClientId">520864329427-r8nf78v9oiqatdhca5sumqjn39q9q2hs.apps.googleusercontent.com</column>
     </insert>
 
     <insert tableName="Client">

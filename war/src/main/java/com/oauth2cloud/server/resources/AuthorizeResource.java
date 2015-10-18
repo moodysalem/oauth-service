@@ -10,6 +10,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.ArrayList;
@@ -164,6 +165,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     public static class AuthorizeModel {
+        private String requestUrl;
         private Client client;
         private String loginError;
 
@@ -181,6 +183,21 @@ public class AuthorizeResource extends BaseResource {
 
         public void setLoginError(String loginError) {
             this.loginError = loginError;
+        }
+
+        public String getRequestUrl() {
+            return requestUrl;
+        }
+
+        public void setRequestUrl(String requestUrl) {
+            this.requestUrl = requestUrl;
+        }
+
+        public void setRequestUrl(ContainerRequestContext containerRequestContext) {
+            if (containerRequestContext == null) {
+                return;
+            }
+            setRequestUrl(containerRequestContext.getUriInfo().getRequestUri().toString());
         }
     }
 
@@ -249,6 +266,7 @@ public class AuthorizeResource extends BaseResource {
 
         AuthorizeModel ar = new AuthorizeModel();
         ar.setClient(client);
+        ar.setRequestUrl(containerRequestContext);
 
         return Response.ok(new Viewable("/templates/Login", ar)).build();
     }
@@ -275,6 +293,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         AuthorizeModel ar = new AuthorizeModel();
+        ar.setRequestUrl(containerRequestContext);
         Client client = getClient(clientId);
         ar.setClient(client);
 
