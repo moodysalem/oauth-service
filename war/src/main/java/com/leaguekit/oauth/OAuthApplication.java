@@ -3,10 +3,14 @@ package com.leaguekit.oauth;
 
 import com.leaguekit.jaxrs.lib.BaseApplication;
 import com.leaguekit.jaxrs.lib.factories.JAXRSEntityManagerFactory;
+import com.leaguekit.jaxrs.lib.factories.MailSessionFactory;
 import com.leaguekit.oauth.filter.NoXFrameOptions;
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.template.Configuration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.process.internal.RequestScoped;
 
+import javax.mail.Session;
 import javax.persistence.EntityManager;
 import javax.ws.rs.ApplicationPath;
 
@@ -35,6 +39,30 @@ public class OAuthApplication extends BaseApplication {
                     true,
                     context
                 )).to(EntityManager.class).in(RequestScoped.class);
+
+
+                int port = 25;
+                if (System.getProperty("SMTP_PORT") != null) {
+                    try {
+                        port = Integer.parseInt(System.getProperty("SMTP_PORT"));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                bindFactory(
+                    new MailSessionFactory(
+                        System.getProperty("SMTP_HOST"),
+                        System.getProperty("SMTP_USERNAME"),
+                        System.getProperty("SMTP_PASSWORD"),
+                        port
+                    )
+                ).to(Session.class).in(RequestScoped.class);
+
+
+                Configuration fmConfig = new Configuration(Configuration.VERSION_2_3_23);
+                fmConfig.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));
+                fmConfig.setDefaultEncoding("UTF-8");
+                bind(fmConfig).to(Configuration.class);
             }
         });
 

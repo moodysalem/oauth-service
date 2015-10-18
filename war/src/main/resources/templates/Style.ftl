@@ -3,7 +3,7 @@
         cursor: pointer;
     }
 
-    #form-signin, #form-register {
+    #form-signin, #form-register, #form-reset {
         padding: 1em;
         background-color: rgba(0, 0, 0, 0.03);
         margin-bottom: 2em;

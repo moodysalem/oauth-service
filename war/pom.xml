@@ -83,6 +83,20 @@
               <name>JDBC_CONNECTION_PASSWORD</name>
               <value>${JDBC_CONNECTION_PASSWORD}</value>
             </systemProperty>
+
+            <systemProperty>
+              <name>SMTP_HOST</name>
+              <value>${SMTP_HOST}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>SMTP_USERNAME</name>
+              <value>${SMTP_USERNAME}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>SMTP_PASSWORD</name>
+              <value>${SMTP_PASSWORD}</value>
+            </systemProperty>
+
             <systemProperty>
               <name>LIQUIBASE_CONTEXT</name>
               <value>test</value>

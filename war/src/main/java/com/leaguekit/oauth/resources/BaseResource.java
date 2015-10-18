@@ -2,11 +2,22 @@ package com.leaguekit.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.oauth.model.*;
+import freemarker.core.ParseException;
+import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateNotFoundException;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -18,7 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -390,6 +404,31 @@ public abstract class BaseResource {
             LOG.log(Level.SEVERE, "A transaction was not closed at the end of a request.");
             rollback();
         }
+    }
+
+    @Inject
+    private Session mailSession;
+
+    @Inject
+    private Configuration cfg;
+
+    protected void sendEmail(String from, String to, String subject, String template, Object model) {
+        try {
+            MimeMessage m = new MimeMessage(mailSession);
+            m.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+            m.setFrom(new InternetAddress(from));
+            m.setSubject(subject);
+            m.setContent(processTemplate(template, model), "text/html");
+            Transport.send(m);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to send e-mail message", e);
+        }
+    }
+
+    private String processTemplate(String template, Object model) throws IOException, TemplateException {
+        StringWriter sw = new StringWriter();
+        cfg.getTemplate(template).process(model, sw);
+        return sw.toString();
     }
 
 }
