@@ -5,11 +5,12 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
-                    <h1 class="page-header text-center">${model.application.name?html}</h1>
+                    <h1 class="page-header text-center">${model.passwordResetCode.user.application.name?html}</h1>
                 </div>
             </div>
             <div class="row" id="form-row">
                 <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
+                    <#if !model.passwordResetCode.used>
                     <form id="form-reset" method="POST">
                         <h2>
                             Change Password
@@ -26,7 +27,7 @@
                                    placeholder="Confirm New Password" required>
                         </div>
 
-                        <input type="hidden" name="code" value="${passwordResetCode.code?html}"/>
+                        <input type="hidden" name="code" value="${model.passwordResetCode.code?html}"/>
 
                         <div class="form-group">
                             <button class="btn btn-lg btn-primary btn-block" id="submitReset" type="submit">
@@ -35,23 +36,12 @@
                             </button>
                         </div>
                     </form>
-
-                <#if model.success>
-                    <div class="alert alert-success">
-                        <i class="fa fa-check"></i>
-                        <strong>Success</strong>
-                        Your password has been changed.
-                    </div>
-                </#if>
-
-                <#-- something happened while logging in -->
-                <#if model.error??>
-                    <div class="alert alert-danger">
-                        <i class="fa fa-exclamation-triangle"></i>
-                        <strong>Error</strong>
-                    ${model.error?html}
-                    </div>
-                </#if>
+                    <#else>
+                        <div class="alert alert-success">
+                            <i class="fa fa-check"></i>
+                            <strong>Success</strong> Your password has been changed.
+                        </div>
+                    </#if>
                 </div>
             </div>
         </div>

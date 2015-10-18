@@ -19,7 +19,7 @@ import java.util.logging.Level;
 @Path("reset")
 @Produces(MediaType.TEXT_HTML)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-public class ResetPasswordResource extends BaseResource {
+public class PasswordResetResource extends BaseResource {
 
     public static final String INVALID_RESET_PASSWORD_URL = "Invalid reset password URL.";
     private static final String FROM_EMAIL = "moody@leaguekit.com";
@@ -122,14 +122,7 @@ public class ResetPasswordResource extends BaseResource {
 
     @GET
     public Response sendEmailPage(@QueryParam("code") String code) {
-        Application application = getApplication();
-        if (application == null) {
-            return error(INVALID_RESET_PASSWORD_URL);
-        }
-
-
         ResetPasswordModel rm = new ResetPasswordModel();
-        rm.setApplication(application);
 
         if (code != null) {
             PasswordResetCode pcode = getCode(code);
@@ -139,6 +132,12 @@ public class ResetPasswordResource extends BaseResource {
             } else {
                 return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
             }
+        } else {
+            Application application = getApplication();
+            if (application == null) {
+                return error(INVALID_RESET_PASSWORD_URL);
+            }
+            rm.setApplication(application);
         }
 
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
@@ -168,12 +167,16 @@ public class ResetPasswordResource extends BaseResource {
                 LOG.log(Level.SEVERE, "Failed to change user password", e);
                 return error(AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD);
             }
+
+            rm.setPasswordResetCode(pc);
+            return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
         }
 
         Application application = getApplication();
         if (application == null) {
             return error(INVALID_RESET_PASSWORD_URL);
         }
+
         rm.setApplication(application);
 
         User u = getUser(email);
