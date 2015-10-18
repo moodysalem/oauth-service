@@ -127,18 +127,26 @@
                             </#if>
                             </div>
                             <div class="col-xs-4">
-                            <#if model.client.application.twitterConsumerSecret??>
+                            <#if model.client.application.amazonClientId??>
                                 <input type="hidden" id="amazonToken" name="amazonToken"/>
-                                <button class="btn btn-sm btn-info btn-block" id="amazonLogin" type="button">
+                                <button class="btn btn-sm btn-warning btn-block" id="amazonLogin" type="button">
                                     <i class="fa fa-amazon fa-2x"></i>
                                 </button>
                                 <script>
-                                    // this is custom code for opening a popup to the twitter page
+                                    window.onAmazonLoginReady = function() {
+                                        amazon.Login.setClientId("${model.client.application.amazonClientId?js_string}");
+                                    };
+
+                                    (function(d) {
+                                        var a = d.createElement('script'); a.type = 'text/javascript';
+                                        a.async = true; a.id = 'amazon-login-sdk';
+                                        a.src = 'https://api-cdn.amazon.com/sdk/login1.js';
+                                        d.getElementById('amazon-root').appendChild(a);
+                                    })(document);
+
                                     $(function () {
                                         $("#amazonLogin").click(function () {
-                                            window.twitterLogin =
-                                                    window.open("${model.baseUrl?js_string}twitter?clientId=${model.client.identifier?js_string}",
-                                                            "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=800, height=800");
+
                                         });
                                     });
                                 </script>
