@@ -158,8 +158,6 @@
                 border: solid #348eda;
                 border-width: 10px 20px;
                 line-height: 2em;
-                /* 2em * 14px = 28px, use px to get airier line-height also in Thunderbird, and Yahoo!, Outlook.com, AOL webmail clients */
-                /*line-height: 28px;*/
                 font-weight: bold;
                 text-align: center;
                 cursor: pointer;
@@ -168,134 +166,12 @@
                 text-transform: capitalize;
             }
 
-            /* -------------------------------------
-                OTHER STYLES THAT MIGHT BE USEFUL
-            ------------------------------------- */
-            .last {
-                margin-bottom: 0;
-            }
-
-            .first {
-                margin-top: 0;
-            }
-
-            .aligncenter {
-                text-align: center;
-            }
-
-            .alignright {
-                text-align: right;
-            }
-
-            .alignleft {
-                text-align: left;
-            }
-
-            .clear {
-                clear: both;
-            }
-
-            /* -------------------------------------
-                ALERTS
-                Change the class depending on warning email, good email or bad email
-            ------------------------------------- */
-            .alert {
-                font-size: 16px;
-                color: #fff;
-                font-weight: 500;
-                padding: 20px;
-                text-align: center;
-                border-radius: 3px 3px 0 0;
-            }
 
             .alert a {
                 color: #fff;
                 text-decoration: none;
                 font-weight: 500;
                 font-size: 16px;
-            }
-
-            .alert.alert-warning {
-                background-color: #FF9F00;
-            }
-
-            .alert.alert-bad {
-                background-color: #D0021B;
-            }
-
-            .alert.alert-good {
-                background-color: #68B90F;
-            }
-
-            /* -------------------------------------
-                INVOICE
-                Styles for the billing table
-            ------------------------------------- */
-            .invoice {
-                margin: 40px auto;
-                text-align: left;
-                width: 80%;
-            }
-
-            .invoice td {
-                padding: 5px 0;
-            }
-
-            .invoice .invoice-items {
-                width: 100%;
-            }
-
-            .invoice .invoice-items td {
-                border-top: #eee 1px solid;
-            }
-
-            .invoice .invoice-items .total td {
-                border-top: 2px solid #333;
-                border-bottom: 2px solid #333;
-                font-weight: 700;
-            }
-
-            /* -------------------------------------
-                RESPONSIVE AND MOBILE FRIENDLY STYLES
-            ------------------------------------- */
-            @media only screen and (max-width: 640px) {
-                body {
-                    padding: 0 !important;
-                }
-
-                h1, h2, h3, h4 {
-                    font-weight: 800 !important;
-                    margin: 20px 0 5px !important;
-                }
-
-                h1 {
-                    font-size: 22px !important;
-                }
-
-                h2 {
-                    font-size: 18px !important;
-                }
-
-                h3 {
-                    font-size: 16px !important;
-                }
-
-                .container {
-                    padding: 0 !important;
-                    width: 100% !important;
-                }
-
-                .content {
-                    padding: 0 !important;
-                }
-
-                .content-wrap {
-                    padding: 10px !important;
-                }
-
-                .invoice {
-                    width: 100% !important;
-                }
             }
         </style>
     </head>
