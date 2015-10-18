@@ -37,13 +37,6 @@
       <artifactId>jbcrypt</artifactId>
     </dependency>
 
-    <!-- used for parsing html to inline styles -->
-    <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
-      <version>1.8.2</version>
-    </dependency>
-
     <!-- TESTING DEPENDENCIES -->
     <dependency>
       <groupId>com.leaguekit</groupId>
