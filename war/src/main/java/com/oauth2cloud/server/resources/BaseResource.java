@@ -2,7 +2,6 @@ package com.oauth2cloud.server.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.model.*;
-import com.oauth2cloud.util.CSSInliner;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -40,6 +39,7 @@ public abstract class BaseResource {
     public static final long THREE_SECONDS = 3000L;
     public static final String COOKIE_NAME_PREFIX = "_AID_";
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
+    private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
@@ -434,14 +434,21 @@ public abstract class BaseResource {
      */
     protected void sendEmail(String from, String to, String subject, String template, Object model) {
         try {
-            MimeMessage m = new MimeMessage(mailSession);
+            final MimeMessage m = new MimeMessage(mailSession);
             m.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
             m.setFrom(new InternetAddress(from));
             m.setSubject(subject);
-            m.setContent(CSSInliner.process(processTemplate(template, model)), "text/html");
+            m.setContent(processTemplate(template, model), "text/html");
+            new Thread(() -> {
+                try {
+                    Transport.send(m);
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
+                }
+            });
             Transport.send(m);
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to send e-mail message", e);
+            LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
         }
     }
 
