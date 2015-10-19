@@ -56,7 +56,7 @@
                             <#if model.client.application.facebookAppId??>
                                 <input type="hidden" id="facebookToken" name="facebookToken"/>
                                 <button class="btn btn-sm btn-primary btn-block" id="facebookLogin" type="button">
-                                    <i class="fa fa-facebook fa-2x"></i>
+                                    <i class="fa fa-facebook fa-lg"></i>
                                 </button>
                                 <script>
                                     window.fbAsyncInit = function () {
@@ -97,7 +97,7 @@
                             <#if model.client.application.googleClientId??>
                                 <input type="hidden" id="googleToken" name="googleToken"/>
                                 <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
-                                    <i class="fa fa-google fa-2x"></i>
+                                    <i class="fa fa-google fa-lg"></i>
                                 </button>
                                 <script src="//apis.google.com/js/platform.js" onload="initGoogle();" async
                                         defer></script>
@@ -130,25 +130,26 @@
                             <#if model.client.application.amazonClientId??>
                                 <input type="hidden" id="amazonToken" name="amazonToken"/>
                                 <button class="btn btn-sm btn-warning btn-block" id="amazonLogin" type="button">
-                                    <i class="fa fa-amazon fa-2x"></i>
+                                    <i class="fa fa-amazon fa-lg"></i>
                                 </button>
                                 <script>
                                     window.onAmazonLoginReady = function() {
                                         amazon.Login.setClientId("${model.client.application.amazonClientId?js_string}");
+                                        $(function () {
+                                            $("#amazonLogin").click(function () {
+                                                options = { scope : 'profile' };
+                                                amazon.Login.authorize(options, "${model.requestUrl}");
+                                                return false;
+                                            });
+                                        });
                                     };
 
                                     (function(d) {
                                         var a = d.createElement('script'); a.type = 'text/javascript';
                                         a.async = true; a.id = 'amazon-login-sdk';
                                         a.src = 'https://api-cdn.amazon.com/sdk/login1.js';
-                                        d.getElementById('amazon-root').appendChild(a);
+                                        document.head.appendChild(a);
                                     })(document);
-
-                                    $(function () {
-                                        $("#amazonLogin").click(function () {
-
-                                        });
-                                    });
                                 </script>
                             </#if>
                             </div>
