@@ -44,7 +44,9 @@
                         </div>
 
                         <div class="form-group">
-                            <a href="/reset?applicationId=${model.client.application.id}">Forgot Password?</a>
+                            <a href="/reset?applicationId=${model.client.application.id}&referer=${model.requestUrl}">
+                                Forgot Password?
+                            </a>
                         </div>
 
                         <div class="center-line text-center form-group">
@@ -129,24 +131,27 @@
                             <div class="col-xs-4">
                             <#if model.client.application.amazonClientId??>
                                 <input type="hidden" id="amazonToken" name="amazonToken"/>
-                                <button class="btn btn-sm btn-warning btn-block" id="amazonLogin" type="button">
+                                <button class="btn btn-sm btn-warning btn-block" id="amazonLogin" type="button"
+                                        disabled>
                                     <i class="fa fa-amazon fa-lg"></i>
                                 </button>
                                 <script>
-                                    window.onAmazonLoginReady = function() {
+                                    window.onAmazonLoginReady = function () {
                                         amazon.Login.setClientId("${model.client.application.amazonClientId?js_string}");
                                         $(function () {
-                                            $("#amazonLogin").click(function () {
-                                                options = { scope : 'profile' };
+                                            $("#amazonLogin").prop("disabled", false).click(function () {
+                                                options = { scope: 'profile' };
                                                 amazon.Login.authorize(options, "${model.requestUrl}");
                                                 return false;
                                             });
                                         });
                                     };
 
-                                    (function(d) {
-                                        var a = d.createElement('script'); a.type = 'text/javascript';
-                                        a.async = true; a.id = 'amazon-login-sdk';
+                                    (function (d) {
+                                        var a = d.createElement('script');
+                                        a.type = 'text/javascript';
+                                        a.async = true;
+                                        a.id = 'amazon-login-sdk';
                                         a.src = 'https://api-cdn.amazon.com/sdk/login1.js';
                                         document.head.appendChild(a);
                                     })(document);

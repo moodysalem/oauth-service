@@ -660,7 +660,11 @@ public class AuthorizeResource extends BaseResource {
         Predicate[] pArray = new Predicate[predicates.size()];
         predicates.toArray(pArray);
 
-        return em.createQuery(cq.select(rcs).where(pArray)).getResultList();
+        List<ClientScope> results = em.createQuery(cq.select(rcs).where(pArray)).getResultList();
+
+        results.sort(null);
+
+        return results;
     }
 
     /**

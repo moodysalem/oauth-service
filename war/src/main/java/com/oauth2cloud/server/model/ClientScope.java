@@ -3,10 +3,40 @@ package com.oauth2cloud.server.model;
 import com.leaguekit.hibernate.model.BaseEntity;
 
 import javax.persistence.*;
+import java.util.Comparator;
 
 @Entity
-public class ClientScope extends BaseEntity {
+public class ClientScope extends BaseEntity implements Comparable<ClientScope> {
 
+
+    @Override
+    public int compareTo(ClientScope o) {
+        // nulls sort first
+        if (o == null) {
+            return 1;
+        }
+        Priority p1 = getPriority();
+        Priority p2 = o.getPriority();
+        if (p1 == null && p2 == null) {
+            return 0;
+        }
+        if (p2 == null) {
+            return 1;
+        }
+        if (p1 == null) {
+            return -1;
+        }
+        if (p1.equals(p2)) {
+            return 0;
+        }
+        if (p1.equals(Priority.ALWAYS) || p2.equals(Priority.ASK)) {
+            return -1;
+        }
+        if (p2.equals(Priority.ALWAYS) || p1.equals(Priority.ASK)) {
+            return 1;
+        }
+        return 0;
+    }
 
     public enum Priority {
         // ALWAYS is the highest level, the user is not asked nor shown the permission when logging in

@@ -45,27 +45,46 @@
         box-shadow: 0 0 1px inset;
     }
 
-    .green-circle-checkbox {
-        width: 40px;
-        height: 40px;
-        background: #ddd;
-        display: inline-block;
-        border-radius: 100%;
-        position: relative;
-        -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-        -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    }
-
-    .green-circle-checkbox input[type=checkbox] {
+    .toggle-checkbox input[type=checkbox] {
         visibility: hidden;
     }
 
-    .green-circle-checkbox label {
+    .toggle-checkbox {
+        display: inline-block;
+        width: 120px;
+        height: 40px;
+        background: #333;
+        margin-top: 50px;
+
+        border-radius: 50px;
+        position: relative;
+    }
+
+    .toggle-checkbox:before {
+        content: 'Yes';
+        position: absolute;
+        top: 9px;
+        left: 17px;
+        height: 2px;
+        color: #26ca28;
+        font-size: 16px;
+    }
+
+    .toggle-checkbox:after {
+        content: 'No';
+        position: absolute;
+        top: 9px;
+        left: 80px;
+        height: 2px;
+        color: #111;
+        font-size: 16px;
+    }
+
+    .toggle-checkbox label {
         display: block;
-        width: 30px;
-        height: 30px;
-        border-radius: 100px;
+        width: 52px;
+        height: 22px;
+        border-radius: 50px;
 
         -webkit-transition: all .5s ease;
         -moz-transition: all .5s ease;
@@ -74,22 +93,18 @@
         transition: all .5s ease;
         cursor: pointer;
         position: absolute;
-        top: 5px;
-        left: 5px;
+        top: 9px;
         z-index: 1;
-
-        background: #333;
-
-        -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
-        -moz-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        left: 12px;
+        background: #ddd;
     }
 
-    .green-circle-checkbox input[type=checkbox]:checked + label {
+    /**
+     * Create the checkbox event for the label
+     */
+    .toggle-checkbox input[type=checkbox]:checked + label {
+        left: 60px;
         background: #26ca28;
     }
 
-    .green-circle-checkbox input[type=checkbox]:checked:disabled + label {
-        background: darkgreen;
-    }
 </style>

@@ -28,12 +28,13 @@
                                         ${cScope.scope.displayName?html}
                                             <i class="fa fa-question-circle"
                                                data-title="${cScope.scope.description?html}"></i>
+                                            <small>${(cScope.priority=="REQUIRE")?then("Required","")}</small>
                                         </h3>
 
                                         <p>${(cScope.reason)!"No reason given."?html}</p>
                                     </div>
                                     <div class="col-sm-2 text-center">
-                                        <div class="green-circle-checkbox">
+                                        <div class="toggle-checkbox">
                                             <input type="checkbox" checked
                                                    id="SCOPE${cScope.scope.id}" name="SCOPE${cScope.scope.id}"
                                                    name="SCOPE${cScope.scope.id}"
