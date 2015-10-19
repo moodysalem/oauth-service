@@ -44,7 +44,7 @@
                         </div>
 
                         <div class="form-group">
-                            <a href="/reset?applicationId=${model.client.application.id}&referer=${model.requestUrl}">
+                            <a href="/reset?applicationId=${model.client.application.id}&referer=${model.requestUrl?url}">
                                 Forgot Password?
                             </a>
                         </div>
