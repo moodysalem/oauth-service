@@ -1,9 +1,9 @@
 package com.oauth2cloud.server.resources;
 
+import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.model.Application;
 import com.oauth2cloud.server.model.PasswordResetCode;
 import com.oauth2cloud.server.model.User;
-import com.leaguekit.util.RandomStringUtil;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -31,6 +31,7 @@ public class PasswordResetResource extends BaseResource {
         private String error;
         private PasswordResetCode passwordResetCode;
         private boolean success;
+        private String referer;
 
         public String getError() {
             return error;
@@ -62,6 +63,14 @@ public class PasswordResetResource extends BaseResource {
 
         public void setPasswordResetCode(PasswordResetCode passwordResetCode) {
             this.passwordResetCode = passwordResetCode;
+        }
+
+        public String getReferer() {
+            return referer;
+        }
+
+        public void setReferer(String referer) {
+            this.referer = referer;
         }
     }
 
@@ -182,6 +191,7 @@ public class PasswordResetResource extends BaseResource {
 
         // always show success
         rm.setSuccess(true);
+        rm.setReferer(referer);
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
     }
 

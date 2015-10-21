@@ -35,6 +35,7 @@
                         <strong>Success</strong>
                         If your e-mail is associated with an account, you will receive an e-mail with a link to a page
                         to change your password that will work for five minutes.
+                        Click <a href="${model.referer?html}">here</a> to go back.
                     </div>
                     </#if>
 
@@ -43,7 +44,7 @@
                         <div class="alert alert-danger">
                             <i class="fa fa-exclamation-triangle"></i>
                             <strong>Error</strong>
-                        ${model.error?html}
+                            ${model.error?html}
                         </div>
                     </#if>
                 </div>

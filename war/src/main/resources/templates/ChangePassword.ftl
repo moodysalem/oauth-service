@@ -72,6 +72,8 @@
                     if (typeof p1 === "string" && p1.length > 0 && p2 === p1) {
                         if (!submitting) {
                             sr.prop("disabled", false);
+                        } else {
+                            sr.prop("disabled", true);
                         }
                     } else {
                         sr.prop("disabled", true);
