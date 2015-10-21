@@ -5,7 +5,7 @@
 
     #form-signin, #form-register, #form-reset {
         padding: 1em;
-        background-color: rgba(0, 0, 0, 0.03);
+        background-color: rgba(0, 0, 0, 0.02);
         margin-bottom: 2em;
     }
 

@@ -69,6 +69,8 @@ public class PasswordResetResource extends BaseResource {
     Long applicationId;
     @QueryParam("code")
     String code;
+    @QueryParam("referer")
+    String referer;
 
     private Application getApplication() {
         if (applicationId == null) {
@@ -93,11 +95,12 @@ public class PasswordResetResource extends BaseResource {
         return lp.size() == 1 ? lp.get(0) : null;
     }
 
-    private PasswordResetCode makeCode(User user) {
+    private PasswordResetCode makeCode(User user, String referer) {
         PasswordResetCode pw = new PasswordResetCode();
         pw.setExpires(new Date(System.currentTimeMillis() + FIVE_MINUTES));
         pw.setUser(user);
         pw.setCode(RandomStringUtil.randomAlphaNumeric(64));
+        pw.setReferer(referer);
         try {
             beginTransaction();
             em.persist(pw);
@@ -172,7 +175,7 @@ public class PasswordResetResource extends BaseResource {
 
         User u = getUser(email, application);
         if (u != null) {
-            PasswordResetCode pc = makeCode(u);
+            PasswordResetCode pc = makeCode(u, referer);
             // do the e-mail
             emailCode(pc);
         }

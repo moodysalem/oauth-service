@@ -11,9 +11,9 @@
             <div class="row" id="form-row">
                 <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
                     <form id="form-reset" method="POST">
-                        <h2>
+                        <h3>
                             Reset Password
-                        </h2>
+                        </h3>
 
                         <div class="form-group">
                             <label class="control-label" for="email">E-mail Address</label>

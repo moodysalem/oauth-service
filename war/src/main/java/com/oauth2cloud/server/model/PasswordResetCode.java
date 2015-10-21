@@ -2,10 +2,7 @@ package com.oauth2cloud.server.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -21,7 +18,12 @@ public class PasswordResetCode extends BaseEntity {
     @Column(name = "expires")
     private Date expires;
 
+    @Column(name ="used")
     private boolean used;
+
+    @Lob
+    @Column(name = "referer")
+    private String referer;
 
     public User getUser() {
         return user;
@@ -53,5 +55,13 @@ public class PasswordResetCode extends BaseEntity {
 
     public void setUsed(boolean used) {
         this.used = used;
+    }
+
+    public String getReferer() {
+        return referer;
+    }
+
+    public void setReferer(String referer) {
+        this.referer = referer;
     }
 }
