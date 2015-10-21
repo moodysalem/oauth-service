@@ -143,6 +143,8 @@ public class PasswordResetResource extends BaseResource {
             rm.setApplication(application);
         }
 
+        rm.setReferer(referer);
+
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
     }
 

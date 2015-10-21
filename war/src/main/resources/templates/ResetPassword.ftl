@@ -21,22 +21,42 @@
                                    placeholder="E-mail address" required autofocus>
                         </div>
 
-                        <div class="form-group">
-                            <button class="btn btn-lg btn-primary btn-block" id="submitReset" type="submit">
-                                <i class="fa fa-envelope-o"></i>
-                                <span>Submit</span>
-                            </button>
-                        </div>
+                        <#if model.referer??>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <a class="btn btn-lg btn-primary btn-block" href="${model.referer?html}">
+                                            <i class="fa fa-arrow-left"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <button class="btn btn-lg btn-success btn-block" id="submitReset" type="submit">
+                                            <i class="fa fa-envelope-o"></i>
+                                            <span>Submit</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <#else>
+                            <div class="form-group">
+                                <button class="btn btn-lg btn-primary btn-block" id="submitReset" type="submit">
+                                    <i class="fa fa-envelope-o"></i>
+                                    <span>Submit</span>
+                                </button>
+                            </div>
+                        </#if>
                     </form>
 
                     <#if model.success>
-                    <div class="alert alert-success">
-                        <i class="fa fa-check"></i>
-                        <strong>Success</strong>
-                        If your e-mail is associated with an account, you will receive an e-mail with a link to a page
-                        to change your password that will work for five minutes.
-                        Click <a href="${model.referer?html}">here</a> to go back.
-                    </div>
+                        <div class="alert alert-success">
+                            <i class="fa fa-check"></i>
+                            <strong>Success</strong>
+                            If your e-mail is associated with an account, you will receive an e-mail with a link to a page
+                            to change your password that will work for five minutes.
+                        </div>
                     </#if>
 
                     <#-- something happened while logging in -->
