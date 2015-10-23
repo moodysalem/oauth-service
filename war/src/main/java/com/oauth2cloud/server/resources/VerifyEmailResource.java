@@ -31,7 +31,7 @@ public class VerifyEmailResource extends BaseResource {
         }
 
         VerifyEmailModel vem = new VerifyEmailModel();
-        vem.setReferer(uc.getReferer());
+        vem.setUserCode(uc);
 
         if (uc.getUser().isVerified()) {
             vem.setMessage(ALREADY_VERIFIED);

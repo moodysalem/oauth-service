@@ -17,7 +17,6 @@ public class VerifyEmailModel {
 
     private UserCode userCode;
     private String message;
-    private String referer;
 
     private AlertLevel alertLevel;
 
@@ -35,14 +34,6 @@ public class VerifyEmailModel {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getReferer() {
-        return referer;
-    }
-
-    public void setReferer(String referer) {
-        this.referer = referer;
     }
 
 }

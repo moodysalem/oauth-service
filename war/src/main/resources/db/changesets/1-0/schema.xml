@@ -83,7 +83,7 @@
     <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
-  <changeSet id="Users Table" author="moody.salem">
+  <changeSet id="User Table" author="moody.salem">
     <createTable tableName="User">
       <column name="id" autoIncrement="true" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
@@ -112,7 +112,7 @@
       <column name="lastName" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="deleted" type="BOOLEAN">
+      <column name="verified" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
     </createTable>

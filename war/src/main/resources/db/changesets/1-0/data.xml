@@ -90,7 +90,7 @@
       <column name="email">moody.salem@gmail.com</column>
       <!-- password "zbJU1sPNGWE0" -->
       <column name="password">$2a$10$2p.CABrjXhTuDZiY5kIhmuMmIe9EsbeG.EgboPC74WLGdIgtAB6V.</column>
-      <column name="deleted" valueBoolean="false"/>
+      <column name="verified" valueBoolean="false"/>
     </insert>
   </changeSet>
 
