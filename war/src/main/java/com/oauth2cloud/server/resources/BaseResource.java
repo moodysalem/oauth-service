@@ -403,8 +403,7 @@ public abstract class BaseResource {
             uq.select(u).where(
                 cb.and(
                     cb.equal(u.get("application"), application),
-                    cb.equal(u.get("email"), email),
-                    cb.equal(u.get("deleted"), false)
+                    cb.equal(u.get("email"), email)
                 )
             )
         ).getResultList();
@@ -475,7 +474,7 @@ public abstract class BaseResource {
      * @param code
      * @return
      */
-    protected UserCode getCode(String code, UserCode.Type type) {
+    protected UserCode getCode(String code, UserCode.Type type, boolean includeUsed) {
         if (code == null) {
             return null;
         }
@@ -484,8 +483,9 @@ public abstract class BaseResource {
         pw.select(rp).where(
             cb.equal(rp.get("code"), code),
             cb.greaterThan(rp.<Date>get("expires"), new Date()),
-            cb.equal(rp.get("used"), false),
-            cb.equal(rp.get("type"), type)
+            cb.equal(rp.get("type"), type),
+            // if we are including used, then use a predicate that will always be true
+            includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
         );
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;

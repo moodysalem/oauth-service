@@ -29,8 +29,8 @@ public class User extends BaseEntity {
     @Column(name = "lastName")
     private String lastName;
 
-    @Column(name = "deleted")
-    private boolean deleted;
+    @Column(name = "verified")
+    private boolean verified;
 
     public String getFirstName() {
         return firstName;
@@ -72,11 +72,11 @@ public class User extends BaseEntity {
         this.password = password;
     }
 
-    public boolean isDeleted() {
-        return deleted;
+    public boolean isVerified() {
+        return verified;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public void setVerified(boolean verified) {
+        this.verified = verified;
     }
 }

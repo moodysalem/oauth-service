@@ -257,7 +257,11 @@ public class AuthorizeResource extends BaseResource {
                             break;
                     }
                     if (user != null) {
-                        return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
+                        if (!user.isVerified()) {
+                            ar.setLoginError("Your e-mail is not yet verified.");
+                        } else {
+                            return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
+                        }
                     }
                 }
                 return Response.ok(new Viewable("/templates/Authorize", ar)).build();
@@ -350,7 +354,7 @@ public class AuthorizeResource extends BaseResource {
 
     private void sendVerificationEmail(User user) {
         UserCode uc = makeCode(user, containerRequestContext.getUriInfo().getRequestUri().toString(),
-            UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH));
+            UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
 
         UserCodeEmailModel ucem = new UserCodeEmailModel();
         ucem.setUserCode(uc);

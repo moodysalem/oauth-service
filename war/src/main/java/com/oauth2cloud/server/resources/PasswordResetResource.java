@@ -48,7 +48,7 @@ public class PasswordResetResource extends BaseResource {
         ResetPasswordModel rm = new ResetPasswordModel();
 
         if (code != null) {
-            UserCode pcode = getCode(code, UserCode.Type.RESET);
+            UserCode pcode = getCode(code, UserCode.Type.RESET, false);
             if (pcode != null) {
                 rm.setUserCode(pcode);
                 return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
@@ -73,7 +73,7 @@ public class PasswordResetResource extends BaseResource {
         ResetPasswordModel rm = new ResetPasswordModel();
 
         if (code != null) {
-            UserCode pc = getCode(code, UserCode.Type.RESET);
+            UserCode pc = getCode(code, UserCode.Type.RESET, false);
             if (pc == null) {
                 return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
             }
