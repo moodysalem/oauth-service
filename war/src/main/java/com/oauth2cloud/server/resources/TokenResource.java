@@ -264,7 +264,7 @@ public class TokenResource extends BaseResource {
         }
         long t2 = System.currentTimeMillis();
         try {
-            long sleepTime = THREE_SECONDS - (t2 - t1);
+            long sleepTime = MINIMUM_LOGIN_TIME - (t2 - t1);
             if (sleepTime > 0) {
                 Thread.sleep(sleepTime);
             }

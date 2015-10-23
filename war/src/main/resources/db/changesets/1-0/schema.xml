@@ -392,8 +392,8 @@
     <sql dbms="mysql">ALTER TABLE LoginCookie CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
-  <changeSet id="PasswordResetCode Table" author="moody.salem">
-    <createTable tableName="PasswordResetCode">
+  <changeSet id="UserCode Table" author="moody.salem">
+    <createTable tableName="UserCode">
       <column name="id" autoIncrement="true" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
       </column>
@@ -409,6 +409,9 @@
       <column name="userId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
+      <column name="type" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
       <column name="code" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
@@ -420,7 +423,7 @@
       </column>
       <column name="referer" type="${TEXT}"/>
     </createTable>
-    <sql dbms="mysql">ALTER TABLE PasswordResetCode CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
+    <sql dbms="mysql">ALTER TABLE UserCode CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
 

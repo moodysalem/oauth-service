@@ -1,19 +1,17 @@
 package com.oauth2cloud.server.resources;
 
-import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.model.Application;
-import com.oauth2cloud.server.model.PasswordResetCode;
 import com.oauth2cloud.server.model.User;
+import com.oauth2cloud.server.model.UserCode;
+import com.oauth2cloud.server.resources.response.models.ResetPasswordModel;
+import com.oauth2cloud.server.resources.response.models.UserCodeEmailModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 
 @Path("reset")
@@ -22,62 +20,18 @@ import java.util.logging.Level;
 public class PasswordResetResource extends BaseResource {
 
     public static final String INVALID_RESET_PASSWORD_URL = "Invalid reset password URL.";
-    public static final String INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL = "Invalid or expired link. Please request another reset password e-mail.";
+    public static final String INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL =
+        "Invalid or expired link. Please request another reset password e-mail.";
     public static final String PASSWORD_IS_REQUIRED_AND_WAS_NOT_INCLUDED = "Password is required and was not included.";
-    public static final String AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD = "An internal server error prevented you from changing your password.";
-
-    public static class ResetPasswordModel {
-        private Application application;
-        private String error;
-        private PasswordResetCode passwordResetCode;
-        private boolean success;
-        private String referer;
-
-        public String getError() {
-            return error;
-        }
-
-        public void setError(String error) {
-            this.error = error;
-        }
-
-        public Application getApplication() {
-            return application;
-        }
-
-        public void setApplication(Application application) {
-            this.application = application;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-
-        public PasswordResetCode getPasswordResetCode() {
-            return passwordResetCode;
-        }
-
-        public void setPasswordResetCode(PasswordResetCode passwordResetCode) {
-            this.passwordResetCode = passwordResetCode;
-        }
-
-        public String getReferer() {
-            return referer;
-        }
-
-        public void setReferer(String referer) {
-            this.referer = referer;
-        }
-    }
+    public static final String AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD =
+        "An internal server error prevented you from changing your password.";
 
     @QueryParam("applicationId")
     Long applicationId;
+
     @QueryParam("code")
     String code;
+
     @QueryParam("referer")
     String referer;
 
@@ -89,48 +43,14 @@ public class PasswordResetResource extends BaseResource {
     }
 
 
-    private PasswordResetCode getCode(String code) {
-        if (code == null) {
-            return null;
-        }
-        CriteriaQuery<PasswordResetCode> pw = cb.createQuery(PasswordResetCode.class);
-        Root<PasswordResetCode> rp = pw.from(PasswordResetCode.class);
-        pw.select(rp).where(
-            cb.equal(rp.get("code"), code),
-            cb.greaterThan(rp.<Date>get("expires"), new Date()),
-            cb.equal(rp.get("used"), false)
-        );
-        List<PasswordResetCode> lp = em.createQuery(pw).getResultList();
-        return lp.size() == 1 ? lp.get(0) : null;
-    }
-
-    private PasswordResetCode makeCode(User user, String referer) {
-        PasswordResetCode pw = new PasswordResetCode();
-        pw.setExpires(new Date(System.currentTimeMillis() + FIVE_MINUTES));
-        pw.setUser(user);
-        pw.setCode(RandomStringUtil.randomAlphaNumeric(64));
-        pw.setReferer(referer);
-        try {
-            beginTransaction();
-            em.persist(pw);
-            commit();
-        } catch (Exception e) {
-            rollback();
-            pw = null;
-            LOG.log(Level.SEVERE, "Failed to create password reset code", e);
-        }
-        return pw;
-    }
-
-
     @GET
     public Response sendEmailPage(@QueryParam("code") String code) {
         ResetPasswordModel rm = new ResetPasswordModel();
 
         if (code != null) {
-            PasswordResetCode pcode = getCode(code);
+            UserCode pcode = getCode(code, UserCode.Type.RESET);
             if (pcode != null) {
-                rm.setPasswordResetCode(pcode);
+                rm.setUserCode(pcode);
                 return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
             } else {
                 return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
@@ -153,7 +73,7 @@ public class PasswordResetResource extends BaseResource {
         ResetPasswordModel rm = new ResetPasswordModel();
 
         if (code != null) {
-            PasswordResetCode pc = getCode(code);
+            UserCode pc = getCode(code, UserCode.Type.RESET);
             if (pc == null) {
                 return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
             }
@@ -173,7 +93,7 @@ public class PasswordResetResource extends BaseResource {
                 return error(AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD);
             }
 
-            rm.setPasswordResetCode(pc);
+            rm.setUserCode(pc);
             return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
         }
 
@@ -186,7 +106,7 @@ public class PasswordResetResource extends BaseResource {
 
         User u = getUser(email, application);
         if (u != null) {
-            PasswordResetCode pc = makeCode(u, referer);
+            UserCode pc = makeCode(u, referer, UserCode.Type.RESET, new Date(System.currentTimeMillis() + FIVE_MINUTES));
             // do the e-mail
             emailCode(pc);
         }
@@ -197,35 +117,14 @@ public class PasswordResetResource extends BaseResource {
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
     }
 
-    public static class EmailModel {
-        private PasswordResetCode passwordResetCode;
-        private String url;
-
-        public PasswordResetCode getPasswordResetCode() {
-            return passwordResetCode;
-        }
-
-        public void setPasswordResetCode(PasswordResetCode passwordResetCode) {
-            this.passwordResetCode = passwordResetCode;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-    }
-
-    private void emailCode(PasswordResetCode pc) {
+    private void emailCode(UserCode pc) {
         String url = containerRequestContext.getUriInfo().getRequestUriBuilder().replacePath("reset")
             .replaceQuery("").queryParam("code", pc.getCode()).toString();
-        EmailModel em = new EmailModel();
-        em.setPasswordResetCode(pc);
-        em.setUrl(url);
+        UserCodeEmailModel prem = new UserCodeEmailModel();
+        prem.setUserCode(pc);
+        prem.setUrl(url);
         sendEmail(pc.getUser().getEmail(), "Your password reset code from " + pc.getUser().getApplication().getName(),
-            "PasswordReset.ftl", em);
+            "PasswordReset.ftl", prem);
     }
 
 

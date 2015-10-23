@@ -5,6 +5,7 @@ import com.oauth2cloud.server.model.*;
 import com.oauth2cloud.server.model.Application;
 import com.oauth2cloud.server.resources.response.models.AuthorizeModel;
 import com.oauth2cloud.server.resources.response.models.PermissionsModel;
+import com.oauth2cloud.server.resources.response.models.UserCodeEmailModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -263,7 +264,37 @@ public class AuthorizeResource extends BaseResource {
 
             // handle the registration action
             case "register":
-                ar.setRegisterError("Not yet implemented.");
+                String firstName = formParams.getFirst("firstName");
+                String lastName = formParams.getFirst("lastName");
+                String email = formParams.getFirst("email");
+                String password = formParams.getFirst("password");
+                if (isEmpty(firstName) || isEmpty(lastName) || isEmpty(email) || isEmpty(password)) {
+                    ar.setRegisterError("First name, last name, e-mail address and password are all required fields.");
+                } else {
+                    User existingUser = getUser(email, client.getApplication());
+                    if (existingUser != null) {
+                        ar.setRegisterError("E-mail is already in use.");
+                    } else {
+                        User nu = new User();
+                        nu.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+                        nu.setApplication(client.getApplication());
+                        nu.setEmail(email);
+                        nu.setFirstName(firstName);
+                        nu.setLastName(lastName);
+                        try {
+                            beginTransaction();
+                            em.persist(nu);
+                            commit();
+
+                            sendVerificationEmail(nu);
+                            ar.setRegisterSuccess(true);
+                        } catch (Exception e) {
+                            LOG.log(Level.SEVERE, "Failed to register new user", e);
+                            rollback();
+                            ar.setRegisterError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+                        }
+                    }
+                }
                 return Response.ok(new Viewable("/templates/Authorize", ar)).build();
 
             // handle the permissions action
@@ -315,6 +346,18 @@ public class AuthorizeResource extends BaseResource {
             default:
                 return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
+    }
+
+    private void sendVerificationEmail(User user) {
+        UserCode uc = makeCode(user, containerRequestContext.getUriInfo().getRequestUri().toString(),
+            UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH));
+
+        UserCodeEmailModel ucem = new UserCodeEmailModel();
+        ucem.setUserCode(uc);
+        ucem.setUrl(containerRequestContext.getUriInfo().getRequestUriBuilder()
+            .replacePath("verify").replaceQueryParam("code", uc.getCode()).build().toString());
+
+        sendEmail(user.getEmail(), "Your confirmation e-mail for " + user.getApplication().getName(), "VerifyEmail", ucem);
     }
 
     private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
@@ -378,9 +421,9 @@ public class AuthorizeResource extends BaseResource {
 
         // prevent timing attacks and brute forcing by making this type of request take 3 seconds
         long t2 = System.currentTimeMillis();
-        if (t2 - t1 < THREE_SECONDS) {
+        if (t2 - t1 < MINIMUM_LOGIN_TIME) {
             try {
-                Thread.sleep(THREE_SECONDS - (t2 - t1));
+                Thread.sleep(MINIMUM_LOGIN_TIME - (t2 - t1));
             } catch (InterruptedException e) {
                 LOG.log(Level.SEVERE, "Thread sleep interrupted", e);
             }

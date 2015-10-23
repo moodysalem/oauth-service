@@ -5,12 +5,12 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
-                    <h1 class="page-header text-center">${model.passwordResetCode.user.application.name?html}</h1>
+                    <h1 class="page-header text-center">${model.userCode.user.application.name?html}</h1>
                 </div>
             </div>
             <div class="row" id="form-row">
                 <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
-                <#if !model.passwordResetCode.used>
+                <#if !model.userCode.used>
                     <form id="form-reset" method="POST">
                         <h2>
                             Change Password
@@ -27,7 +27,7 @@
                                    placeholder="Confirm New Password" required>
                         </div>
 
-                        <input type="hidden" name="code" value="${model.passwordResetCode.code?html}"/>
+                        <input type="hidden" name="code" value="${model.userCode.code?html}"/>
 
                         <div class="form-group">
                             <button class="btn btn-lg btn-primary btn-block" id="submitReset" disabled type="submit">
@@ -40,8 +40,8 @@
                     <div class="alert alert-success">
                         <i class="fa fa-check"></i>
                         <strong>Success</strong> Your password has been changed.
-                        <#if model.passwordResetCode.referer??>
-                            Click <a class="alert-link" href="${model.passwordResetCode.referer?html}">here</a> to
+                        <#if model.userCode.referer??>
+                            Click <a class="alert-link" href="${model.userCode.referer?html}">here</a> to
                             return.
                         </#if>
                     </div>

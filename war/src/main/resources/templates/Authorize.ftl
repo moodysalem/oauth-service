@@ -250,6 +250,13 @@
                         ${model.registerError}
                         </div>
                     </#if>
+                    <#if model.registerSuccess>
+                        <div class="alert alert-success">
+                            <i class="fa fa-check"></i>
+                            <strong>Success</strong>
+                            You will receive a confirmation e-mail. You must confirm your e-mail before you can sign in.
+                        </div>
+                    </#if>
 
                 </div>
             </div>

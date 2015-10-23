@@ -25,7 +25,7 @@
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <a class="btn btn-lg btn-primary btn-block" href="${model.referer?html}">
+                                        <a class="btn btn-lg btn-primary btn-block" id="back" href="${model.referer?html}">
                                             <i class="fa fa-arrow-left"></i>
                                             <span>Back</span>
                                         </a>
@@ -75,8 +75,8 @@
             $(function () {
                 $("#form-reset").submit(function () {
                     $("#form-reset").find("input").prop("readOnly", true).end()
-                            .find("#submitReset").prop("disabled", true)
-                            .find("span").text("Working...").end()
+                            .find("#submitReset").prop("disabled", true).find("span").text("Working...").end()
+                            .find("#back").prop("disabled", true).end()
                             .find("i").removeClass("fa-envelope-o").addClass("fa-pulse fa-spinner");
                 });
             });

@@ -10,6 +10,7 @@ public class AuthorizeModel {
     private Client client;
     private String loginError;
     private String registerError;
+    private boolean registerSuccess;
 
     public Client getClient() {
         return client;
@@ -57,5 +58,13 @@ public class AuthorizeModel {
 
     public void setRegisterError(String registerError) {
         this.registerError = registerError;
+    }
+
+    public boolean isRegisterSuccess() {
+        return registerSuccess;
+    }
+
+    public void setRegisterSuccess(boolean registerSuccess) {
+        this.registerSuccess = registerSuccess;
     }
 }

@@ -5,8 +5,23 @@ import com.leaguekit.hibernate.model.BaseEntity;
 import javax.persistence.*;
 import java.util.Date;
 
+/**
+ * These objects are created when we need something specific to a user in an application, but not specific to a client
+ */
 @Entity
-public class PasswordResetCode extends BaseEntity {
+public class UserCode extends BaseEntity {
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public enum Type {
+        VERIFY, RESET
+    }
 
     @ManyToOne
     @JoinColumn(name = "userId")
@@ -18,12 +33,16 @@ public class PasswordResetCode extends BaseEntity {
     @Column(name = "expires")
     private Date expires;
 
-    @Column(name ="used")
+    @Column(name = "used")
     private boolean used;
 
     @Lob
     @Column(name = "referer")
     private String referer;
+
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private Type type;
 
     public User getUser() {
         return user;

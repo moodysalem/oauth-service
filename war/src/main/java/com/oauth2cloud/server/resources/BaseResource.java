@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
+import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.model.*;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -37,7 +38,9 @@ import java.util.logging.Logger;
 
 public abstract class BaseResource {
     public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
-    public static final long THREE_SECONDS = 3000L;
+    // this is the minimum amount of time we should wait to validate a password
+    // this serves two purposes - minimizing the threat of brute force attacks, and preventing timing attacks
+    public static final long MINIMUM_LOGIN_TIME = 1000L;
     public static final String COOKIE_NAME_PREFIX = "_AID_";
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
     private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
@@ -461,6 +464,63 @@ public abstract class BaseResource {
             LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
         }
     }
+
+    protected boolean isEmpty(String check) {
+        return check == null || check.trim().length() == 0;
+    }
+
+    /**
+     * Get a UserCode based on the user code string
+     *
+     * @param code
+     * @return
+     */
+    protected UserCode getCode(String code, UserCode.Type type) {
+        if (code == null) {
+            return null;
+        }
+        CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
+        Root<UserCode> rp = pw.from(UserCode.class);
+        pw.select(rp).where(
+            cb.equal(rp.get("code"), code),
+            cb.greaterThan(rp.<Date>get("expires"), new Date()),
+            cb.equal(rp.get("used"), false),
+            cb.equal(rp.get("type"), type)
+        );
+        List<UserCode> lp = em.createQuery(pw).getResultList();
+        return lp.size() == 1 ? lp.get(0) : null;
+    }
+
+
+    /**
+     * Make a UserCode
+     *
+     * @param user    user for which the code is created
+     * @param referer the referer to which the user should be redirected after using the code
+     * @param type    the type of code
+     * @param expires when it expires
+     * @return
+     */
+    protected UserCode makeCode(User user, String referer, UserCode.Type type, Date expires) {
+        UserCode pw = new UserCode();
+        pw.setExpires(expires);
+        pw.setUser(user);
+        pw.setCode(RandomStringUtil.randomAlphaNumeric(64));
+        pw.setReferer(referer);
+        pw.setType(type);
+        pw.setExpires(expires);
+        try {
+            beginTransaction();
+            em.persist(pw);
+            commit();
+        } catch (Exception e) {
+            rollback();
+            pw = null;
+            LOG.log(Level.SEVERE, "Failed to create password reset code", e);
+        }
+        return pw;
+    }
+
 
     /**
      * Process a mail template
