@@ -278,9 +278,9 @@ public class AuthorizeResource extends BaseResource {
                         User nu = new User();
                         nu.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
                         nu.setApplication(client.getApplication());
-                        nu.setEmail(email);
-                        nu.setFirstName(firstName);
-                        nu.setLastName(lastName);
+                        nu.setEmail(email.trim());
+                        nu.setFirstName(firstName.trim());
+                        nu.setLastName(lastName.trim());
                         try {
                             beginTransaction();
                             em.persist(nu);
@@ -355,9 +355,11 @@ public class AuthorizeResource extends BaseResource {
         UserCodeEmailModel ucem = new UserCodeEmailModel();
         ucem.setUserCode(uc);
         ucem.setUrl(containerRequestContext.getUriInfo().getRequestUriBuilder()
-            .replacePath("verify").replaceQueryParam("code", uc.getCode()).build().toString());
+            .replacePath("verify").replaceQuery("").queryParam("code", uc.getCode())
+            .build().toString());
 
-        sendEmail(user.getEmail(), "Your confirmation e-mail for " + user.getApplication().getName(), "VerifyEmail", ucem);
+        sendEmail(user.getEmail(), "Your confirmation e-mail for " + user.getApplication().getName(), "VerifyEmail.ftl",
+            ucem);
     }
 
     private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
