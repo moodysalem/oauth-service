@@ -17,6 +17,8 @@
                     </p>
 
                     <form method="POST">
+                        <input type="hidden" name="action" value="permissions"/>
+
                         <#list model.clientScopes as cScope>
                             <div class="well well-sm">
                                 <div class="row">

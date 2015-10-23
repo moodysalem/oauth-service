@@ -3,6 +3,8 @@ package com.oauth2cloud.server.resources;
 import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.model.*;
 import com.oauth2cloud.server.model.Application;
+import com.oauth2cloud.server.resources.response.models.AuthorizeModel;
+import com.oauth2cloud.server.resources.response.models.PermissionsModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -11,7 +13,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class AuthorizeResource extends BaseResource {
     public static final String INVALID_LOGIN_CREDENTIALS = "Invalid login credentials.";
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
+    public static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
+        "Invalid request. Please contact an administrator if this continues.";
 
     @QueryParam("response_type")
     String responseType;
@@ -55,7 +58,7 @@ public class AuthorizeResource extends BaseResource {
     @Path("logout")
     public Response logout() {
         if (clientId == null) {
-            return error("Client ID is a required query parameter to log out.");
+            return error("'client_id' is a required query parameter to log out.");
         }
 
         Client c = getClient(clientId);
@@ -165,92 +168,6 @@ public class AuthorizeResource extends BaseResource {
         return null;
     }
 
-    public static class AuthorizeModel {
-        private String requestUrl;
-        private String baseUrl;
-        private Client client;
-        private String loginError;
-
-        public Client getClient() {
-            return client;
-        }
-
-        public void setClient(Client client) {
-            this.client = client;
-        }
-
-        public String getLoginError() {
-            return loginError;
-        }
-
-        public void setLoginError(String loginError) {
-            this.loginError = loginError;
-        }
-
-        public String getRequestUrl() {
-            return requestUrl;
-        }
-
-        public void setRequestUrl(String requestUrl) {
-            this.requestUrl = requestUrl;
-        }
-
-        public String getBaseUrl() {
-            return baseUrl;
-        }
-
-        public void setBaseUrl(String baseUrl) {
-            this.baseUrl = baseUrl;
-        }
-
-        public void setURLs(ContainerRequestContext containerRequestContext) {
-            if (containerRequestContext == null) {
-                return;
-            }
-            setRequestUrl(containerRequestContext.getUriInfo().getRequestUri().toString());
-            setBaseUrl(containerRequestContext.getUriInfo().getBaseUri().toString());
-        }
-    }
-
-    public static class PermissionsModel {
-        private Client client;
-        private Token token;
-        private List<ClientScope> clientScopes;
-        private boolean rememberMe;
-
-        public Token getToken() {
-            return token;
-        }
-
-        public void setToken(Token token) {
-            this.token = token;
-        }
-
-        public List<ClientScope> getClientScopes() {
-            return clientScopes;
-        }
-
-        public void setClientScopes(List<ClientScope> clientScopes) {
-            this.clientScopes = clientScopes;
-        }
-
-        public boolean isRememberMe() {
-            return rememberMe;
-        }
-
-        public void setRememberMe(boolean rememberMe) {
-            this.rememberMe = rememberMe;
-        }
-
-        public Client getClient() {
-            return client;
-        }
-
-        public void setClient(Client client) {
-            this.client = client;
-        }
-    }
-
     /**
      * Validates the request parameters and shows a login screen
      *
@@ -279,7 +196,7 @@ public class AuthorizeResource extends BaseResource {
         ar.setClient(client);
         ar.setURLs(containerRequestContext);
 
-        return Response.ok(new Viewable("/templates/Login", ar)).build();
+        return Response.ok(new Viewable("/templates/Authorize", ar)).build();
     }
 
 
@@ -294,84 +211,110 @@ public class AuthorizeResource extends BaseResource {
     public Response login(MultivaluedMap<String, String> formParams) {
         boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
 
-        String loginToken = formParams.getFirst("login_token");
         // validate the client id stuff again
         Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
         }
 
+        String action = formParams.getFirst("action");
+        if (action == null) {
+            return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+        }
+
+
         AuthorizeModel ar = new AuthorizeModel();
         ar.setURLs(containerRequestContext);
         Client client = getClient(clientId);
         ar.setClient(client);
 
-        // they just completed the second step of the login
-        if (loginToken != null) {
-            Token t = getPermissionToken(loginToken, client);
-            if (t == null) {
-                ar.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-            } else {
-                if (t.getExpires().before(new Date())) {
-                    ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
-                } else {
-                    // first get all the client scopes we will try to approve or check if are approved
-                    List<ClientScope> clientScopes = getScopes(client, scopes);
-                    // we'll populate this as we loop through the scopes
-                    List<AcceptedScope> tokenScopes = new ArrayList<>();
-                    // get all the scope ids that were explicitly granted
-                    Set<Long> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
-                        try {
-                            return s != null && s.startsWith("SCOPE") &&
-                                "on".equalsIgnoreCase(formParams.getFirst(s)) ?
-                                Long.parseLong(s.substring("SCOPE".length())) : null;
-                        } catch (Exception e) {
-                            return null;
-                        }
-                    }).filter((i) -> i != null).collect(Collectors.toSet());
-                    for (ClientScope cs : clientScopes) {
-                        // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
-                        if (!cs.getPriority().equals(ClientScope.Priority.ASK) || acceptedScopeIds.contains(cs.getScope().getId())) {
-                            // create/find the accepted scope for this client scope
-                            tokenScopes.add(acceptScope(t.getUser(), cs));
+        // this resource is used for a few different actions which are represented as hidden inputs in the forms
+        // this is done so that the query string can be preserved across all requests without any special handling
+        switch (action) {
+            // handle the login action
+            case "login":
+                // get the KIND of login we should attempt
+                Provider p = getProvider(formParams);
+
+                // by default, the credentials are invalid
+                ar.setLoginError(INVALID_LOGIN_CREDENTIALS);
+
+                if (p != null) {
+                    User user = null;
+                    switch (p) {
+                        case EMAIL:
+                            user = doEmailLogin(client.getApplication(), formParams);
+                            break;
+                        case GOOGLE:
+                            user = doGoogleLogin(client.getApplication(), formParams);
+                            break;
+                        case FACEBOOK:
+                            user = doFacebookLogin(client.getApplication(), formParams);
+                            break;
+                        case AMAZON:
+                            user = doAmazonLogin(client.getApplication(), formParams);
+                            break;
+                    }
+                    if (user != null) {
+                        return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
+                    }
+                }
+                return Response.ok(new Viewable("/templates/Authorize", ar)).build();
+
+            // handle the registration action
+            case "register":
+                ar.setRegisterError("Not yet implemented.");
+                return Response.ok(new Viewable("/templates/Authorize", ar)).build();
+
+            // handle the permissions action
+            case "permissions":
+                String loginToken = formParams.getFirst("login_token");
+
+
+                // they just completed the second step of the login
+                if (loginToken != null) {
+                    Token t = getPermissionToken(loginToken, client);
+                    if (t == null) {
+                        ar.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+                    } else {
+                        if (t.getExpires().before(new Date())) {
+                            ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
+                        } else {
+                            // first get all the client scopes we will try to approve or check if are approved
+                            List<ClientScope> clientScopes = getScopes(client, scopes);
+                            // we'll populate this as we loop through the scopes
+                            List<AcceptedScope> tokenScopes = new ArrayList<>();
+                            // get all the scope ids that were explicitly granted
+                            Set<Long> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
+                                try {
+                                    return s != null && s.startsWith("SCOPE") &&
+                                        "on".equalsIgnoreCase(formParams.getFirst(s)) ?
+                                        Long.parseLong(s.substring("SCOPE".length())) : null;
+                                } catch (Exception e) {
+                                    return null;
+                                }
+                            }).filter((i) -> i != null).collect(Collectors.toSet());
+                            for (ClientScope cs : clientScopes) {
+                                // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
+                                if (!cs.getPriority().equals(ClientScope.Priority.ASK) ||
+                                    acceptedScopeIds.contains(cs.getScope().getId())) {
+                                    // create/find the accepted scope for this client scope
+                                    tokenScopes.add(acceptScope(t.getUser(), cs));
+                                }
+                            }
+                            Token.Type type = getTokenType(responseType);
+                            // now create the token we will be returning to the user
+                            Token token = generateToken(type, t, tokenScopes);
+                            return getRedirectResponse(redirectUri, state, token, rememberMe);
                         }
                     }
-                    Token.Type type = getTokenType(responseType);
-                    // now create the token we will be returning to the user
-                    Token token = generateToken(type, t, tokenScopes);
-                    return getRedirectResponse(redirectUri, state, token, rememberMe);
+                } else {
+                    return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
                 }
-            }
-        } else {
-            // get the kind of login we should attempt
-            Provider p = getProvider(formParams);
-
-            // by default, the credentials are invalid
-            ar.setLoginError(INVALID_LOGIN_CREDENTIALS);
-
-            if (p != null) {
-                User user = null;
-                switch (p) {
-                    case EMAIL:
-                        user = doEmailLogin(client.getApplication(), formParams);
-                        break;
-                    case GOOGLE:
-                        user = doGoogleLogin(client.getApplication(), formParams);
-                        break;
-                    case FACEBOOK:
-                        user = doFacebookLogin(client.getApplication(), formParams);
-                        break;
-                    case AMAZON:
-                        user = doAmazonLogin(client.getApplication(), formParams);
-                        break;
-                }
-                if (user != null) {
-                    return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
-                }
-            }
+                return Response.ok(new Viewable("/templates/Authorize", ar)).build();
+            default:
+                return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
-
-        return Response.ok(new Viewable("/templates/Login", ar)).build();
     }
 
     private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {

@@ -15,6 +15,8 @@
 
                 <div class="col-lg-4 col-lg-offset-2 col-sm-6">
                     <form id="form-signin" method="POST">
+                        <input type="hidden" name="action" value="login"/>
+
                         <h2>
                             Sign In<br/>
                             <small>${model.client.name?html}</small>
@@ -159,8 +161,18 @@
                             </#if>
                             </div>
                         </div>
-
                     </form>
+
+                    <script>
+                        $(function () {
+                            $("#form-signin").submit(function () {
+                                $("#form-signin").find("input").prop("readOnly", true).end()
+                                        .find("button").prop("disabled", true)
+                                        .find("#submitLogin span").text("Signing in...").end()
+                                        .find("i.fa-sign-in").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
+                            });
+                        });
+                    </script>
 
 
                 <#-- something happened while logging in -->
@@ -173,7 +185,9 @@
                 </#if>
                 </div>
                 <div class="col-lg-4 col-sm-6">
-                    <form id="form-register" method="POST" action="/register">
+                    <form id="form-register" method="POST">
+                        <input type="hidden" name="action" value="register"/>
+
                         <h2 class="form-signin-heading">
                             Register
                         </h2>
@@ -217,26 +231,28 @@
                             <span>Register</span>
                         </button>
                     </form>
+
+                    <script>
+                        $(function () {
+                            $("#form-register").submit(function () {
+                                $("#form-register").find("input").prop("readOnly", true).end()
+                                        .find("#submitRegister").prop("disabled", true)
+                                        .find("span").text("Submitting...").end()
+                                        .find("i").removeClass("fa-user-plus").addClass("fa-pulse fa-spinner");
+                            });
+                        });
+                    </script>
+
+                    <#if model.registerError??>
+                        <div class="alert alert-danger">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            <strong>Error</strong>
+                        ${model.registerError}
+                        </div>
+                    </#if>
+
                 </div>
             </div>
         </div>
-
-        <script>
-            $(function () {
-                $("#form-signin").submit(function () {
-                    $("#form-signin").find("input").prop("readOnly", true).end()
-                            .find("button").prop("disabled", true)
-                            .find("#submitLogin span").text("Signing in...").end()
-                            .find("i.fa-sign-in").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
-                });
-
-                $("#form-register").submit(function () {
-                    $("#form-register").find("input").prop("readOnly", true).end()
-                            .find("#submitRegister").prop("disabled", true)
-                            .find("span").text("Submitting...").end()
-                            .find("i").removeClass("fa-user-plus").addClass("fa-pulse fa-spinner");
-                });
-            });
-        </script>
     </body>
 </html>
