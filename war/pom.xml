@@ -37,6 +37,11 @@
       <artifactId>jbcrypt</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.restfb</groupId>
+      <artifactId>restfb</artifactId>
+    </dependency>
+
     <!-- TESTING DEPENDENCIES -->
     <dependency>
       <groupId>com.leaguekit</groupId>
