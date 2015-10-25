@@ -372,8 +372,10 @@ public abstract class BaseResource {
      */
     protected void rollback() {
         if (etx != null) {
-            LOG.info("Rolling back transaction");
-            etx.rollback();
+            if (etx.isActive()) {
+                LOG.info("Rolling back transaction");
+                etx.rollback();
+            }
             etx = null;
         }
     }

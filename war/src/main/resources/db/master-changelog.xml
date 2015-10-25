@@ -9,10 +9,12 @@
   <property name="TEXT" dbms="mysql" value="LONGTEXT"/>
   <property name="TEXT" value="TEXT"/>
 
-  <property name="now" value="CURRENT_TIMESTAMP()" />
+  <property name="now" value="CURRENT_TIMESTAMP()"/>
 
+  <property name="BOOLEAN" dbms="mysql" value="TINYINT(1)"/>
+  <property name="BOOLEAN" value="BOOLEAN"/>
 
-  <include file="changesets/1-0/schema.xml" relativeToChangelogFile="true" />
-  <include file="changesets/1-0/data.xml" relativeToChangelogFile="true" />
+  <include file="changesets/1-0/schema.xml" relativeToChangelogFile="true"/>
+  <include file="changesets/1-0/data.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

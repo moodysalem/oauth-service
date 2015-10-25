@@ -9,6 +9,7 @@ import com.oauth2cloud.server.resources.response.models.PermissionsModel;
 import com.oauth2cloud.server.resources.response.models.UserCodeEmailModel;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.Parameter;
 import com.restfb.Version;
 import com.restfb.types.*;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -385,10 +386,10 @@ public class AuthorizeResource extends BaseResource {
         }
         String token = formParams.getFirst("facebookToken");
 
-        if (token == null || token.trim().length() == 0) {
+        if (isEmpty(token)) {
             return null;
         }
-        FacebookClient fbc = new DefaultFacebookClient(application.getFacebookAppId().toString(), application.getFacebookAppSecret(), Version.VERSION_2_5);
+        FacebookClient fbc = new DefaultFacebookClient(token, application.getFacebookAppSecret(), Version.VERSION_2_5);
         FacebookClient.DebugTokenInfo dbt = fbc.debugToken(token);
         if (!dbt.isValid()) {
             return null;
@@ -402,8 +403,12 @@ public class AuthorizeResource extends BaseResource {
             return null;
         }
 
-        com.restfb.types.User fbUser = fbc.fetchObject("me", com.restfb.types.User.class);
+        com.restfb.types.User fbUser = fbc.fetchObject("me", com.restfb.types.User.class, Parameter.with("fields", "email,first_name,last_name"));
         String email = fbUser.getEmail();
+        if (email == null) {
+            return null;
+        }
+
         User user = getUser(email, application);
         if (user != null) {
             user.setFirstName(fbUser.getFirstName());
@@ -416,6 +421,7 @@ public class AuthorizeResource extends BaseResource {
             } catch (Exception e) {
                 rollback();
                 LOG.log(Level.SEVERE, "Failed to update user", e);
+                user = null;
             }
             return user;
         } else {
@@ -452,16 +458,16 @@ public class AuthorizeResource extends BaseResource {
     }
 
     public Provider getProvider(MultivaluedMap<String, String> formParams) {
-        if (formParams.getFirst("email") != null && formParams.getFirst("password") != null) {
+        if (!isEmpty(formParams.getFirst("email"))&& !isEmpty(formParams.getFirst("password"))) {
             return Provider.EMAIL;
         }
-        if (formParams.getFirst("facebookToken") != null) {
+        if (!isEmpty(formParams.getFirst("facebookToken"))) {
             return Provider.FACEBOOK;
         }
-        if (formParams.getFirst("googleToken") != null) {
+        if (!isEmpty(formParams.getFirst("googleToken"))) {
             return Provider.GOOGLE;
         }
-        if (formParams.getFirst("amazonToken") != null) {
+        if (!isEmpty(formParams.getFirst("amazonToken"))) {
             return Provider.AMAZON;
         }
         return null;
