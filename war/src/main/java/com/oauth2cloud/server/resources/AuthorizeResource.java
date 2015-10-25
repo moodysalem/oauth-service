@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.resources;
 
+import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.model.*;
 import com.oauth2cloud.server.model.Application;
@@ -249,19 +250,24 @@ public class AuthorizeResource extends BaseResource {
 
                 if (p != null) {
                     User user = null;
-                    switch (p) {
-                        case EMAIL:
-                            user = doEmailLogin(client.getApplication(), formParams);
-                            break;
-                        case GOOGLE:
-                            user = doGoogleLogin(client.getApplication(), formParams);
-                            break;
-                        case FACEBOOK:
-                            user = doFacebookLogin(client.getApplication(), formParams);
-                            break;
-                        case AMAZON:
-                            user = doAmazonLogin(client.getApplication(), formParams);
-                            break;
+                    try {
+                        switch (p) {
+                            case EMAIL:
+                                user = doEmailLogin(client.getApplication(), formParams);
+                                break;
+                            case GOOGLE:
+                                user = doGoogleLogin(client.getApplication(), formParams);
+                                break;
+                            case FACEBOOK:
+                                user = doFacebookLogin(client.getApplication(), formParams);
+                                break;
+                            case AMAZON:
+                                user = doAmazonLogin(client.getApplication(), formParams);
+                                break;
+                        }
+                    } catch (Exception e) {
+                        // some exceptional case occurred while trying to log in
+                        ar.setLoginError(e.getMessage());
                     }
                     if (user != null) {
                         if (!user.isVerified()) {
@@ -382,13 +388,10 @@ public class AuthorizeResource extends BaseResource {
 
     private User doFacebookLogin(Application application, MultivaluedMap<String, String> formParams) {
         if (application.getFacebookAppId() == null || application.getFacebookAppSecret() == null) {
-            return null;
+            throw new IllegalArgumentException("The application is not fully configured for Facebook Login.");
         }
         String token = formParams.getFirst("facebookToken");
 
-        if (isEmpty(token)) {
-            return null;
-        }
         FacebookClient fbc = new DefaultFacebookClient(token, application.getFacebookAppSecret(), Version.VERSION_2_5);
         FacebookClient.DebugTokenInfo dbt = fbc.debugToken(token);
         if (!dbt.isValid()) {
@@ -397,31 +400,34 @@ public class AuthorizeResource extends BaseResource {
 
         // we need the e-mail to log in
         if (!dbt.getScopes().contains("email")) {
-            return null;
+            throw new IllegalArgumentException("The e-mail scope is required to log in via Facebook.");
         }
         if (!dbt.getAppId().equals(application.getFacebookAppId().toString())) {
-            return null;
+            throw new IllegalArgumentException("The Facebook application ID does not match the audience of the token.");
         }
 
         com.restfb.types.User fbUser = fbc.fetchObject("me", com.restfb.types.User.class, Parameter.with("fields", "email,first_name,last_name"));
         String email = fbUser.getEmail();
         if (email == null) {
-            return null;
+            throw new NullPointerException("The e-mail could not be retrieved from Facebook.");
         }
 
         User user = getUser(email, application);
         if (user != null) {
-            user.setFirstName(fbUser.getFirstName());
-            user.setLastName(fbUser.getLastName());
-            user.setVerified(true);
-            try {
-                beginTransaction();
-                em.merge(user);
-                commit();
-            } catch (Exception e) {
-                rollback();
-                LOG.log(Level.SEVERE, "Failed to update user", e);
-                user = null;
+            // update the user if their name has changed
+            if (!user.getFirstName().equals(fbUser.getFirstName()) || !user.getLastName().equals(fbUser.getLastName())) {
+                user.setFirstName(fbUser.getFirstName());
+                user.setLastName(fbUser.getLastName());
+                user.setVerified(true);
+                try {
+                    beginTransaction();
+                    em.merge(user);
+                    commit();
+                } catch (Exception e) {
+                    rollback();
+                    LOG.log(Level.SEVERE, "Failed to update user", e);
+                    user = null;
+                }
             }
             return user;
         } else {
