@@ -2,69 +2,130 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.oauth2cloud.server.oauth</groupId>
-  <artifactId>oauth-parent</artifactId>
+  <artifactId>war</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <modules>
-    <module>war</module>
-  </modules>
-  <packaging>pom</packaging>
+  <packaging>war</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.0-SNAPSHOT</jaxrs.lib.version>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <!-- jaxrs library -->
-      <dependency>
-        <groupId>com.leaguekit</groupId>
-        <artifactId>jaxrs-lib</artifactId>
-        <version>${jaxrs.lib.version}</version>
-      </dependency>
+  <modelVersion>4.0.0</modelVersion>
 
-      <!-- mysql connector -->
-      <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.35</version>
-      </dependency>
+  <dependencies>
+    <!-- jaxrs library -->
+    <dependency>
+      <groupId>com.leaguekit</groupId>
+      <artifactId>jaxrs-lib</artifactId>
+      <version>${jaxrs.lib.version}</version>
+    </dependency>
 
-      <!-- facebook api-->
-      <dependency>
-        <groupId>com.restfb</groupId>
-        <artifactId>restfb</artifactId>
-        <version>1.16.0</version>
-      </dependency>
+    <!-- mysql connector -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.35</version>
 
-      <!-- password hashing -->
-      <dependency>
-        <groupId>org.mindrot</groupId>
-        <artifactId>jbcrypt</artifactId>
-        <version>0.3m</version>
-      </dependency>
+    </dependency>
 
-      <!-- TESTING DEPENDENCIES -->
-      <dependency>
-        <groupId>com.leaguekit</groupId>
-        <artifactId>jaxrs-lib-test</artifactId>
-        <version>${jaxrs.lib.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+    <!-- password hashing -->
+    <dependency>
+      <groupId>org.mindrot</groupId>
+      <artifactId>jbcrypt</artifactId>
+      <version>0.3m</version>
+    </dependency>
+
+    <!-- facebook api-->
+    <dependency>
+      <groupId>com.restfb</groupId>
+      <artifactId>restfb</artifactId>
+      <version>1.16.0</version>
+    </dependency>
+
+    <!-- TESTING DEPENDENCIES -->
+    <dependency>
+      <groupId>com.leaguekit</groupId>
+      <artifactId>jaxrs-lib-test</artifactId>
+      <version>${jaxrs.lib.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.3</version>
+          <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-war-plugin</artifactId>
+          <configuration>
+            <webResources>
+              <resource>
+                <directory>src/main/ebextensions</directory>
+                <targetPath>.ebextensions</targetPath>
+                <filtering>true</filtering>
+              </resource>
+            </webResources>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.3.0.M2</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <systemProperties>
+            <systemProperty>
+              <name>JDBC_CONNECTION_STRING</name>
+              <value>${JDBC_CONNECTION_STRING}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>JDBC_CONNECTION_USERNAME</name>
+              <value>${JDBC_CONNECTION_USERNAME}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>JDBC_CONNECTION_PASSWORD</name>
+              <value>${JDBC_CONNECTION_PASSWORD}</value>
+            </systemProperty>
+
+            <systemProperty>
+              <name>SMTP_HOST</name>
+              <value>${SMTP_HOST}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>SMTP_USERNAME</name>
+              <value>${SMTP_USERNAME}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>SMTP_PASSWORD</name>
+              <value>${SMTP_PASSWORD}</value>
+            </systemProperty>
+
+            <systemProperty>
+              <name>SHOW_SQL</name>
+              <value>1</value>
+            </systemProperty>
+
+            <systemProperty>
+              <name>LIQUIBASE_CONTEXT</name>
+              <value>test</value>
+            </systemProperty>
+          </systemProperties>
         </configuration>
       </plugin>
     </plugins>
