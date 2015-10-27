@@ -118,7 +118,7 @@
                                                     // Sign the user in, and then retrieve their ID token for the server
                                                     // to validate
                                                     auth2.signIn().then(function () {
-                                                        var token = auth2.currentUser.get().getAuthResponse().id_token;
+                                                        var token = auth2.currentUser.get().getAuthResponse().access_token;
                                                         if (token) {
                                                             $("#googleToken").val(token).closest("form").submit();
                                                         }

@@ -432,19 +432,24 @@ public class AuthorizeResource extends BaseResource {
             throw new IllegalArgumentException("Token supplied is not for the correct client.");
         }
 
+        JsonNode emailVerified = tokenInfoJson.get("verified_email");
+        if (emailVerified == null || !emailVerified.asBoolean()) {
+            throw new IllegalArgumentException("Google E-mail is not yet verified.");
+        }
+
         JsonNode scopes = tokenInfoJson.get("scope");
         String scope = scopes == null ? null : scopes.asText().trim();
         if (isEmpty(scope)) {
             throw new IllegalArgumentException("The profile and e-mail scopes are required to log in.");
         }
 
-        Set<String> scopeSet = new HashSet<>();
-        for (String s : scope.split(" ")) {
-            scopeSet.add(s);
-        }
-        if (!scopeSet.contains("profile") || !scopeSet.contains("email")) {
-            throw new IllegalArgumentException("Both profile and e-mail scopes are required to log in via Google.");
-        }
+//        Set<String> scopeSet = new HashSet<>();
+//        for (String s : scope.split(" ")) {
+//            scopeSet.add(s);
+//        }
+//        if (!scopeSet.contains("userinfo.profile") || !scopeSet.contains("userinfo.email")) {
+//            throw new IllegalArgumentException("Both profile and e-mail scopes are required to log in via Google.");
+//        }
 
         Response userInfo = ClientBuilder.newClient().target("https://www.googleapis.com/plus/v1/people/me")
                 .request(MediaType.APPLICATION_JSON)
