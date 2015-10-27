@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.resources;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.hibernate.model.Application;
@@ -18,12 +19,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -408,48 +407,12 @@ public class AuthorizeResource extends BaseResource {
             throw new NullPointerException("The e-mail could not be retrieved from Facebook.");
         }
 
-        User user = getUser(email, application);
-        if (user != null) {
-            // update the user if their name has changed
-            if (!user.getFirstName().equals(fbUser.getFirstName()) || !user.getLastName().equals(fbUser.getLastName())) {
-                user.setFirstName(fbUser.getFirstName());
-                user.setLastName(fbUser.getLastName());
-                user.setVerified(true);
-                try {
-                    beginTransaction();
-                    em.merge(user);
-                    commit();
-                } catch (Exception e) {
-                    rollback();
-                    LOG.log(Level.SEVERE, "Failed to update user", e);
-                    user = null;
-                }
-            }
-            return user;
-        } else {
-            user = new User();
-            user.setVerified(true);
-            user.setEmail(email);
-            user.setLastName(fbUser.getLastName());
-            user.setFirstName(fbUser.getFirstName());
-            user.setApplication(application);
-            try {
-                beginTransaction();
-                em.persist(user);
-                commit();
-            } catch (Exception e) {
-                rollback();
-                LOG.log(Level.SEVERE, "Failed to create new user", e);
-                user = null;
-            }
-        }
-
-        return user;
+        return makeOrUpdateUser(application, email, fbUser.getFirstName(), fbUser.getLastName(), null, true);
     }
 
     private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
         if (application.getGoogleClientId() == null || application.getGoogleClientSecret() == null) {
-            throw new IllegalArgumentException("The application is not fully configured for Google Login.");
+            throw new IllegalArgumentException(String.format("The application %s is not fully configured for Google Login.", application.getName()));
         }
 
         String googleToken = formParams.getFirst("googleToken");
@@ -457,7 +420,96 @@ public class AuthorizeResource extends BaseResource {
             throw new IllegalArgumentException("Invalid Google Token supplied.");
         }
 
-        return null;
+        Response tokenInfo = ClientBuilder.newClient().target("https://www.googleapis.com/oauth2/v1/tokeninfo")
+                .queryParam("access_token", googleToken).request(MediaType.APPLICATION_JSON).get();
+
+        if (tokenInfo.getStatus() != 200) {
+            throw new IllegalArgumentException("Invalid Google Token supplied.");
+        }
+        JsonNode tokenInfoJson = tokenInfo.readEntity(JsonNode.class);
+        JsonNode aud = tokenInfoJson.get("audience");
+        if (aud == null || !aud.asText().equals(application.getGoogleClientId())) {
+            throw new IllegalArgumentException("Token supplied is not for the correct client.");
+        }
+
+        JsonNode scopes = tokenInfoJson.get("scope");
+        String scope = scopes == null ? null : scopes.asText().trim();
+        if (isEmpty(scope)) {
+            throw new IllegalArgumentException("The profile and e-mail scopes are required to log in.");
+        }
+
+        Set<String> scopeSet = new HashSet<>();
+        for (String s : scope.split(" ")) {
+            scopeSet.add(s);
+        }
+        if (!scopeSet.contains("profile") || !scopeSet.contains("email")) {
+            throw new IllegalArgumentException("Both profile and e-mail scopes are required to log in via Google.");
+        }
+
+        Response userInfo = ClientBuilder.newClient().target("https://www.googleapis.com/plus/v1/people/me")
+                .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + googleToken)
+                .get();
+
+        if (userInfo.getStatus() != 200) {
+            throw new IllegalArgumentException("Failed to get user info.");
+        }
+
+        JsonNode userData = userInfo.readEntity(JsonNode.class);
+
+        JsonNode emails = userData.get("emails");
+        if (emails == null || !emails.isArray() || emails.size() != 1) {
+            throw new IllegalArgumentException("Google account is not associated with an e-mail or has more than one e-mail.");
+        }
+        String email = emails.get(0).get("value").asText();
+
+        JsonNode name = userData.get("name");
+        if (name == null || !name.has("familyName") || !name.has("givenName")) {
+            throw new IllegalArgumentException("Could not fetch full name from Google.");
+        }
+        String lastName = name.get("familyName").asText();
+        String firstName = name.get("givenName").asText();
+
+        return makeOrUpdateUser(application, email, firstName, lastName, null, true);
+    }
+
+    private User makeOrUpdateUser(Application app, String email, String firstName, String lastName, String rawPass, boolean verified) {
+        User u = getUser(email, app);
+
+        if (u == null) {
+            u = new User();
+            u.setApplication(app);
+            u.setFirstName(firstName);
+            u.setLastName(lastName);
+            if (rawPass != null) {
+                u.setPassword(BCrypt.hashpw(rawPass, BCrypt.gensalt()));
+            }
+            u.setVerified(verified);
+            try {
+                beginTransaction();
+                em.persist(u);
+                commit();
+            } catch (Exception e) {
+                rollback();
+                LOG.log(Level.SEVERE, "Failed to create user", e);
+                u = null;
+            }
+        } else {
+            u.setFirstName(firstName);
+            u.setLastName(lastName);
+            u.setVerified(verified);
+            try {
+                beginTransaction();
+                em.merge(u);
+                commit();
+            } catch (Exception e) {
+                rollback();
+                LOG.log(Level.SEVERE, "Failed to update user", e);
+                u = null;
+            }
+        }
+
+        return u;
     }
 
     public enum Provider {

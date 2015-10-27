@@ -43,6 +43,10 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
 
     @Override
     public String convertToDatabaseColumn(String toEncrypt) {
+        if (toEncrypt == null) {
+            return null;
+        }
+
         try {
             return Base64.getEncoder().encodeToString(ENCRYPTION_CIPHER.doFinal(toEncrypt.getBytes(UTF_8)));
         } catch (Exception e) {
@@ -53,6 +57,10 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
 
     @Override
     public String convertToEntityAttribute(String toDecrypt) {
+        if (toDecrypt == null) {
+            return null;
+        }
+
         try {
             return new String(DECRYPTION_CIPHER.doFinal(Base64.getDecoder().decode(toDecrypt)), UTF_8);
         } catch (Exception e) {

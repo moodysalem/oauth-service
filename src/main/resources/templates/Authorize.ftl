@@ -111,7 +111,7 @@
                                             var auth2 = gapi.auth2.init({
                                                 client_id: "${model.client.application.googleClientId?js_string}",
                                                 fetch_basic_profile: true,
-                                                scope: 'profile'
+                                                scope: 'profile email'
                                             });
                                             $(function () {
                                                 $("#googleLogin").click(function () {
