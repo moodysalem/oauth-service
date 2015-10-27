@@ -2,7 +2,7 @@ package com.oauth2cloud.server.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.util.RandomStringUtil;
-import com.oauth2cloud.server.model.*;
+import com.oauth2cloud.server.hibernate.model.*;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.glassfish.jersey.server.mvc.Viewable;

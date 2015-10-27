@@ -1,8 +1,10 @@
-package com.oauth2cloud.server.model;
+package com.oauth2cloud.server.hibernate.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
+import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 
 @Entity
@@ -14,18 +16,21 @@ public class Application extends BaseEntity {
     private Long facebookAppId;
 
     @Column(name = "facebookAppSecret")
+    @Convert(converter = EncryptedStringConverter.class)
     private String facebookAppSecret;
 
     @Column(name = "googleClientId")
     private String googleClientId;
 
     @Column(name = "googleClientSecret")
+    @Convert(converter = EncryptedStringConverter.class)
     private String googleClientSecret;
 
     @Column(name = "amazonClientId")
     private String amazonClientId;
 
     @Column(name = "amazonClientSecret")
+    @Convert(converter = EncryptedStringConverter.class)
     private String amazonClientSecret;
 
     public String getName() {

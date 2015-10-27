@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
-import com.oauth2cloud.server.model.*;
+import com.oauth2cloud.server.hibernate.model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.annotation.PostConstruct;

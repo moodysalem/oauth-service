@@ -1,8 +1,8 @@
 package com.oauth2cloud.server.resources.response.models;
 
-import com.oauth2cloud.server.model.Client;
-import com.oauth2cloud.server.model.ClientScope;
-import com.oauth2cloud.server.model.Token;
+import com.oauth2cloud.server.hibernate.model.Client;
+import com.oauth2cloud.server.hibernate.model.ClientScope;
+import com.oauth2cloud.server.hibernate.model.Token;
 
 import java.util.List;
 

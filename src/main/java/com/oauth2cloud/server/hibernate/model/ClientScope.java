@@ -1,9 +1,8 @@
-package com.oauth2cloud.server.model;
+package com.oauth2cloud.server.hibernate.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
 import javax.persistence.*;
-import java.util.Comparator;
 
 @Entity
 public class ClientScope extends BaseEntity implements Comparable<ClientScope> {

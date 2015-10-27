@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.resources.response.models;
 
-import com.oauth2cloud.server.model.Client;
+import com.oauth2cloud.server.hibernate.model.Client;
 
 import javax.ws.rs.container.ContainerRequestContext;
 

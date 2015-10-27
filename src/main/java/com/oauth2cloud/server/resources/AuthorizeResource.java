@@ -1,10 +1,8 @@
 package com.oauth2cloud.server.resources;
 
-import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.util.RandomStringUtil;
-import com.oauth2cloud.server.model.*;
-import com.oauth2cloud.server.model.Application;
-import com.oauth2cloud.server.model.User;
+import com.oauth2cloud.server.hibernate.model.*;
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.resources.response.models.AuthorizeModel;
 import com.oauth2cloud.server.resources.response.models.PermissionsModel;
 import com.oauth2cloud.server.resources.response.models.UserCodeEmailModel;
@@ -12,7 +10,6 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.Version;
-import com.restfb.types.*;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -22,7 +19,6 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import java.lang.Thread;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -453,7 +449,12 @@ public class AuthorizeResource extends BaseResource {
 
     private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
         if (application.getGoogleClientId() == null || application.getGoogleClientSecret() == null) {
-            return null;
+            throw new IllegalArgumentException("The application is not fully configured for Google Login.");
+        }
+
+        String googleToken = formParams.getFirst("googleToken");
+        if (isEmpty(googleToken)) {
+            throw new IllegalArgumentException("Invalid Google Token supplied.");
         }
 
         return null;
@@ -464,7 +465,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     public Provider getProvider(MultivaluedMap<String, String> formParams) {
-        if (!isEmpty(formParams.getFirst("email"))&& !isEmpty(formParams.getFirst("password"))) {
+        if (!isEmpty(formParams.getFirst("email")) && !isEmpty(formParams.getFirst("password"))) {
             return Provider.EMAIL;
         }
         if (!isEmpty(formParams.getFirst("facebookToken"))) {

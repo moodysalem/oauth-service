@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.model;
+package com.oauth2cloud.server.hibernate.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 
