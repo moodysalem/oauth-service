@@ -6,8 +6,10 @@ import com.oauth2cloud.server.hibernate.model.Token;
 
 import java.util.List;
 
-public class PermissionsModel {
-    private Client client;
+/**
+ * This is the model that gets passed to Permissions.ftl
+ */
+public class PermissionsModel extends AuthorizeModel {
     private Token token;
     private List<ClientScope> clientScopes;
     private boolean rememberMe;
@@ -36,11 +38,4 @@ public class PermissionsModel {
         this.rememberMe = rememberMe;
     }
 
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
 }

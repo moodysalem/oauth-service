@@ -55,11 +55,10 @@
                         <div class="row">
                             <div class="col-sm-4 col-sm-offset-2">
                                 <div class="form-group">
-                                    <button onclick="window.location = window.location"
-                                            class="btn btn-danger btn-block">
+                                    <a href="${model.cancelUrl}" class="btn btn-danger btn-block">
                                         <i class="fa fa-ban"></i>
                                         Cancel
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                             <div class="col-sm-4">

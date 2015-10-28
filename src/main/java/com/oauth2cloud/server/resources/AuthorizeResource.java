@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.resources.response.models.AuthorizeModel;
+import com.oauth2cloud.server.resources.response.models.LoginRegisterModel;
 import com.oauth2cloud.server.resources.response.models.PermissionsModel;
 import com.oauth2cloud.server.resources.response.models.UserCodeEmailModel;
 import com.restfb.DefaultFacebookClient;
@@ -22,7 +22,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -196,11 +199,13 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        AuthorizeModel ar = new AuthorizeModel();
-        ar.setClient(client);
-        ar.setURLs(containerRequestContext);
+        LoginRegisterModel lrm = new LoginRegisterModel();
+        lrm.setClient(client);
+        lrm.setRedirectUri(redirectUri);
+        lrm.setState(state);
+        lrm.setURLs(containerRequestContext);
 
-        return Response.ok(new Viewable("/templates/Authorize", ar)).build();
+        return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
     }
 
 
@@ -227,10 +232,12 @@ public class AuthorizeResource extends BaseResource {
         }
 
 
-        AuthorizeModel ar = new AuthorizeModel();
-        ar.setURLs(containerRequestContext);
+        LoginRegisterModel lrm = new LoginRegisterModel();
+        lrm.setURLs(containerRequestContext);
+        lrm.setState(state);
+        lrm.setRedirectUri(redirectUri);
         Client client = getClient(clientId);
-        ar.setClient(client);
+        lrm.setClient(client);
 
         // this resource is used for a few different actions which are represented as hidden inputs in the forms
         // this is done so that the query string can be preserved across all requests without any special handling
@@ -241,7 +248,7 @@ public class AuthorizeResource extends BaseResource {
                 Provider p = getProvider(formParams);
 
                 // by default, the credentials are invalid
-                ar.setLoginError(INVALID_LOGIN_CREDENTIALS);
+                lrm.setLoginError(INVALID_LOGIN_CREDENTIALS);
 
                 if (p != null) {
                     User user = null;
@@ -262,17 +269,17 @@ public class AuthorizeResource extends BaseResource {
                         }
                     } catch (Exception e) {
                         // some exceptional case occurred while trying to log in
-                        ar.setLoginError(e.getMessage());
+                        lrm.setLoginError(e.getMessage());
                     }
                     if (user != null) {
                         if (!user.isVerified()) {
-                            ar.setLoginError("Your e-mail is not yet verified.");
+                            lrm.setLoginError("Your e-mail is not yet verified.");
                         } else {
                             return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
                         }
                     }
                 }
-                return Response.ok(new Viewable("/templates/Authorize", ar)).build();
+                return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
 
             // handle the registration action
             case "register":
@@ -281,11 +288,11 @@ public class AuthorizeResource extends BaseResource {
                 String email = formParams.getFirst("email");
                 String password = formParams.getFirst("password");
                 if (isEmpty(firstName) || isEmpty(lastName) || isEmpty(email) || isEmpty(password)) {
-                    ar.setRegisterError("First name, last name, e-mail address and password are all required fields.");
+                    lrm.setRegisterError("First name, last name, e-mail address and password are all required fields.");
                 } else {
                     User existingUser = getUser(email, client.getApplication());
                     if (existingUser != null) {
-                        ar.setRegisterError("E-mail is already in use.");
+                        lrm.setRegisterError("E-mail is already in use.");
                     } else {
                         User nu = new User();
                         nu.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
@@ -299,15 +306,15 @@ public class AuthorizeResource extends BaseResource {
                             commit();
 
                             sendVerificationEmail(nu);
-                            ar.setRegisterSuccess(true);
+                            lrm.setRegisterSuccess(true);
                         } catch (Exception e) {
                             LOG.log(Level.SEVERE, "Failed to register new user", e);
                             rollback();
-                            ar.setRegisterError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+                            lrm.setRegisterError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
                         }
                     }
                 }
-                return Response.ok(new Viewable("/templates/Authorize", ar)).build();
+                return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
 
             // handle the permissions action
             case "permissions":
@@ -318,10 +325,10 @@ public class AuthorizeResource extends BaseResource {
                 if (loginToken != null) {
                     Token t = getPermissionToken(loginToken, client);
                     if (t == null) {
-                        ar.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+                        lrm.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
                     } else {
                         if (t.getExpires().before(new Date())) {
-                            ar.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
+                            lrm.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                         } else {
                             // first get all the client scopes we will try to approve or check if are approved
                             List<ClientScope> clientScopes = getScopes(client, scopes);
@@ -354,7 +361,7 @@ public class AuthorizeResource extends BaseResource {
                 } else {
                     return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
                 }
-                return Response.ok(new Viewable("/templates/Authorize", ar)).build();
+                return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
             default:
                 return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
@@ -578,6 +585,9 @@ public class AuthorizeResource extends BaseResource {
             pr.setToken(t);
             pr.setRememberMe(rememberMe);
             pr.setClient(client);
+            pr.setURLs(containerRequestContext);
+            pr.setState(state);
+            pr.setRedirectUri(redirectUri);
             return Response.ok(new Viewable("/templates/Permissions", pr)).build();
         } else {
             // accept all the always permissions

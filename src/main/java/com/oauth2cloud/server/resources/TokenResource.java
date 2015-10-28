@@ -92,7 +92,7 @@ public class TokenResource extends BaseResource {
             case REFRESH_TOKEN:
                 return refreshTokenGrantType(formParams);
             default:
-                return error(ErrorResponse.Type.invalid_grant, "Invalid 'grant_type' specified.");
+                return error(ErrorResponse.Type.unsupported_grant_type, "The 'grant_type' specified is not supported by this server.");
         }
     }
 

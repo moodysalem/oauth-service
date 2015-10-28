@@ -1,16 +1,20 @@
 package com.oauth2cloud.server.resources.response.models;
 
 import com.oauth2cloud.server.hibernate.model.Client;
+import com.oauth2cloud.server.hibernate.model.ErrorResponse;
 
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
 
-public class AuthorizeModel {
+/**
+ * Base class of the template models
+ */
+public abstract class AuthorizeModel {
     private String requestUrl;
-    private String baseUrl;
     private Client client;
-    private String loginError;
-    private String registerError;
-    private boolean registerSuccess;
+    private String redirectUri;
+    private String state;
 
     public Client getClient() {
         return client;
@@ -18,14 +22,6 @@ public class AuthorizeModel {
 
     public void setClient(Client client) {
         this.client = client;
-    }
-
-    public String getLoginError() {
-        return loginError;
-    }
-
-    public void setLoginError(String loginError) {
-        this.loginError = loginError;
     }
 
     public String getRequestUrl() {
@@ -36,35 +32,49 @@ public class AuthorizeModel {
         this.requestUrl = requestUrl;
     }
 
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
     public void setURLs(ContainerRequestContext containerRequestContext) {
         if (containerRequestContext == null) {
             return;
         }
         setRequestUrl(containerRequestContext.getUriInfo().getRequestUri().toString());
-        setBaseUrl(containerRequestContext.getUriInfo().getBaseUri().toString());
     }
 
-    public String getRegisterError() {
-        return registerError;
+    private String getFragment(ErrorResponse er) {
+        if (getState() == null || getState().length() == 0) {
+            return er.toString();
+        }
+
+        if (er == null) {
+            return "state=" + getState();
+        } else {
+            return er.toString() + "&state=" + getState();
+        }
     }
 
-    public void setRegisterError(String registerError) {
-        this.registerError = registerError;
+    public String getCancelUrl() {
+        ErrorResponse er = new ErrorResponse();
+        er.setError(ErrorResponse.Type.access_denied);
+        er.setErrorDescription("User has cancelled the authorization");
+        try {
+            return UriBuilder.fromUri(new URI(getRedirectUri())).fragment(getFragment(er)).build().toString();
+        } catch (Exception ignored) {
+        }
+        return getRedirectUri();
     }
 
-    public boolean isRegisterSuccess() {
-        return registerSuccess;
+    public String getRedirectUri() {
+        return redirectUri;
     }
 
-    public void setRegisterSuccess(boolean registerSuccess) {
-        this.registerSuccess = registerSuccess;
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }
