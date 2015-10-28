@@ -139,30 +139,37 @@
                         <script>
                             var params = {
                                 scope: "profile",
-                                response_type: "code",
+                                response_type: "token",
                                 client_id: "${model.client.application.amazonClientId?js_string}"
                             };
 
                             var redirect = "&redirect_uri=" + window.location.origin + "/amazon";
                             var loginUrl = "https://www.amazon.com/ap/oa?";
+                            var completeUrl = loginUrl + $.param(params, true) + redirect;
 
                             $(function () {
-                                $("#amazonLogin").click(function () {
-                                    var amazonLogin = window.open(loginUrl + $.param(params, true) + redirect, "_blank",
-                                            "height=640,width=810");
+                                var popup = null;
 
-                                    $(window).on("message", function (e) {
-                                        var event = e.originalEvent;
-                                        if (event.origin !== window.location.origin) {
-                                            return;
-                                        }
-                                        var d = event.data;
-                                        if (d.code !== null) {
-                                            $("#googleToken").val(d.code).closest("form").submit();
-                                        }
-                                        amazonLogin.close();
-                                    }, false);
+                                $("#amazonLogin").click(function () {
+                                    if (popup !== null && !popup.closed) {
+                                        popup.location.href = completeUrl;
+                                        return;
+                                    }
+                                    popup = window.open(completeUrl, "_blank", "height=640,width=810");
                                 });
+
+                                window.addEventListener("message", function (event) {
+                                    if (event.origin !== window.location.origin) {
+                                        return;
+                                    }
+                                    var d = event.data;
+                                    if (d.code !== null) {
+                                        $("#amazonToken").val(d.code).closest("form").submit();
+                                    }
+                                    if (popup !== null && !popup.closed) {
+                                        popup.close();
+                                    }
+                                }, false);
                             });
                         </script>
                     </#if>

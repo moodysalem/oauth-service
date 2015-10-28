@@ -40,6 +40,7 @@ public class AuthorizeResource extends BaseResource {
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
     public static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
             "Invalid request. Please contact an administrator if this continues.";
+    public static final String AMAZON_API_URL = "https://api.amazon.com";
 
     @QueryParam("response_type")
     String responseType;
@@ -383,9 +384,54 @@ public class AuthorizeResource extends BaseResource {
 
     private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
         if (application.getAmazonClientId() == null || application.getAmazonClientSecret() == null) {
-            return null;
+            throw new IllegalArgumentException("The application is not fully configured for Amazon Login.");
         }
-        return null;
+
+        String token = formParams.getFirst("amazonToken");
+
+        Response info = ClientBuilder.newClient()
+                .target(AMAZON_API_URL).path("auth").path("o2").path("tokeninfo")
+                .queryParam("access_token", token).request().get();
+        if (info.getStatus() != 200) {
+            throw new IllegalArgumentException("Invalid Amazon login credentials.");
+        }
+
+        JsonNode tokenInfo = info.readEntity(JsonNode.class);
+
+        String audience = tokenInfo.get("aud") != null ? tokenInfo.get("aud").asText() : null;
+
+        if (!application.getAmazonClientId().equals(audience)) {
+            throw new IllegalArgumentException("Token is not associated with the correct client.");
+        }
+
+        Response userInfo = ClientBuilder.newClient()
+                .target(AMAZON_API_URL).path("user").path("profile")
+                .request().header("Authorization", "bearer " + token)
+                .get();
+
+        if (userInfo.getStatus() != 200) {
+            throw new IllegalArgumentException("Failed to get the user information.");
+        }
+
+        JsonNode user = userInfo.readEntity(JsonNode.class);
+
+        if (user.get("email") == null || user.get("name") == null) {
+            throw new IllegalArgumentException("Could not retrieve name or e-mail from user profile.");
+        }
+
+        String name = user.get("name").asText();
+        String[] namePcs = name.split(" ");
+
+        String firstName = namePcs[0];
+        StringBuilder lnb = new StringBuilder();
+        for (int i = 1; i < namePcs.length; i++) {
+            lnb.append(namePcs[i]);
+        }
+        String lastName = lnb.toString();
+
+        String email = user.get("email").asText();
+
+        return makeOrUpdateUser(application, email, firstName, lastName, null, true);
     }
 
     private User doFacebookLogin(Application application, MultivaluedMap<String, String> formParams) {
