@@ -9,6 +9,7 @@
         var message = {};
         if (typeof hash === "string" && hash.length > 1) {
             var pcs = hash.split("&");
+            hash = hash.substring(1);
             for (var i = 0; i < pcs.length; i++) {
                 var p = pcs[i];
                 var pSplit = p.split("=");

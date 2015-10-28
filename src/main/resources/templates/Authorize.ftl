@@ -163,8 +163,8 @@
                                         return;
                                     }
                                     var d = event.data;
-                                    if (d.code !== null) {
-                                        $("#amazonToken").val(d.code).closest("form").submit();
+                                    if (typeof d.access_token === "string") {
+                                        $("#amazonToken").val(d.access_token).closest("form").submit();
                                     }
                                     if (popup !== null && !popup.closed) {
                                         popup.close();

@@ -575,9 +575,6 @@ public class AuthorizeResource extends BaseResource {
     }
 
     public Provider getProvider(MultivaluedMap<String, String> formParams) {
-        if (!isEmpty(formParams.getFirst("email")) && !isEmpty(formParams.getFirst("password"))) {
-            return Provider.EMAIL;
-        }
         if (!isEmpty(formParams.getFirst("facebookToken"))) {
             return Provider.FACEBOOK;
         }
@@ -586,6 +583,9 @@ public class AuthorizeResource extends BaseResource {
         }
         if (!isEmpty(formParams.getFirst("amazonToken"))) {
             return Provider.AMAZON;
+        }
+        if (!isEmpty(formParams.getFirst("email")) && !isEmpty(formParams.getFirst("password"))) {
+            return Provider.EMAIL;
         }
         return null;
     }
