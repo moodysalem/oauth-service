@@ -16,7 +16,7 @@
                 if (pSplit.length !== 2) {
                     continue;
                 }
-                message[pSplit[0]] = pSplit[1];
+                message[decodeURIComponent(pSplit[0])] = decodeURIComponent(pSplit[1]);
             }
 
             if (window.opener && window.opener.postMessage) {
