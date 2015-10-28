@@ -11,6 +11,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.0-SNAPSHOT</jaxrs.lib.version>
+    <!--skip deploying to the -->
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
@@ -84,6 +86,33 @@
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>br.com.ingenieux</groupId>
+        <artifactId>beanstalk-maven-plugin</artifactId>
+        <version>1.4.0</version>
+        <executions>
+          <execution>
+            <id>deploy to EB</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>upload-source-bundle</goal>
+              <goal>create-application-version</goal>
+              <goal>update-environment</goal>
+              <goal>clean-previous-versions</goal>
+            </goals>
+            <configuration>
+              <applicationName>OAuth</applicationName>
+              <environmentRef>oauth-prd.elasticbeanstalk.com</environmentRef>
+              <s3Bucket>eb-project-versions</s3Bucket>
+              <s3Key>${project.groupId}/${project.artifactId}/${project.build.finalName}</s3Key>
+              <versionLabel>${project.build.finalName}-${maven.build.timestamp}</versionLabel>
+              <regionName>us-west-2</regionName>
+              <versionsToKeep>5</versionsToKeep>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
