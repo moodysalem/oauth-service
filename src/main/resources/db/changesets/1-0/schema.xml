@@ -38,6 +38,7 @@
       <column name="amazonClientSecret" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
+      <column name="legacyUrl" type="${TEXT}"/>
     </createTable>
     <addUniqueConstraint tableName="Application" columnNames="facebookAppId,facebookAppSecret"/>
     <addUniqueConstraint tableName="Application" columnNames="googleClientId,googleClientSecret"/>

@@ -20,6 +20,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.ArrayList;
@@ -269,6 +270,7 @@ public class AuthorizeResource extends BaseResource {
                                 break;
                         }
                     } catch (Exception e) {
+                        LOG.log(Level.WARNING, "login exception", e);
                         // some exceptional case occurred while trying to log in
                         lrm.setLoginError(e.getMessage());
                     }
@@ -595,15 +597,32 @@ public class AuthorizeResource extends BaseResource {
 
         String email = formParams.getFirst("email");
         String password = formParams.getFirst("password");
-        User user = getUser(email, app);
+        User userWithEmail = getUser(email, app);
+        User toReturn = null;
 
-        if (user != null) {
-            if (user.getPassword() == null) {
-                user = null;
-            } else {
-                if (!BCrypt.checkpw(password, user.getPassword())) {
-                    user = null;
+        if (userWithEmail != null && userWithEmail.getPassword() != null && BCrypt.checkpw(password, userWithEmail.getPassword())) {
+            toReturn = userWithEmail;
+        }
+
+        // check with the legacy url to see if the user is there and passing the correct password
+        if (userWithEmail == null && app.getLegacyUrl() != null) {
+            Form f = new Form();
+            f.param("email", email).param("password", password);
+            Response r = ClientBuilder.newClient().target(app.getLegacyUrl()).request(MediaType.APPLICATION_JSON_TYPE)
+                    .post(Entity.form(f));
+
+            if (r.getStatus() == 200) {
+                JsonNode ui = r.readEntity(JsonNode.class);
+                String fn, ln, newPassword;
+                fn = ui.get("firstName") != null ? ui.get("firstName").asText() : null;
+                ln = ui.get("lastName") != null ? ui.get("lastName").asText() : null;
+                newPassword = ui.get("newPassword") != null ? ui.get("newPassword").asText() : null;
+
+                if (fn == null || ln == null || newPassword == null) {
+                    throw new IllegalArgumentException("The legacy URL indicated that the user was properly logged in, but did not return the user's first name, last name, and a new password for the user.");
                 }
+
+                toReturn = makeOrUpdateUser(app, email, fn, ln, newPassword, true);
             }
         }
 
@@ -616,7 +635,7 @@ public class AuthorizeResource extends BaseResource {
                 LOG.log(Level.SEVERE, "Thread sleep interrupted", e);
             }
         }
-        return user;
+        return toReturn;
     }
 
     private Response getSuccessfulLoginResponse(User user, Client client, List<String> scopes, String redirectUri,

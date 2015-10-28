@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.resources;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
@@ -52,6 +53,9 @@ public abstract class BaseResource {
 
     @Context
     ContainerRequestContext containerRequestContext;
+
+    @Context
+    ObjectMapper om;
 
     @Inject
     protected EntityManager em;

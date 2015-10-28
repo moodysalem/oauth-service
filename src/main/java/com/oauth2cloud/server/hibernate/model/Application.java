@@ -6,6 +6,7 @@ import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 
 @Entity
 public class Application extends BaseEntity {
@@ -32,6 +33,10 @@ public class Application extends BaseEntity {
     @Column(name = "amazonClientSecret")
     @Convert(converter = EncryptedStringConverter.class)
     private String amazonClientSecret;
+
+    @Lob
+    @Column(name = "legacyUrl")
+    private String legacyUrl;
 
     public String getName() {
         return name;
@@ -87,5 +92,13 @@ public class Application extends BaseEntity {
 
     public void setAmazonClientSecret(String amazonClientSecret) {
         this.amazonClientSecret = amazonClientSecret;
+    }
+
+    public String getLegacyUrl() {
+        return legacyUrl;
+    }
+
+    public void setLegacyUrl(String legacyUrl) {
+        this.legacyUrl = legacyUrl;
     }
 }
