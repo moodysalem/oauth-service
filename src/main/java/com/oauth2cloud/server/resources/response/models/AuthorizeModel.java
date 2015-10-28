@@ -5,6 +5,7 @@ import com.oauth2cloud.server.hibernate.model.ErrorResponse;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 
 /**
@@ -36,7 +37,8 @@ public abstract class AuthorizeModel {
         if (containerRequestContext == null) {
             return;
         }
-        setRequestUrl(containerRequestContext.getUriInfo().getRequestUri().toString());
+        UriInfo ui = containerRequestContext.getUriInfo();
+        setRequestUrl(ui.getRequestUri().toString());
     }
 
     private String getFragment(ErrorResponse er) {
