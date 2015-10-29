@@ -12,8 +12,9 @@ import java.util.logging.Logger;
 @Converter
 public class EncryptedStringConverter implements AttributeConverter<String, String> {
 
+    private static final String ENCRYPTION_SECRET = System.getProperty("ENCRYPTION_SECRET");
     private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
-    private static final byte[] KEY_STRING = "EmAZrHVgeKDJtZaO".getBytes();
+    private static final byte[] KEY_STRING = ENCRYPTION_SECRET.getBytes();
 
     private static final Key KEY;
     private static final Logger LOG = Logger.getLogger(EncryptedStringConverter.class.getName());

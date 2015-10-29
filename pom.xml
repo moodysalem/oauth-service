@@ -144,6 +144,10 @@
               <name>SMTP_PASSWORD</name>
               <value>${SMTP_PASSWORD}</value>
             </systemProperty>
+            <systemProperty>
+              <name>ENCRYPTION_SECRET</name>
+              <value>${ENCRYPTION_SECRET}</value>
+            </systemProperty>
 
             <systemProperty>
               <name>SHOW_SQL</name>
