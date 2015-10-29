@@ -1,5 +1,7 @@
 package com.oauth2cloud.server.resources.response.models;
 
+import com.oauth2cloud.server.hibernate.model.Application;
+
 /**
  * This is the model that gets passed to Authorize.ftl
  */
@@ -7,12 +9,11 @@ public class LoginRegisterModel extends AuthorizeModel {
     private String loginError;
     private String registerError;
     private boolean registerSuccess;
-
+    private String lastEmail;
 
     public String getLoginError() {
         return loginError;
     }
-
     public void setLoginError(String loginError) {
         this.loginError = loginError;
     }
@@ -32,4 +33,13 @@ public class LoginRegisterModel extends AuthorizeModel {
     public void setRegisterSuccess(boolean registerSuccess) {
         this.registerSuccess = registerSuccess;
     }
+
+    public String getLastEmail() {
+        return lastEmail;
+    }
+
+    public void setLastEmail(String lastEmail) {
+        this.lastEmail = lastEmail;
+    }
+
 }

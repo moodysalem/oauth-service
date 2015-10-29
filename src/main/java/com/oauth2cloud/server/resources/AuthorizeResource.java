@@ -257,6 +257,7 @@ public class AuthorizeResource extends BaseResource {
                     try {
                         switch (p) {
                             case EMAIL:
+                                lrm.setLastEmail(formParams.getFirst("email"));
                                 user = doEmailLogin(client.getApplication(), formParams);
                                 break;
                             case GOOGLE:

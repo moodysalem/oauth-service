@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.resources.response.models;
 
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.hibernate.model.ErrorResponse;
 
@@ -17,12 +18,37 @@ public abstract class AuthorizeModel {
     private String redirectUri;
     private String state;
 
+    private int loginButtonSize;
+    private boolean amazonLogin;
+    private boolean googleLogin;
+    private boolean facebookLogin;
+
+    public void setProviders(Application application) {
+        int numLogins = 0;
+        if (application.getAmazonClientId() != null && application.getAmazonClientSecret() != null) {
+            numLogins++;
+            setAmazonLogin(true);
+        }
+        if (application.getFacebookAppId() != null && application.getFacebookAppSecret() != null) {
+            numLogins++;
+            setFacebookLogin(true);
+        }
+        if (application.getGoogleClientId() != null && application.getGoogleClientSecret() != null) {
+            numLogins++;
+            setGoogleLogin(true);
+        }
+        setLoginButtonSize((numLogins > 0) ? 12 / numLogins : 0);
+    }
+
     public Client getClient() {
         return client;
     }
 
     public void setClient(Client client) {
         this.client = client;
+        if (client != null) {
+            setProviders(client.getApplication());
+        }
     }
 
     public String getRequestUrl() {
@@ -78,5 +104,37 @@ public abstract class AuthorizeModel {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public int getLoginButtonSize() {
+        return loginButtonSize;
+    }
+
+    public void setLoginButtonSize(int loginButtonSize) {
+        this.loginButtonSize = loginButtonSize;
+    }
+
+    public boolean isAmazonLogin() {
+        return amazonLogin;
+    }
+
+    public void setAmazonLogin(boolean amazonLogin) {
+        this.amazonLogin = amazonLogin;
+    }
+
+    public boolean isGoogleLogin() {
+        return googleLogin;
+    }
+
+    public void setGoogleLogin(boolean googleLogin) {
+        this.googleLogin = googleLogin;
+    }
+
+    public boolean isFacebookLogin() {
+        return facebookLogin;
+    }
+
+    public void setFacebookLogin(boolean facebookLogin) {
+        this.facebookLogin = facebookLogin;
     }
 }

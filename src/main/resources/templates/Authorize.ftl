@@ -24,11 +24,14 @@
                 <div class="form-group">
                     <label class="control-label" for="email">E-mail Address</label>
                     <input type="email" id="email" name="email" class="form-control input-lg"
-                           placeholder="E-mail address" required autofocus>
+                           <#if model.lastEmail??>value="${model.lastEmail}"</#if>
+                           <#if !model.lastEmail??>autofocus</#if>
+                           placeholder="E-mail address" required>
                 </div>
                 <div class="form-group">
                     <label class="control-label" for="password">Password</label>
                     <input type="password" id="password" name="password" class="form-control input-lg"
+                           <#if model.lastEmail??>autofocus</#if>
                            placeholder="Password" required>
                 </div>
 
@@ -51,130 +54,134 @@
                     </a>
                 </div>
 
+                <#-- open the alternative login button section -->
+                <#if model.loginButtonSize gt 0>
                 <div class="center-line text-center form-group">
                     <div class="or-block bg-info">OR</div>
                 </div>
 
                 <div class="row">
-                    <div class="col-xs-4">
-                    <#if model.client.application.facebookAppId??>
-                        <input type="hidden" id="facebookToken" name="facebookToken"/>
-                        <button class="btn btn-sm btn-primary btn-block" id="facebookLogin" type="button">
-                            <i class="fa fa-facebook fa-lg"></i>
-                        </button>
-                        <script>
-                            window.fbAsyncInit = function () {
-                                FB.init({
-                                    appId: "${model.client.application.facebookAppId?c}",
-                                    xfbml: false,
-                                    version: 'v2.5'
-                                });
-                            };
-
-                            (function (d, s, id) {
-                                var js, fjs = d.getElementsByTagName(s)[0];
-                                if (d.getElementById(id)) {
-                                    return;
-                                }
-                                js = d.createElement(s);
-                                js.id = id;
-                                js.src = "//connect.facebook.net/en_US/sdk.js";
-                                fjs.parentNode.insertBefore(js, fjs);
-                            }(document, 'script', 'facebook-jssdk'));
-
-                            $(function () {
-                                $("#facebookLogin").click(function () {
-                                    FB.login(function (response) {
-                                        console.log(response);
-                                        if (response.status === 'connected') {
-                                            // Logged into your app and Facebook.
-                                            $("#facebookToken").val(response.authResponse.accessToken)
-                                                    .closest("form").submit();
-                                        }
-                                    }, {scope: "public_profile,email"});
-                                });
-                            });
-                        </script>
-                    </#if>
-                    </div>
-                    <div class="col-xs-4">
-                    <#if model.client.application.googleClientId??>
-                        <input type="hidden" id="googleToken" name="googleToken"/>
-                        <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
-                            <i class="fa fa-google fa-lg"></i>
-                        </button>
-                        <script src="//apis.google.com/js/platform.js" onload="initGoogle();" async
-                                defer></script>
-                        <script>
-                            var initGoogle = function () {
-                                gapi.load('auth2', function () {
-                                    var auth2 = gapi.auth2.init({
-                                        client_id: "${model.client.application.googleClientId?js_string}",
-                                        fetch_basic_profile: true,
-                                        scope: 'profile email'
+                    <#if model.facebookLogin>
+                        <div class="col-xs-${model.loginButtonSize}">
+                            <input type="hidden" id="facebookToken" name="facebookToken"/>
+                            <button class="btn btn-sm btn-primary btn-block" id="facebookLogin" type="button">
+                                <i class="fa fa-facebook fa-lg"></i>
+                            </button>
+                            <script>
+                                window.fbAsyncInit = function () {
+                                    FB.init({
+                                        appId: "${model.client.application.facebookAppId?c}",
+                                        xfbml: false,
+                                        version: 'v2.5'
                                     });
-                                    $(function () {
-                                        $("#googleLogin").click(function () {
-                                            // Sign the user in, and then retrieve their ID token for the server
-                                            // to validate
-                                            auth2.signIn().then(function () {
-                                                var token = auth2.currentUser.get().getAuthResponse().access_token;
-                                                if (token) {
-                                                    $("#googleToken").val(token).closest("form").submit();
-                                                }
+                                };
+
+                                (function (d, s, id) {
+                                    var js, fjs = d.getElementsByTagName(s)[0];
+                                    if (d.getElementById(id)) {
+                                        return;
+                                    }
+                                    js = d.createElement(s);
+                                    js.id = id;
+                                    js.src = "//connect.facebook.net/en_US/sdk.js";
+                                    fjs.parentNode.insertBefore(js, fjs);
+                                }(document, 'script', 'facebook-jssdk'));
+
+                                $(function () {
+                                    $("#facebookLogin").click(function () {
+                                        FB.login(function (response) {
+                                            console.log(response);
+                                            if (response.status === 'connected') {
+                                                // Logged into your app and Facebook.
+                                                $("#facebookToken").val(response.authResponse.accessToken)
+                                                        .closest("form").submit();
+                                            }
+                                        }, {scope: "public_profile,email"});
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </#if>
+                    <#if model.googleLogin>
+                        <div class="col-xs-${model.loginButtonSize}">
+                            <input type="hidden" id="googleToken" name="googleToken"/>
+                            <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
+                                <i class="fa fa-google fa-lg"></i>
+                            </button>
+                            <script src="//apis.google.com/js/platform.js" onload="initGoogle();" async
+                                    defer></script>
+                            <script>
+                                var initGoogle = function () {
+                                    gapi.load('auth2', function () {
+                                        var auth2 = gapi.auth2.init({
+                                            client_id: "${model.client.application.googleClientId?js_string}",
+                                            fetch_basic_profile: true,
+                                            scope: 'profile email'
+                                        });
+                                        $(function () {
+                                            $("#googleLogin").click(function () {
+                                                // Sign the user in, and then retrieve their ID token for the server
+                                                // to validate
+                                                auth2.signIn().then(function () {
+                                                    var token = auth2.currentUser.get().getAuthResponse().access_token;
+                                                    if (token) {
+                                                        $("#googleToken").val(token).closest("form").submit();
+                                                    }
+                                                });
                                             });
                                         });
                                     });
-                                });
-                            };
-                        </script>
+                                };
+                            </script>
+                        </div>
                     </#if>
-                    </div>
-                    <div class="col-xs-4">
-                    <#if model.client.application.amazonClientId??>
-                        <input type="hidden" id="amazonToken" name="amazonToken"/>
-                        <button class="btn btn-sm btn-warning btn-block" id="amazonLogin" type="button">
-                            <i class="fa fa-amazon fa-lg"></i>
-                        </button>
-                        <script>
-                            var params = {
-                                scope: "profile",
-                                response_type: "token",
-                                client_id: "${model.client.application.amazonClientId?js_string}"
-                            };
+                    <#if model.amazonLogin>
+                        <div class="col-xs-${model.loginButtonSize}">
+                            <input type="hidden" id="amazonToken" name="amazonToken"/>
+                            <button class="btn btn-sm btn-warning btn-block" id="amazonLogin" type="button">
+                                <i class="fa fa-amazon fa-lg"></i>
+                            </button>
+                            <script>
+                                var params = {
+                                    scope: "profile",
+                                    response_type: "token",
+                                    client_id: "${model.client.application.amazonClientId?js_string}"
+                                };
 
-                            var redirect = "&redirect_uri=" + window.location.origin + "/amazon";
-                            var loginUrl = "https://www.amazon.com/ap/oa?";
-                            var completeUrl = loginUrl + $.param(params, true) + redirect;
+                                var redirect = "&redirect_uri=" + window.location.origin + "/amazon";
+                                var loginUrl = "https://www.amazon.com/ap/oa?";
+                                var completeUrl = loginUrl + $.param(params, true) + redirect;
 
-                            $(function () {
-                                var popup = null;
+                                $(function () {
+                                    var popup = null;
 
-                                $("#amazonLogin").click(function () {
-                                    if (popup !== null && !popup.closed) {
-                                        popup.location.href = completeUrl;
-                                        return;
-                                    }
-                                    popup = window.open(completeUrl, "_blank", "height=640,width=810");
+                                    $("#amazonLogin").click(function () {
+                                        if (popup !== null && !popup.closed) {
+                                            popup.location.href = completeUrl;
+                                            return;
+                                        }
+                                        popup = window.open(completeUrl, "_blank", "height=640,width=810");
+                                    });
+
+                                    window.addEventListener("message", function (event) {
+                                        if (event.origin !== window.location.origin) {
+                                            return;
+                                        }
+                                        var d = event.data;
+                                        if (typeof d.access_token === "string") {
+                                            $("#amazonToken").val(d.access_token).closest("form").submit();
+                                        }
+                                        if (popup !== null && !popup.closed) {
+                                            popup.close();
+                                        }
+                                    }, false);
                                 });
-
-                                window.addEventListener("message", function (event) {
-                                    if (event.origin !== window.location.origin) {
-                                        return;
-                                    }
-                                    var d = event.data;
-                                    if (typeof d.access_token === "string") {
-                                        $("#amazonToken").val(d.access_token).closest("form").submit();
-                                    }
-                                    if (popup !== null && !popup.closed) {
-                                        popup.close();
-                                    }
-                                }, false);
-                            });
-                        </script>
+                            </script>
+                        </div>
                     </#if>
-                    </div>
                 </div>
+                </#if>
+                <#-- close the alternative login button section -->
             </form>
 
             <script>
