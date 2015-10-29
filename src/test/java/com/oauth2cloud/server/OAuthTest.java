@@ -17,6 +17,8 @@ public class OAuthTest extends BaseTest {
         System.setProperty("SMTP_USERNAME", "fake");
         System.setProperty("SMTP_PASSWORD", "fake");
 
+        System.setProperty("ENCRYPTION_SECRET", "xTUf4mP2SI6nfeLO");
+
         return new OAuthApplication();
     }
 }
