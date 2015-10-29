@@ -20,6 +20,10 @@
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
+      <column name="supportEmail" type="VARCHAR(191)">
+        <constraints nullable="false" />
+      </column>
+      <column name="ownerId" type="BIGINT"/>
       <column name="facebookAppId" type="BIGINT">
         <constraints nullable="true"/>
       </column>
@@ -119,6 +123,9 @@
     </createTable>
     <addForeignKeyConstraint baseTableName="User" baseColumnNames="applicationId" constraintName="FK_User_Application"
                              referencedTableName="Application"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="Application" baseColumnNames="ownerId" constraintName="FK_Application_Owner"
+                             referencedTableName="User"
                              referencedColumnNames="id"/>
     <addUniqueConstraint tableName="User" columnNames="applicationId,email"/>
     <sql dbms="mysql">ALTER TABLE User CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>

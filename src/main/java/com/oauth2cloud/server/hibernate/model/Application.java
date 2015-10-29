@@ -3,15 +3,19 @@ package com.oauth2cloud.server.hibernate.model;
 import com.leaguekit.hibernate.model.BaseEntity;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
+import javax.persistence.*;
 
 @Entity
 public class Application extends BaseEntity {
     @Column(name = "name")
     private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "ownerId")
+    private User owner;
+
+    @Column(name = "supportEmail")
+    private String supportEmail;
 
     @Column(name = "facebookAppId")
     private Long facebookAppId;
@@ -100,5 +104,21 @@ public class Application extends BaseEntity {
 
     public void setLegacyUrl(String legacyUrl) {
         this.legacyUrl = legacyUrl;
+    }
+
+    public String getSupportEmail() {
+        return supportEmail;
+    }
+
+    public void setSupportEmail(String supportEmail) {
+        this.supportEmail = supportEmail;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 }

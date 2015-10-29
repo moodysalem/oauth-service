@@ -8,7 +8,8 @@
 
     <insert tableName="Application">
       <column name="id">1</column>
-      <column name="name">OAuth Cloud</column>
+      <column name="name">OAuth2 Cloud</column>
+      <column name="supportEmail">moody.salem@gmail.com</column>
       <column name="facebookAppId">725381047606159</column>
       <column name="googleClientId">520864329427-r8nf78v9oiqatdhca5sumqjn39q9q2hs.apps.googleusercontent.com</column>
     </insert>
@@ -90,8 +91,15 @@
       <column name="email">moody.salem@gmail.com</column>
       <!-- password "zbJU1sPNGWE0" -->
       <column name="password">$2a$10$2p.CABrjXhTuDZiY5kIhmuMmIe9EsbeG.EgboPC74WLGdIgtAB6V.</column>
-      <column name="verified" valueBoolean="false"/>
+      <column name="verified" valueBoolean="true"/>
     </insert>
+
+    <update tableName="Application">
+      <column name="ownerId" valueNumeric="1"/>
+      <where>id=1</where>
+    </update>
+
+    <addNotNullConstraint tableName="Application" columnName="ownerId" columnDataType="BIGINT"/>
   </changeSet>
 
 </databaseChangeLog>

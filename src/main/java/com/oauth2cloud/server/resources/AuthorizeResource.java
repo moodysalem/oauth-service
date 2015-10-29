@@ -386,8 +386,9 @@ public class AuthorizeResource extends BaseResource {
                 .replacePath("verify").replaceQuery("").queryParam("code", uc.getCode())
                 .build().toString());
 
-        sendEmail(user.getEmail(), "Your confirmation e-mail for " + user.getApplication().getName(), "VerifyEmail.ftl",
-                ucem);
+        sendEmail(user.getApplication().getSupportEmail(), user.getEmail(),
+                "Your confirmation e-mail for " + user.getApplication().getName(),
+                "VerifyEmail.ftl", ucem);
     }
 
     private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {

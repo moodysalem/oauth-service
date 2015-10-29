@@ -46,7 +46,7 @@ public abstract class BaseResource {
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
     private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
 
-    protected static final String FROM_EMAIL = System.getProperty("admin@oauth2cloud.com");
+    protected static final String FROM_EMAIL = System.getProperty("SEND_EMAILS_FROM", "admin@oauth2cloud.com");
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
@@ -82,12 +82,12 @@ public abstract class BaseResource {
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         Root<Token> t = tq.from(Token.class);
         tq.select(t).where(
-            cb.and(
-                cb.equal(t.get("token"), token),
-                t.get("type").in(types),
-                cb.greaterThan(t.<Date>get("expires"), new Date()),
-                cb.equal(t.get("client"), client)
-            )
+                cb.and(
+                        cb.equal(t.get("token"), token),
+                        t.get("type").in(types),
+                        cb.greaterThan(t.<Date>get("expires"), new Date()),
+                        cb.equal(t.get("client"), client)
+                )
         );
 
         List<Token> tkns = em.createQuery(tq).getResultList();
@@ -213,8 +213,8 @@ public abstract class BaseResource {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-            cb.equal(ras.get("user"), user),
-            cb.equal(ras.get("clientScope"), clientScope)
+                cb.equal(ras.get("user"), user),
+                cb.equal(ras.get("clientScope"), clientScope)
         ))).getResultList();
         if (las.size() == 1) {
             return las.get(0);
@@ -337,9 +337,9 @@ public abstract class BaseResource {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
         Root<LoginCookie> rlc = lc.from(LoginCookie.class);
         lc.select(rlc).where(
-            cb.equal(rlc.get("secret"), secret),
-            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-            cb.equal(rlc.join("user").get("application"), client.getApplication())
+                cb.equal(rlc.get("secret"), secret),
+                cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+                cb.equal(rlc.join("user").get("application"), client.getApplication())
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -405,12 +405,12 @@ public abstract class BaseResource {
         Root<User> u = uq.from(User.class);
 
         List<User> users = em.createQuery(
-            uq.select(u).where(
-                cb.and(
-                    cb.equal(u.get("application"), application),
-                    cb.equal(u.get("email"), email)
+                uq.select(u).where(
+                        cb.and(
+                                cb.equal(u.get("application"), application),
+                                cb.equal(u.get("email"), email)
+                        )
                 )
-            )
         ).getResultList();
 
         if (users.size() != 1) {
@@ -434,26 +434,28 @@ public abstract class BaseResource {
     @Inject
     private Configuration cfg;
 
-    protected void sendEmail(String to, String subject, String template, Object model) {
-        sendEmail(FROM_EMAIL, to, subject, template, model);
-    }
-
     /**
      * Send an e-mail using the template in the resources templates.email package
      *
-     * @param from     who to send from
+     * @param replyTo  who to send from
      * @param to       who to send to
      * @param subject  of the email
      * @param template to build the e-mail
      * @param model    object to pass into template
      */
-    protected void sendEmail(String from, String to, String subject, String template, Object model) {
+    protected void sendEmail(String replyTo, String to, String subject, String template, Object model) {
         try {
             final MimeMessage m = new MimeMessage(mailSession);
             m.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            Address fromAddress = new InternetAddress(from);
+            Address fromAddress = new InternetAddress(FROM_EMAIL);
             m.setFrom(fromAddress);
-            m.setReplyTo(new Address[]{fromAddress});
+            if (replyTo != null) {
+                try {
+                    m.setReplyTo(new Address[]{new InternetAddress(replyTo)});
+                } catch (Exception e) {
+                    LOG.log(Level.WARNING, "Failed to set reply-to for e-mail", e);
+                }
+            }
             m.setSubject(subject);
             m.setContent(processTemplate(template, model), "text/html");
             new Thread(() -> {
@@ -486,11 +488,11 @@ public abstract class BaseResource {
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
         Root<UserCode> rp = pw.from(UserCode.class);
         pw.select(rp).where(
-            cb.equal(rp.get("code"), code),
-            cb.greaterThan(rp.<Date>get("expires"), new Date()),
-            cb.equal(rp.get("type"), type),
-            // if we are including used, then use a predicate that will always be true
-            includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
+                cb.equal(rp.get("code"), code),
+                cb.greaterThan(rp.<Date>get("expires"), new Date()),
+                cb.equal(rp.get("type"), type),
+                // if we are including used, then use a predicate that will always be true
+                includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
         );
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;
