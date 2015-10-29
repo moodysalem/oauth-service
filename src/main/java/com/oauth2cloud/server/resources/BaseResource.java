@@ -46,8 +46,7 @@ public abstract class BaseResource {
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
     private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
 
-    protected static final String FROM_EMAIL = "moody@leaguekit.com";
-    protected static final String REPLY_TO_EMAIL = "moody@leaguekit.com";
+    protected static final String FROM_EMAIL = System.getProperty("admin@oauth2cloud.com");
 
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 

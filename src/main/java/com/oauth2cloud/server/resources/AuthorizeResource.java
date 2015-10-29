@@ -277,7 +277,7 @@ public class AuthorizeResource extends BaseResource {
                     }
                     if (user != null) {
                         if (!user.isVerified()) {
-                            lrm.setLoginError("Your e-mail is not yet verified.");
+                            lrm.setLoginError("Your e-mail is not yet verified. Register again to receive another verification e-mail.");
                         } else {
                             return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
                         }
@@ -295,10 +295,11 @@ public class AuthorizeResource extends BaseResource {
                     lrm.setRegisterError("First name, last name, e-mail address and password are all required fields.");
                 } else {
                     User existingUser = getUser(email, client.getApplication());
-                    if (existingUser != null) {
+                    if (existingUser != null && existingUser.isVerified()) {
                         lrm.setRegisterError("E-mail is already in use.");
                     } else {
-                        User nu = new User();
+                        boolean isNewUser = existingUser == null;
+                        User nu = isNewUser ? new User() : existingUser;
                         nu.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
                         nu.setApplication(client.getApplication());
                         nu.setEmail(email.trim());
@@ -306,7 +307,11 @@ public class AuthorizeResource extends BaseResource {
                         nu.setLastName(lastName.trim());
                         try {
                             beginTransaction();
-                            em.persist(nu);
+                            if (isNewUser) {
+                                em.persist(nu);
+                            } else {
+                                em.merge(nu);
+                            }
                             commit();
 
                             sendVerificationEmail(nu);
