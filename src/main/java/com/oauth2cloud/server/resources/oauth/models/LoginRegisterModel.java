@@ -1,6 +1,4 @@
-package com.oauth2cloud.server.resources.response.models;
-
-import com.oauth2cloud.server.hibernate.model.Application;
+package com.oauth2cloud.server.resources.oauth.models;
 
 /**
  * This is the model that gets passed to Authorize.ftl

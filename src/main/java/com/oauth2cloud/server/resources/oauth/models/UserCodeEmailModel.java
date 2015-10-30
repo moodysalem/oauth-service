@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.resources.response.models;
+package com.oauth2cloud.server.resources.oauth.models;
 
 import com.oauth2cloud.server.hibernate.model.UserCode;
 

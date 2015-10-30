@@ -1,6 +1,7 @@
-package com.oauth2cloud.server;
+package com.oauth2cloud.server.oauth;
 
 import com.leaguekit.jaxrs.lib.test.BaseTest;
+import com.oauth2cloud.server.resources.oauth.OAuthApplication;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**

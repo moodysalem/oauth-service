@@ -1,12 +1,13 @@
-package com.oauth2cloud.server.resources;
+package com.oauth2cloud.server.resources.oauth.resources;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.resources.response.models.LoginRegisterModel;
-import com.oauth2cloud.server.resources.response.models.PermissionsModel;
-import com.oauth2cloud.server.resources.response.models.UserCodeEmailModel;
+import com.oauth2cloud.server.resources.BaseResource;
+import com.oauth2cloud.server.resources.oauth.models.LoginRegisterModel;
+import com.oauth2cloud.server.resources.oauth.models.PermissionsModel;
+import com.oauth2cloud.server.resources.oauth.models.UserCodeEmailModel;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;

@@ -1,10 +1,10 @@
-package com.oauth2cloud.server;
+package com.oauth2cloud.server.resources.oauth;
 
 
 import com.leaguekit.jaxrs.lib.BaseApplication;
 import com.leaguekit.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.leaguekit.jaxrs.lib.factories.MailSessionFactory;
-import com.oauth2cloud.server.filter.NoXFrameOptions;
+import com.oauth2cloud.server.resources.oauth.filter.NoXFrameOptions;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -14,14 +14,14 @@ import javax.mail.Session;
 import javax.persistence.EntityManager;
 import javax.ws.rs.ApplicationPath;
 
-@ApplicationPath("")
+@ApplicationPath("oauth")
 public class OAuthApplication extends BaseApplication {
 
     public OAuthApplication() {
         super();
         register(NoXFrameOptions.class);
 
-        packages("com.oauth2cloud.server");
+        packages("com.oauth2cloud.server.resources.oauth.resources");
 
         register(new AbstractBinder() {
             @Override
@@ -58,13 +58,23 @@ public class OAuthApplication extends BaseApplication {
                     )
                 ).to(Session.class).in(RequestScoped.class);
 
-                Configuration fmConfig = new Configuration(Configuration.VERSION_2_3_23);
-                fmConfig.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));
-                fmConfig.setDefaultEncoding("UTF-8");
-                bind(fmConfig).to(Configuration.class);
+                Configuration freemarkerConfiguration = new Configuration(Configuration.VERSION_2_3_23);
+                freemarkerConfiguration.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));
+                freemarkerConfiguration.setDefaultEncoding("UTF-8");
+                bind(freemarkerConfiguration).to(Configuration.class);
             }
         });
 
+    }
+
+    @Override
+    public boolean forceHttps() {
+        return true;
+    }
+
+    @Override
+    public boolean allowCORS() {
+        return false;
     }
 
 }

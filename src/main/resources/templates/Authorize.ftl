@@ -148,7 +148,7 @@
                                     client_id: "${model.client.application.amazonClientId?js_string}"
                                 };
 
-                                var redirect = "&redirect_uri=" + window.location.origin + "/amazon";
+                                var redirect = "&redirect_uri=" + window.location.origin + "/oauth/amazon";
                                 var loginUrl = "https://www.amazon.com/ap/oa?";
                                 var completeUrl = loginUrl + $.param(params, true) + redirect;
 

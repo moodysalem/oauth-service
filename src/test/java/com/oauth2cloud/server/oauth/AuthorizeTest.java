@@ -1,4 +1,4 @@
-package com.oauth2cloud.server;
+package com.oauth2cloud.server.oauth;
 
 import org.testng.annotations.Test;
 

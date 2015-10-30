@@ -1,6 +1,7 @@
-package com.oauth2cloud.server.resources;
+package com.oauth2cloud.server.resources.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
+import com.oauth2cloud.server.resources.BaseResource;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

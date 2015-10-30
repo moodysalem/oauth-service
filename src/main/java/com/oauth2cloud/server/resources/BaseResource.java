@@ -51,7 +51,7 @@ public abstract class BaseResource {
     protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
 
     @Context
-    ContainerRequestContext containerRequestContext;
+    protected ContainerRequestContext containerRequestContext;
 
     @Context
     ObjectMapper om;
