@@ -383,8 +383,8 @@ public class AuthorizeResource extends BaseResource {
 
         UserCodeEmailModel ucem = new UserCodeEmailModel();
         ucem.setUserCode(uc);
-        ucem.setUrl(containerRequestContext.getUriInfo().getRequestUriBuilder()
-                .replacePath("verify").replaceQuery("").queryParam("code", uc.getCode())
+        ucem.setUrl(containerRequestContext.getUriInfo().getBaseUriBuilder()
+                .path("verify").replaceQuery("").queryParam("code", uc.getCode())
                 .build().toString());
 
         sendEmail(user.getApplication().getSupportEmail(), user.getEmail(),

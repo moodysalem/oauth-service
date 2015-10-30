@@ -16,6 +16,7 @@ public abstract class AuthorizeModel {
     private String requestUrl;
     private Client client;
     private String redirectUri;
+    private String baseUri;
     private String state;
 
     private int loginButtonSize;
@@ -65,6 +66,7 @@ public abstract class AuthorizeModel {
         }
         UriInfo ui = containerRequestContext.getUriInfo();
         setRequestUrl(ui.getRequestUri().toString());
+        setBaseUri(ui.getBaseUri().toString());
     }
 
     private String getFragment(ErrorResponse er) {
@@ -136,5 +138,13 @@ public abstract class AuthorizeModel {
 
     public void setFacebookLogin(boolean facebookLogin) {
         this.facebookLogin = facebookLogin;
+    }
+
+    public String getBaseUri() {
+        return baseUri;
+    }
+
+    public void setBaseUri(String baseUri) {
+        this.baseUri = baseUri;
     }
 }

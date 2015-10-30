@@ -119,7 +119,7 @@ public class PasswordResetResource extends BaseResource {
     }
 
     private void emailCode(UserCode pc) {
-        String url = containerRequestContext.getUriInfo().getRequestUriBuilder().replacePath("reset")
+        String url = containerRequestContext.getUriInfo().getBaseUriBuilder().path("reset")
                 .replaceQuery("").queryParam("code", pc.getCode()).toString();
         UserCodeEmailModel prem = new UserCodeEmailModel();
         prem.setUserCode(pc);
