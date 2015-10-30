@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.resources.oauth.models;
+package com.oauth2cloud.server.applications.oauth.models;
 
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;

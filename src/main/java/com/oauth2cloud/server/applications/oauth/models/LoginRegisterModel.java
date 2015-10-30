@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.resources.oauth.models;
+package com.oauth2cloud.server.applications.oauth.models;
 
 /**
  * This is the model that gets passed to Authorize.ftl

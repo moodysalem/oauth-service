@@ -1,8 +1,8 @@
-package com.oauth2cloud.server.resources.oauth.resources;
+package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.oauth2cloud.server.hibernate.model.UserCode;
-import com.oauth2cloud.server.resources.BaseResource;
-import com.oauth2cloud.server.resources.oauth.models.VerifyEmailModel;
+import com.oauth2cloud.server.applications.BaseResource;
+import com.oauth2cloud.server.applications.oauth.models.VerifyEmailModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.ws.rs.GET;

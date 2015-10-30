@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.resources.admin.resources;
+package com.oauth2cloud.server.applications.admin.resources;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 import com.leaguekit.jaxrs.lib.resources.EntityResource;

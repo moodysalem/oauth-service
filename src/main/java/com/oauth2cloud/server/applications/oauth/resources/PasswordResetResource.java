@@ -1,11 +1,11 @@
-package com.oauth2cloud.server.resources.oauth.resources;
+package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.hibernate.model.UserCode;
-import com.oauth2cloud.server.resources.BaseResource;
-import com.oauth2cloud.server.resources.oauth.models.ResetPasswordModel;
-import com.oauth2cloud.server.resources.oauth.models.UserCodeEmailModel;
+import com.oauth2cloud.server.applications.BaseResource;
+import com.oauth2cloud.server.applications.oauth.models.ResetPasswordModel;
+import com.oauth2cloud.server.applications.oauth.models.UserCodeEmailModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 

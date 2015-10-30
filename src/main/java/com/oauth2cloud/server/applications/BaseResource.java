@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.resources;
+package com.oauth2cloud.server.applications;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
@@ -435,7 +435,7 @@ public abstract class BaseResource {
     private Configuration cfg;
 
     /**
-     * Send an e-mail using the template in the resources templates.email package
+     * Send an e-mail using the template in the applications templates.email package
      *
      * @param replyTo  who to send from
      * @param to       who to send to

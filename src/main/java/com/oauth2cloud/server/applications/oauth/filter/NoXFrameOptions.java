@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.resources.oauth.filter;
+package com.oauth2cloud.server.applications.oauth.filter;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
