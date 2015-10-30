@@ -700,7 +700,7 @@ public class AuthorizeResource extends BaseResource {
         String scope = tkn.getAcceptedScopes().stream()
                 .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
                 .collect(Collectors.joining(" "));
-        String expiresIn = Long.toString(tkn.getExpires().getTime() - System.currentTimeMillis() / 1000L);
+        String expiresIn = Long.toString(tkn.getExpires().getTime() - System.currentTimeMillis());
 
         if (tkn.getType().equals(Token.Type.ACCESS)) {
             MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
