@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="rbs/css/rbs.css" type="text/css"/>
-    <link rel="shortcut icon" href="res/favicon.ico">
+    <link rel="shortcut icon" href="res/favicon.ico?v=1">
     <base href="/">
 
     <title>OAuth2 Cloud</title>
