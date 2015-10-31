@@ -7,8 +7,10 @@ import com.oauth2cloud.server.applications.oauth.filter.NoXFrameOptions;
 
 import javax.ws.rs.ApplicationPath;
 
-@ApplicationPath("oauth")
+@ApplicationPath(OAuthApplication.OAUTH)
 public class OAuthApplication extends BaseApplication {
+
+    public static final String OAUTH = "oauth";
 
     public OAuthApplication() {
         super();

@@ -140,6 +140,11 @@
             </systemProperty>
 
             <systemProperty>
+              <name>CLIENT_ID</name>
+              <value>6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4</value>
+            </systemProperty>
+
+            <systemProperty>
               <name>SMTP_HOST</name>
               <value>${SMTP_HOST}</value>
             </systemProperty>

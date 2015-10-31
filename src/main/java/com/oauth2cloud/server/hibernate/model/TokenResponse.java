@@ -21,6 +21,7 @@ public class TokenResponse {
         tr.setScope(accessToken.getScope());
         tr.setTokenType(BEARER);
         tr.setClientId(accessToken.getClient().getIdentifier());
+        tr.setUser(accessToken.getUser());
         return tr;
     }
 
@@ -41,6 +42,9 @@ public class TokenResponse {
 
     @JsonProperty("client_id")
     private String clientId;
+
+    @JsonProperty("user_details")
+    private User user;
 
     public String getAccessToken() {
         return accessToken;
@@ -88,5 +92,13 @@ public class TokenResponse {
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

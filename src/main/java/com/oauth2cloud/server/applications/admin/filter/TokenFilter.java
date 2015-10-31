@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.applications.admin.filter;
 
+import com.oauth2cloud.server.applications.oauth.OAuthApplication;
 import com.oauth2cloud.server.applications.oauth.resources.TokenResource;
 import com.oauth2cloud.server.hibernate.model.TokenResponse;
 
@@ -32,10 +33,12 @@ public class TokenFilter implements ContainerRequestFilter {
             if (token.length() > 0) {
                 try {
                     URI tokenInfoEndpoint = containerRequestContext.getUriInfo().getRequestUriBuilder()
-                            .replacePath("oauth").path(TokenResource.class.getMethod("tokenInfo", String.class, String.class)).build();
+                            .replacePath(OAuthApplication.OAUTH)
+                            .path(TokenResource.class)
+                            .path(TokenResource.class.getMethod("tokenInfo", String.class, String.class))
+                            .build();
 
-                    Form f = new Form();
-                    f.param("token", token);
+                    Form f = (new Form()).param("token", token).param("client_id", CLIENT_ID);
                     Response r = ClientBuilder.newClient().target(tokenInfoEndpoint).request().post(Entity.form(f));
                     if (r.getStatus() == 200) {
                         TokenResponse tr = r.readEntity(TokenResponse.class);

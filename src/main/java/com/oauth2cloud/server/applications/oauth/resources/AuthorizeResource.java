@@ -627,7 +627,7 @@ public class AuthorizeResource extends BaseResource {
                 newPassword = ui.get("newPassword") != null ? ui.get("newPassword").asText() : null;
 
                 if (fn == null || ln == null || newPassword == null) {
-                    throw new IllegalArgumentException("The legacy URL indicated that the user was properly logged in, but did not return the user's first name, last name, and a new password for the user.");
+                    throw new IllegalArgumentException("The legacy URL indicated that the user was properly logged in, but did not return the user's first name, last name, and a new password.");
                 }
 
                 toReturn = makeOrUpdateUser(app, email, fn, ln, newPassword, true);
