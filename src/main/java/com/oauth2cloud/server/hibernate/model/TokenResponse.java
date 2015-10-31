@@ -20,6 +20,7 @@ public class TokenResponse {
         }
         tr.setScope(accessToken.getScope());
         tr.setTokenType(BEARER);
+        tr.setClientId(accessToken.getClient().getIdentifier());
         return tr;
     }
 
@@ -37,6 +38,9 @@ public class TokenResponse {
 
     @JsonProperty("scope")
     private String scope;
+
+    @JsonProperty("client_id")
+    private String clientId;
 
     public String getAccessToken() {
         return accessToken;
@@ -76,5 +80,13 @@ public class TokenResponse {
 
     public void setExpiresIn(Long expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 }
