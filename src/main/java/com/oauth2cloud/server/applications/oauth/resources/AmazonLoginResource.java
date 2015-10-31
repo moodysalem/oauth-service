@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.applications.oauth.resources;
 
-import com.oauth2cloud.server.applications.BaseResource;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.ws.rs.GET;

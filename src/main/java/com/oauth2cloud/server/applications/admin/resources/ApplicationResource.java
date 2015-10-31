@@ -46,7 +46,7 @@ public class ApplicationResource extends BaseEntityResource<Application> {
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
-        list.add(cb.equal(root.join("owner").get("id"), 0));
+        list.add(cb.equal(root.get("owner"), getUser()));
     }
 
     @Override

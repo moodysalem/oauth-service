@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.applications.BaseResource;
 import com.oauth2cloud.server.applications.oauth.models.LoginRegisterModel;
 import com.oauth2cloud.server.applications.oauth.models.PermissionsModel;
 import com.oauth2cloud.server.applications.oauth.models.UserCodeEmailModel;

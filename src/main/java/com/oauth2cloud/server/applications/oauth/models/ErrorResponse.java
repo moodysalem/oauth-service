@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.hibernate.model;
+package com.oauth2cloud.server.applications.oauth.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -6,8 +6,11 @@ import com.oauth2cloud.server.applications.admin.filter.TokenFilter;
 
 import javax.ws.rs.ApplicationPath;
 
-@ApplicationPath("api")
+@ApplicationPath(APIApplication.API)
 public class APIApplication extends BaseApplication {
+
+    public static final String API = "api";
+
     public APIApplication() {
         super();
 

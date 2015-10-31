@@ -3,7 +3,6 @@ package com.oauth2cloud.server.applications.oauth.resources;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.hibernate.model.UserCode;
-import com.oauth2cloud.server.applications.BaseResource;
 import com.oauth2cloud.server.applications.oauth.models.ResetPasswordModel;
 import com.oauth2cloud.server.applications.oauth.models.UserCodeEmailModel;
 import org.glassfish.jersey.server.mvc.Viewable;

@@ -2,7 +2,6 @@ package com.oauth2cloud.server.applications.oauth.models;
 
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
-import com.oauth2cloud.server.hibernate.model.ErrorResponse;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriBuilder;

@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.applications;
+package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
