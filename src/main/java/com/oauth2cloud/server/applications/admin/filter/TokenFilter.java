@@ -21,9 +21,9 @@ public class TokenFilter implements ContainerRequestFilter {
 
     public static final String BEARER = "bearer ";
     public static final String TOKEN = "TOKEN";
+    public static final String CLIENT_ID = System.getProperty("CLIENT_ID");
 
     private static final Logger LOG = Logger.getLogger(TokenFilter.class.getName());
-    private static final String CLIENT_ID = System.getProperty("CLIENT_ID");
 
     @Override
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {

@@ -1,3 +1,5 @@
+<%@ page import="com.oauth2cloud.server.applications.admin.filter.TokenFilter" %>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
 <!DOCTYPE html>
 
 <html>
@@ -13,6 +15,7 @@
 
     <script>
         window.debug = true;
+        window.clientId = "<%= StringEscapeUtils.escapeEcmaScript(TokenFilter.CLIENT_ID) %>";
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js" data-main="js/App.js"></script>
 </head>

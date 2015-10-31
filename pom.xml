@@ -26,10 +26,17 @@
       <version>${jaxrs.lib.version}</version>
     </dependency>
 
+    <!-- UI library -->
     <dependency>
       <groupId>com.leaguekit</groupId>
       <artifactId>react-backstrap</artifactId>
       <version>${react.backstrap.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.4</version>
     </dependency>
 
     <!-- mysql connector -->
