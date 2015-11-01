@@ -1,23 +1,23 @@
 /**
  * This script provides functions for checking the login status and visiting the login page
  */
-define(["jquery", "underscore"], function ($, _) {
+define(["promise-polyfill"], function () {
     "use strict";
 
-    var callback = _.path(window.location.origin, "callback");
-    var origin = window.location.origin;
+    var AUTHORIZE_URL = "https://oauth2cloud.com/oauth/authorize";
+    var TOKEN_INFO_URL = "https://oauth2cloud.com/oauth/token/info";
 
-    var loginParams = $.param({
-        client_id: window.clientId,
-        response_type: "token",
-        redirect_uri: origin
-    });
+    var clientId;
 
-    var loginUrl = _.path(origin, "oauth", "authorize?" + loginParams);
-    var tokenInfoPath = _.path(origin, "oauth", "token", "info");
+    var getLoginUrl = function (callback) {
+        return AUTHORIZE_URL + "?" +
+            "client_id=" + encodeURIComponent(clientId) +
+            "&response_type=token" +
+            "&redirect_uri=" + ((typeof callback === "string") ? encodeURIComponent(callback) : encodeURIComponent(window.location.origin))
+    };
 
     // for caching the token so we don't get a new one unnecessarily
-    var TOKEN_KEY = "_login_token";
+    var TOKEN_KEY = "_oauth2cloud_login_token";
     var getCachedToken = function () {
         return window.localStorage.getItem(TOKEN_KEY);
     };
@@ -32,99 +32,102 @@ define(["jquery", "underscore"], function ($, _) {
 
     // gets info for a token
     var getTokenInfo = function (token) {
-        var def = $.Deferred();
-
-        if (typeof token === "string" && token.length > 0) {
-            var d = $.param({
-                client_id: window.clientId,
-                token: token
-            });
-            $.ajax({
-                url: tokenInfoPath,
-                method: "POST",
-                data: d,
-                success: function (resp) {
-                    def.resolve(resp);
-                },
-                error: function () {
-                    def.reject();
-                }
-            });
-        } else {
-            def.reject();
-        }
-
-        return def.promise();
+        return new Promise(function (resolve, reject) {
+            if (typeof clientId !== "string" && clientId.length === 0) {
+                console.error("Must initialize the OAuth2 library before calling getTokenInfo");
+                reject();
+                return;
+            }
+            if (typeof token === "string" && token.length > 0) {
+                var d = "client_id=" + encodeURIComponent(clientId) + "&token=" + encodeURIComponent(token);
+                $.ajax({
+                    url: TOKEN_INFO_URL,
+                    method: "POST",
+                    data: d,
+                    success: function (resp) {
+                        resolve(resp);
+                    },
+                    error: function () {
+                        reject();
+                    }
+                });
+            } else {
+                reject();
+            }
+        });
     };
 
     // checks if we're logged in to the oauth site already
-    var checkLoggedIn = function () {
-        var def = $.Deferred();
-        var ifr = $("<iframe></iframe>").css("visibility", "hidden")
-            .attr("src", loginUrl);
-        ifr.on("load", function () {
-            try {
-                var url = ifr.get(0).contentWindow.location.href;
-                var hash = url.split("#")[1];
-                if (typeof hash !== "string" || hash.length === 0) {
-                    return;
-                }
-                var pcs = hash.split("&");
-                var i;
-                var obj = {};
-                for (i = 0; i < pcs.length; i++) {
-                    var pp = pcs[i].split("=");
-                    var n = pp[0], v = pp[1];
-
-                    obj[decodeURIComponent(n)] = decodeURIComponent(v);
-                }
-                getTokenInfo(obj.access_token).then(function (resp) {
-                    def.resolve(resp);
-                }, function () {
-                    def.reject();
-                });
-            } catch (e) {
-                def.reject();
+    var checkAlreadyLoggedIn = function () {
+        return new Promise(function (resolve, reject) {
+            if (typeof clientId !== "string" || clientId === null) {
+                reject();
+                return;
             }
-            ifr.remove();
+
+            var ifr = document.createElement('iframe');
+            ifr.style.visibility = "hidden";
+            ifr.src = getLoginUrl();
+            document.body.appendChild(ifr);
+            ifr.onload = function () {
+                try {
+                    var url = ifr.contentWindow.location.href;
+                    var hash = url.split("#")[1];
+                    if (typeof hash !== "string" || hash.length === 0) {
+                        return;
+                    }
+                    var pcs = hash.split("&");
+                    var i;
+                    var obj = {};
+                    for (i = 0; i < pcs.length; i++) {
+                        var pp = pcs[i].split("=");
+                        var n = pp[0], v = pp[1];
+
+                        obj[decodeURIComponent(n)] = decodeURIComponent(v);
+                    }
+                    resolve(getTokenInfo(obj.access_token));
+                } catch (e) {
+                    reject();
+                }
+                ifr.parentNode.removeChild(ifr);
+            };
         });
-        $("body").append(ifr);
-        return def.promise();
     };
 
-    return {
-        getLoginPath: function () {
-            return loginUrl;
-        },
-
-        getLoginStatus: function () {
-            var def = $.Deferred();
+    var getLoginStatus = function () {
+        return new Promise(function (resolve, reject) {
             var tkn = getCachedToken();
             if (typeof tkn === "string" && tkn.length > 0) {
                 getTokenInfo(tkn).then(function (obj) {
-                    def.resolve(obj);
+                    resolve(obj);
                 }, function () {
                     clearCachedToken();
-                    checkLoggedIn().then(function (token) {
+                    checkAlreadyLoggedIn().then(function (token) {
                         setCachedToken(token.access_token);
-                        def.resolve(token);
+                        resolve(token);
                     }, function () {
-                        def.reject();
+                        reject();
                     });
                 });
             } else {
-                checkLoggedIn().then(function (token) {
+                checkAlreadyLoggedIn().then(function (token) {
                     setCachedToken(token.access_token);
-                    def.resolve(token);
+                    resolve(token);
                 }, function () {
-                    def.reject();
+                    reject();
                 });
             }
-            return def.promise();
-        },
+        });
+    };
 
-        login: function (callbackUrl, scope) {
-            window.location.href = loginUrl;
+    var init = function (object) {
+        if (typeof object.clientId === "string") {
+            clientId = object.clientId;
         }
+    };
+
+    return {
+        init: init,
+        getLoginStatus: getLoginStatus
     };
 });

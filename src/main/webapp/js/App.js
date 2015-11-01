@@ -17,6 +17,10 @@ window.define(["rbs/RequireConfig"], function (rc) {
             });
         };
 
+        oauth2.init({
+            clientId: window.clientId
+        });
+
         oauth2.getLoginStatus().then(function (token) {
             m.set("token", token);
             start();

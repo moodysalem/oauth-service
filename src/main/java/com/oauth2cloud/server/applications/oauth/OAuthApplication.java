@@ -29,7 +29,7 @@ public class OAuthApplication extends BaseApplication {
 
     @Override
     public boolean allowCORS() {
-        return false;
+        return true;
     }
 
 }
