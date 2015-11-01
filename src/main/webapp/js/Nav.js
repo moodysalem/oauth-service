@@ -2,11 +2,11 @@
  *
  */
 define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/components/mixins/NavbarHelper",
-    "rbs/components/layout/Navbar", "rbs/components/layout/NavbarGroup", "rbs/components/layout/Icon", "js/OAuth2" ],
-  function (React, _, m, model, nh, navbar, ng, icon, oauth2) {
+    "rbs/components/layout/Navbar", "rbs/components/layout/NavbarGroup", "rbs/components/layout/Icon", "js/OAuth2", "util" ],
+  function (React, _, m, model, nh, navbar, ng, icon, oauth2, util) {
     "use strict";
 
-    return _.rf({
+    return util.rf({
       mixins: [ model, nh ],
       render: function () {
         var mdl = this.state.model;

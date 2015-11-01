@@ -1,10 +1,10 @@
 define(["backbone", "react", "react-dom", "model", "underscore", "rbs/components/mixins/Model", "rbs/components/controls/Tappable",
-        "js/Nav"],
-    function (Backbone, React, dom, m, _, model, tappable, nav) {
+    "js/Nav", "util" ],
+  function (Backbone, React, dom, m, _, model, tappable, nav, util) {
         "use strict";
 
         // component that re-renders on application model change as well as wraps the children in a tap-friendly listener
-        var wrapper = _.rf({
+    var wrapper = util.rf({
             displayName: "wrapper",
             mixins: [model],
             render: function () {
