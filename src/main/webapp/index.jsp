@@ -8,7 +8,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="rbs/css/rbs.css" type="text/css"/>
-    <link rel="shortcut icon" href="res/favicon.ico?v=1">
+    <link rel="shortcut icon" href="res/favicon.ico?v=1"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/paper/bootstrap.min.css"/>
     <base href="/">
 
     <title>OAuth2 Cloud</title>
@@ -23,12 +24,12 @@
             var fragPcs = frag.split("&");
             var i;
             for (i = 0; i < fragPcs.length; i++) {
-                var pp = fragPcs[i].split("=");
+                var pp = fragPcs[ i ].split("=");
                 if (pp.length != 2) {
                     continue;
                 }
-                var n = decodeURIComponent(pp[0]), v = decodeURIComponent(pp[1]);
-                obj[n] = v;
+                var n = decodeURIComponent(pp[ 0 ]), v = decodeURIComponent(pp[ 1 ]);
+                obj[ n ] = v;
             }
             window.hashObject = obj;
         }

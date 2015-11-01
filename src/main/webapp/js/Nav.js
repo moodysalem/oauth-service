@@ -40,7 +40,10 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
         }
 
         return navbar({
-          brand: React.DOM.span({}, [ icon({ key: "i", name: "chain" }), "OAuth2 Cloud" ])
+          brand: React.DOM.span({}, [
+            icon({ key: "i", name: "chain", style: { color: "cornflowerblue" } }),
+            "OAuth2 Cloud"
+          ])
         }, [
           ng({
             key: "ll"
