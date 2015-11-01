@@ -82,7 +82,7 @@
             top: 1px;
             width: 26px;
             height: 26px;
-            -webkit-animation: spin 1s infinite linear;
+            -webkit-animation: spin 1s infini te linear;
             -moz-animation: spin 1s infinite linear;
             -o-animation: spin 1s infinite linear;
             animation: spin 1s infinite linear;

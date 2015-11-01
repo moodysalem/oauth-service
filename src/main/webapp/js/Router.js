@@ -1,10 +1,10 @@
-define(["backbone", "react", "react-dom"], function (Backbone, React, dom) {
+define(["backbone", "react", "react-dom", "model", "underscore"], function (Backbone, React, dom, m, _) {
     "use strict";
 
     var renderFile = function (file, properties) {
         require([file], function (comp) {
             dom.render(comp(properties), $("#app").get(0));
-        })
+        });
     };
 
     return Backbone.Router.extend({
