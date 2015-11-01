@@ -9,11 +9,12 @@
 
     var clientId;
 
-    var getLoginUrl = function (callback) {
+    var getLoginUrl = function (callback, logout) {
         return AUTHORIZE_URL + "?" +
             "client_id=" + encodeURIComponent(clientId) +
             "&response_type=token" +
-            "&redirect_uri=" + ((typeof callback === "string") ? encodeURIComponent(callback) : encodeURIComponent(window.location.origin))
+            "&redirect_uri=" + ((typeof callback === "string") ? encodeURIComponent(callback) : encodeURIComponent(window.location.origin)) +
+            ((logout) ? "&logout=true" : "")
     };
 
     // for caching the token so we don't get a new one unnecessarily
@@ -135,9 +136,21 @@
         }
     };
 
+    var logout = function () {
+        clearCachedToken();
+        var ifr = document.createElement('iframe');
+        ifr.style.visibility = "hidden";
+        ifr.src = getLoginUrl(null, true);
+        document.body.appendChild(ifr);
+        ifr.onload = function () {
+            ifr.parentNode.removeChild(ifr);
+        };
+    };
+
     var toReturn = {
         init: init,
-        getLoginStatus: getLoginStatus
+        getLoginStatus: getLoginStatus,
+        logout: logout
     };
 
     if (typeof window.define === "function") {
