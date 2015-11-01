@@ -127,6 +127,12 @@
         if (typeof object.token === "string") {
             setCachedToken(object.token);
         }
+        if (typeof object.authorizeUrl === "string") {
+            AUTHORIZE_URL = object.authorizeUrl;
+        }
+        if (typeof object.tokenInfoUrl === "string") {
+            TOKEN_INFO_URL = object.tokenInfoUrl;
+        }
     };
 
     var toReturn = {

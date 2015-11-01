@@ -19,7 +19,9 @@ window.define(["rbs/RequireConfig"], function (rc) {
 
         oauth2.init({
             clientId: window.clientId,
-            token: window.hashObject && window.hashObject.access_token
+            token: window.hashObject && window.hashObject.access_token,
+            authorizeUrl: "/oauth/authorize",
+            tokenInfoUrl: "/oauth/token/info"
         });
 
         oauth2.getLoginStatus().then(function (token) {

@@ -2,8 +2,8 @@
  *
  */
 define(["react", "underscore", "model", "rbs/components/mixins/Model", "rbs/components/mixins/NavbarHelper",
-        "rbs/components/layout/Navbar", "rbs/components/layout/NavbarGroup"],
-    function (React, _, m, model, nh, navbar, ng) {
+        "rbs/components/layout/Navbar", "rbs/components/layout/NavbarGroup", "rbs/components/layout/Icon"],
+    function (React, _, m, model, nh, navbar, ng, icon) {
         "use strict";
 
         return _.rf({
@@ -22,7 +22,7 @@ define(["react", "underscore", "model", "rbs/components/mixins/Model", "rbs/comp
                 }
 
                 return navbar({
-                    brand: "OAuth2 Cloud"
+                    brand: React.DOM.span({}, [icon({key: "i", name: "chain"}), "OAuth2 Cloud"])
                 }, [
                     ng({
                         key: "ll"
