@@ -1,19 +1,32 @@
-define(["backbone", "react", "react-dom", "model", "underscore"], function (Backbone, React, dom, m, _) {
-    "use strict";
+define(["backbone", "react", "react-dom", "model", "underscore", "rbs/components/mixins/Model", "rbs/components/controls/Tappable",
+        "js/Nav"],
+    function (Backbone, React, dom, m, _, model, tappable, nav) {
+        "use strict";
 
-    var renderFile = function (file, properties) {
-        require([file], function (comp) {
-            dom.render(comp(properties), $("#app").get(0));
+        // component that re-renders on application model change as well as wraps the children in a tap-friendly listener
+        var wrapper = _.rf({
+            displayName: "wrapper",
+            mixins: [model],
+            render: function () {
+                return tappable({}, this.props.children);
+            }
         });
-    };
 
-    return Backbone.Router.extend({
-        routes: {
-            "(/)": "home"
-        },
+        var renderFile = function (file, properties) {
+            require([file], function (comp) {
+                dom.render(wrapper({model: m}, comp(properties)), $("#app").get(0));
+            });
+        };
 
-        home: function () {
-            renderFile("js/views/Home");
-        }
+        dom.render(nav({model: m}), $("#nav").get(0));
+
+        return Backbone.Router.extend({
+            routes: {
+                "(/)": "home"
+            },
+
+            home: function () {
+                renderFile("js/views/Home");
+            }
+        });
     });
-});

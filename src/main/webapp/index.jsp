@@ -16,10 +16,27 @@
     <script>
         window.debug = true;
         window.clientId = "<%= StringEscapeUtils.escapeEcmaScript(TokenFilter.CLIENT_ID) %>";
+        if (typeof window.location.hash === "string" && window.location.hash.length > 0) {
+            var frag = window.location.hash.substring(1);
+            var obj = {};
+            window.history.replaceState(void(0), void(0), window.location.pathname);
+            var fragPcs = frag.split("&");
+            var i;
+            for (i = 0; i < fragPcs.length; i++) {
+                var pp = fragPcs[i].split("=");
+                if (pp.length != 2) {
+                    continue;
+                }
+                var n = decodeURIComponent(pp[0]), v = decodeURIComponent(pp[1]);
+                obj[n] = v;
+            }
+            window.hashObject = obj;
+        }
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js" data-main="js/App.js"></script>
 </head>
 <body>
+<div id="nav"></div>
 <div id="app">
     <!-- Loading animation container -->
     <div class="loading">
@@ -82,7 +99,7 @@
             top: 1px;
             width: 26px;
             height: 26px;
-            -webkit-animation: spin 1s infini te linear;
+            -webkit-animation: spin 1s infinite linear;
             -moz-animation: spin 1s infinite linear;
             -o-animation: spin 1s infinite linear;
             animation: spin 1s infinite linear;

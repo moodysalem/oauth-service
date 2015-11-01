@@ -1,7 +1,7 @@
 /**
  * This script provides functions for checking the login status and visiting the login page
  */
-define(["promise-polyfill"], function () {
+(function () {
     "use strict";
 
     var AUTHORIZE_URL = "https://oauth2cloud.com/oauth/authorize";
@@ -34,7 +34,7 @@ define(["promise-polyfill"], function () {
     var getTokenInfo = function (token) {
         return new Promise(function (resolve, reject) {
             if (typeof clientId !== "string" && clientId.length === 0) {
-                console.error("Must initialize the OAuth2 library before calling getTokenInfo");
+                console.error("Must initialize the oauth2 library before calling getTokenInfo");
                 reject();
                 return;
             }
@@ -124,10 +124,17 @@ define(["promise-polyfill"], function () {
         if (typeof object.clientId === "string") {
             clientId = object.clientId;
         }
+        if (typeof object.token === "string") {
+            setCachedToken(object.token);
+        }
     };
 
-    return {
+    var toReturn = {
         init: init,
         getLoginStatus: getLoginStatus
     };
-});
+
+    if (typeof window.define === "function") {
+        window.define(toReturn);
+    }
+})();

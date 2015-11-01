@@ -5,7 +5,7 @@ window.require.config({
 window.define(["rbs/RequireConfig"], function (rc) {
     window.require.config(rc);
 
-    window.require(["js/OAuth2", "backbone"], function (oauth2, Backbone) {
+    window.require(["js/OAuth2", "backbone", "promise-polyfill"], function (oauth2, Backbone) {
         var m = new Backbone.Model();
         window.define("model", m);
 
@@ -18,7 +18,8 @@ window.define(["rbs/RequireConfig"], function (rc) {
         };
 
         oauth2.init({
-            clientId: window.clientId
+            clientId: window.clientId,
+            token: window.hashObject && window.hashObject.access_token
         });
 
         oauth2.getLoginStatus().then(function (token) {
