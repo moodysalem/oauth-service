@@ -15,6 +15,13 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
         var rightLinks = [];
 
         if (mdl.token) {
+          leftLinks.push({
+            text: "Applications",
+            icon: "users",
+            href: "/applications"
+          });
+
+
           var dn = util.concatWS(" ", mdl.token.user_details.firstName, mdl.token.user_details.lastName);
           rightLinks.push({
             text: "Logged in as " + dn
