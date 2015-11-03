@@ -1,7 +1,7 @@
 /**
  * This script provides functions for checking the login status and visiting the login page
  */
-(function () {
+define([ "jquery" ], function ($) {
   "use strict";
 
   var AUTHORIZE_URL = "https://oauth2cloud.com/oauth/authorize";
@@ -138,27 +138,27 @@
 
   var logout = function () {
     clearCachedToken();
-    var ifr = document.createElement('iframe');
-    ifr.style.visibility = "hidden";
-    ifr.src = getLoginUrl(null, true);
-    document.body.appendChild(ifr);
-    ifr.onload = function () {
-      ifr.parentNode.removeChild(ifr);
-    };
+    return new Promise(function (resolve, reject) {
+      $.ajax({
+        path: AUTHORIZE_URL + "/logout?client_id=" + encodeURIComponent(clientId),
+        sucess: function () {
+          resolve();
+        },
+        error: function () {
+          reject();
+        }
+      });
+    });
   };
 
   var login = function () {
     window.location.href = getLoginUrl(window.location.href, true);
   };
 
-  var toReturn = {
+  return {
     init: init,
     getLoginStatus: getLoginStatus,
     logout: logout,
     login: login
   };
-
-  if (typeof window.define === "function") {
-    window.define(toReturn);
-  }
-})();
+});
