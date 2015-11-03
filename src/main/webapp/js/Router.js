@@ -27,8 +27,7 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
       },
 
       applications: function () {
-        renderFile("js/views/Home");
-        util.debug("Not yet implemented.");
+        renderFile("js/views/Applications");
       },
 
       home: function () {

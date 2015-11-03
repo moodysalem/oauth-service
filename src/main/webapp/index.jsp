@@ -1,4 +1,3 @@
-<%@ page import="com.leaguekit.jaxrs.lib.filters.HTTPSFilter" %>
 <%@ page import="com.oauth2cloud.server.applications.admin.filter.TokenFilter" %>
 <%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
 <!DOCTYPE html>
@@ -17,12 +16,6 @@
 
     <script>
         window.debug = true;
-        var HTTP = "http", HTTPS = "https";
-        var forwardedProto = "<%= StringEscapeUtils.escapeEcmaScript(request.getHeader(HTTPSFilter.PROTO_HEADER)) %>";
-        if (forwardedProto.toLowerCase() === HTTP) {
-            window.location.replace(HTTPS + window.location.href.substring(HTTP.length));
-        }
-
         window.clientId = "<%= StringEscapeUtils.escapeEcmaScript(TokenFilter.CLIENT_ID) %>";
         if (typeof window.location.hash === "string" && window.location.hash.length > 0) {
             var frag = window.location.hash.substring(1);

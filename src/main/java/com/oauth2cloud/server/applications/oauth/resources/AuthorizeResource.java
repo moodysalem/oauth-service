@@ -2,11 +2,11 @@ package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.leaguekit.util.RandomStringUtil;
-import com.oauth2cloud.server.hibernate.model.*;
-import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.applications.oauth.models.LoginRegisterModel;
 import com.oauth2cloud.server.applications.oauth.models.PermissionsModel;
 import com.oauth2cloud.server.applications.oauth.models.UserCodeEmailModel;
+import com.oauth2cloud.server.hibernate.model.*;
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
@@ -23,10 +23,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -40,7 +37,7 @@ public class AuthorizeResource extends BaseResource {
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
     public static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
-            "Invalid request. Please contact an administrator if this continues.";
+        "Invalid request. Please contact an administrator if this continues.";
     public static final String AMAZON_API_URL = "https://api.amazon.com";
 
     @QueryParam("response_type")
@@ -139,8 +136,8 @@ public class AuthorizeResource extends BaseResource {
                 URI cUri = new URI(uri);
                 // scheme, host, and port must match
                 if (cUri.getScheme().equalsIgnoreCase(toRedirect.getScheme()) &&
-                        cUri.getHost().equalsIgnoreCase(toRedirect.getHost()) &&
-                        cUri.getPort() == toRedirect.getPort()) {
+                    cUri.getHost().equalsIgnoreCase(toRedirect.getHost()) &&
+                    cUri.getPort() == toRedirect.getPort()) {
                     validRedirect = true;
                     break;
                 }
@@ -166,7 +163,7 @@ public class AuthorizeResource extends BaseResource {
         // verify all the requested scopes are available to the client
         if (scopes != null && scopes.size() > 0) {
             Set<String> scopeNames = c.getClientScopes().stream()
-                    .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
+                .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
             if (!scopeNames.containsAll(scopes)) {
                 String joinedScopes = scopes.stream().filter((s) -> !scopeNames.contains(s)).collect(Collectors.joining(", "));
                 return error("The following scopes are requested but not allowed for this client: " + joinedScopes);
@@ -197,7 +194,7 @@ public class AuthorizeResource extends BaseResource {
                 deleteLoginCookie(loginCookie);
             } else {
                 return getSuccessfulLoginResponse(loginCookie.getUser(), client, scopes, redirectUri, responseType, state,
-                        loginCookie.isRememberMe());
+                    loginCookie.isRememberMe());
             }
         }
 
@@ -347,8 +344,8 @@ public class AuthorizeResource extends BaseResource {
                             Set<Long> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
                                 try {
                                     return s != null && s.startsWith("SCOPE") &&
-                                            "on".equalsIgnoreCase(formParams.getFirst(s)) ?
-                                            Long.parseLong(s.substring("SCOPE".length())) : null;
+                                        "on".equalsIgnoreCase(formParams.getFirst(s)) ?
+                                        Long.parseLong(s.substring("SCOPE".length())) : null;
                                 } catch (Exception e) {
                                     return null;
                                 }
@@ -356,7 +353,7 @@ public class AuthorizeResource extends BaseResource {
                             for (ClientScope cs : clientScopes) {
                                 // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
                                 if (!cs.getPriority().equals(ClientScope.Priority.ASK) ||
-                                        acceptedScopeIds.contains(cs.getScope().getId())) {
+                                    acceptedScopeIds.contains(cs.getScope().getId())) {
                                     // create/find the accepted scope for this client scope
                                     tokenScopes.add(acceptScope(t.getUser(), cs));
                                 }
@@ -378,17 +375,17 @@ public class AuthorizeResource extends BaseResource {
 
     private void sendVerificationEmail(User user) {
         UserCode uc = makeCode(user, containerRequestContext.getUriInfo().getRequestUri().toString(),
-                UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
+            UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
 
         UserCodeEmailModel ucem = new UserCodeEmailModel();
         ucem.setUserCode(uc);
         ucem.setUrl(containerRequestContext.getUriInfo().getBaseUriBuilder()
-                .path("verify").replaceQuery("").queryParam("code", uc.getCode())
-                .build().toString());
+            .path("verify").replaceQuery("").queryParam("code", uc.getCode())
+            .build().toString());
 
         sendEmail(user.getApplication().getSupportEmail(), user.getEmail(),
-                "Your confirmation e-mail for " + user.getApplication().getName(),
-                "VerifyEmail.ftl", ucem);
+            "Your confirmation e-mail for " + user.getApplication().getName(),
+            "VerifyEmail.ftl", ucem);
     }
 
     private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
@@ -399,8 +396,8 @@ public class AuthorizeResource extends BaseResource {
         String token = formParams.getFirst("amazonToken");
 
         Response info = ClientBuilder.newClient()
-                .target(AMAZON_API_URL).path("auth").path("o2").path("tokeninfo")
-                .queryParam("access_token", token).request().get();
+            .target(AMAZON_API_URL).path("auth").path("o2").path("tokeninfo")
+            .queryParam("access_token", token).request().get();
         if (info.getStatus() != 200) {
             throw new IllegalArgumentException("Invalid Amazon login credentials.");
         }
@@ -414,9 +411,9 @@ public class AuthorizeResource extends BaseResource {
         }
 
         Response userInfo = ClientBuilder.newClient()
-                .target(AMAZON_API_URL).path("user").path("profile")
-                .request().header("Authorization", "bearer " + token)
-                .get();
+            .target(AMAZON_API_URL).path("user").path("profile")
+            .request().header("Authorization", "bearer " + token)
+            .get();
 
         if (userInfo.getStatus() != 200) {
             throw new IllegalArgumentException("Failed to get the user information.");
@@ -483,7 +480,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         Response tokenInfo = ClientBuilder.newClient().target("https://www.googleapis.com/oauth2/v1/tokeninfo")
-                .queryParam("access_token", googleToken).request(MediaType.APPLICATION_JSON).get();
+            .queryParam("access_token", googleToken).request(MediaType.APPLICATION_JSON).get();
 
         if (tokenInfo.getStatus() != 200) {
             throw new IllegalArgumentException("Invalid Google Token supplied.");
@@ -514,9 +511,9 @@ public class AuthorizeResource extends BaseResource {
 //        }
 
         Response userInfo = ClientBuilder.newClient().target("https://www.googleapis.com/plus/v1/people/me")
-                .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + googleToken)
-                .get();
+            .request(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + googleToken)
+            .get();
 
         if (userInfo.getStatus() != 200) {
             throw new IllegalArgumentException("Failed to get user info.");
@@ -616,7 +613,7 @@ public class AuthorizeResource extends BaseResource {
             Form f = new Form();
             f.param("email", email).param("password", password);
             Response r = ClientBuilder.newClient().target(app.getLegacyUrl()).request(MediaType.APPLICATION_JSON_TYPE)
-                    .post(Entity.form(f));
+                .post(Entity.form(f));
 
             if (r.getStatus() == 200) {
                 JsonNode ui = r.readEntity(JsonNode.class);
@@ -671,7 +668,7 @@ public class AuthorizeResource extends BaseResource {
             Token.Type type = getTokenType(responseType);
             // redirect with token since they've already asked for all the permissions
             Token t = generateToken(type, client, user, getExpires(client, type),
-                    redirectUri, acceptedScopes, null, null);
+                redirectUri, acceptedScopes, null, null);
             return getRedirectResponse(redirectUri, state, t, rememberMe);
         }
     }
@@ -697,8 +694,8 @@ public class AuthorizeResource extends BaseResource {
         UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
         String scope = tkn.getAcceptedScopes().stream()
-                .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
-                .collect(Collectors.joining(" "));
+            .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
+            .collect(Collectors.joining(" "));
         String expiresIn = Long.toString((tkn.getExpires().getTime() - System.currentTimeMillis()) / 1000L);
 
         if (tkn.getType().equals(Token.Type.ACCESS)) {
@@ -721,13 +718,18 @@ public class AuthorizeResource extends BaseResource {
         }
 
         return Response.status(Response.Status.FOUND)
-                .location(toRedirect.build())
-                .cookie(getNewCookie(tkn, rememberMe))
-                .build();
+            .location(toRedirect.build())
+            .cookie(getNewCookie(tkn, rememberMe))
+            .build();
     }
 
     @HeaderParam("X-Forwarded-Proto")
     private String forwardedProto;
+
+    private static final String IPV4_ADDRESS_REGEX = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$";
+    private static final String HTTPS = "HTTPS";
+    private static final String OAUTH2_CLOUD_LOGIN_COOKIE = "OAuth2 Cloud Login Cookie";
+
 
     private NewCookie getNewCookie(Token tkn, Boolean rememberMe) {
         Date expires;
@@ -744,10 +746,23 @@ public class AuthorizeResource extends BaseResource {
         int maxAge = rememberMe ? (new Long(ONE_MONTH / 1000L)).intValue() : NewCookie.DEFAULT_MAX_AGE;
         Date expiry = rememberMe ? expires : null;
 
-        boolean isHTTPS = "HTTPS".equalsIgnoreCase(forwardedProto);
+        boolean isHTTPS = HTTPS.equalsIgnoreCase(forwardedProto);
 
-        return new NewCookie(getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", null, NewCookie.DEFAULT_VERSION,
-                "login cookie", maxAge, expiry, isHTTPS, true);
+        String domain = containerRequestContext.getUriInfo().getBaseUri().getHost();
+        if (domain != null) {
+            if (domain.matches(IPV4_ADDRESS_REGEX)) {
+                // don't put a domain on a cookie that is passed to an IP address
+                domain = null;
+            } else {
+                // the domain should be the last two pieces of the domain name
+                String[] pieces = domain.split("\\.");
+                List<String> pcs = Arrays.asList(pieces);
+                domain = pcs.subList(Math.max(0, pcs.size() - 2), pcs.size()).stream().collect(Collectors.joining("."));
+            }
+        }
+
+        return new NewCookie(getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", domain, NewCookie.DEFAULT_VERSION,
+            OAUTH2_CLOUD_LOGIN_COOKIE, maxAge, expiry, isHTTPS, true);
     }
 
     private LoginCookie makeLoginCookie(User user, String secret, Date expires, boolean rememberMe) {
@@ -779,7 +794,7 @@ public class AuthorizeResource extends BaseResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
-                getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null);
+            getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null);
     }
 
     /**
@@ -793,9 +808,9 @@ public class AuthorizeResource extends BaseResource {
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         Root<Token> tk = tq.from(Token.class);
         List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
-                cb.equal(tk.get("token"), token),
-                cb.equal(tk.get("type"), Token.Type.PERMISSION),
-                cb.equal(tk.get("client"), client)
+            cb.equal(tk.get("token"), token),
+            cb.equal(tk.get("type"), Token.Type.PERMISSION),
+            cb.equal(tk.get("client"), client)
         ))).getResultList();
         return tks.size() == 1 ? tks.get(0) : null;
     }
