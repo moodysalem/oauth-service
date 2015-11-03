@@ -1,6 +1,8 @@
 package com.oauth2cloud.server.applications.webapp;
 
 import com.leaguekit.jaxrs.lib.filters.HTTPSFilter;
+import com.oauth2cloud.server.applications.admin.APIApplication;
+import com.oauth2cloud.server.applications.oauth.OAuthApplication;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -37,10 +39,10 @@ public class ServletHTTPSFilter implements Filter {
             }
 
             String path = reqUri.getPath() != null ? reqUri.getPath().toLowerCase() : "";
-            if (!path.startsWith("/")) {
-                path = "/" + path;
+            if (path.startsWith("/")) {
+                path = path.substring(1);
             }
-            if (!path.startsWith("/api") && !path.startsWith("/oauth")) {
+            if (!path.startsWith(OAuthApplication.OAUTH) && !path.startsWith(APIApplication.API)) {
                 resp.sendRedirect(
                     UriBuilder.fromUri(reqUri)
                         .scheme(HTTPSFilter.HTTPS)
