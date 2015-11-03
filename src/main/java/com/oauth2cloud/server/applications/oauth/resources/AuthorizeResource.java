@@ -542,6 +542,7 @@ public class AuthorizeResource extends BaseResource {
 
         if (u == null) {
             u = new User();
+            u.setEmail(email);
             u.setApplication(app);
             u.setFirstName(firstName);
             u.setLastName(lastName);
