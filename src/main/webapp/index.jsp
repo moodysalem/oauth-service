@@ -1,5 +1,15 @@
+<%
+    String proto = request.getHeader(HTTPSFilter.PROTO_HEADER);
+    if (proto != null && !proto.equalsIgnoreCase(HTTPSFilter.HTTPS)) {
+        URI uri = UriBuilder.fromUri(new URI(request.getRequestURI())).scheme(HTTPSFilter.HTTPS).build();
+        response.sendRedirect(uri.toString());
+    }
+%>
+<%@ page import="com.leaguekit.jaxrs.lib.filters.HTTPSFilter" %>
 <%@ page import="com.oauth2cloud.server.applications.admin.filter.TokenFilter" %>
 <%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
+<%@ page import="java.net.URI" %>
+<%@ page import="javax.ws.rs.core.UriBuilder" %>
 <!DOCTYPE html>
 
 <html>
