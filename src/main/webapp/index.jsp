@@ -1,17 +1,6 @@
-<%
-    String proto = request.getHeader(HTTPSFilter.PROTO_HEADER);
-    if (proto != null && !proto.equalsIgnoreCase(HTTPSFilter.HTTPS)) {
-        URI uri = UriBuilder.fromUri(new URI(request.getRequestURI())).scheme(HTTPSFilter.HTTPS).build();
-        response.sendRedirect(uri.toString());
-    }
-%>
-<%@ page import="com.leaguekit.jaxrs.lib.filters.HTTPSFilter" %>
 <%@ page import="com.oauth2cloud.server.applications.admin.filter.TokenFilter" %>
 <%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
-<%@ page import="java.net.URI" %>
-<%@ page import="javax.ws.rs.core.UriBuilder" %>
 <!DOCTYPE html>
-
 <html>
 <head>
     <meta charset="UTF-8">
@@ -19,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="rbs/css/rbs.css" type="text/css"/>
     <link rel="shortcut icon" href="res/favicon.ico?v=1"/>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/paper/bootstrap.min.css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/paper/bootstrap.min.css"
+          integrity="sha384-8uu+B/3A5Pjofed/yR1V7M6z9vL+Q2qm6uWNxIog8oyuvh9Avf22OpU7QLY6YJri" crossorigin="anonymous">
     <base href="/">
 
     <title>OAuth2 Cloud</title>
@@ -44,7 +34,9 @@
             window.hashObject = obj;
         }
     </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js" data-main="js/App.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"
+            integrity="sha384-3Ft7qPP9cYCINavEQr8puY8Ng61an4d3jQRqlOv+NhS7aKteY9qqGaqzcGk5hT7c" crossorigin="anonymous"
+            data-main="js/App.js"></script>
 </head>
 <body>
 <div id="nav"></div>
