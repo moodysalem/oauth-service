@@ -31,7 +31,7 @@ public class ServletHTTPSFilter implements Filter {
         if (proto != null && !proto.equalsIgnoreCase(HTTPSFilter.HTTPS)) {
             URI reqUri = null;
             try {
-                reqUri = new URI(req.getRequestURI());
+                reqUri = new URI(req.getRequestURL().toString());
             } catch (URISyntaxException e) {
                 LOG.log(Level.SEVERE, "failed to parse URI in HTTPS filter", e);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
