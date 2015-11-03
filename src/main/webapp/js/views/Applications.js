@@ -7,11 +7,15 @@ define([ "react", "util" ], function (React, util) {
   var d = React.DOM;
 
   return util.rf({
+    getInitialState: function () {
+      return {};
+    },
+
     render: function () {
       return d.div({
         className: "container"
       }, [
-        d.h1({ className: "page-header", key: "p" }, "My Applications")
+        d.h2({ className: "page-header", key: "p" }, "My Applications")
       ]);
     }
   });

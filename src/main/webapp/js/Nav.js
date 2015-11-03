@@ -10,7 +10,13 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
       mixins: [ model, nh ],
       render: function () {
         var mdl = this.state.model;
-        var leftLinks = [];
+        var leftLinks = [
+          {
+            text: "Home",
+            icon: "home",
+            href: "/"
+          }
+        ];
 
         var rightLinks = [];
 

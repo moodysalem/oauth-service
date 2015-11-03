@@ -232,12 +232,12 @@
 
                 <div class="form-group">
                     <label class="control-label" for="registerEmail">E-mail Address</label>
-                    <input type="email" id="registerEmail" name="email" class="form-control input-lg"
+                    <input type="email" id="registerEmail" name="registerEmail" class="form-control input-lg"
                            placeholder="E-mail address" required autofocus>
                 </div>
                 <div class="form-group">
                     <label class="control-label" for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" name="password" class="form-control input-lg"
+                    <input type="password" id="registerPassword" name="registerEmail" class="form-control input-lg"
                            placeholder="Password" required>
                 </div>
 
