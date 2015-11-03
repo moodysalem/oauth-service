@@ -20,7 +20,7 @@
         var HTTP = "http", HTTPS = "https";
         var forwardedProto = "<%= StringEscapeUtils.escapeEcmaScript(request.getHeader(HTTPSFilter.PROTO_HEADER)) %>";
         if (forwardedProto.toLowerCase() === HTTP) {
-            window.location.href = (HTTPS + window.location.href.substring(HTTP.length))
+            window.location.replace(HTTPS + window.location.href.substring(HTTP.length));
         }
 
         window.clientId = "<%= StringEscapeUtils.escapeEcmaScript(TokenFilter.CLIENT_ID) %>";
