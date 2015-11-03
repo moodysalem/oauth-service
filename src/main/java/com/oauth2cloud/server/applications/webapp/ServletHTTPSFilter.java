@@ -23,24 +23,34 @@ public class ServletHTTPSFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+
         String proto = req.getHeader(HTTPSFilter.PROTO_HEADER);
         if (proto != null && !proto.equalsIgnoreCase(HTTPSFilter.HTTPS)) {
-            HttpServletResponse resp = (HttpServletResponse) response;
+            URI reqUri = null;
             try {
-                resp.sendRedirect(
-                    UriBuilder.fromUri(new URI(req.getRequestURI()))
-                        .scheme(HTTPSFilter.HTTPS)
-                        .replaceQuery("")
-                        .build()
-                        .toString()
-                );
+                reqUri = new URI(req.getRequestURI());
             } catch (URISyntaxException e) {
                 LOG.log(Level.SEVERE, "failed to parse URI in HTTPS filter", e);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return;
             }
-        } else {
-            chain.doFilter(request, response);
+
+            String path = reqUri.getPath() != null ? reqUri.getPath().toLowerCase() : "";
+            if (!path.startsWith("/")) {
+                path = "/" + path;
+            }
+            if (!path.startsWith("/api") && !path.startsWith("/oauth")) {
+                resp.sendRedirect(
+                    UriBuilder.fromUri(reqUri)
+                        .scheme(HTTPSFilter.HTTPS)
+                        .build()
+                        .toString()
+                );
+            }
         }
+
+        chain.doFilter(request, response);
     }
 
     @Override
