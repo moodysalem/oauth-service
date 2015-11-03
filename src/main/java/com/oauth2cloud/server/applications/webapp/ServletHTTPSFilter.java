@@ -47,6 +47,7 @@ public class ServletHTTPSFilter implements Filter {
                         .build()
                         .toString()
                 );
+                return;
             }
         }
 
