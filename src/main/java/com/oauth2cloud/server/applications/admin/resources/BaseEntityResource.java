@@ -3,7 +3,7 @@ package com.oauth2cloud.server.applications.admin.resources;
 import com.leaguekit.hibernate.model.BaseEntity;
 import com.leaguekit.jaxrs.lib.resources.EntityResource;
 import com.oauth2cloud.server.applications.admin.filter.TokenFilter;
-import com.oauth2cloud.server.hibernate.model.TokenResponse;
+import com.oauth2cloud.server.hibernate.model.Token;
 import com.oauth2cloud.server.hibernate.model.User;
 
 import javax.annotation.PostConstruct;
@@ -101,12 +101,12 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
         return X_TOTAL_COUNT;
     }
 
-    public TokenResponse getToken() {
-        return (TokenResponse) req.getProperty(TokenFilter.TOKEN);
+    public Token getToken() {
+        return (Token) req.getProperty(TokenFilter.TOKEN);
     }
 
     public User getUser() {
-        TokenResponse tr = getToken();
+        Token tr = getToken();
         if (tr == null) {
             return null;
         }

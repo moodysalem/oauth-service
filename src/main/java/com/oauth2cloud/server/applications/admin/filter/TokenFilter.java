@@ -1,19 +1,18 @@
 package com.oauth2cloud.server.applications.admin.filter;
 
-import com.oauth2cloud.server.applications.oauth.OAuthApplication;
-import com.oauth2cloud.server.applications.oauth.resources.TokenResource;
-import com.oauth2cloud.server.hibernate.model.TokenResponse;
+import com.oauth2cloud.server.hibernate.model.Token;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
-import java.net.URI;
-import java.util.logging.Level;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 @Provider
@@ -25,29 +24,30 @@ public class TokenFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = Logger.getLogger(TokenFilter.class.getName());
 
+    public TokenFilter() {
+        super();
+        LOG.info("TokenFilter INSTANTIATED");
+    }
+
+    @Inject
+    EntityManager em;
+
     @Override
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
         String auth = containerRequestContext.getHeaderString("Authorization");
         if (auth != null && auth.toLowerCase().startsWith(BEARER)) {
             String token = auth.substring(BEARER.length());
             if (token.length() > 0) {
-                try {
-                    URI tokenInfoEndpoint = containerRequestContext.getUriInfo().getRequestUriBuilder()
-                            .replacePath(OAuthApplication.OAUTH)
-                            .path(TokenResource.class)
-                            .path(TokenResource.class.getMethod("tokenInfo", String.class, String.class))
-                            .build();
-
-                    Form f = (new Form()).param("token", token).param("client_id", CLIENT_ID);
-                    Response r = ClientBuilder.newClient().target(tokenInfoEndpoint).request().post(Entity.form(f));
-                    if (r.getStatus() == 200) {
-                        TokenResponse tr = r.readEntity(TokenResponse.class);
-                        if (CLIENT_ID.equals(tr.getClientId())) {
-                            containerRequestContext.setProperty(TOKEN, tr);
-                        }
-                    }
-                } catch (NoSuchMethodException e) {
-                    LOG.log(Level.WARNING, "Token exception", e);
+                CriteriaQuery<Token> cq = cb.createQuery(Token.class);
+                Root<Token> rt = cq.from(Token.class);
+                List<Token> tks = em.createQuery(cq.select(rt).where(
+                    cb.equal(rt.get("token"), token),
+                    cb.greaterThan(rt.get("expires"), new Date()),
+                    cb.equal(rt.get("type"), Token.Type.ACCESS)
+                )).getResultList();
+                if (tks.size() == 1) {
+                    containerRequestContext.setProperty(TOKEN, tks.get(0));
                 }
             }
         }

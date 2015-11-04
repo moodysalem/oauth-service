@@ -25,7 +25,7 @@ public class ResourceBinder extends AbstractBinder {
                 "db/master-changelog.xml",
                 System.getProperty("SHOW_SQL") != null,
                 context
-        )).to(EntityManager.class).in(RequestScoped.class);
+        )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
 
         int port = 25;
