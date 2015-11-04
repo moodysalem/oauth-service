@@ -11,6 +11,7 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.Version;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -610,7 +611,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         // check with the legacy url to see if the user is there and passing the correct password
-        if (userWithEmail == null && app.getLegacyUrl() != null) {
+        if (userWithEmail == null && !StringUtils.isBlank(app.getLegacyUrl())) {
             Form f = new Form();
             f.param("email", email).param("password", password);
             Response r = ClientBuilder.newClient().target(app.getLegacyUrl()).request(MediaType.APPLICATION_JSON_TYPE)

@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
 import com.leaguekit.hibernate.model.BaseEntity;
+import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.jaxrs.lib.resources.EntityResource;
 import com.oauth2cloud.server.applications.admin.filter.TokenFilter;
 import com.oauth2cloud.server.hibernate.model.Token;
@@ -12,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 public abstract class BaseEntityResource<T extends BaseEntity> extends EntityResource<T> {
     public static final String SORT = "sort";
@@ -111,6 +113,12 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
             return null;
         }
         return tr.getUser();
+    }
+
+    protected void mustBeLoggedIn() {
+        if (getUser() == null) {
+            throw new RequestProcessingException(Response.Status.UNAUTHORIZED, "You must be logged in to access this reosurce.");
+        }
     }
 
 }

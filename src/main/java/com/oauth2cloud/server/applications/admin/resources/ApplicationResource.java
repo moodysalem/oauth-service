@@ -16,17 +16,20 @@ public class ApplicationResource extends BaseEntityResource<Application> {
 
     @Override
     public boolean canCreate(Application application) {
-        return false;
+        mustBeLoggedIn();
+        return true;
     }
 
     @Override
     public boolean canEdit(Application application) {
-        return false;
+        mustBeLoggedIn();
+        return application.getOwner().equals(getUser());
     }
 
     @Override
     public boolean canDelete(Application application) {
-        return false;
+        mustBeLoggedIn();
+        return application.getOwner().equals(getUser());
     }
 
     @Override
@@ -36,7 +39,6 @@ public class ApplicationResource extends BaseEntityResource<Application> {
 
     @Override
     public void beforeCreate(Application application) {
-
     }
 
     @Override
