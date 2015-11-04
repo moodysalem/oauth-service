@@ -39,6 +39,7 @@ public class ApplicationResource extends BaseEntityResource<Application> {
 
     @Override
     public void beforeCreate(Application application) {
+        application.setOwner(getUser());
     }
 
     @Override

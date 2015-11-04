@@ -8,6 +8,41 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
 
     var d = React.DOM;
 
+    var appTableColumns = [
+      {
+        label: "Name",
+        sortOn: "name",
+        component: util.rf({
+          mixins: [ model ],
+          render: function () {
+            return d.a({ href: util.path("applications", this.state.model.id) }, this.state.model.name);
+          }
+        })
+      },
+      {
+        label: "Support E-mail",
+        attribute: "supportEmail",
+        sortOn: "supportEmail",
+        component: d.span
+      },
+      {
+        label: "Clients",
+        key: "btn",
+        component: util.rf({
+          mixins: [ model ],
+          render: function () {
+            return btn({
+              caption: "Manage",
+              type: "warning",
+              size: "sm",
+              icon: "pencil",
+              href: util.path("applications", this.state.model.id, "clients")
+            })
+          }
+        })
+      }
+    ];
+
     return util.rf({
       getInitialState: function () {
         return {
@@ -32,32 +67,14 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
               href: "applications/create",
               icon: "plus"
             }),
-            "My Applications",
-            d.div({ key: "cf", className: "clearfix" })
+            "My Applications"
           ]),
           lw({
             key: "t",
             watch: this.state.apps
           }, table({
             collection: this.state.apps,
-            attributes: [
-              {
-                label: "Name",
-                sortOn: "name",
-                component: util.rf({
-                  mixins: [ model ],
-                  render: function () {
-                    return d.a({ href: util.path("applications", this.state.model.id) }, this.state.model.name);
-                  }
-                })
-              },
-              {
-                label: "Support E-mail",
-                attribute: "supportEmail",
-                sortOn: "supportEmail",
-                component: d.span
-              }
-            ]
+            attributes: appTableColumns
           }))
         ]);
       }
