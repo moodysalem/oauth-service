@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
@@ -10,12 +11,12 @@
     <link rel="shortcut icon" href="res/favicon.ico?v=1"/>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/paper/bootstrap.min.css"
           integrity="sha384-8uu+B/3A5Pjofed/yR1V7M6z9vL+Q2qm6uWNxIog8oyuvh9Avf22OpU7QLY6YJri" crossorigin="anonymous">
-    <base href="/">
 
     <title>OAuth2 Cloud</title>
 
     <script>
         window.debug = true;
+        var API_URL = "api";
         window.clientId = "<%= StringEscapeUtils.escapeEcmaScript(TokenFilter.CLIENT_ID) %>";
         if (typeof window.location.hash === "string" && window.location.hash.length > 0) {
             var frag = window.location.hash.substring(1);

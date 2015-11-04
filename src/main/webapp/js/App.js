@@ -30,11 +30,20 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
           });
         });
 
-        Backbone.history.start({
-          pushState: true
-        });
+        Backbone.history.start({ pushState: true });
       });
     };
+
+
+    //configure ajax calls to the API to send our token in the authorization header whenever we are logged in
+    $(document).ajaxSend(function (event, jqXhr, ajaxOptions) {
+      var url = ajaxOptions.url;
+      if (url.indexOf("api") === 0) {
+        if (m.has("token.access_token")) {
+          jqXhr.setRequestHeader("Authorization", "bearer " + m.get("token.access_token"));
+        }
+      }
+    });
 
     oauth2.init({
       clientId: window.clientId,
