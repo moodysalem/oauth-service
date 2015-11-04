@@ -2,8 +2,8 @@
  *
  */
 define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "rbs/components/controls/Button",
-    "rbs/components/controls/LoadingWrapper", "rbs/components/layout/Modal" ],
-  function (React, util, mdls, m, table, btn, lw, modal) {
+    "rbs/components/controls/LoadingWrapper", "rbs/components/layout/Modal", "rbs/components/mixins/Model" ],
+  function (React, util, mdls, m, table, btn, lw, modal, model) {
     "use strict";
 
     var d = React.DOM;
@@ -43,9 +43,13 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
             attributes: [
               {
                 label: "Name",
-                attribute: "name",
                 sortOn: "name",
-                component: d.span
+                component: util.rf({
+                  mixins: [ model ],
+                  render: function () {
+                    return d.a({ href: util.path("applications", this.state.model.id) }, this.state.model.name);
+                  }
+                })
               },
               {
                 label: "Support E-mail",
