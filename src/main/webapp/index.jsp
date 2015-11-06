@@ -46,15 +46,21 @@
     <div class="loading">
         <div class="loader">
         </div>
+        <br/><br/>
+        <span id="loading-text">Loading JS...</span>
     </div>
     <style>
+        .loading {
+            position: fixed;
+            top: 30%;
+            text-align: center;
+            width: 100%;
+        }
+
         .loader {
             width: 50px;
             height: 50px;
-            position: fixed;
-            top: 30%;
-            left: 50%;
-            margin-left: -25px;
+            display: inline-block;
             border-radius: 100%;
             border: 2px solid rgba(0, 0, 0, 0.25);
             border-top-color: rgba(0, 0, 0, 0.5);

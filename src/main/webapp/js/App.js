@@ -1,15 +1,23 @@
 "use strict";
+
+var txt = function (tx) {
+  document.getElementById("loading-text").innerText = tx;
+};
+
 window.require.config({
   baseUrl: ""
 });
+txt("Loading Require...");
 window.define([ "rbs/RequireConfig" ], function (rc) {
   window.require.config(rc);
 
+  txt("Loading dependencies...");
   window.require([ "js/OAuth2", "backbone", "jquery", "promise-polyfill", "util" ], function (oauth2, Backbone, $, pp, util) {
     var m = new Backbone.Model();
     window.define("model", m);
 
     var start = function () {
+      txt("Initializing Application...");
       require([ "js/Router" ], function (router) {
         var r = new router();
         window.define("router", r);
