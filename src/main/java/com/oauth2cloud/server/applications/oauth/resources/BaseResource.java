@@ -82,12 +82,12 @@ public abstract class BaseResource {
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         Root<Token> t = tq.from(Token.class);
         tq.select(t).where(
-                cb.and(
-                        cb.equal(t.get("token"), token),
-                        t.get("type").in(types),
-                        cb.greaterThan(t.<Date>get("expires"), new Date()),
-                        cb.equal(t.get("client"), client)
-                )
+            cb.and(
+                cb.equal(t.get("token"), token),
+                t.get("type").in(types),
+                cb.greaterThan(t.<Date>get("expires"), new Date()),
+                cb.equal(t.get("client"), client)
+            )
         );
 
         List<Token> tkns = em.createQuery(tq).getResultList();
@@ -213,8 +213,8 @@ public abstract class BaseResource {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-                cb.equal(ras.get("user"), user),
-                cb.equal(ras.get("clientScope"), clientScope)
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.get("clientScope"), clientScope)
         ))).getResultList();
         if (las.size() == 1) {
             return las.get(0);
@@ -261,7 +261,7 @@ public abstract class BaseResource {
     protected List<ClientScope> getScopes(Client client, List<String> scopes) {
         CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
         Root<ClientScope> rcs = cq.from(ClientScope.class);
-        Predicate p = cb.equal(rcs.get("client"), client);
+        Predicate p = cb.and(cb.equal(rcs.get("client"), client), cb.equal(rcs.get("approved"), true));
         if (scopes != null && scopes.size() > 0) {
             p = cb.and(p, rcs.join("scope").get("name").in(scopes));
         }
@@ -337,9 +337,9 @@ public abstract class BaseResource {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
         Root<LoginCookie> rlc = lc.from(LoginCookie.class);
         lc.select(rlc).where(
-                cb.equal(rlc.get("secret"), secret),
-                cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-                cb.equal(rlc.join("user").get("application"), client.getApplication())
+            cb.equal(rlc.get("secret"), secret),
+            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+            cb.equal(rlc.join("user").get("application"), client.getApplication())
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -405,12 +405,12 @@ public abstract class BaseResource {
         Root<User> u = uq.from(User.class);
 
         List<User> users = em.createQuery(
-                uq.select(u).where(
-                        cb.and(
-                                cb.equal(u.get("application"), application),
-                                cb.equal(u.get("email"), email)
-                        )
+            uq.select(u).where(
+                cb.and(
+                    cb.equal(u.get("application"), application),
+                    cb.equal(u.get("email"), email)
                 )
+            )
         ).getResultList();
 
         if (users.size() != 1) {
@@ -488,11 +488,11 @@ public abstract class BaseResource {
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
         Root<UserCode> rp = pw.from(UserCode.class);
         pw.select(rp).where(
-                cb.equal(rp.get("code"), code),
-                cb.greaterThan(rp.<Date>get("expires"), new Date()),
-                cb.equal(rp.get("type"), type),
-                // if we are including used, then use a predicate that will always be true
-                includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
+            cb.equal(rp.get("code"), code),
+            cb.greaterThan(rp.<Date>get("expires"), new Date()),
+            cb.equal(rp.get("type"), type),
+            // if we are including used, then use a predicate that will always be true
+            includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
         );
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;

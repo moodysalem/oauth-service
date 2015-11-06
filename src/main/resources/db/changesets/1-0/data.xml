@@ -12,6 +12,8 @@
       <column name="supportEmail">moody.salem@gmail.com</column>
       <column name="facebookAppId">725381047606159</column>
       <column name="googleClientId">520864329427-r8nf78v9oiqatdhca5sumqjn39q9q2hs.apps.googleusercontent.com</column>
+      <column name="amazonClientId">amzn1.application-oa2-client.fca66588ac9f4914ac23a931f5d45f7b</column>
+      <column name="publicClientRegistration" valueBoolean="false"/>
     </insert>
 
     <insert tableName="Client">
@@ -45,6 +47,7 @@
       <column name="displayName">User Profile</column>
       <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
       <column name="description">This gives the application access to view your user details</column>
+      <column name="requiresApprovalFromApplication" valueBoolean="false"/>
     </insert>
 
     <insert tableName="Scope">
@@ -54,6 +57,7 @@
       <column name="displayName">List Applications</column>
       <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
       <column name="description">This gives the application access to list all your applications</column>
+      <column name="requiresApprovalFromApplication" valueBoolean="false"/>
     </insert>
 
     <insert tableName="Scope">
@@ -63,24 +67,28 @@
       <column name="displayName">List Scopes</column>
       <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
       <column name="description">List the scopes that your application has defined</column>
+      <column name="requiresApprovalFromApplication" valueBoolean="false"/>
     </insert>
 
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">1</column>
       <column name="priority">ALWAYS</column>
+      <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">2</column>
       <column name="priority">ASK</column>
+      <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">3</column>
       <column name="priority">REQUIRE</column>
+      <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="User">

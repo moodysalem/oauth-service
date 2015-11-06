@@ -866,6 +866,9 @@ public class AuthorizeResource extends BaseResource {
         // scopes for this client
         predicates.add(cb.equal(rcs.get("client"), client));
 
+        // only approved scopes should be asked for
+        predicates.add(cb.equal(rcs.get("approved"), false));
+
         // since a client will always have these scopes, we don't show them
         predicates.add(cb.notEqual(rcs.get("priority"), ClientScope.Priority.ALWAYS));
 
@@ -888,7 +891,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     /**
-     * Generates a subquery that returns all the scopes a user has accepted
+     * Generates a subquery that returns all the scopes a user has accepted (must be approved by application)
      *
      * @param user for which the acceptedscopes are returned
      * @return a subquery of all the clientscopes that have already been accepted by a user, across clients
@@ -897,7 +900,10 @@ public class AuthorizeResource extends BaseResource {
         Subquery<ClientScope> sq = cb.createQuery().subquery(ClientScope.class);
 
         Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
-        sq.select(ras.get("clientScope")).where(cb.equal(ras.get("user"), user));
+        sq.select(ras.get("clientScope")).where(
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.join("clientScope").get("approved"), true)
+        );
 
         return sq;
     }

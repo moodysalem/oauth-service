@@ -37,6 +37,7 @@ public class ClientScope extends BaseEntity implements Comparable<ClientScope> {
         return 0;
     }
 
+
     public enum Priority {
         // ALWAYS is the highest level, the user is not asked nor shown the permission when logging in
         ALWAYS,
@@ -61,6 +62,9 @@ public class ClientScope extends BaseEntity implements Comparable<ClientScope> {
     @Lob
     @Column(name = "reason")
     private String reason;
+
+    @Column(name = "approved")
+    private boolean approved;
 
     public Client getClient() {
         return client;
@@ -92,5 +96,13 @@ public class ClientScope extends BaseEntity implements Comparable<ClientScope> {
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 }
