@@ -47,54 +47,8 @@
         <div class="loader">
         </div>
         <br/><br/>
-        <span id="loading-text">Loading JS...</span>
+        <span id="loading-text">Loading JavaScript...</span>
     </div>
-    <style>
-        .loading {
-            position: fixed;
-            top: 30%;
-            text-align: center;
-            width: 100%;
-        }
-
-        .loader {
-            width: 50px;
-            height: 50px;
-            display: inline-block;
-            border-radius: 100%;
-            border: 2px solid rgba(0, 0, 0, 0.25);
-            border-top-color: rgba(0, 0, 0, 0.5);
-            text-align: center;
-            animation: 0.5s spin linear infinite;
-        }
-
-        @-moz-keyframes spin {
-            from {
-                -moz-transform: rotate(0deg);
-            }
-            to {
-                -moz-transform: rotate(360deg);
-            }
-        }
-
-        @-webkit-keyframes spin {
-            from {
-                -webkit-transform: rotate(0deg);
-            }
-            to {
-                -webkit-transform: rotate(360deg);
-            }
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
 </div>
 </body>
 </html>

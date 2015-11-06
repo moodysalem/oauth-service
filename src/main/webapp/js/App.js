@@ -17,7 +17,7 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
     window.define("model", m);
 
     var start = function () {
-      txt("Initializing Application...");
+      txt("Initializing application...");
       require([ "js/Router" ], function (router) {
         var r = new router();
         window.define("router", r);

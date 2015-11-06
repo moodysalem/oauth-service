@@ -1,7 +1,7 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/GridRow", "rbs/components/controls/LoadingWrapper" ],
+define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/GridRow", "./Loading" ],
   function (React, util, form, row, lw) {
     "use strict";
 
