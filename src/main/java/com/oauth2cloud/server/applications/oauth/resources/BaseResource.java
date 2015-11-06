@@ -81,16 +81,17 @@ public abstract class BaseResource {
         }
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         Root<Token> t = tq.from(Token.class);
-        tq.select(t).where(
-            cb.and(
-                cb.equal(t.get("token"), token),
-                t.get("type").in(types),
-                cb.greaterThan(t.<Date>get("expires"), new Date()),
-                cb.equal(t.get("client"), client)
-            )
-        );
 
-        List<Token> tkns = em.createQuery(tq).getResultList();
+        Predicate p = cb.and(
+            cb.equal(t.get("token"), token),
+            t.get("type").in(types),
+            cb.greaterThan(t.<Date>get("expires"), new Date())
+        );
+        if (client != null) {
+            p = cb.and(p, cb.equal(t.get("client"), client));
+        }
+
+        List<Token> tkns = em.createQuery(tq.select(t).where(p)).getResultList();
         return tkns.size() == 1 ? tkns.get(0) : null;
     }
 

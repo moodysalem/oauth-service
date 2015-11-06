@@ -22,6 +22,7 @@ public class TokenResponse {
         tr.setTokenType(BEARER);
         tr.setClientId(accessToken.getClient().getIdentifier());
         tr.setUser(accessToken.getUser());
+        tr.setApplicationId(accessToken.getClient().getApplication().getId());
         return tr;
     }
 
@@ -45,6 +46,9 @@ public class TokenResponse {
 
     @JsonProperty("user_details")
     private User user;
+
+    @JsonProperty("application_id")
+    private Long applicationId;
 
     public String getAccessToken() {
         return accessToken;
@@ -100,5 +104,13 @@ public class TokenResponse {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Long getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
     }
 }

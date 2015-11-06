@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
-import com.leaguekit.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.applications.oauth.models.ErrorResponse;
 import com.oauth2cloud.server.hibernate.model.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -338,24 +337,28 @@ public class TokenResource extends BaseResource {
     /**
      * Get the info for a token for a specific client
      *
-     * @param token    unique string representing the token
-     * @param clientId the client id for which the token was issued
+     * @param token         unique string representing the token
+     * @param applicationId the id of the application for which this token was created
      * @return the token information
      */
     @POST
     @Path("info")
-    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId) {
-        if (token == null || clientId == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and 'clientId' form parameters are required.");
+    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId, @FormParam("application_id") Long applicationId) {
+        if (token == null || (applicationId == null && clientId == null)) {
+            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and the 'application_id' or 'client_id' form parameters are required.");
         }
 
-        Client client = getClient(clientId);
-        if (client == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client identifier.");
+        Client c = null;
+        if (clientId != null) {
+            c = getClient(clientId);
+            if (c == null) {
+                throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client ID.");
+            }
+            applicationId = c.getApplication().getId();
         }
 
-        Token t = getToken(token, client, Token.Type.ACCESS, Token.Type.REFRESH);
-        if (t == null) {
+        Token t = getToken(token, c, Token.Type.ACCESS, Token.Type.REFRESH);
+        if (t == null || !t.getClient().getApplication().getId().equals(applicationId)) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }
 

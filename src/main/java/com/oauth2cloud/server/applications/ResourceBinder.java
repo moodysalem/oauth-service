@@ -13,7 +13,7 @@ import javax.persistence.EntityManager;
 public class ResourceBinder extends AbstractBinder {
     @Override
     protected void configure() {
-        String context = System.getProperty("LIQUIBASE_CONTEXT");
+        String context = System.getProperty("LIQUIBASE_CONTEXT", "");
         if (context == null) {
             context = "";
         }

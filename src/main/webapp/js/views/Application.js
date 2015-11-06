@@ -3,7 +3,7 @@
  */
 define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/controls/Button", "model",
     "rbs/components/mixins/Events", "router", "rbs/components/layout/Modal", "rbs/components/layout/Alert" ],
-  function (React, util, af, mdls, btn, m, events, r, modal, alt) {
+  function (React, util, af, mdls, btn, m, events, r, modal, alt, form) {
     "use strict";
 
     var d = React.DOM;
@@ -16,7 +16,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
       getInitialState: function () {
         return {
           app: (new mdls.Application({
-            id: this.props.id === "create" ? null : this.props.id
+            id: this.props.id
           })),
           deleteModalOpen: false
         };
@@ -24,13 +24,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
 
       componentDidMount: function () {
         this.listenTo(this.state.app, "sync", this.showClientsButton);
-        if (this.props.id !== "create") {
-          this.state.app.fetch();
-        } else {
-          this.listenTo(this.state.app, "sync", function (model) {
-            r.navigate(util.path("applications", model.get("id")), { trigger: true })
-          });
-        }
+        this.state.app.fetch();
       },
 
       closeDeleteModal: function () {
@@ -41,9 +35,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
         }
       },
       render: function () {
-        var dn = (this.props.id === "create") ? "New Application" : "Edit Application";
-        var isNew = this.props.id === "create";
-
+        var dn = "Edit Application";
         return d.div({ className: "container" }, [
           d.h2({
             key: "h2",
@@ -57,7 +49,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
               href: "applications",
               icon: "long-arrow-left"
             }),
-            isNew ? null : btn({
+            btn({
               key: "b",
               icon: "edit",
               caption: "Clients",
@@ -80,7 +72,6 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
             className: "row"
           }, [
             d.div({ className: "col-xs-6", key: "1" }, btn({
-              disabled: isNew,
               caption: "Delete",
               type: "danger",
               icon: "trash",
@@ -93,7 +84,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
               }, this)
             })),
             d.div({ className: "col-xs-6", key: "2" }, btn({
-              caption: isNew ? "Create" : "Save",
+              caption: "Save",
               type: "success",
               ajax: true,
               icon: "save",

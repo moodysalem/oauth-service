@@ -21,13 +21,18 @@ public class TokenFilter implements ContainerRequestFilter {
     public static final String BEARER = "bearer ";
     public static final String TOKEN = "TOKEN";
     public static final String CLIENT_ID = System.getProperty("CLIENT_ID");
+    private static final long APPLICATION_ID;
+
+    static {
+        long aid = 1;
+        try {
+            aid = Long.parseLong(System.getProperty("APPLICATION_ID", "1"));
+        } catch (NumberFormatException ignored) {
+        }
+        APPLICATION_ID = aid;
+    }
 
     private static final Logger LOG = Logger.getLogger(TokenFilter.class.getName());
-
-    public TokenFilter() {
-        super();
-        LOG.info("TokenFilter INSTANTIATED");
-    }
 
     @Inject
     EntityManager em;
@@ -44,7 +49,8 @@ public class TokenFilter implements ContainerRequestFilter {
                 List<Token> tks = em.createQuery(cq.select(rt).where(
                     cb.equal(rt.get("token"), token),
                     cb.greaterThan(rt.get("expires"), new Date()),
-                    cb.equal(rt.get("type"), Token.Type.ACCESS)
+                    cb.equal(rt.get("type"), Token.Type.ACCESS),
+                    cb.equal(rt.join("client").join("application").get("id"), APPLICATION_ID)
                 )).getResultList();
                 if (tks.size() == 1) {
                     containerRequestContext.setProperty(TOKEN, tks.get(0));
