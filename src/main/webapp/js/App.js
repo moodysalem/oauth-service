@@ -20,8 +20,12 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
             if (typeof href !== "string") {
               return;
             }
+            if (href === "#") {
+              e.preventDefault();
+              return;
+            }
             var isInternal = util.internalLink(href);
-            if (isInternal || href === "#") {
+            if (isInternal) {
               e.preventDefault();
             }
             if (isInternal) {

@@ -49,14 +49,14 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
               href: "applications",
               icon: "long-arrow-left"
             }),
-            btn({
-              key: "b",
-              icon: "edit",
-              caption: "Clients",
-              type: "warning",
-              className: "pull-right",
-              href: util.path("applications", this.props.id, "clients")
-            }),
+            //btn({
+            //  key: "b",
+            //  icon: "edit",
+            //  caption: "Clients",
+            //  type: "warning",
+            //  className: "pull-right",
+            //  href: util.path("applications", this.props.id, "clients")
+            //}),
             dn
           ]),
           af({

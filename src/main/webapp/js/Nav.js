@@ -37,7 +37,13 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
             onClick: function (e) {
               e.preventDefault();
               m.clear();
-              oauth2.logout();
+              oauth2.logout().then(function () {
+                util.debug("loggedout");
+                window.location.href = window.location.origin;
+              }, function () {
+                util.debug("loggedout with error");
+                window.location.href = window.location.origin;
+              });
             }
           });
         } else {

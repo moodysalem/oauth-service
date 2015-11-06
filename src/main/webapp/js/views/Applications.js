@@ -38,12 +38,20 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
           mixins: [ model ],
           render: function () {
             return dd({
-              caption: "Manage",
-              type: "warning",
+              caption: "Actions",
+              type: "primary",
               size: "sm",
-              icon: "pencil",
-              href: util.path("applications", this.state.model.id, "clients")
-            })
+              icon: "tachometer"
+            }, [
+              di({
+                key: "mc",
+                caption: "Manage Clients",
+                icon: "pencil",
+                onClick: _.bind(function () {
+                  r.navigate(util.path("applications", this.state.model.id, "clients"), { trigger: true });
+                }, this)
+              })
+            ])
           }
         })
       }
