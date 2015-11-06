@@ -9,11 +9,19 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
 
     var firstRow = [
       {
+        attribute: "id",
+        label: "ID",
+        tip: "This ID is used to identify your application. You need to verify this matches the token on the resource server when validating access tokens.",
+        component: "text",
+        readOnly: true,
+        sm: 2
+      },
+      {
         attribute: "name",
         label: "Name",
         tip: "Enter the name by which you'd like your application to be identified.",
         component: "text",
-        sm: 6,
+        sm: 5,
         required: true
       },
       {
@@ -22,7 +30,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
         tip: "Enter the e-mail to which users we e-mail will be directed to reply.",
         component: "email",
         required: true,
-        sm: 6
+        sm: 5
       },
       {
         attribute: "publicClientRegistration",

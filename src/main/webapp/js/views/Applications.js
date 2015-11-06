@@ -11,6 +11,12 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
 
     var appTableColumns = [
       {
+        label: "ID",
+        attribute: "id",
+        sortOn: "id",
+        component: d.span
+      },
+      {
         label: "Name",
         sortOn: "name",
         component: util.rf({
