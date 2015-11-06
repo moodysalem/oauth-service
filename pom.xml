@@ -33,6 +33,13 @@
       <version>${react.backstrap.version}</version>
     </dependency>
 
+    <!-- for caching the js/css files -->
+    <dependency>
+      <groupId>com.samaxes.filter</groupId>
+      <artifactId>cachefilter</artifactId>
+      <version>2.3.1</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>

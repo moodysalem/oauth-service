@@ -9,6 +9,7 @@
     <location>/index.jsp</location>
   </error-page>
 
+  <!-- force https on everything -->
   <filter>
     <filter-name>httpsfilter</filter-name>
     <filter-class>com.oauth2cloud.server.applications.webapp.ServletHTTPSFilter</filter-class>
@@ -16,6 +17,22 @@
   <filter-mapping>
     <filter-name>httpsfilter</filter-name>
     <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!-- caching js files -->
+  <filter>
+    <filter-name>hourcache</filter-name>
+    <filter-class>com.samaxes.filter.CacheFilter</filter-class>
+    <init-param>
+      <param-name>expiration</param-name>
+      <param-value>3600</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>hourcache</filter-name>
+    <url-pattern>/rbs/*</url-pattern>
+    <url-pattern>/js/*</url-pattern>
+    <url-pattern>/res/*</url-pattern>
   </filter-mapping>
 
 </web-app>
