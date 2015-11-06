@@ -3,3 +3,31 @@
     box-shadow: 0 0 1px rgba(0, 0, 0, 0.65);
     margin-bottom: 2.5em;
 }
+
+.card-inverse {
+    padding: 1.5em;
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.65);
+    margin-bottom: 2.5em;
+}
+
+.home-bg {
+    background-color: #fff;
+    background-image: url('./crossword.png');
+    background-repeat: repeat;
+    height: 400px;
+    background-size: auto;
+    max-height: 100vh;
+    background-attachment: fixed;
+    margin-top: -23px;
+    margin-bottom: 23px;
+}
+
+.home-bg .header-lead {
+    margin-top: 140px;
+}
+
+.team-thumb {
+    border-radius: 100%;
+    margin-bottom: 1em;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}

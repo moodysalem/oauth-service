@@ -25,6 +25,9 @@ public class Scope extends BaseEntity {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "requiresApprovalFromApplication")
+    private boolean requiresApprovalFromApplication;
+
     public Application getApplication() {
         return application;
     }
@@ -63,5 +66,13 @@ public class Scope extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isRequiresApprovalFromApplication() {
+        return requiresApprovalFromApplication;
+    }
+
+    public void setRequiresApprovalFromApplication(boolean requiresApprovalFromApplication) {
+        this.requiresApprovalFromApplication = requiresApprovalFromApplication;
     }
 }

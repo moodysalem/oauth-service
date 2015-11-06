@@ -2,8 +2,8 @@
  *
  */
 define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "rbs/components/controls/Button",
-    "rbs/components/controls/LoadingWrapper", "rbs/components/layout/Modal", "rbs/components/mixins/Model" ],
-  function (React, util, mdls, m, table, btn, lw, modal, model) {
+    "rbs/components/controls/LoadingWrapper", "rbs/components/layout/Modal", "rbs/components/mixins/Model", "rbs/components/layout/Dropdown" ],
+  function (React, util, mdls, m, table, btn, lw, modal, model, dd) {
     "use strict";
 
     var d = React.DOM;

@@ -50,10 +50,12 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
             className: "page-header text-center"
           }, [
             btn({
+              key: "back",
               type: "primary",
               caption: "Back",
               className: "pull-left",
-              href: "applications"
+              href: "applications",
+              icon: "long-arrow-left"
             }),
             isNew ? null : btn({
               key: "b",

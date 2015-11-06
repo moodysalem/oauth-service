@@ -21,7 +21,10 @@
         <constraints nullable="false" unique="true"/>
       </column>
       <column name="supportEmail" type="VARCHAR(191)">
-        <constraints nullable="false" />
+        <constraints nullable="false"/>
+      </column>
+      <column name="publicClientRegistration" type="BOOLEAN">
+        <constraints nullable="false"/>
       </column>
       <column name="ownerId" type="BIGINT"/>
       <column name="facebookAppId" type="BIGINT">
@@ -78,6 +81,9 @@
       </column>
       <column name="description" type="VARCHAR(191)">
         <constraints nullable="true"/>
+      </column>
+      <column name="requiresApprovalFromApplication" type="BOOLEAN">
+        <constraints nullable="false"/>
       </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
@@ -284,6 +290,9 @@
         <constraints nullable="false"/>
       </column>
       <column name="reason" type="${TEXT}"/>
+      <column name="approved" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="clientId"
                              constraintName="FK_ClientScope_Client"

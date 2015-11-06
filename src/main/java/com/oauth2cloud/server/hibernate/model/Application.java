@@ -42,6 +42,9 @@ public class Application extends BaseEntity {
     @Column(name = "legacyUrl")
     private String legacyUrl;
 
+    @Column(name = "publicClientRegistration")
+    private boolean publicClientRegistration;
+
     public String getName() {
         return name;
     }
@@ -120,5 +123,13 @@ public class Application extends BaseEntity {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public boolean isPublicClientRegistration() {
+        return publicClientRegistration;
+    }
+
+    public void setPublicClientRegistration(boolean publicClientRegistration) {
+        this.publicClientRegistration = publicClientRegistration;
     }
 }

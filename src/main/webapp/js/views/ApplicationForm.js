@@ -23,6 +23,13 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
         component: "email",
         required: true,
         sm: 6
+      },
+      {
+        attribute: "publicClientRegistration",
+        label: "Public for Client Registration",
+        tip: "Check this box to allow other users to register clients for this application. You can choose which scopes require your approval on the scopes page.",
+        component: "checkbox",
+        xs: 12
       }
     ];
 
