@@ -47,9 +47,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
                 key: "mc",
                 caption: "Manage Clients",
                 icon: "pencil",
-                onClick: _.bind(function () {
-                  r.navigate(util.path("applications", this.state.model.id, "clients"), { trigger: true });
-                }, this)
+                href: util.path("applications", this.state.model.id, "clients")
               })
             ])
           }
