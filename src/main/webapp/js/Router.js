@@ -18,13 +18,15 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
       });
     };
 
-    dom.render(nav({ model: m }), $("#nav").get(0));
+    dom.render(wrapper({ model: m }, nav({ model: m })), $("#nav").get(0));
 
     return Backbone.Router.extend({
       routes: {
         "applications": "applications",
         "docs": "docs",
         "applications/:id": "app",
+        "applications/:id/scopes": "scopes",
+        "applications/:id/clients": "clients",
         "(/)": "home",
         "*splat": "notFound"
       },
@@ -43,6 +45,14 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
 
       home: function () {
         renderFile("js/views/Home");
+      },
+
+      scopes: function (id) {
+        renderFile("js/views/Scopes", { applicationId: id });
+      },
+
+      clients: function (id) {
+        renderFile("js/views/Clients", { applicationId: id });
       },
 
       notFound: function () {

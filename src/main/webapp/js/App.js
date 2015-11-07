@@ -30,6 +30,15 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
             }
             if (href.length > 0 && href[ 0 ] === "#") {
               e.preventDefault();
+              if (href.length > 1) {
+                var els = $(href);
+                if (els.length == 1) {
+                  var st = els.offset().top;
+                  if (st > 0) {
+                    $("html, body").animate({ scrollTop: st + "px" });
+                  }
+                }
+              }
               return;
             }
             var isInternal = util.internalLink(href);
