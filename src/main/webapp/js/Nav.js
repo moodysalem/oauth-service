@@ -15,6 +15,11 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
             text: "Home",
             icon: "home",
             href: "/"
+          },
+          {
+            text: "Documentation",
+            icon: "file-text",
+            href: "/docs"
           }
         ];
 

@@ -23,6 +23,7 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
     return Backbone.Router.extend({
       routes: {
         "applications": "applications",
+        "docs": "docs",
         "applications/:id": "app",
         "(/)": "home",
         "*splat": "notFound"
@@ -30,6 +31,10 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
 
       applications: function () {
         renderFile("js/views/Applications");
+      },
+
+      docs: function () {
+        renderFile("js/views/Documentation");
       },
 
       app: function (id) {

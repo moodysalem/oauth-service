@@ -71,7 +71,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
             key: "btnrow",
             className: "row"
           }, [
-            d.div({ className: "col-xs-6", key: "1" }, btn({
+            d.div({ className: "col-xs-6", key: "1" }, d.div({ className: "form-group" }, btn({
               caption: "Delete",
               type: "danger",
               icon: "trash",
@@ -82,8 +82,8 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
                   deleteModalOpen: true
                 });
               }, this)
-            })),
-            d.div({ className: "col-xs-6", key: "2" }, btn({
+            }))),
+            d.div({ className: "col-xs-6", key: "2" }, d.div({ className: "form-group" }, btn({
               caption: "Save",
               type: "success",
               ajax: true,
@@ -92,7 +92,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
               onClick: _.bind(function () {
                 this.refs.af.submit();
               }, this)
-            }))
+            })))
           ]),
           modal({
             key: "dm",

@@ -37,19 +37,32 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
         component: util.rf({
           mixins: [ model ],
           render: function () {
-            return dd({
+            return d.div({ className: "pull-right" }, dd({
               caption: "Actions",
               type: "primary",
               size: "xs",
-              icon: "tachometer"
+              icon: "tachometer",
+              right: true
             }, [
+              di({
+                key: "edit",
+                caption: "Edit",
+                icon: "pencil",
+                href: util.path("applications", this.state.model.id)
+              }),
+              di({
+                key: "scp",
+                caption: "Scopes",
+                icon: "book",
+                href: util.path("applications", this.state.model.id, "scopes")
+              }),
               di({
                 key: "mc",
                 caption: "Manage Clients",
-                icon: "pencil",
+                icon: "gavel",
                 href: util.path("applications", this.state.model.id, "clients")
               })
-            ])
+            ]))
           }
         })
       }

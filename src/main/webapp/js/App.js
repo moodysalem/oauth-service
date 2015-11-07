@@ -28,7 +28,7 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
             if (typeof href !== "string") {
               return;
             }
-            if (href === "#") {
+            if (href.length > 0 && href[ 0 ] === "#") {
               e.preventDefault();
               return;
             }
