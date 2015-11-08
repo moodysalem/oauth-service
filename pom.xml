@@ -176,7 +176,7 @@
             </systemProperty>
 
             <systemProperty>
-              <name>SHOW_SQL</name>
+              <name>DEBUG</name>
               <value>1</value>
             </systemProperty>
 

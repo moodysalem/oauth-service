@@ -23,7 +23,7 @@ public class ResourceBinder extends AbstractBinder {
                 System.getProperty("JDBC_CONNECTION_PASSWORD"),
                 "oauth-service",
                 "db/master-changelog.xml",
-                System.getProperty("SHOW_SQL") != null,
+            System.getProperty("DEBUG") != null,
                 context
         )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 

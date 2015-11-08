@@ -4,6 +4,7 @@ import com.leaguekit.hibernate.model.BaseEntity;
 import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
 import com.leaguekit.jaxrs.lib.resources.EntityResource;
 import com.oauth2cloud.server.applications.admin.filter.TokenFilter;
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Token;
 import com.oauth2cloud.server.hibernate.model.User;
 
@@ -11,6 +12,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

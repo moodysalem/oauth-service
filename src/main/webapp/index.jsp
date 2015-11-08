@@ -16,7 +16,7 @@
     <title>OAuth2 Cloud</title>
 
     <script>
-        window.debug = true;
+        window.debug = <%= System.getProperty("DEBUG") != null %>;
         var API_URL = "api";
         window.clientId = "<%= StringEscapeUtils.escapeEcmaScript(TokenFilter.CLIENT_ID) %>";
         if (typeof window.location.hash === "string" && window.location.hash.length > 0) {
