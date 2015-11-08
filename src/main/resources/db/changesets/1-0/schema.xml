@@ -23,7 +23,7 @@
       <column name="supportEmail" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="publicClientRegistration" type="BOOLEAN">
+      <column name="publicClientRegistration" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
       <column name="ownerId" type="BIGINT"/>
@@ -82,7 +82,7 @@
       <column name="description" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
-      <column name="requiresApprovalFromApplication" type="BOOLEAN">
+      <column name="requiresApprovalFromApplication" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
     </createTable>
@@ -290,7 +290,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="reason" type="${TEXT}"/>
-      <column name="approved" type="BOOLEAN">
+      <column name="approved" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
     </createTable>
