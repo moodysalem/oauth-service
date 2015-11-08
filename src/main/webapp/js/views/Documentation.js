@@ -8,6 +8,7 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
 
   var ep = util.rf({
     propTypes: {
+      method: rpt.string.isRequired,
       endpoint: rpt.string.isRequired,
       parameters: rpt.arrayOf(
         rpt.shape({
@@ -16,19 +17,12 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
           type: rpt.string.isRequired,
           loc: rpt.string.isRequired,
           desc: rpt.string.isRequired
-        })
+        }).isRequired
       )
     },
 
-    getDefaultProps: function () {
-      return { parameters: null };
-    },
-
     getParameterTable: function () {
-      if (this.props.parameters === null) {
-        return;
-      }
-      return d.div({}, [
+      return d.div({ key: "d" }, [
         d.h5({ key: "hdr" }, "Parameters"),
         d.table({ key: "t", className: "table table-striped table-responsive-horizontal" }, [
           d.thead({ key: "th" },
@@ -57,7 +51,11 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
 
     render: function () {
       return d.div({ className: "card " }, [
-        d.div({ key: "ep", className: "well well-sm" }, this.props.endpoint),
+        d.div({ key: "ep", className: "well well-sm" }, [
+          d.strong({ key: "m" }, this.props.method),
+          " ",
+          this.props.endpoint
+        ]),
         this.getParameterTable()
       ])
     }
@@ -132,9 +130,10 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
               " managing your OAuth2 resources. In order to access the administrative API, you must register a client with the OAuth2Cloud application."),
             d.h4({ key: "oauth2", id: "oauth2" }, "OAuth2"),
             d.div({ key: "oauth2info" }, [
-              d.p({ key: "1" }, "To access the login screen for your application, the authorize endpoint exists."),
+              d.p({ key: "1" }, "To access the login screen for your application, use the authorize endpoint."),
               ep({
                 key: "2",
+                method: "GET",
                 endpoint: "https://oauth2cloud.com/authorize",
                 parameters: [
                   {
@@ -143,6 +142,35 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
                     type: "string",
                     loc: "query",
                     desc: "Either token or code, depending on the desired response type. See the OAuth2 specification."
+                  },
+                  {
+                    req: true,
+                    name: "client_id",
+                    type: "string",
+                    loc: "query",
+                    desc: "The ID of the client that is attempting to get user authorization."
+                  },
+                  {
+                    req: true,
+                    name: "redirect_uri",
+                    type: "string",
+                    loc: "query",
+                    desc: "The location to which the user should be redirected after completing or cancelling authentication."
+                  },
+                  {
+                    req: false,
+                    name: "scope",
+                    type: "string",
+                    loc: "query",
+                    desc: "A space-delimited list of scopes that the client requires. Listing scopes that the client cannot access here will " +
+                    "cause an error to be displayed to the user."
+                  },
+                  {
+                    req: false,
+                    name: "logout",
+                    type: "boolean",
+                    loc: "query",
+                    desc: "Pass true to log the user out. This is especially useful when the user must accept certain scopes to continue."
                   }
                 ]
               })
