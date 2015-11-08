@@ -134,7 +134,7 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
               ep({
                 key: "2",
                 method: "GET",
-                endpoint: "https://oauth2cloud.com/authorize",
+                endpoint: "https://oauth2cloud.com/oauth/authorize",
                 parameters: [
                   {
                     req: true,
