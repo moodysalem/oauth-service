@@ -2,11 +2,14 @@ package com.oauth2cloud.server.hibernate.model;
 
 import com.leaguekit.hibernate.model.BaseEntity;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 
 @Entity
 public class Application extends BaseEntity {
+    @NotBlank
     @Column(name = "name")
     private String name;
 
@@ -14,6 +17,8 @@ public class Application extends BaseEntity {
     @JoinColumn(name = "ownerId")
     private User owner;
 
+    @Email
+    @NotBlank
     @Column(name = "supportEmail")
     private String supportEmail;
 

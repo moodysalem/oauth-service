@@ -2,8 +2,9 @@
  *
  */
 define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/controls/Button", "model",
-    "rbs/components/mixins/Events", "router", "rbs/components/layout/Modal", "rbs/components/layout/Alert" ],
-  function (React, util, af, mdls, btn, m, events, r, modal, alt, form) {
+    "rbs/components/mixins/Events", "router", "rbs/components/layout/Modal", "rbs/components/layout/Alert",
+    "rbs/components/collection/Alerts" ],
+  function (React, util, af, mdls, btn, m, events, r, modal, alt, alerts) {
     "use strict";
 
     var d = React.DOM;
@@ -67,23 +68,28 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
               this.state.app.save();
             }, this)
           }),
+          alerts({
+            key: "alts",
+            showSuccess: false,
+            watch: this.state.app
+          }),
           d.div({
             key: "btnrow",
             className: "row"
           }, [
-            d.div({ className: "col-xs-6", key: "1" }, d.div({ className: "form-group" }, btn({
-              caption: "Delete",
-              type: "danger",
-              icon: "trash",
-              ajax: true,
-              block: true,
-              onClick: _.bind(function () {
-                this.setState({
-                  deleteModalOpen: true
-                });
-              }, this)
-            }))),
-            d.div({ className: "col-xs-6", key: "2" }, d.div({ className: "form-group" }, btn({
+            //d.div({ className: "col-xs-6", key: "1" }, d.div({ className: "form-group" }, btn({
+            //  caption: "Delete",
+            //  type: "danger",
+            //  icon: "trash",
+            //  ajax: true,
+            //  block: true,
+            //  onClick: _.bind(function () {
+            //    this.setState({
+            //      deleteModalOpen: true
+            //    });
+            //  }, this)
+            //}))),
+            d.div({ className: "col-sm-6 col-sm-offset-3", key: "2" }, d.div({ className: "form-group" }, btn({
               caption: "Save",
               type: "success",
               ajax: true,
