@@ -9,10 +9,13 @@ import java.util.List;
 
 @Path("clients")
 public class ClientResource extends BaseEntityResource<Client>{
+
     @Override
     public Class<Client> getEntityClass() {
         return Client.class;
     }
+
+
 
     @Override
     public boolean canCreate(Client client) {

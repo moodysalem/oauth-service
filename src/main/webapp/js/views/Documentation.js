@@ -173,6 +173,43 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
                     desc: "Pass true to log the user out. This is especially useful when the user must accept certain scopes to continue."
                   }
                 ]
+              }),
+              d.p({ key: "3" }, "To exchange an authorization code for a token, or exchange a refresh token for another " +
+                "access token, use the token endpoint. Each of these actions requires a different grant_type."),
+              ep({
+                key: "4",
+                method: "POST",
+                endpoint: "https://oauth2cloud.com/oauth/token",
+                parameters: [
+                  {
+                    req: true,
+                    name: "grant_type",
+                    type: "string",
+                    loc: "body",
+                    desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                  },
+                  {
+                    req: true,
+                    name: "code",
+                    type: "string",
+                    loc: "body",
+                    desc: "The authorization code received as a query parameter in the redirect URI from the authorize endpoint."
+                  },
+                  {
+                    req: true,
+                    name: "redirect_uri",
+                    type: "string",
+                    loc: "body",
+                    desc: "The exact redirect URI with which the authorization code grant flow was initialized."
+                  },
+                  {
+                    req: true,
+                    name: "client_id",
+                    type: "string",
+                    loc: "body",
+                    desc: "The ID of the client that requested the authorization code "
+                  }
+                ]
               })
             ]),
             d.h4({ key: "admin", id: "admin" }, "Admin"),
