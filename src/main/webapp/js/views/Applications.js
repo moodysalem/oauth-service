@@ -3,8 +3,9 @@
  */
 define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "rbs/components/controls/Button",
     "./Loading", "rbs/components/layout/Modal", "rbs/components/mixins/Model", "rbs/components/layout/Dropdown",
-    "rbs/components/model/Form", "rbs/components/collection/Alerts", "router", "rbs/components/layout/DropdownItem" ],
-  function (React, util, mdls, m, table, btn, lw, modal, model, dd, form, alerts, r, di) {
+    "rbs/components/model/Form", "rbs/components/collection/Alerts", "router", "rbs/components/layout/DropdownItem",
+    "rbs/components/controls/Pagination" ],
+  function (React, util, mdls, m, table, btn, lw, modal, model, dd, form, alerts, r, di, pag) {
     "use strict";
 
     var d = React.DOM;
@@ -131,10 +132,18 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
           lw({
             key: "t",
             watch: this.state.apps
-          }, table({
-            collection: this.state.apps,
-            attributes: appTableColumns
-          })),
+          }, [
+            table({
+              key: "apps",
+              collection: this.state.apps,
+              attributes: appTableColumns
+            }),
+            d.div({ className: "text-center", key: "pag" },
+              pag({
+                collection: this.state.apps
+              })
+            )
+          ]),
 
           modal({
             key: "ca",

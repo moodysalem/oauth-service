@@ -2,12 +2,36 @@
  * view scopes for an application
  */
 define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
-    "rbs/components/layout/Icon" ],
-  function (React, util, alert, mdls, table, lw, icon) {
+    "rbs/components/layout/Icon", "rbs/components/mixins/Model", "rbs/components/controls/Pagination", "rbs/components/layout/Dropdown",
+    "rbs/components/layout/DropdownItem", "rbs/components/controls/Button" ],
+  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn) {
     "use strict";
 
     var rpt = React.PropTypes;
     var d = React.DOM;
+
+    var scopesHeader = util.rf({
+      displayName: "Scopes Header",
+      mixins: [ model ],
+
+      render: function () {
+        var dn = this.state.model.name ? (" for " + this.state.model.name) : "";
+        return d.div({}, [
+          d.h2({ key: "h", className: "page-header" }, [
+            btn({
+              key: "btn",
+              className: "pull-right",
+              caption: "Create",
+              icon: "plus",
+              type: "success",
+              onClick: this.props.onCreate
+            }),
+            "Scopes",
+            d.small({ key: "s" }, dn)
+          ])
+        ]);
+      }
+    });
 
     var ta = [
       {
@@ -37,6 +61,36 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
             return icon({ name: "check" });
           }
         }
+      },
+      {
+        component: util.rf({
+          mixins: [ model ],
+          render: function () {
+            return d.div({ className: "pull-right" }, dd({
+              caption: "Actions",
+              right: true,
+              icon: "ellipsis-v",
+              size: "xs"
+            }, [
+              di({
+                key: "edit",
+                caption: "Edit",
+                icon: "pencil",
+                onClick: _.bind(function () {
+                  //this.props.model.destroy({ wait: true });
+                }, this)
+              }),
+              di({
+                key: "del",
+                caption: "Delete",
+                icon: "trash",
+                onClick: _.bind(function () {
+                  this.props.model.destroy({ wait: true });
+                }, this)
+              })
+            ]));
+          }
+        })
       }
     ];
 
@@ -48,7 +102,9 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
       getInitialState: function () {
         return {
           scopes: new mdls.Scopes().setParam("applicationId", this.props.applicationId),
-          app: new mdls.Application({ id: this.props.applicationId })
+          app: new mdls.Application({ id: this.props.applicationId }),
+          createOpen: false,
+          scope: new mdls.Scope({ application: { id: this.props.applicationId } })
         };
       },
 
@@ -59,14 +115,27 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
 
       render: function () {
         return d.div({ className: "container" }, [
-          d.h2({ key: "h", className: "page-header" }, "Scopes"),
+          scopesHeader({ key: "sh", model: this.state.app }),
           lw({
             key: "t",
             watch: this.state.scopes
-          }, table({
-            collection: this.state.scopes,
-            attributes: ta
-          }))
+          }, [
+            table({
+              key: "scopes",
+              collection: this.state.scopes,
+              attributes: ta,
+              onCreate: _.bind(function () {
+                this.setState({
+                  createOpen: true
+                })
+              }, this)
+            }),
+            d.div({ className: "text-center", key: "pag" },
+              pag({
+                collection: this.state.scopes
+              })
+            )
+          ])
         ]);
       }
     });
