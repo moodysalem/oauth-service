@@ -85,16 +85,24 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
       ]);
     },
 
-    getData: function () {
+    getParamObj: function (location) {
+      location = location.toLowerCase();
       var dataObj = {};
-      var hasParams = false;
       _.each(this.props.parameters, function (oneP) {
-        if ((oneP.value || this.state.parameters[ oneP.name ]) && oneP.loc.toLowerCase() === "body") {
-          dataObj[ oneP.name ] = typeof oneP.value !== "undefined" ? oneP.value : this.state.parameters[ oneP.name ];
-          hasParams = true;
+        if ((oneP.req || oneP.value || this.state.parameters[ oneP.name ]) && oneP.loc.toLowerCase() === location) {
+          var val = typeof oneP.value !== "undefined" ? oneP.value : this.state.parameters[ oneP.name ];
+          if (typeof val !== "string") {
+            val = "";
+          }
+          dataObj[ oneP.name ] = val;
         }
       }, this);
-      if (hasParams) {
+      return dataObj;
+    },
+
+    getBody: function () {
+      var dataObj = this.getParamObj("body");
+      if (_.keys(dataObj).length > 0) {
         var toReturn = "-d '";
         if (this.props.contentType === "application/json") {
           toReturn += JSON.stringify(dataObj);
@@ -107,16 +115,21 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
       return "";
     },
 
+    getHeaders: function () {
+      var headerObj = this.getParamObj("header");
+      if (_.keys(headerObj).length > 0) {
+        var toReturn = [];
+        _.each(headerObj, function (value, key, list) {
+          toReturn.push("-H '" + key + ": " + value + "'");
+        });
+        return toReturn.join(" ");
+      }
+      return "";
+    },
+
     getEndpoint: function () {
-      var paramObj = {};
-      var hasParams = false;
-      _.each(this.props.parameters, function (oneP) {
-        if ((oneP.value || this.state.parameters[ oneP.name ]) && oneP.loc.toLowerCase() === "query") {
-          paramObj[ oneP.name ] = typeof oneP.value !== "undefined" ? oneP.value : this.state.parameters[ oneP.name ];
-          hasParams = true;
-        }
-      }, this);
-      return this.props.endpoint + (hasParams ? ("?" + $.param(paramObj, true)) : "");
+      var paramObj = this.getParamObj("query");
+      return this.props.endpoint + (_.keys(paramObj).length > 0 ? ("?" + $.param(paramObj, true)) : "");
     },
 
     render: function () {
@@ -127,7 +140,9 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
           " ",
           this.getEndpoint(),
           " ",
-          this.getData()
+          this.getBody(),
+          " ",
+          this.getHeaders()
         ]),
         this.getParameterTable()
       ])
@@ -302,6 +317,13 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                   },
                   {
                     req: true,
+                    name: "Authorization",
+                    type: "string",
+                    loc: "header",
+                    desc: "'Basic ' followed by the base64-encoded clientid:secret. This is required for the resource owner password flow."
+                  },
+                  {
+                    req: true,
                     name: "username",
                     type: "string",
                     loc: "body",
@@ -332,24 +354,17 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                   },
                   {
                     req: true,
-                    name: "code",
+                    name: "Authorization",
                     type: "string",
-                    loc: "body",
-                    desc: "The authorization code received as a query parameter in the redirect URI from the authorize endpoint."
+                    loc: "header",
+                    desc: "'Basic ' followed by the base64-encoded clientid:secret. This is required for the resource owner password flow."
                   },
                   {
-                    req: true,
-                    name: "redirect_uri",
+                    req: false,
+                    name: "scope",
                     type: "string",
                     loc: "body",
-                    desc: "The exact redirect URI with which the authorization code grant flow was initialized."
-                  },
-                  {
-                    req: true,
-                    name: "client_id",
-                    type: "string",
-                    loc: "body",
-                    desc: "The ID of the client that requested the authorization code "
+                    desc: "The scopes for which the client is requesting a token."
                   }
                 ]
               }),
@@ -369,24 +384,26 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                   },
                   {
                     req: true,
-                    name: "code",
+                    name: "Authorization",
                     type: "string",
-                    loc: "body",
-                    desc: "The authorization code received as a query parameter in the redirect URI from the authorize endpoint."
+                    loc: "header",
+                    desc: "'Basic ' followed by the base64-encoded clientid:secret. This is required for the resource owner password flow."
                   },
                   {
                     req: true,
-                    name: "redirect_uri",
+                    name: "refresh_token",
                     type: "string",
                     loc: "body",
-                    desc: "The exact redirect URI with which the authorization code grant flow was initialized."
+                    desc: "The refresh token for the user for which a new access token should be obtained."
                   },
                   {
                     req: true,
-                    name: "client_id",
+                    name: "scope",
                     type: "string",
                     loc: "body",
-                    desc: "The ID of the client that requested the authorization code "
+                    desc: "The scopes for which the access token should be valid. These scopes cannot exceed the scopes " +
+                    " for which the refresh token was obtained, even if the user has accepted those scopes for the client " +
+                    "to which the refresh token was distributed."
                   }
                 ]
               })
@@ -396,7 +413,10 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
               "website to manage your OAuth2 application."),
             d.h3({ key: "addtnl", id: "addtl" }, "Additional Features"),
             d.h4({ key: "legacy", id: "legacy" }, "Legacy Integration"),
-            d.p({ key: "legacyinfo" }, "You may need to integrate with an existing database of users. We allow existing users' e-mails and passwords " +
+            d.p({
+              style: { marginBottom: "5em" },
+              key: "legacyinfo"
+            }, "You may need to integrate with an existing database of users. We allow existing users' e-mails and passwords " +
               " to be ported via and endpoint that is hit with every failed login attempt. You can specify this endpoint" +
               " in your application settings. This endpoint will receive a POST containing the e-mail and password and should return " +
               " the user's first name and last name if the user's credentials are valid. OAuth2Cloud will then create a user and issue " +
