@@ -374,7 +374,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                   }
                 ]
               }),
-              d.h5({ key: "h54", id: "refresh" }, "Refresh Token"),
+              d.h5({ key: "h54", id: "refresh_token" }, "Refresh Token"),
               ep({
                 key: "refresh",
                 method: "POST",
@@ -403,7 +403,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                     desc: "The refresh token for the user for which a new access token should be obtained."
                   },
                   {
-                    req: true,
+                    req: false,
                     name: "scope",
                     type: "string",
                     loc: "body",
