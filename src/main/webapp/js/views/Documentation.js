@@ -65,7 +65,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
           d.tbody({ key: "tb" },
             _.map(this.props.parameters, function (oneP) {
               return d.tr({ key: oneP.name }, [
-                d.td({ key: "r", "data-title": "Required" }, oneP.req ? icon({ name: "check" }) : null),
+                d.td({ key: "r", "data-title": "Required" }, oneP.req ? "Yes" : "No"),
                 d.td({ key: "1", "data-title": "Name" }, oneP.name),
                 d.td({ key: "2", "data-title": "Type" }, oneP.type),
                 d.td({ key: "val", "data-title": "Value" }, d.span({}, d.input({

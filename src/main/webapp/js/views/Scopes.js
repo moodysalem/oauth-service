@@ -72,8 +72,9 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
         className: "text-center",
         formatFunction: function (val) {
           if (val === true) {
-            return icon({ name: "check" });
+            return "Yes";
           }
+          return "No";
         }
       },
       {
