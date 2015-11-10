@@ -176,6 +176,12 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
           d.li({ key: "api" }, d.a({ href: "#api" }, "Developer API")),
           d.ul({ key: "subapi" }, [
             d.li({ key: "a" }, d.a({ href: "#oauth2" }, "OAuth2")),
+            d.ul({ key: "suboauth" }, [
+              d.li({ key: "1" }, d.a({ href: "#authorization_code" }, "Authorization Code")),
+              d.li({ key: "2" }, d.a({ href: "#resource_owner_password" }, "Resource Owner Password")),
+              d.li({ key: "3" }, d.a({ href: "#client_credentials" }, "Client Credentials")),
+              d.li({ key: "4" }, d.a({ href: "#refresh_token" }, "Refresh Token"))
+            ]),
             d.li({ key: "a2" }, d.a({ href: "#admin" }, "Admin"))
           ]),
           d.li({ key: "addtl" }, d.a({ href: "#addtl" }, "Additional Features")),
@@ -264,7 +270,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
               }),
               d.p({ key: "3" }, "To exchange an authorization code for a token, or exchange a refresh token for another " +
                 "access token, use the token endpoint. Each of these actions requires a different grant_type."),
-              d.h5({ key: "h51" }, "Authorization Code"),
+              d.h5({ key: "h51", id: "authorization_code" }, "Authorization Code"),
               ep({
                 key: "4",
                 method: "POST",
@@ -301,7 +307,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                   }
                 ]
               }),
-              d.h5({ key: "h52" }, "Resource Owner Password"),
+              d.h5({ key: "h52", id: "resource_owner_password" }, "Resource Owner Password"),
               ep({
                 key: "password",
                 method: "POST",
@@ -338,7 +344,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                   }
                 ]
               }),
-              d.h5({ key: "h53" }, "Client Credentials"),
+              d.h5({ key: "h53", id: "client_credentials" }, "Client Credentials"),
               ep({
                 key: "client_credentials",
                 method: "POST",
@@ -368,7 +374,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                   }
                 ]
               }),
-              d.h5({ key: "h54" }, "Refresh Token"),
+              d.h5({ key: "h54", id: "refresh" }, "Refresh Token"),
               ep({
                 key: "refresh",
                 method: "POST",
