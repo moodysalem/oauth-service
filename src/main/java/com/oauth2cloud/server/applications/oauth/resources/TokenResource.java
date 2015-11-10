@@ -358,7 +358,7 @@ public class TokenResource extends BaseResource {
         }
 
         Token t = getToken(token, c, Token.Type.ACCESS, Token.Type.REFRESH);
-        if (t == null || !t.getClient().getApplication().getId().equals(applicationId)) {
+        if (t == null || t.getClient().getApplication().getId() != applicationId) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }
 

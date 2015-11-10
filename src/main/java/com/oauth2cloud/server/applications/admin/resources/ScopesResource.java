@@ -18,7 +18,7 @@ public class ScopesResource extends BaseEntityResource<Scope> {
 
     @Override
     public boolean canCreate(Scope scope) {
-        Application ap = scope.getApplication() != null && scope.getApplication().getId() != null ? em.find(Application.class, scope.getApplication().getId()) : null;
+        Application ap = scope.getApplication() != null && scope.getApplication().getId() != 0 ? em.find(Application.class, scope.getApplication().getId()) : null;
         if (ap == null) {
             return false;
         }

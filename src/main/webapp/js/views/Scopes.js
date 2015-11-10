@@ -139,7 +139,7 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
           scopesHeader({
             key: "sh", model: this.state.app, onCreate: _.bind(function () {
               this.state.scope.clear();
-              this.state.scope.set({ application: { id: +this.props.applicationId, version: 0 } });
+              this.state.scope.set({ application: { id: +this.props.applicationId } });
               this.setState({
                 createOpen: true
               });
