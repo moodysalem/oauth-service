@@ -3,8 +3,9 @@
  */
 define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
     "rbs/components/layout/Icon", "rbs/components/mixins/Model", "rbs/components/controls/Pagination", "rbs/components/layout/Dropdown",
-    "rbs/components/layout/DropdownItem", "rbs/components/controls/Button" ],
-  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn) {
+    "rbs/components/layout/DropdownItem", "rbs/components/controls/Button", "rbs/components/layout/Modal", "./ScopeForm",
+    "rbs/components/collection/Alerts" ],
+  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn, modal, sf, alerts) {
     "use strict";
 
     var rpt = React.PropTypes;
@@ -35,6 +36,18 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
 
     var ta = [
       {
+        attribute: "thumbnail",
+        label: "Thumbnail",
+        component: util.rf({
+          render: function () {
+            return d.span({ className: "text-center" }, d.img({
+              src: this.props.value,
+              className: "scope-thumbnail"
+            }));
+          }
+        })
+      },
+      {
         attribute: "displayName",
         label: "Display Name",
         sortOn: "displayName",
@@ -56,6 +69,7 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
         sortOn: "requiresApprovalFromApplication",
         label: "Requires Approval",
         component: d.span,
+        className: "text-center",
         formatFunction: function (val) {
           if (val === true) {
             return icon({ name: "check" });
@@ -113,14 +127,27 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
         this.state.app.fetch();
       },
 
+      closeCreate: function () {
+        this.setState({
+          createOpen: false
+        });
+      },
+
       render: function () {
         return d.div({ className: "container" }, [
-          scopesHeader({ key: "sh", model: this.state.app }),
+          scopesHeader({
+            key: "sh", model: this.state.app, onCreate: _.bind(function () {
+              this.setState({
+                createOpen: true
+              });
+            }, this)
+          }),
           lw({
             key: "t",
             watch: this.state.scopes
           }, [
             table({
+              className: "vertical-align-middle",
               key: "scopes",
               collection: this.state.scopes,
               attributes: ta,
@@ -135,6 +162,55 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
                 collection: this.state.scopes
               })
             )
+          ]),
+          modal({
+            key: "modal",
+            open: this.state.createOpen,
+            title: "Add Scope",
+            onClose: this.closeCreate
+          }, [
+            d.div({
+              key: "mb",
+              className: "modal-body"
+            }, [
+              sf({
+                key: "sf",
+                ref: "sf",
+                onSubmit: _.bind(function () {
+                  this.state.scope.save().then(_.bind(function () {
+                    this.closeCreate();
+                  }, this));
+                }, this),
+                model: this.state.scope
+              }),
+              alerts({
+                watch: this.state.scope,
+                key: "alts",
+                showSuccess: false
+              })
+            ]),
+            d.div({
+              key: "mf",
+              className: "modal-footer"
+            }, [
+              btn({
+                key: "cancel",
+                ajax: true,
+                icon: "cancel",
+                onClick: this.closeCreate,
+                caption: "Cancel"
+              }),
+              btn({
+                key: "save",
+                icon: "plus",
+                ajax: true,
+                type: "success",
+                onClick: _.bind(function () {
+                  this.refs.sf.submit();
+                }, this),
+                caption: "Add"
+              })
+            ])
           ])
         ]);
       }

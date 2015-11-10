@@ -130,6 +130,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
             watch: this.state.apps
           }, [
             table({
+              className: "vertical-align-middle",
               key: "apps",
               collection: this.state.apps,
               attributes: appTableColumns

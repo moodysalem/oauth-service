@@ -1,4 +1,7 @@
 /* loading indicator */
+.inline-block {
+    display: inline-block;
+}
 
 .loading {
     position: fixed;
@@ -84,4 +87,15 @@
 .nowrap-scroll {
     white-space: nowrap;
     overflow-x: auto;
+}
+
+.scope-thumbnail {
+    width: 100%;
+    max-width: 150px;
+    border-radius: 100%;
+    box-shadow: 0 0 1px inset;
+}
+
+table.vertical-align-middle td {
+    vertical-align: middle !important;
 }
