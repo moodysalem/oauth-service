@@ -79,31 +79,105 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
       },
       {
         component: util.rf({
+          displayName: "dropdown column",
+
+          getInitialState: function () {
+            return {
+              editOpen: false,
+              modelCopy: new mdls.Scope()
+            };
+          },
+
+          closeEdit: function () {
+            this.setState({
+              editOpen: false
+            });
+          },
+
+          openEdit: function () {
+            this.state.modelCopy.set(this.props.model.toJSON());
+            this.setState({
+              editOpen: true
+            });
+          },
+
           mixins: [ model ],
+
           render: function () {
-            return d.div({ className: "pull-right" }, dd({
-              caption: "Actions",
-              right: true,
-              icon: "ellipsis-v",
-              size: "sm"
-            }, [
-              di({
-                key: "edit",
-                caption: "Edit",
-                icon: "pencil",
-                onClick: _.bind(function () {
-                  //this.props.model.destroy({ wait: true });
-                }, this)
-              }),
-              di({
-                key: "del",
-                caption: "Delete",
-                icon: "trash",
-                onClick: _.bind(function () {
-                  this.props.model.destroy({ wait: true });
-                }, this)
-              })
-            ]));
+            return d.div({ className: "pull-right" }, [
+              dd({
+                key: "dd",
+                caption: "Actions",
+                right: true,
+                icon: "ellipsis-v",
+                size: "sm"
+              }, [
+                di({
+                  key: "edit",
+                  caption: "Edit",
+                  icon: "pencil",
+                  onClick: this.openEdit
+                }),
+                di({
+                  key: "del",
+                  caption: "Delete",
+                  icon: "trash",
+                  onClick: _.bind(function () {
+                    this.props.model.destroy({ wait: true });
+                  }, this)
+                })
+              ]),
+              modal({
+                key: "modal",
+                open: this.state.editOpen,
+                title: "Edit Scope",
+                onClose: this.closeEdit
+              }, [
+                d.div({
+                  key: "mb",
+                  className: "modal-body"
+                }, [
+                  sf({
+                    key: "sf",
+                    ref: "sf",
+                    onSubmit: _.bind(function () {
+                      this.state.modelCopy.save().then(_.bind(function (model) {
+                        this.props.model.set(model);
+                        this.closeEdit();
+                      }, this));
+                    }, this),
+                    model: this.state.modelCopy
+                  }),
+                  alerts({
+                    watch: this.state.modelCopy,
+                    key: "alts",
+                    showSuccess: false
+                  })
+                ]),
+                d.div({
+                  key: "mf",
+                  className: "modal-footer"
+                }, [
+                  btn({
+                    key: "cancel",
+                    ajax: true,
+                    icon: "cancel",
+                    onClick: this.closeEdit,
+                    caption: "Cancel"
+                  }),
+                  btn({
+                    key: "save",
+                    icon: "save",
+                    ajax: true,
+                    type: "success",
+                    onClick: _.bind(function () {
+                      this.refs.sf.submit();
+                    }, this),
+                    caption: "Save"
+                  })
+                ])
+              ])
+            ]);
           }
         })
       }
