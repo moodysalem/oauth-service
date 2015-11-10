@@ -12,19 +12,22 @@ define([ "react", "util", "rbs/components/model/Form" ], function (React, util, 
       attribute: "name",
       label: "Name",
       tip: "Programmatic name for the scope. May only include alphanumeric characters and underscores.",
-      component: "text"
+      component: "text",
+      required: true
     },
     {
       attribute: "displayName",
       label: "Display Name",
       tip: "How the scope should appear to users.",
-      component: "text"
+      component: "text",
+      required: true
     },
     {
       attribute: "description",
       label: "Description",
       tip: "Enter a short description of the API that this scope provides access to.",
-      component: "textarea"
+      component: "textarea",
+      required: true
     },
     {
       attribute: "requiresApprovalFromApplication",

@@ -114,11 +114,12 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
       },
 
       getInitialState: function () {
+        var app = new mdls.Application({ id: this.props.applicationId });
         return {
           scopes: new mdls.Scopes().setParam("applicationId", this.props.applicationId),
-          app: new mdls.Application({ id: this.props.applicationId }),
+          app: app,
           createOpen: false,
-          scope: new mdls.Scope({ application: { id: this.props.applicationId } })
+          scope: new mdls.Scope()
         };
       },
 
@@ -137,6 +138,8 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
         return d.div({ className: "container" }, [
           scopesHeader({
             key: "sh", model: this.state.app, onCreate: _.bind(function () {
+              this.state.scope.clear();
+              this.state.scope.set({ application: { id: +this.props.applicationId, version: 0 } });
               this.setState({
                 createOpen: true
               });
@@ -177,8 +180,9 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
                 key: "sf",
                 ref: "sf",
                 onSubmit: _.bind(function () {
-                  this.state.scope.save().then(_.bind(function () {
+                  this.state.scope.save().then(_.bind(function (model) {
                     this.closeCreate();
+                    this.state.scopes.add(model);
                   }, this));
                 }, this),
                 model: this.state.scope
