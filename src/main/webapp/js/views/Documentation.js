@@ -1,7 +1,7 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util, icon) {
+define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/Tip" ], function (React, util, icon, tip) {
   "use strict";
   var d = React.DOM;
   var rpt = React.PropTypes;
@@ -16,22 +16,50 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
           name: rpt.string.isRequired,
           type: rpt.string.isRequired,
           loc: rpt.string.isRequired,
-          desc: rpt.string.isRequired
+          desc: rpt.string.isRequired,
+          value: rpt.string
         }).isRequired
-      )
+      ),
+      contentType: rpt.oneOf([ "application/x-www-form-urlencoded" ])
+    },
+
+    getDefaultProps: function () {
+      return {
+        contentType: "application/x-www-form-urlencoded"
+      };
+    },
+
+    getInitialState: function () {
+      return {
+        parameters: {}
+      };
+    },
+
+    handleChange: function (paramName, event) {
+      var val = event.target.value;
+      if (typeof val !== "string" || val.trim().length === 0) {
+        val = null;
+      }
+      var newVal = {};
+      newVal[ paramName ] = val;
+      var newParams = _.extend({}, this.state.parameters, newVal);
+      this.setState({
+        parameters: newParams
+      });
     },
 
     getParameterTable: function () {
       return d.div({ key: "d" }, [
         d.h5({ key: "hdr" }, "Parameters"),
-        d.table({ key: "t", className: "table table-striped table-responsive-horizontal" }, [
+        d.table({ key: "t", className: "table table-bordered table-responsive-horizontal" }, [
           d.thead({ key: "th" },
             d.tr({}, [
-              d.td({ key: "r" }, "Required"),
-              d.td({ key: "1" }, "Name"),
-              d.td({ key: "2" }, "Type"),
-              d.td({ key: "4" }, "Location"),
-              d.td({ key: "3" }, "Description")
+              d.td({ key: "r" }, tip({ tip: "Whether the parameter is required as part of a valid request" }, "Required")),
+              d.td({ key: "1" }, tip({ tip: "The expected name of the parameter" }, "Name")),
+              d.td({ key: "2" }, tip({ tip: "The data type of the parameter" }, "Type")),
+              d.td({ key: "val" }, tip({ tip: "Enter a value to see an example request" }, "Value")),
+              d.td({ key: "4" }, tip({ tip: "Where the parameter should be found in the request" }, "Location")),
+              d.td({ key: "3" }, tip({ tip: "What the parameter does." }, "Description"))
             ])
           ),
           d.tbody({ key: "tb" },
@@ -40,21 +68,66 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
                 d.td({ key: "r", "data-title": "Required" }, oneP.req ? icon({ name: "check" }) : null),
                 d.td({ key: "1", "data-title": "Name" }, oneP.name),
                 d.td({ key: "2", "data-title": "Type" }, oneP.type),
+                d.td({ key: "val", "data-title": "Value" }, d.span({}, d.input({
+                  type: "text",
+                  placeholder: oneP.name,
+                  className: "form-control",
+                  readOnly: (typeof oneP.value !== "undefined"),
+                  value: (typeof oneP.value === "undefined" ? this.state.parameters[ oneP.name ] : oneP.value),
+                  onChange: _.bind(this.handleChange, this, oneP.name)
+                }))),
                 d.td({ key: "3", "data-title": "Location" }, oneP.loc),
                 d.td({ key: "4", "data-title": "Description" }, oneP.desc)
               ])
-            })
+            }, this)
           )
         ])
       ]);
     },
 
+    getData: function () {
+      var dataObj = {};
+      var hasParams = false;
+      _.each(this.props.parameters, function (oneP) {
+        if ((oneP.value || this.state.parameters[ oneP.name ]) && oneP.loc.toLowerCase() === "body") {
+          dataObj[ oneP.name ] = typeof oneP.value !== "undefined" ? oneP.value : this.state.parameters[ oneP.name ];
+          hasParams = true;
+        }
+      }, this);
+      if (hasParams) {
+        var toReturn = "-d '";
+        if (this.props.contentType === "application/json") {
+          toReturn += JSON.stringify(dataObj);
+        } else {
+          toReturn += $.param(dataObj, true);
+        }
+        toReturn += "'";
+        return toReturn;
+      }
+      return "";
+    },
+
+    getEndpoint: function () {
+      var paramObj = {};
+      var hasParams = false;
+      _.each(this.props.parameters, function (oneP) {
+        if ((oneP.value || this.state.parameters[ oneP.name ]) && oneP.loc.toLowerCase() === "query") {
+          paramObj[ oneP.name ] = typeof oneP.value !== "undefined" ? oneP.value : this.state.parameters[ oneP.name ];
+          hasParams = true;
+        }
+      }, this);
+      return this.props.endpoint + (hasParams ? ("?" + $.param(paramObj, true)) : "");
+    },
+
     render: function () {
       return d.div({ className: "card " }, [
-        d.div({ key: "ep", className: "well well-sm" }, [
-          d.strong({ key: "m" }, this.props.method),
+        d.div({ key: "ep", className: "well well-sm nowrap-scroll" }, [
+          "curl ",
+          (this.props.method !== "GET" ? d.strong({ key: "m" }, [ " -X ", this.props.method ]) : ""),
           " ",
-          this.props.endpoint
+          this.getEndpoint(),
+          " ",
+          this.getData()
         ]),
         this.getParameterTable()
       ])
@@ -176,6 +249,7 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
               }),
               d.p({ key: "3" }, "To exchange an authorization code for a token, or exchange a refresh token for another " +
                 "access token, use the token endpoint. Each of these actions requires a different grant_type."),
+              d.h5({ key: "h51" }, "Authorization Code"),
               ep({
                 key: "4",
                 method: "POST",
@@ -184,6 +258,111 @@ define([ "react", "util", "rbs/components/layout/Icon" ], function (React, util,
                   {
                     req: true,
                     name: "grant_type",
+                    value: "authorization_code",
+                    type: "string",
+                    loc: "body",
+                    desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                  },
+                  {
+                    req: true,
+                    name: "code",
+                    type: "string",
+                    loc: "body",
+                    desc: "The authorization code received as a query parameter in the redirect URI from the authorize endpoint."
+                  },
+                  {
+                    req: true,
+                    name: "redirect_uri",
+                    type: "string",
+                    loc: "body",
+                    desc: "The exact redirect URI with which the authorization code grant flow was initialized."
+                  },
+                  {
+                    req: true,
+                    name: "client_id",
+                    type: "string",
+                    loc: "body",
+                    desc: "The ID of the client that requested the authorization code "
+                  }
+                ]
+              }),
+              d.h5({ key: "h52" }, "Resource Owner Password"),
+              ep({
+                key: "password",
+                method: "POST",
+                endpoint: "https://oauth2cloud.com/oauth/token",
+                parameters: [
+                  {
+                    req: true,
+                    name: "grant_type",
+                    value: "password",
+                    type: "string",
+                    loc: "body",
+                    desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                  },
+                  {
+                    req: true,
+                    name: "username",
+                    type: "string",
+                    loc: "body",
+                    desc: "The e-mail address of the user."
+                  },
+                  {
+                    req: true,
+                    name: "password",
+                    type: "string",
+                    loc: "body",
+                    desc: "The password of the user."
+                  }
+                ]
+              }),
+              d.h5({ key: "h53" }, "Client Credentials"),
+              ep({
+                key: "client_credentials",
+                method: "POST",
+                endpoint: "https://oauth2cloud.com/oauth/token",
+                parameters: [
+                  {
+                    req: true,
+                    name: "grant_type",
+                    value: "client_credentials",
+                    type: "string",
+                    loc: "body",
+                    desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                  },
+                  {
+                    req: true,
+                    name: "code",
+                    type: "string",
+                    loc: "body",
+                    desc: "The authorization code received as a query parameter in the redirect URI from the authorize endpoint."
+                  },
+                  {
+                    req: true,
+                    name: "redirect_uri",
+                    type: "string",
+                    loc: "body",
+                    desc: "The exact redirect URI with which the authorization code grant flow was initialized."
+                  },
+                  {
+                    req: true,
+                    name: "client_id",
+                    type: "string",
+                    loc: "body",
+                    desc: "The ID of the client that requested the authorization code "
+                  }
+                ]
+              }),
+              d.h5({ key: "h54" }, "Refresh Token"),
+              ep({
+                key: "refresh",
+                method: "POST",
+                endpoint: "https://oauth2cloud.com/oauth/token",
+                parameters: [
+                  {
+                    req: true,
+                    name: "grant_type",
+                    value: "refresh",
                     type: "string",
                     loc: "body",
                     desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"

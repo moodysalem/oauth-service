@@ -80,3 +80,8 @@
     margin-bottom: 1em;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
 }
+
+.nowrap-scroll {
+    white-space: nowrap;
+    overflow-x: auto;
+}
