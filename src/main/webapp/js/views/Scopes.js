@@ -70,7 +70,7 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
               caption: "Actions",
               right: true,
               icon: "ellipsis-v",
-              size: "xs"
+              size: "sm"
             }, [
               di({
                 key: "edit",

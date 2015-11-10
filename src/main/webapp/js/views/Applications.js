@@ -19,13 +19,9 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
       },
       {
         label: "Name",
+        attribute: "name",
         sortOn: "name",
-        component: util.rf({
-          mixins: [ model ],
-          render: function () {
-            return d.a({ href: util.path("applications", this.state.model.id) }, this.state.model.name);
-          }
-        })
+        component: d.span
       },
       {
         label: "Support E-mail",
@@ -41,7 +37,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
             return d.div({ className: "pull-right" }, dd({
               caption: "Actions",
               type: "primary",
-              size: "xs",
+              size: "sm",
               icon: "tachometer",
               right: true
             }, [
