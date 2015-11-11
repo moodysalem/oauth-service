@@ -8,7 +8,7 @@ import javax.ws.rs.Path;
 import java.util.List;
 
 @Path("applications")
-public class ApplicationResource extends BaseEntityResource<Application> {
+public class ApplicationsResource extends BaseEntityResource<Application> {
     @Override
     public Class<Application> getEntityClass() {
         return Application.class;

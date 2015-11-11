@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
+import com.leaguekit.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
 
@@ -9,7 +10,7 @@ import javax.ws.rs.Path;
 import java.util.List;
 
 @Path("clients")
-public class ClientResource extends BaseEntityResource<Client> {
+public class ClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public Class<Client> getEntityClass() {
@@ -49,12 +50,12 @@ public class ClientResource extends BaseEntityResource<Client> {
 
     @Override
     public void beforeCreate(Client client) {
-
+        client.setIdentifier(RandomStringUtil.randomAlphaNumeric(64));
+        client.setSecret(RandomStringUtil.randomAlphaNumeric(64));
     }
 
     @Override
     public void beforeEdit(Client client, Client t1) {
-
     }
 
     @Override

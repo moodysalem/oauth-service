@@ -6,7 +6,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
-public class ClientScopeResource extends BaseEntityResource<ClientScope> {
+public class ClientScopesResource extends BaseEntityResource<ClientScope> {
     @Override
     public Class<ClientScope> getEntityClass() {
         return ClientScope.class;

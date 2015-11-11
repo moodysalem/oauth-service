@@ -2,6 +2,7 @@ package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.leaguekit.hibernate.model.BaseEntity;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import java.util.List;
@@ -23,6 +24,7 @@ public class Client extends BaseEntity {
         PUBLIC;
     }
 
+    @NotBlank
     @Column(name = "name")
     private String name;
 
@@ -37,10 +39,10 @@ public class Client extends BaseEntity {
     @JoinColumn(name = "applicationId")
     private Application application;
 
-    @Column(name = "identifier")
+    @Column(name = "identifier", updatable = false)
     private String identifier;
 
-    @Column(name = "secret")
+    @Column(name = "secret", updatable = false)
     private String secret;
 
     @ElementCollection

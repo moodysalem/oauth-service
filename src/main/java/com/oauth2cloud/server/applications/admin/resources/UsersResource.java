@@ -8,7 +8,7 @@ import javax.ws.rs.Path;
 import java.util.List;
 
 @Path("users")
-public class UserResource extends BaseEntityResource<User> {
+public class UsersResource extends BaseEntityResource<User> {
     @Override
     public Class<User> getEntityClass() {
         return User.class;

@@ -11,7 +11,7 @@ define([ "react", "util", "rbs/components/model/Form" ], function (React, util, 
     {
       attribute: "name",
       label: "Name",
-      placeholder: "Scope_Name",
+      placeholder: "Name",
       tip: "Programmatic name for the scope. May only include alphanumeric characters and underscores.",
       component: "text",
       required: true
@@ -26,7 +26,7 @@ define([ "react", "util", "rbs/components/model/Form" ], function (React, util, 
     {
       attribute: "displayName",
       label: "Display Name",
-      placeholder: "Scope Name",
+      placeholder: "Display Name",
       tip: "How the scope should appear to users.",
       component: "text",
       required: true
@@ -34,7 +34,7 @@ define([ "react", "util", "rbs/components/model/Form" ], function (React, util, 
     {
       attribute: "description",
       label: "Description",
-      placeholder: "This scope allows you to edit scopes...",
+      placeholder: "Scope Description",
       tip: "Enter a short description of the API that this scope provides access to.",
       component: "textarea",
       required: true
