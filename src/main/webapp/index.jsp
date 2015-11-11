@@ -1,6 +1,6 @@
 <%@ page import="com.oauth2cloud.server.applications.admin.filter.TokenFilter" %>
 <%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
-<% response.setStatus(200); %>
+<% response.setStatus();%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="rbs/css/rbs.css" type="text/css"/>
     <link rel="stylesheet" href="res/oauth2cloud.css">
     <link rel="shortcut icon" href="res/favicon.ico?v=1"/>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/paper/bootstrap.min.css"
-          integrity="sha384-8uu+B/3A5Pjofed/yR1V7M6z9vL+Q2qm6uWNxIog8oyuvh9Avf22OpU7QLY6YJri" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/paper/bootstrap.min.css"
+          integrity="sha384-8uu+B/3A5Pjofed/yR1V7M6z9vL+Q2qm6uWNxIog8oyuvh9Avf22OpU7QLY6YJri" crossorigin="anonymous">-->
 
     <title>OAuth2 Cloud</title>
 
