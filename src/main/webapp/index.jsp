@@ -1,5 +1,6 @@
 <%@ page import="com.oauth2cloud.server.applications.admin.filter.TokenFilter" %>
 <%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
+<% response.setStatus(200); %>
 <!DOCTYPE html>
 <html>
 <head>

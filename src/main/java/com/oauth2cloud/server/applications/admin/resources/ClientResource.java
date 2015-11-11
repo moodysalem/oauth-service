@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
 
 import javax.persistence.criteria.Predicate;
@@ -8,7 +9,7 @@ import javax.ws.rs.Path;
 import java.util.List;
 
 @Path("clients")
-public class ClientResource extends BaseEntityResource<Client>{
+public class ClientResource extends BaseEntityResource<Client> {
 
     @Override
     public Class<Client> getEntityClass() {
@@ -16,20 +17,29 @@ public class ClientResource extends BaseEntityResource<Client>{
     }
 
 
-
     @Override
     public boolean canCreate(Client client) {
-        return false;
+        if (client.getApplication() == null) {
+            return false;
+        }
+        Application ap = em.find(Application.class, client.getApplication().getId());
+        if (ap == null) {
+            return false;
+        }
+        if (!ap.getOwner().equals(getUser())) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public boolean canEdit(Client client) {
-        return false;
+        return client.getApplication().getOwner().equals(getUser());
     }
 
     @Override
     public boolean canDelete(Client client) {
-        return false;
+        return canEdit(client);
     }
 
     @Override

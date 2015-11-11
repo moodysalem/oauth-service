@@ -4,35 +4,12 @@
 define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
     "rbs/components/layout/Icon", "rbs/components/mixins/Model", "rbs/components/controls/Pagination", "rbs/components/layout/Dropdown",
     "rbs/components/layout/DropdownItem", "rbs/components/controls/Button", "rbs/components/layout/Modal", "./ScopeForm",
-    "rbs/components/collection/Alerts" ],
-  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn, modal, sf, alerts) {
+    "rbs/components/collection/Alerts", "./AppHeader" ],
+  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn, modal, sf, alerts, ah) {
     "use strict";
 
     var rpt = React.PropTypes;
     var d = React.DOM;
-
-    var scopesHeader = util.rf({
-      displayName: "Scopes Header",
-      mixins: [ model ],
-
-      render: function () {
-        var dn = this.state.model.name ? (" for " + this.state.model.name) : "";
-        return d.div({}, [
-          d.h2({ key: "h", className: "page-header" }, [
-            btn({
-              key: "btn",
-              className: "pull-right",
-              caption: "Create",
-              icon: "plus",
-              type: "success",
-              onClick: this.props.onCreate
-            }),
-            "Scopes",
-            d.small({ key: "s" }, dn)
-          ])
-        ]);
-      }
-    });
 
     var ta = [
       {
@@ -48,15 +25,15 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
         })
       },
       {
-        attribute: "displayName",
-        label: "Display Name",
-        sortOn: "displayName",
-        component: d.span
-      },
-      {
         attribute: "name",
         label: "Name",
         sortOn: "name",
+        component: d.span
+      },
+      {
+        attribute: "displayName",
+        label: "Display Name",
+        sortOn: "displayName",
         component: d.span
       },
       {
@@ -211,8 +188,11 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
 
       render: function () {
         return d.div({ className: "container" }, [
-          scopesHeader({
-            key: "sh", model: this.state.app, onCreate: _.bind(function () {
+          ah({
+            title: "Scopes",
+            key: "sh",
+            model: this.state.app,
+            onCreate: _.bind(function () {
               this.state.scope.clear();
               this.state.scope.set({ application: { id: +this.props.applicationId } });
               this.setState({
