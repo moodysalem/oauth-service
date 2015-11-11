@@ -9,6 +9,7 @@ define([ "util", "backbone" ], function (util, Backbone) {
   var APPLICATIONS_URL = util.path(API_URL, "applications");
   var SCOPES_URL = util.path(API_URL, "scopes");
   var CLIENTS_URL = util.path(API_URL, "clients");
+  var CLIENT_SCOPES_URL = util.path(API_URL, "clientscopes");
   return {
     Application: mdl.extend({
       urlRoot: APPLICATIONS_URL
@@ -27,6 +28,12 @@ define([ "util", "backbone" ], function (util, Backbone) {
     }),
     Clients: cl.extend({
       url: CLIENTS_URL
+    }),
+    ClientScope: mdl.extend({
+      urlRoot: CLIENT_SCOPES_URL
+    }),
+    ClientScopes: cl.extend({
+      url: CLIENT_SCOPES_URL
     }),
     ClientTypes: new cl([
       {
@@ -54,6 +61,20 @@ define([ "util", "backbone" ], function (util, Backbone) {
       {
         id: "CLIENT_CREDENTIALS",
         name: "CLIENT_CREDENTIALS"
+      }
+    ]),
+    ClientScopePriorities: new cl([
+      {
+        id: "ALWAYS",
+        name: "ALWAYS"
+      },
+      {
+        id: "ASK",
+        name: "ASK"
+      },
+      {
+        id: "REQUIRE",
+        name: "REQUIRE"
       }
     ])
   };

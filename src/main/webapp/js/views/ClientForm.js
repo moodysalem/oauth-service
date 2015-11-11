@@ -1,8 +1,9 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/components/mixins/Model" ],
-  function (React, util, fm, mdls, model) {
+define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/components/mixins/Model",
+    "rbs/components/controls/Button", "./MultiText", "./ViewablePassword" ],
+  function (React, util, fm, mdls, model, btn, multitext, vp) {
     "use strict";
 
     var d = React.DOM;
@@ -19,6 +20,7 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
       {
         attribute: "name",
         placeholder: "Name",
+        required: true,
         label: "Name",
         component: "text",
         tip: "The name as users should see this client."
@@ -26,6 +28,7 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
       {
         attribute: "tokenTtl",
         placeholder: "Access Token Time-To-Live",
+        required: true,
         label: "Token TTL",
         component: "number",
         tip: "Enter how long an access or client token should last before expiring in seconds from issue time."
@@ -39,6 +42,7 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
       },
       {
         tip: "Type as defined by the OAuth2 specification. This controls whether client credentials are required for some of the token requests.",
+        required: true,
         label: "Type",
         attribute: "type",
         component: "select",
@@ -46,18 +50,54 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
         modelComponent: nameOpt
       },
       {
-        tip: "Flows that the client may access. Resource owner credentials and client credentials flows are not compatible with a .",
+        tip: "These are the authorization flows that a client may use.",
         label: "Flows",
         attribute: "flows",
         component: "select",
         multiple: true,
         collection: mdls.ClientFlows,
         modelComponent: nameOpt
+      },
+      {
+        tip: "The URIs that this client may use as redirect URIs.",
+        label: "Redirect URIs",
+        attribute: "uris",
+        placeholder: "Redirect URIs",
+        component: multitext
       }
     ];
 
+    var moreAtt;
+    moreAtt = [
+      {
+        attribute: "identifier",
+        label: "Client ID",
+        tip: "The client ID is considered public information, and is used to build login URLs, or included in Javascript source code on a page.",
+        component: "text",
+        readOnly: true
+      },
+      {
+        attribute: "secret",
+        label: "Secret",
+        readOnly: true,
+        tip: "The client secret must be kept confidential. If a deployed app cannot keep the secret confidential, such as Javascript or native apps, then the secret is not used.",
+        component: vp
+      }
+    ].concat(att);
+
+
     return util.rf({
       displayName: "Client Form",
+
+      propTypes: {
+        allFields: rpt.bool
+      },
+
+      getDefaultProps: function () {
+        return {
+          allFields: false
+        };
+      },
 
       submit: function () {
         this.refs.fm.submit();
@@ -68,7 +108,7 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
           ref: "fm",
           model: this.props.model,
           onSubmit: this.props.onSubmit,
-          attributes: att
+          attributes: (this.props.allFields) ? moreAtt : att
         })
       }
     });

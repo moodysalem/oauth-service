@@ -4,8 +4,11 @@ import com.oauth2cloud.server.hibernate.model.ClientScope;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import java.util.List;
 
+@Path("clientscopes")
 public class ClientScopesResource extends BaseEntityResource<ClientScope> {
     @Override
     public Class<ClientScope> getEntityClass() {
@@ -42,9 +45,16 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     }
 
+    @QueryParam("clientId")
+    Long clientId;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<ClientScope> root) {
         list.add(cb.equal(root.join("scope").join("application").get("owner"), getUser()));
+
+        if (clientId != null) {
+            list.add(cb.equal(root.join("client").get("id"), clientId));
+        }
     }
 
     @Override

@@ -102,7 +102,8 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
               modal({
                 key: "modal",
                 open: this.state.editOpen,
-                title: "Edit Scope",
+                title: "Edit Client",
+                size: "lg",
                 onClose: this.closeEdit
               }, [
                 d.div({
@@ -110,6 +111,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                   className: "modal-body"
                 }, [
                   cf({
+                    allFields: true,
                     key: "cf",
                     ref: "cf",
                     onSubmit: _.bind(function () {
@@ -214,6 +216,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
             key: "modal",
             open: this.state.createOpen,
             title: "Add Client",
+            size: "lg",
             onClose: this.closeCreate
           }, [
             d.div({

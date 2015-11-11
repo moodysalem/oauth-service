@@ -99,3 +99,13 @@
 table.vertical-align-middle td {
     vertical-align: middle !important;
 }
+
+.position-relative {
+    position: relative;
+}
+
+.right-absolute {
+    position: absolute;
+    right: 0.5em;
+    top: 0.5em;
+}
