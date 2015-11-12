@@ -10,11 +10,40 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
     var rpt = React.PropTypes;
     var d = React.DOM;
 
+    var scopeAttributes = [
+      {
+        attribute: "scope.name",
+        label: "Scope",
+        component: d.span
+      },
+      {
+        attribute: "priority",
+        label: "Priority",
+        component: "select",
+        className: "form-control",
+        collection: mdls.ClientScopePriorities,
+        modelComponent: util.rf({
+          mixins: [ model ],
+          render: function () {
+            return d.div({}, this.state.model.name);
+          }
+        })
+      },
+      {
+        attribute: "reason",
+        label: "Reason",
+        component: "textarea",
+        className: "form-control",
+        placeholder: "Reason for scope"
+      }
+    ];
+
     var ta = [
       {
         attribute: "name",
         sortOn: "name",
         label: "Name",
+        tip: "name",
         component: d.span
       },
       {
@@ -47,10 +76,14 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
         component: util.rf({
           displayName: "dropdown client",
 
+          mixins: [ model ],
+
           getInitialState: function () {
             return {
               editOpen: false,
-              modelCopy: new mdls.Client()
+              modelCopy: new mdls.Client(),
+              scopesOpen: false,
+              scopes: new mdls.ClientScopes()
             };
           },
 
@@ -67,16 +100,35 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
             });
           },
 
-          mixins: [ model ],
+          openScopes: function () {
+            this.state.scopes.reset();
+            if (this.isMounted()) {
+              this.setState({
+                scopesOpen: true
+              }, function () {
+                this.state.scopes.setParam("clientId", this.state.model.id);
+                this.state.scopes.fetch();
+              });
+            }
+          },
+
+          closeScopes: function () {
+            if (this.isMounted()) {
+              this.setState({
+                scopesOpen: false
+              });
+            }
+          },
+
 
           render: function () {
             return d.div({ className: "pull-right" }, [
               dd({
                 key: "dd",
                 caption: "Actions",
-                right: true,
                 icon: "ellipsis-v",
-                size: "sm"
+                size: "sm",
+                right: true
               }, [
                 di({
                   key: "edit",
@@ -85,24 +137,24 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                   onClick: this.openEdit
                 }),
                 di({
+                  key: "scopes",
+                  caption: "Client Scopes",
+                  icon: "book",
+                  onClick: this.openScopes
+                }),
+                di({
                   key: "del",
                   caption: "Delete",
                   icon: "trash",
                   onClick: _.bind(function () {
                     this.props.model.destroy({ wait: true });
                   }, this)
-                }),
-                di({
-                  key: "scopes",
-                  caption: "Client Scopes",
-                  icon: "book",
-                  href: util.path("clients", this.state.model.id)
                 })
               ]),
               modal({
                 key: "modal",
                 open: this.state.editOpen,
-                title: "Edit Client",
+                title: "Edit " + this.state.model.name,
                 size: "lg",
                 onClose: this.closeEdit
               }, [
@@ -146,6 +198,65 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                     type: "success",
                     onClick: _.bind(function () {
                       this.refs.cf.submit();
+                    }, this),
+                    caption: "Save"
+                  })
+                ])
+              ]),
+
+              modal({
+                key: "scopes",
+                open: this.state.scopesOpen,
+                title: "Edit Scopes for " + this.state.model.name,
+                size: "lg",
+                onClose: this.closeScopes
+              }, [
+                d.div({
+                  key: "mb",
+                  className: "modal-body"
+                }, [
+                  lw({
+                    key: "tbl",
+                    watch: this.state.scopes
+                  }, table({
+                    collection: this.state.scopes,
+                    attributes: scopeAttributes
+                  })),
+                  alerts({
+                    watch: this.state.modelCopy,
+                    key: "alts",
+                    showSuccess: false
+                  })
+                ]),
+                d.div({
+                  key: "mf",
+                  className: "modal-footer"
+                }, [
+                  btn({
+                    key: "cancel",
+                    ajax: true,
+                    icon: "cancel",
+                    onClick: this.closeScopes,
+                    caption: "Cancel"
+                  }),
+                  btn({
+                    key: "add",
+                    icon: "plus",
+                    ajax: true,
+                    type: "primary",
+                    caption: "Add",
+                    onClick: _.bind(function () {
+                      alert("Not yet implemented.");
+                      //this.state.scopes.add({ client: { id: this.state.model.id } });
+                    }, this)
+                  }),
+                  btn({
+                    key: "save",
+                    icon: "save",
+                    ajax: true,
+                    type: "success",
+                    onClick: _.bind(function () {
+                      alert("Not yet implemented.");
                     }, this),
                     caption: "Save"
                   })
