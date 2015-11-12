@@ -109,3 +109,11 @@ table.vertical-align-middle td {
     right: 0.5em;
     top: 0.5em;
 }
+
+.multitext-value {
+    margin-bottom: 0.5em;
+}
+
+td .pull-right .dropdown {
+    margin: 0.5em;
+}

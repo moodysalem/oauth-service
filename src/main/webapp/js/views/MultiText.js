@@ -56,7 +56,7 @@ define([ "react", "util", "underscore", "rbs/components/controls/Button" ],
       render: function () {
         var i = 0;
         var children = _.map(this.props.value, function (val) {
-          return d.div({ key: "val-" + val, className: "position-relative" }, [
+          return d.div({ key: "val-" + val, className: "position-relative multitext-value" }, [
             d.input({ key: "in", type: "text", className: this.props.className, value: val, readOnly: true }),
             btn({
               key: "btn",

@@ -203,6 +203,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
           lw({ key: "t", watch: this.state.clients }, [
               table({
                 key: "table",
+                className: "vertical-align-middle",
                 collection: this.state.clients,
                 attributes: ta
               }),

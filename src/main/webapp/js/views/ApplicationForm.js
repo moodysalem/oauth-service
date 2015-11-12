@@ -19,6 +19,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "name",
         label: "Name",
+        placeholder: "Name",
         tip: "Enter the name by which you'd like your application to be identified.",
         component: "text",
         sm: 5,
@@ -27,6 +28,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "supportEmail",
         label: "Support E-mail",
+        placeholder: "Support E-mail",
         tip: "Enter the e-mail to which users we e-mail will be directed to reply.",
         component: "email",
         required: true,
@@ -45,6 +47,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "legacyUrl",
         label: "Legacy URL",
+        placeholder: "Legacy URL",
         tip: "Enter a URL to be treated as a webhook for legacy login account requests.",
         component: "text",
         xs: 12
@@ -55,6 +58,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "facebookAppId",
         label: "Facebook Application ID",
+        placeholder: "Facebook Application ID",
         tip: "Enter the Facebook Application ID given to your application to enable login via Facebook.",
         component: "text",
         sm: 5
@@ -62,6 +66,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "facebookAppSecret",
         label: "Facebook Application Secret",
+        placeholder: "Facebook Application Secret",
         tip: "Enter the Facebook Application Secret given to your application to enable login via Facebook.",
         component: "password",
         sm: 7
@@ -72,6 +77,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "googleClientId",
         label: "Google Client ID",
+        placeholder: "Google Client ID",
         tip: "Enter the Google Client ID given to your application to enable login via Google.",
         component: "text",
         sm: 5
@@ -79,6 +85,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "googleClientSecret",
         label: "Google Client Secret",
+        placeholder: "Google Client Secret",
         tip: "Enter the Google Client Secret given to your application to enable login via Google.",
         component: "password",
         sm: 7
@@ -89,6 +96,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "amazonClientId",
         label: "Amazon Client ID",
+        placeholder: "Amazon Client ID",
         tip: "Enter the Amazon Client ID given to your application to enable login via Amazon.",
         component: "text",
         sm: 5
@@ -96,6 +104,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       {
         attribute: "amazonClientSecret",
         label: "Amazon Client Secret",
+        placeholder: "Amazon Client Secret",
         tip: "Enter the Amazon Client Secret given to your application to enable login via Amazon.",
         component: "password",
         sm: 7

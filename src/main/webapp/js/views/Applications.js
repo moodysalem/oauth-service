@@ -71,6 +71,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
         label: "Name",
         tip: "Enter the name to display for this application.",
         component: "text",
+        placeholder: "Application Name",
         required: true
       },
       {
@@ -78,6 +79,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
         label: "Support E-mail",
         tip: "Enter the e-mail address to which support e-mails should be sent.",
         component: "email",
+        placeholder: "Support E-mail",
         required: true
       }
     ];
