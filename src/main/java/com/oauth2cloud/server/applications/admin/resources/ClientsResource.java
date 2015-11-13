@@ -7,6 +7,7 @@ import com.oauth2cloud.server.hibernate.model.Client;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import java.util.List;
 
 @Path("clients")
@@ -58,9 +59,34 @@ public class ClientsResource extends BaseEntityResource<Client> {
     public void beforeEdit(Client client, Client t1) {
     }
 
+
+    @QueryParam("search")
+    String search;
+
+    @QueryParam("applicationId")
+    Long appliationId;
+
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Client> root) {
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
+
+        if (appliationId != null) {
+            list.add(cb.equal(root.join("application").get("id"), appliationId));
+        }
+
+        if (search != null) {
+            Predicate toAdd = null;
+            for (String s : search.split(" ")) {
+                if (s.trim().length() > 0) {
+                    Predicate sp = cb.like(root.get("name"), "%" + s + "%");
+                    toAdd = toAdd == null ? sp : cb.and(sp, toAdd);
+                }
+            }
+            if (toAdd != null) {
+                list.add(toAdd);
+            }
+        }
     }
 
     @Override

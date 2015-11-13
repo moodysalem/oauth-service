@@ -3,8 +3,9 @@
  */
 define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
     "./AppHeader", "rbs/components/layout/Modal", "rbs/components/collection/Alerts", "rbs/components/controls/Button",
-    "./ClientForm", "rbs/components/mixins/Model", "rbs/components/layout/Dropdown", "rbs/components/layout/DropdownItem" ],
-  function (React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, dd, di) {
+    "./ClientForm", "rbs/components/mixins/Model", "rbs/components/layout/Dropdown", "rbs/components/layout/DropdownItem",
+    "rbs/components/model/GridRow", "rbs/components/mixins/Events" ],
+  function (React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, dd, di, row, events) {
     "use strict";
 
     var rpt = React.PropTypes;
@@ -22,7 +23,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
         attribute: "priority",
         label: "Priority",
         component: "select",
-        className: "form-control",
+        className: "form-control input-sm",
         collection: mdls.ClientScopePriorities,
         modelComponent: nameComp
       },
@@ -30,8 +31,13 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
         attribute: "reason",
         label: "Reason",
         component: "textarea",
-        className: "form-control",
+        className: "form-control input-sm",
         placeholder: "Reason for scope"
+      },
+      {
+        attribute: "approved",
+        label: "Approved",
+        component: "checkbox"
       }
     ];
 
@@ -40,7 +46,6 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
         attribute: "name",
         sortOn: "name",
         label: "Name",
-        tip: "name",
         component: d.span
       },
       {
@@ -76,7 +81,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
           mixins: [ model ],
 
           getInitialState: function () {
-            var scopes = new mdls.Scopes();
+            var scopes = (new mdls.Scopes()).setPageSize(1000);
             return {
               editOpen: false,
               modelCopy: new mdls.Client(),
@@ -93,7 +98,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                 attribute: "scope.id",
                 label: "Scope",
                 component: "select",
-                className: "form-control",
+                className: "form-control input-sm",
                 collection: scopes,
                 modelComponent: nameComp
               }
@@ -238,7 +243,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                     attributes: this.state.attributes
                   })),
                   alerts({
-                    watch: this.state.modelCopy,
+                    watch: this.state.clientScopes,
                     key: "alts",
                     showSuccess: false
                   })
@@ -270,8 +275,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                     ajax: true,
                     type: "success",
                     onClick: _.bind(function () {
-                      alert("Not yet implemented.");
-                      //this.state.clientScopes.save();
+                      this.state.clientScopes.save();
                     }, this),
                     caption: "Save"
                   })
@@ -295,7 +299,8 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
           app: new mdls.Application({ id: this.props.applicationId }),
           clients: (new mdls.Clients()).setParam("applicationId", this.props.applicationId),
           createOpen: false,
-          client: (new mdls.Client())
+          client: (new mdls.Client()),
+          search: ""
         };
       },
 
@@ -318,6 +323,24 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
         this.state.clients.fetch();
       },
 
+      searchChange: function (e) {
+        var v = e.target.value;
+        this.setState({
+          search: v
+        });
+      },
+
+      handleEnter: function (e) {
+        if (e.keyCode === 13) {
+          this.search();
+          this.refs.search.blur();
+        }
+      },
+
+      search: function () {
+        this.state.clients.setPageNo(0).setParam("search", this.state.search).fetch();
+      },
+
       render: function () {
         return d.div({ className: "container" }, [
           ah({
@@ -326,6 +349,26 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
             model: this.state.app,
             onCreate: this.openCreate
           }),
+          d.div({
+            key: "search",
+            className: "row"
+          }, [
+            d.div({ key: "search", className: "col-sm-8" }, d.input({
+              type: "text",
+              value: this.state.search,
+              ref: "search",
+              placeholder: "Search Text",
+              className: "form-control",
+              onChange: this.searchChange,
+              onKeyDown: this.handleEnter
+            })),
+            d.div({ key: "btn", className: "col-sm-4" }, btn({
+              block: true, ajax: true,
+              caption: "Search",
+              icon: "search",
+              onClick: _.bind(this.search, this)
+            }))
+          ]),
           lw({ key: "t", watch: this.state.clients }, [
               table({
                 key: "table",

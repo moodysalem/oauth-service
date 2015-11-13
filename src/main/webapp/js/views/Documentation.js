@@ -66,7 +66,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
         return d.input({
           type: "text",
           placeholder: oneP.name,
-          className: "form-control",
+          className: "form-control input-sm",
           readOnly: (typeof oneP.value !== "undefined"),
           value: (typeof oneP.value === "undefined" ? this.state.parameters[ oneP.name ] : oneP.value),
           onChange: _.bind(this.handleChange, this, oneP.name)
@@ -445,7 +445,27 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                 " to be ported via and endpoint that is hit with every failed login attempt. You can specify this endpoint" +
                 " in your application settings. This endpoint will receive a POST containing the e-mail and password and should return " +
                 " the user's first name and last name if the user's credentials are valid. OAuth2Cloud will then create a user and issue " +
-                " an OAuth2 token.")
+                " an OAuth2 token."),
+              ep({
+                endpoint: "https://your-legacy-url.com/login",
+                method: "POST",
+                parameters: [
+                  {
+                    req: true,
+                    name: "email",
+                    type: "string",
+                    loc: "body",
+                    desc: "The e-mail address that the user entered."
+                  },
+                  {
+                    req: true,
+                    name: "password",
+                    type: "string",
+                    loc: "body",
+                    desc: "The password that the user entered."
+                  }
+                ]
+              })
             ]),
             d.div({ className: "col-md-4 col-lg-3 hidden-xs hidden-sm", key: "toc-big" }, d.div({
               className: "well",

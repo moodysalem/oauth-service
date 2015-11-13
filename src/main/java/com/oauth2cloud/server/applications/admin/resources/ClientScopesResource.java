@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
+import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.hibernate.model.ClientScope;
 
 import javax.persistence.criteria.Predicate;
@@ -17,17 +18,21 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     @Override
     public boolean canCreate(ClientScope clientScope) {
-        return false;
+        Client c = null;
+        if (clientScope.getClient() != null && clientScope.getClient().getId() > 0) {
+            c = em.find(Client.class, clientScope.getClient().getId());
+        }
+        return c != null && c.getApplication().getOwner().equals(getUser());
     }
 
     @Override
     public boolean canEdit(ClientScope clientScope) {
-        return false;
+        return clientScope.getClient().getApplication().getOwner().equals(getUser());
     }
 
     @Override
     public boolean canDelete(ClientScope clientScope) {
-        return false;
+        return canEdit(clientScope);
     }
 
     @Override
@@ -48,12 +53,19 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
     @QueryParam("clientId")
     Long clientId;
 
+    @QueryParam("scopeId")
+    Long scopeId;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<ClientScope> root) {
         list.add(cb.equal(root.join("scope").join("application").get("owner"), getUser()));
 
         if (clientId != null) {
             list.add(cb.equal(root.join("client").get("id"), clientId));
+        }
+
+        if (scopeId != null) {
+            list.add(cb.equal(root.join("scope").get("id"), scopeId));
         }
     }
 
