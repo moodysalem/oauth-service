@@ -12,7 +12,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.0-SNAPSHOT</jaxrs.lib.version>
     <react.backstrap.version>0.0.15</react.backstrap.version>
-    <!--skip deploying to the -->
+    <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
@@ -129,6 +129,7 @@
               <versionLabel>${project.build.finalName}-${maven.build.timestamp}</versionLabel>
               <regionName>us-west-2</regionName>
               <versionsToKeep>5</versionsToKeep>
+              <dryRun>false</dryRun>
             </configuration>
           </execution>
         </executions>
