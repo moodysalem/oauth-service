@@ -122,6 +122,11 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
     }
 
     @Override
+    protected int getMaxBatchDeleteSize() {
+        return getMaxPerPage();
+    }
+
+    @Override
     public boolean requiresLogin() {
         return true;
     }

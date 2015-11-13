@@ -79,7 +79,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
             Predicate toAdd = null;
             for (String s : search.split(" ")) {
                 if (s.trim().length() > 0) {
-                    Predicate sp = cb.like(root.get("name"), "%" + s + "%");
+                    Predicate sp = cb.like(cb.upper(root.get("name")), "%" + s.trim().toUpperCase() + "%");
                     toAdd = toAdd == null ? sp : cb.and(sp, toAdd);
                 }
             }

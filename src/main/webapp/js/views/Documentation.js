@@ -439,7 +439,6 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
               d.h3({ key: "addtnl", id: "addtl" }, "Additional Features"),
               d.h4({ key: "legacy", id: "legacy" }, "Legacy Integration"),
               d.p({
-                style: { marginBottom: "5em" },
                 key: "legacyinfo"
               }, "You may need to integrate with an existing database of users. We allow existing users' e-mails and passwords " +
                 " to be ported via and endpoint that is hit with every failed login attempt. You can specify this endpoint" +
@@ -447,7 +446,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                 " the user's first name and last name if the user's credentials are valid. OAuth2Cloud will then create a user and issue " +
                 " an OAuth2 token."),
               ep({
-                endpoint: "https://your-legacy-url.com/login",
+                endpoint: "https://your-legacy-url.com",
                 method: "POST",
                 parameters: [
                   {

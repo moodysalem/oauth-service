@@ -300,7 +300,8 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
           clients: (new mdls.Clients()).setParam("applicationId", this.props.applicationId),
           createOpen: false,
           client: (new mdls.Client()),
-          search: ""
+          search: "",
+          lastSearch: ""
         };
       },
 
@@ -338,7 +339,13 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
       },
 
       search: function () {
+        if (this.state.search === this.state.lastSearch) {
+          return;
+        }
         this.state.clients.setPageNo(0).setParam("search", this.state.search).fetch();
+        this.setState({
+          lastSearch: this.state.search
+        });
       },
 
       render: function () {
@@ -353,7 +360,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
             key: "search",
             className: "row"
           }, [
-            d.div({ key: "search", className: "col-sm-8" }, d.input({
+            d.div({ key: "search", className: "col-sm-8" }, d.div({ className: "form-group" }, d.input({
               type: "text",
               value: this.state.search,
               ref: "search",
@@ -361,13 +368,14 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
               className: "form-control",
               onChange: this.searchChange,
               onKeyDown: this.handleEnter
-            })),
-            d.div({ key: "btn", className: "col-sm-4" }, btn({
+            }))),
+            d.div({ key: "btn", className: "col-sm-4" }, d.div({ className: "form-group" }, btn({
               block: true, ajax: true,
               caption: "Search",
               icon: "search",
+              disabled: this.state.search === this.state.lastSearch,
               onClick: _.bind(this.search, this)
-            }))
+            })))
           ]),
           lw({ key: "t", watch: this.state.clients }, [
               table({
