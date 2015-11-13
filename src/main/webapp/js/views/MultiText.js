@@ -40,7 +40,8 @@ define([ "react", "util", "underscore", "rbs/components/controls/Button" ],
         this.setState({
           newValue: ""
         }, function () {
-          this.props.onChange(this.props.value.concat([ val ]));
+          var newVal = (_.isArray(this.props.value)) ? this.props.value.concat([ val ]) : [ val ];
+          this.props.onChange(newVal);
           if (focus) {
             this.refs.newValue.focus();
           }
