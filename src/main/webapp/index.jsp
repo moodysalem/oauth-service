@@ -10,6 +10,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="rbs/css/rbs.css" type="text/css"/>
     <link rel="stylesheet" href="res/oauth2cloud.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/cosmo/bootstrap.min.css"
+          integrity="sha384-X1WZVl4a9n8ONvqi5NUzo9FzcyMTWJ8TeF5AiqROAUkyrMYBenoixW9fMe6aWb6L" crossorigin="anonymous">
     <link rel="shortcut icon" href="res/favicon.ico?v=1"/>
     <!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/paper/bootstrap.min.css"
           integrity="sha384-8uu+B/3A5Pjofed/yR1V7M6z9vL+Q2qm6uWNxIog8oyuvh9Avf22OpU7QLY6YJri" crossorigin="anonymous">-->
