@@ -17,7 +17,7 @@
 
                         <div class="form-group">
                             <label class="control-label" for="email">E-mail Address</label>
-                            <input type="email" id="email" name="email" class="form-control input-lg"
+                            <input type="email" id="email" name="email" class="form-control"
                                    placeholder="E-mail address" required autofocus>
                         </div>
 
@@ -25,7 +25,7 @@
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <a class="btn btn-lg btn-primary btn-block" id="back" href="${model.referer?html}">
+                                        <a class="btn btn-primary btn-block" id="back" href="${model.referer?html}">
                                             <i class="fa fa-arrow-left"></i>
                                             <span>Back</span>
                                         </a>
@@ -33,7 +33,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <button class="btn btn-lg btn-success btn-block" id="submitReset" type="submit">
+                                        <button class="btn btn-success btn-block" id="submitReset" type="submit">
                                             <i class="fa fa-envelope-o"></i>
                                             <span>Submit</span>
                                         </button>
@@ -42,7 +42,7 @@
                             </div>
                         <#else>
                             <div class="form-group">
-                                <button class="btn btn-lg btn-primary btn-block" id="submitReset" type="submit">
+                                <button class="btn btn-primary btn-block" id="submitReset" type="submit">
                                     <i class="fa fa-envelope-o"></i>
                                     <span>Submit</span>
                                 </button>

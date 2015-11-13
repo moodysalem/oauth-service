@@ -23,14 +23,14 @@
                 </h2>
                 <div class="form-group">
                     <label class="control-label" for="email">E-mail Address</label>
-                    <input type="email" id="email" name="email" class="form-control input-lg"
+                    <input type="email" id="email" name="email" class="form-control"
                            <#if model.lastEmail??>value="${model.lastEmail}"</#if>
                            <#if !model.lastEmail??>autofocus</#if>
                            placeholder="E-mail address" required>
                 </div>
                 <div class="form-group">
                     <label class="control-label" for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control input-lg"
+                    <input type="password" id="password" name="password" class="form-control"
                            <#if model.lastEmail??>autofocus</#if>
                            placeholder="Password" required>
                 </div>
@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="form-group">
-                    <button class="btn btn-lg btn-primary btn-block" id="submitLogin" type="submit">
+                    <button class="btn btn-primary btn-block" id="submitLogin" type="submit">
                         <i class="fa fa-sign-in"></i>
                         <span>Sign In</span>
                     </button>
@@ -217,14 +217,14 @@
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label for="firstName" class="control-label">First Name</label>
-                            <input type="text" id="firstName" name="firstName" class="form-control input-lg"
+                            <input type="text" id="firstName" name="firstName" class="form-control"
                                    placeholder="First Name" required/>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label for="lastName" class="control-label">Last Name</label>
-                            <input type="text" id="lastName" name="lastName" class="form-control input-lg"
+                            <input type="text" id="lastName" name="lastName" class="form-control"
                                    placeholder="Last Name" required/>
                         </div>
                     </div>
@@ -232,22 +232,22 @@
 
                 <div class="form-group">
                     <label class="control-label" for="registerEmail">E-mail Address</label>
-                    <input type="email" id="registerEmail" name="registerEmail" class="form-control input-lg"
+                    <input type="email" id="registerEmail" name="registerEmail" class="form-control"
                            placeholder="E-mail address" required autofocus>
                 </div>
                 <div class="form-group">
                     <label class="control-label" for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" name="registerEmail" class="form-control input-lg"
+                    <input type="password" id="registerPassword" name="registerEmail" class="form-control"
                            placeholder="Password" required>
                 </div>
 
                 <div class="form-group">
                     <label class="control-label" for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" class="form-control input-lg"
+                    <input type="password" id="confirmPassword" class="form-control"
                            placeholder="Confirm Password" required>
                 </div>
 
-                <button class="btn btn-lg btn-success btn-block" id="submitRegister" type="submit">
+                <button class="btn btn-success btn-block" id="submitRegister" type="submit">
                     <i class="fa fa-user-plus"></i>
                     <span>Register</span>
                 </button>

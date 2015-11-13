@@ -18,19 +18,19 @@
 
                         <div class="form-group">
                             <label class="control-label" for="password">New Password</label>
-                            <input type="password" id="password" name="password" class="form-control input-lg"
+                            <input type="password" id="password" name="password" class="form-control"
                                    placeholder="New Password" required autofocus>
                         </div>
                         <div class="form-group">
                             <label class="control-label" for="confirmPassword">Confirm New Password</label>
-                            <input type="password" id="confirmPassword" class="form-control input-lg"
+                            <input type="password" id="confirmPassword" class="form-control"
                                    placeholder="Confirm New Password" required>
                         </div>
 
                         <input type="hidden" name="code" value="${model.userCode.code?html}"/>
 
                         <div class="form-group">
-                            <button class="btn btn-lg btn-primary btn-block" id="submitReset" disabled type="submit">
+                            <button class="btn btn-primary btn-block" id="submitReset" disabled type="submit">
                                 <i class="fa fa-pencil"></i>
                                 <span>Submit</span>
                             </button>
