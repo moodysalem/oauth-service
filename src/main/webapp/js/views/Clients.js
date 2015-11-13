@@ -10,24 +10,21 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
     var rpt = React.PropTypes;
     var d = React.DOM;
 
+    var nameComp = util.rf({
+      mixins: [ model ],
+      render: function () {
+        return d.div({}, this.state.model.name);
+      }
+    });
+
     var scopeAttributes = [
-      {
-        attribute: "scope.name",
-        label: "Scope",
-        component: d.span
-      },
       {
         attribute: "priority",
         label: "Priority",
         component: "select",
         className: "form-control",
         collection: mdls.ClientScopePriorities,
-        modelComponent: util.rf({
-          mixins: [ model ],
-          render: function () {
-            return d.div({}, this.state.model.name);
-          }
-        })
+        modelComponent: nameComp
       },
       {
         attribute: "reason",
@@ -79,12 +76,28 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
           mixins: [ model ],
 
           getInitialState: function () {
+            var scopes = new mdls.Scopes();
             return {
               editOpen: false,
               modelCopy: new mdls.Client(),
               scopesOpen: false,
-              scopes: new mdls.ClientScopes()
+              clientScopes: new mdls.ClientScopes(),
+              scopes: scopes,
+              attributes: this.getTableAttributes(scopes)
             };
+          },
+
+          getTableAttributes: function (scopes) {
+            return [
+              {
+                attribute: "scope.id",
+                label: "Scope",
+                component: "select",
+                className: "form-control",
+                collection: scopes,
+                modelComponent: nameComp
+              }
+            ].concat(scopeAttributes);
           },
 
           closeEdit: function () {
@@ -101,12 +114,14 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
           },
 
           openScopes: function () {
-            this.state.scopes.reset();
+            this.state.clientScopes.reset();
+            this.state.scopes.setParam("applicationId", this.state.model.application.id);
             if (this.isMounted()) {
               this.setState({
                 scopesOpen: true
               }, function () {
-                this.state.scopes.setParam("clientId", this.state.model.id);
+                this.state.clientScopes.setParam("clientId", this.state.model.id);
+                this.state.clientScopes.fetch();
                 this.state.scopes.fetch();
               });
             }
@@ -217,10 +232,10 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                 }, [
                   lw({
                     key: "tbl",
-                    watch: this.state.scopes
+                    watch: [ this.state.clientScopes, this.state.scopes ]
                   }, table({
-                    collection: this.state.scopes,
-                    attributes: scopeAttributes
+                    collection: this.state.clientScopes,
+                    attributes: this.state.attributes
                   })),
                   alerts({
                     watch: this.state.modelCopy,
@@ -246,8 +261,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                     type: "primary",
                     caption: "Add",
                     onClick: _.bind(function () {
-                      alert("Not yet implemented.");
-                      //this.state.scopes.add({ client: { id: this.state.model.id } });
+                      this.state.clientScopes.add({ client: { id: this.state.model.id } });
                     }, this)
                   }),
                   btn({
@@ -257,6 +271,7 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                     type: "success",
                     onClick: _.bind(function () {
                       alert("Not yet implemented.");
+                      //this.state.clientScopes.save();
                     }, this),
                     caption: "Save"
                   })
