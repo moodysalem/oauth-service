@@ -11,7 +11,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.0-SNAPSHOT</jaxrs.lib.version>
-    <react.backstrap.version>0.0.16-SNAPSHOT</react.backstrap.version>
+    <react.backstrap.version>0.0.16</react.backstrap.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
@@ -28,7 +28,7 @@
 
     <!-- UI library -->
     <dependency>
-      <groupId>com.leaguekit</groupId>
+      <groupId>com.moodysalem.js</groupId>
       <artifactId>react-backstrap</artifactId>
       <version>${react.backstrap.version}</version>
     </dependency>
