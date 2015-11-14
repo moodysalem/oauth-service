@@ -11,6 +11,9 @@ import java.util.List;
 
 @Path("clientscopes")
 public class ClientScopesResource extends BaseEntityResource<ClientScope> {
+
+    public static final String MANAGE_CLIENT_SCOPES = "manage_client_scopes";
+
     @Override
     public Class<ClientScope> getEntityClass() {
         return ClientScope.class;
@@ -18,6 +21,8 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     @Override
     public boolean canCreate(ClientScope clientScope) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_CLIENT_SCOPES);
         Client c = null;
         if (clientScope.getClient() != null && clientScope.getClient().getId() > 0) {
             c = em.find(Client.class, clientScope.getClient().getId());
@@ -27,11 +32,15 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     @Override
     public boolean canEdit(ClientScope clientScope) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_CLIENT_SCOPES);
         return clientScope.getClient().getApplication().getOwner().equals(getUser());
     }
 
     @Override
     public boolean canDelete(ClientScope clientScope) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_CLIENT_SCOPES);
         return canEdit(clientScope);
     }
 
@@ -58,6 +67,9 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<ClientScope> root) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_CLIENT_SCOPES);
+
         list.add(cb.equal(root.join("scope").join("application").get("owner"), getUser()));
 
         if (clientId != null) {

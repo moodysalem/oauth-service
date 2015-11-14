@@ -11,6 +11,8 @@ import java.util.List;
 
 @Path("scopes")
 public class ScopesResource extends BaseEntityResource<Scope> {
+    public static final String MANAGE_SCOPES = "manage_scopes";
+
     @Override
     public Class<Scope> getEntityClass() {
         return Scope.class;
@@ -18,6 +20,8 @@ public class ScopesResource extends BaseEntityResource<Scope> {
 
     @Override
     public boolean canCreate(Scope scope) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_SCOPES);
         Application ap = scope.getApplication() != null && scope.getApplication().getId() != 0 ? em.find(Application.class, scope.getApplication().getId()) : null;
         if (ap == null) {
             return false;
@@ -27,12 +31,14 @@ public class ScopesResource extends BaseEntityResource<Scope> {
 
     @Override
     public boolean canEdit(Scope scope) {
-        return canCreate(scope);
+        mustBeLoggedIn();
+        checkScope(MANAGE_SCOPES);
+        return scope.getApplication().getOwner().equals(getUser());
     }
 
     @Override
     public boolean canDelete(Scope scope) {
-        return canCreate(scope);
+        return canEdit(scope);
     }
 
     @Override
@@ -54,6 +60,9 @@ public class ScopesResource extends BaseEntityResource<Scope> {
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Scope> root) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_SCOPES);
+
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
 
         if (applicationId != null) {

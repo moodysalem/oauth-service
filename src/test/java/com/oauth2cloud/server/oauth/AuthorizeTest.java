@@ -21,7 +21,7 @@ public class AuthorizeTest extends OAuthTest {
             .queryParam("client_id", CLIENT_ID).queryParam("redirect_uri", "http://localhost:8080").queryParam("response_type", "token")
             .request().get();
 
-        assertTrue(r1.getStatus() == 200 && r2.getStatus() == 200);
+        assertTrue(r1.getStatus() == 400 && r2.getStatus() == 200);
     }
 
 }

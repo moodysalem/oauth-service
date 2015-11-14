@@ -12,6 +12,7 @@ import java.util.List;
 
 @Path("clients")
 public class ClientsResource extends BaseEntityResource<Client> {
+    public static final String MANAGE_CLIENTS = "manage_clients";
 
     @Override
     public Class<Client> getEntityClass() {
@@ -21,6 +22,9 @@ public class ClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public boolean canCreate(Client client) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_CLIENTS);
+
         if (client.getApplication() == null) {
             return false;
         }
@@ -36,6 +40,8 @@ public class ClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public boolean canEdit(Client client) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_CLIENTS);
         return client.getApplication().getOwner().equals(getUser());
     }
 
@@ -69,6 +75,9 @@ public class ClientsResource extends BaseEntityResource<Client> {
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Client> root) {
+        mustBeLoggedIn();
+        checkScope(MANAGE_CLIENTS);
+
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
 
         if (appliationId != null) {

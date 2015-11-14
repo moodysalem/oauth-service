@@ -14,6 +14,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class BaseEntityResource<T extends BaseEntity> extends EntityResource<T> {
     public static final String SORT = "sort";
@@ -134,5 +137,24 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
     @Override
     public boolean isLoggedIn() {
         return getUser() != null;
+    }
+
+    private Set<String> scopes;
+
+    protected boolean hasScope(String scope) {
+        if (scopes == null) {
+            scopes = new HashSet<>();
+            if (getToken() != null) {
+                String[] scps = getToken().getScope().split(" ");
+                Collections.addAll(scopes, scps);
+            }
+        }
+        return scopes.contains(scope);
+    }
+
+    protected void checkScope(String scope) {
+        if (!hasScope(scope)) {
+            throw new RequestProcessingException(Response.Status.FORBIDDEN, String.format("'%s' scope is required for this resource.", scope));
+        }
     }
 }

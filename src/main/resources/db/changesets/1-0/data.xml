@@ -3,19 +3,18 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
-
-  <changeSet id="Testing Data" author="moody.salem" context="test">
-
+  <changeSet id="Required Data" author="moody.salem">
     <insert tableName="Application">
       <column name="id">1</column>
       <column name="name">OAuth2 Cloud</column>
-      <column name="supportEmail">moody.salem@gmail.com</column>
+      <column name="supportEmail">moody@oauth2cloud.com</column>
       <column name="facebookAppId">725381047606159</column>
       <column name="googleClientId">520864329427-r8nf78v9oiqatdhca5sumqjn39q9q2hs.apps.googleusercontent.com</column>
       <column name="amazonClientId">amzn1.application-oa2-client.fca66588ac9f4914ac23a931f5d45f7b</column>
-      <column name="publicClientRegistration" valueBoolean="false"/>
+      <column name="publicClientRegistration" valueBoolean="true"/>
     </insert>
 
+    <!-- admin interface -->
     <insert tableName="Client">
       <column name="id">1</column>
       <column name="name">Administration</column>
@@ -26,50 +25,71 @@
       <column name="tokenTtl">86400</column>
     </insert>
 
+    <!-- only allow implicit flow -->
     <insert tableName="Client_Flow">
       <column name="clientId">1</column>
       <column name="flow">IMPLICIT</column>
     </insert>
-    <insert tableName="Client_Flow">
-      <column name="clientId">1</column>
-      <column name="flow">CODE</column>
-    </insert>
 
+    <!-- allow https://oauth2cloud.com -->
     <insert tableName="Client_URI">
       <column name="clientId">1</column>
-      <column name="uri">http://localhost:8080</column>
+      <column name="uri">https://oauth2cloud.com</column>
     </insert>
 
+    <!-- create scopes we use in the api -->
     <insert tableName="Scope">
       <column name="id">1</column>
       <column name="applicationId">1</column>
-      <column name="name">user_profile</column>
-      <column name="displayName">User Profile</column>
-      <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
-      <column name="description">This gives the application access to view your user details</column>
-      <column name="requiresApprovalFromApplication" valueBoolean="false"/>
+      <column name="name">manage_applications</column>
+      <column name="displayName">Manage Applications</column>
+      <column name="description">
+        Permission to create, view, edit, and delete your applications and application settings.
+      </column>
+      <column name="requiresApprovalFromApplication" valueBoolean="true"/>
     </insert>
-
     <insert tableName="Scope">
       <column name="id">2</column>
       <column name="applicationId">1</column>
-      <column name="name">list_applications</column>
-      <column name="displayName">List Applications</column>
-      <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
-      <column name="description">This gives the application access to list all your applications</column>
-      <column name="requiresApprovalFromApplication" valueBoolean="false"/>
+      <column name="name">manage_clients</column>
+      <column name="displayName">Manage Clients</column>
+      <column name="description">
+        Permission to create, view, edit, and delete clients for your applications.
+      </column>
+      <column name="requiresApprovalFromApplication" valueBoolean="true"/>
     </insert>
-
     <insert tableName="Scope">
       <column name="id">3</column>
       <column name="applicationId">1</column>
-      <column name="name">list_scopes</column>
-      <column name="displayName">List Scopes</column>
-      <column name="thumbnail">http://thesocialmediamonthly.com/wp-content/uploads/2015/08/photo.png</column>
-      <column name="description">List the scopes that your application has defined</column>
-      <column name="requiresApprovalFromApplication" valueBoolean="false"/>
+      <column name="name">manage_client_scopes</column>
+      <column name="displayName">Manage Scopes</column>
+      <column name="description">
+        Permission to change the scopes that a client can use and their priorities.
+      </column>
+      <column name="requiresApprovalFromApplication" valueBoolean="true"/>
+    </insert>
+    <insert tableName="Scope">
+      <column name="id">4</column>
+      <column name="applicationId">1</column>
+      <column name="name">manage_scopes</column>
+      <column name="displayName">Manage Scopes</column>
+      <column name="description">
+        Permission to create, view, edit, and delete application scopes.
+      </column>
+      <column name="requiresApprovalFromApplication" valueBoolean="true"/>
+    </insert>
+    <insert tableName="Scope">
+      <column name="id">5</column>
+      <column name="applicationId">1</column>
+      <column name="name">manage_users</column>
+      <column name="displayName">Manage Users</column>
+      <column name="description">
+        Permission to create, view, edit, and delete users of your applications.
+      </column>
+      <column name="requiresApprovalFromApplication" valueBoolean="true"/>
     </insert>
 
+    <!-- give it all the scopes -->
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">1</column>
@@ -80,34 +100,58 @@
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">2</column>
-      <column name="priority">ASK</column>
+      <column name="priority">ALWAYS</column>
       <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="ClientScope">
       <column name="clientId">1</column>
       <column name="scopeId">3</column>
-      <column name="priority">REQUIRE</column>
+      <column name="priority">ALWAYS</column>
       <column name="approved" valueBoolean="true"/>
     </insert>
 
+    <insert tableName="ClientScope">
+      <column name="clientId">1</column>
+      <column name="scopeId">4</column>
+      <column name="priority">ALWAYS</column>
+      <column name="approved" valueBoolean="true"/>
+    </insert>
+
+    <insert tableName="ClientScope">
+      <column name="clientId">1</column>
+      <column name="scopeId">5</column>
+      <column name="priority">ALWAYS</column>
+      <column name="approved" valueBoolean="true"/>
+    </insert>
+
+    <!-- create the admin user of app 1 -->
     <insert tableName="User">
       <column name="id">1</column>
       <column name="applicationId">1</column>
       <column name="firstName">Moody</column>
       <column name="lastName">Salem</column>
       <column name="email">moody.salem@gmail.com</column>
-      <!-- password "zbJU1sPNGWE0" -->
-      <column name="password">$2a$10$2p.CABrjXhTuDZiY5kIhmuMmIe9EsbeG.EgboPC74WLGdIgtAB6V.</column>
+      <column name="password">$2a$10$jGLkWP/A24QL6wEf73FDqe1IKUhr3zKLxpLC4mjmexh1HJAi3JNwa</column>
       <column name="verified" valueBoolean="true"/>
     </insert>
 
+    <!-- set the owner to app 1 -->
     <update tableName="Application">
       <column name="ownerId" valueNumeric="1"/>
       <where>id=1</where>
     </update>
 
+    <!-- complete schema by making sure applications cannot be without owners -->
     <addNotNullConstraint tableName="Application" columnName="ownerId" columnDataType="BIGINT"/>
   </changeSet>
+
+  <changeSet id="Testing Data" author="moody.salem" context="test">
+    <insert tableName="Client_URI">
+      <column name="clientId">1</column>
+      <column name="uri">http://localhost:8080</column>
+    </insert>
+  </changeSet>
+
 
 </databaseChangeLog>
