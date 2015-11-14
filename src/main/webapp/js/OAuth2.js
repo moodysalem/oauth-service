@@ -141,7 +141,7 @@ define([ "jquery" ], function ($) {
     return new Promise(function (resolve, reject) {
       $.ajax({
         path: AUTHORIZE_URL + "/logout?client_id=" + encodeURIComponent(clientId),
-        sucess: function () {
+        success: function () {
           resolve();
         },
         error: function () {
