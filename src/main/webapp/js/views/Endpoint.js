@@ -33,8 +33,15 @@ define([ "react", "util", "underscore", "rbs/components/layout/Icon", "rbs/compo
       },
 
       getInitialState: function () {
+        var p = {};
+        _.each(this.props.parameters, function (oneP) {
+          if (oneP.req && !oneP.val && _.isArray(oneP.opts)) {
+            p[ oneP.name ] = oneP.opts[ 0 ];
+          }
+        });
+
         return {
-          parameters: {}
+          parameters: p
         };
       },
 
@@ -55,12 +62,13 @@ define([ "react", "util", "underscore", "rbs/components/layout/Icon", "rbs/compo
         var val = (typeof oneP.value === "undefined" ? this.state.parameters[ oneP.name ] : oneP.value),
           ro = typeof oneP.value !== "undefined";
         if (_.isArray(oneP.opts)) {
+          var op = oneP.req ? oneP.opts : [ "" ].concat(oneP.opts);
           return d.select({
             className: "form-control input-sm",
             readOnly: ro,
             value: val,
             onChange: _.bind(this.handleChange, this, oneP.name)
-          }, _.map(oneP.opts, function (o) {
+          }, _.map(op, function (o) {
             return d.option({ key: o, value: o }, o);
           }));
         }
