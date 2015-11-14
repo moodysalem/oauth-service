@@ -38,6 +38,16 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
         attribute: "approved",
         label: "Approved",
         component: "checkbox"
+      },
+      {
+        component: btn,
+        type: "danger",
+        icon: "ban",
+        size: "xs",
+        ajax: true,
+        onClick: function () {
+          this.props.model.destroy({ wait: true });
+        }
       }
     ];
 
