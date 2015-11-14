@@ -10,6 +10,14 @@
 
   <name>OAuth2Cloud</name>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jaxrs.lib.version>1.0.0</jaxrs.lib.version>
+    <react.backstrap.version>0.0.17</react.backstrap.version>
+    <!--skip deploying to the repositories -->
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
   <developers>
     <developer>
       <name>Moody Salem</name>
@@ -17,14 +25,6 @@
       <url>http://moodysalem.com</url>
     </developer>
   </developers>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>1.0.0</jaxrs.lib.version>
-    <react.backstrap.version>0.0.16</react.backstrap.version>
-    <!--skip deploying to the repositories -->
-    <maven.deploy.skip>true</maven.deploy.skip>
-  </properties>
 
   <modelVersion>4.0.0</modelVersion>
 
