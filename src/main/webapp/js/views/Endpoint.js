@@ -56,7 +56,7 @@ define([ "react", "util", "underscore", "rbs/components/layout/Icon", "rbs/compo
           ro = typeof oneP.value !== "undefined";
         if (_.isArray(oneP.opts)) {
           return d.select({
-            className: "form-control",
+            className: "form-control input-sm",
             readOnly: ro,
             value: val,
             onChange: _.bind(this.handleChange, this, oneP.name)
