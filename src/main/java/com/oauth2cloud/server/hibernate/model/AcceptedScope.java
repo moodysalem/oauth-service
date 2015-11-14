@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.hibernate.model;
 
-import com.leaguekit.hibernate.model.BaseEntity;
+import com.moodysalem.hibernate.model.BaseEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;

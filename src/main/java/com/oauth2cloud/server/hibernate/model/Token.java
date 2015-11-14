@@ -1,8 +1,8 @@
 package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.leaguekit.hibernate.model.BaseEntity;
-import com.leaguekit.util.RandomStringUtil;
+import com.moodysalem.hibernate.model.BaseEntity;
+import com.moodysalem.util.RandomStringUtil;
 
 import javax.persistence.*;
 import java.util.Date;

@@ -1,8 +1,8 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
-import com.leaguekit.hibernate.model.BaseEntity;
-import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
-import com.leaguekit.jaxrs.lib.resources.EntityResource;
+import com.moodysalem.hibernate.model.BaseEntity;
+import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.moodysalem.jaxrs.lib.resources.EntityResource;
 import com.oauth2cloud.server.applications.admin.filter.TokenFilter;
 import com.oauth2cloud.server.hibernate.model.Token;
 import com.oauth2cloud.server.hibernate.model.User;

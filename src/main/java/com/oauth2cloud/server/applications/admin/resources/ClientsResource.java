@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
-import com.leaguekit.util.RandomStringUtil;
+import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
 

@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.applications.admin;
 
-import com.leaguekit.jaxrs.lib.BaseApplication;
+import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.oauth2cloud.server.applications.ResourceBinder;
 import com.oauth2cloud.server.applications.admin.filter.TokenFilter;
 

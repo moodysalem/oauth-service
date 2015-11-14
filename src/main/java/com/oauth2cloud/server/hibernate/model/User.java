@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.leaguekit.hibernate.model.BaseEntity;
+import com.moodysalem.hibernate.model.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

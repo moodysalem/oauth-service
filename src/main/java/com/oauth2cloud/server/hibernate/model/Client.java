@@ -1,11 +1,13 @@
 package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.leaguekit.hibernate.model.BaseEntity;
+import com.moodysalem.hibernate.model.BaseEntity;
 import com.oauth2cloud.server.hibernate.validate.NoSpaces;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 

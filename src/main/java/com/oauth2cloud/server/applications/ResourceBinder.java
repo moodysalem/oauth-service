@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.applications;
 
-import com.leaguekit.jaxrs.lib.factories.JAXRSEntityManagerFactory;
-import com.leaguekit.jaxrs.lib.factories.MailSessionFactory;
+import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
+import com.moodysalem.jaxrs.lib.factories.MailSessionFactory;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;

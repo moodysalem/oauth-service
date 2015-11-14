@@ -1,8 +1,8 @@
 package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
-import com.leaguekit.util.RandomStringUtil;
+import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;

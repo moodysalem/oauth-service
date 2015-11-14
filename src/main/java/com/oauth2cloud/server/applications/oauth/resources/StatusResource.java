@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.applications.oauth.resources;
 
-import com.leaguekit.jaxrs.lib.exceptions.RequestProcessingException;
+import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.applications.webapp;
 
-import com.leaguekit.jaxrs.lib.filters.HTTPSFilter;
+import com.moodysalem.jaxrs.lib.filters.HTTPSFilter;
 import com.oauth2cloud.server.applications.admin.APIApplication;
 import com.oauth2cloud.server.applications.oauth.OAuthApplication;
 

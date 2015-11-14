@@ -21,7 +21,7 @@
   <dependencies>
     <!-- jaxrs library -->
     <dependency>
-      <groupId>com.leaguekit</groupId>
+      <groupId>com.moodysalem.java</groupId>
       <artifactId>jaxrs-lib</artifactId>
       <version>${jaxrs.lib.version}</version>
     </dependency>

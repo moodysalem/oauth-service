@@ -446,6 +446,7 @@ define([ "react", "util", "rbs/components/layout/Icon", "rbs/components/layout/T
                 " the user's first name and last name if the user's credentials are valid. OAuth2Cloud will then create a user and issue " +
                 " an OAuth2 token."),
               ep({
+                key: "lgep",
                 endpoint: "https://your-legacy-url.com",
                 method: "POST",
                 parameters: [
