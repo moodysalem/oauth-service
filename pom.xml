@@ -8,9 +8,19 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
+  <name>OAuth2Cloud</name>
+
+  <developers>
+    <developer>
+      <name>Moody Salem</name>
+      <email>moody.salem@gmail.com</email>
+      <url>http://moodysalem.com</url>
+    </developer>
+  </developers>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>1.0.0-SNAPSHOT</jaxrs.lib.version>
+    <jaxrs.lib.version>1.0.0</jaxrs.lib.version>
     <react.backstrap.version>0.0.16</react.backstrap.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
@@ -70,7 +80,7 @@
 
     <!-- TESTING DEPENDENCIES -->
     <dependency>
-      <groupId>com.leaguekit</groupId>
+      <groupId>com.moodysalem.java</groupId>
       <artifactId>jaxrs-lib-test</artifactId>
       <version>${jaxrs.lib.version}</version>
       <scope>test</scope>
