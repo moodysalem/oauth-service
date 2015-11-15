@@ -1,11 +1,11 @@
 /**
  * view scopes for an application
  */
-define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
+define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
     "./AppHeader", "rbs/components/layout/Modal", "rbs/components/collection/Alerts", "rbs/components/controls/Button",
     "./ClientForm", "rbs/components/mixins/Model", "rbs/components/layout/Dropdown", "rbs/components/layout/DropdownItem",
-    "rbs/components/model/GridRow", "rbs/components/mixins/Events" ],
-  function (React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, dd, di, row, events) {
+    "rbs/components/model/GridRow", "rbs/components/mixins/Events", "./ConfirmDeleteModal" ],
+  function (_, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, dd, di, row, events, delModal) {
     "use strict";
 
     var rpt = React.PropTypes;
@@ -98,7 +98,8 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
               scopesOpen: false,
               clientScopes: new mdls.ClientScopes(),
               scopes: scopes,
-              attributes: this.getTableAttributes(scopes)
+              attributes: this.getTableAttributes(scopes),
+              deleteOpen: false
             };
           },
 
@@ -150,6 +151,17 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
             }
           },
 
+          openDelete: function () {
+            this.setState({
+              deleteOpen: true
+            });
+          },
+
+          closeDelete: function () {
+            this.setState({
+              deleteOpen: false
+            });
+          },
 
           render: function () {
             return d.div({ className: "pull-right" }, [
@@ -176,11 +188,19 @@ define([ "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading"
                   key: "del",
                   caption: "Delete",
                   icon: "trash",
-                  onClick: _.bind(function () {
-                    this.props.model.destroy({ wait: true });
-                  }, this)
+                  onClick: this.openDelete
                 })
               ]),
+              delModal({
+                key: "delmodal",
+                title: "Delete Client: " + this.state.model.name,
+                open: this.state.deleteOpen,
+                onDelete: _.bind(function () {
+                  this.props.model.destroy({ wait: true });
+                }, this),
+                deleteMessage: "This operation cannot be undone.",
+                onClose: this.closeDelete
+              }),
               modal({
                 key: "modal",
                 open: this.state.editOpen,

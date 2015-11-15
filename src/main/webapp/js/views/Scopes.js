@@ -4,8 +4,8 @@
 define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
     "rbs/components/layout/Icon", "rbs/components/mixins/Model", "rbs/components/controls/Pagination", "rbs/components/layout/Dropdown",
     "rbs/components/layout/DropdownItem", "rbs/components/controls/Button", "rbs/components/layout/Modal", "./ScopeForm",
-    "rbs/components/collection/Alerts", "./AppHeader" ],
-  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn, modal, sf, alerts, ah) {
+    "rbs/components/collection/Alerts", "./AppHeader", "./ConfirmDeleteModal" ],
+  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn, modal, sf, alerts, ah, delModal) {
     "use strict";
 
     var rpt = React.PropTypes;
@@ -115,47 +115,16 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
                   onClick: this.openDelete
                 })
               ]),
-              modal({
+              delModal({
                 key: "delModal",
                 open: this.state.deleteOpen,
+                onClose: this.closeDelete,
                 title: "Delete Scope: " + this.state.model.name,
-                onClose: this.closeDelete
-              }, [
-                d.div({
-                  key: "mb",
-                  className: "modal-body"
-                }, [
-                  alert({
-                    key: "warning",
-                    strong: "Warning",
-                    message: "Deleting this scope will also remove this scope from all associated clients and tokens. This operation cannot be undone.",
-                    level: "danger",
-                    icon: "exclamation-triangle"
-                  })
-                ]),
-                d.div({
-                  key: "mf",
-                  className: "modal-footer"
-                }, [
-                  btn({
-                    key: "cancel",
-                    ajax: true,
-                    icon: "cancel",
-                    onClick: this.closeDelete,
-                    caption: "Cancel"
-                  }),
-                  btn({
-                    key: "del",
-                    icon: "trash",
-                    ajax: true,
-                    type: "danger",
-                    onClick: _.bind(function () {
-                      this.props.model.destroy({ wait: true });
-                    }, this),
-                    caption: "Delete"
-                  })
-                ])
-              ]),
+                deleteMessage: "This will remove the scope from all clients and tokens. This operation cannot be undone.",
+                onDelete: _.bind(function () {
+                  this.props.model.destroy({ wait: true });
+                }, this)
+              }),
               modal({
                 key: "modal",
                 open: this.state.editOpen,
