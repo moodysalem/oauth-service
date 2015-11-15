@@ -61,6 +61,7 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
           getInitialState: function () {
             return {
               editOpen: false,
+              deleteOpen: false,
               modelCopy: new mdls.Scope()
             };
           },
@@ -75,6 +76,18 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
             this.state.modelCopy.set(this.props.model.toJSON());
             this.setState({
               editOpen: true
+            });
+          },
+
+          openDelete: function () {
+            this.setState({
+              deleteOpen: true
+            });
+          },
+
+          closeDelete: function () {
+            this.setState({
+              deleteOpen: false
             });
           },
 
@@ -99,10 +112,49 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
                   key: "del",
                   caption: "Delete",
                   icon: "trash",
-                  onClick: _.bind(function () {
-                    this.props.model.destroy({ wait: true });
-                  }, this)
+                  onClick: this.openDelete
                 })
+              ]),
+              modal({
+                key: "delModal",
+                open: this.state.deleteOpen,
+                title: "Delete Scope: " + this.state.model.name,
+                onClose: this.closeDelete
+              }, [
+                d.div({
+                  key: "mb",
+                  className: "modal-body"
+                }, [
+                  alert({
+                    key: "warning",
+                    strong: "Warning",
+                    message: "Deleting this scope will also remove this scope from all associated clients and tokens. This operation cannot be undone.",
+                    level: "danger",
+                    icon: "exclamation-triangle"
+                  })
+                ]),
+                d.div({
+                  key: "mf",
+                  className: "modal-footer"
+                }, [
+                  btn({
+                    key: "cancel",
+                    ajax: true,
+                    icon: "cancel",
+                    onClick: this.closeDelete,
+                    caption: "Cancel"
+                  }),
+                  btn({
+                    key: "del",
+                    icon: "trash",
+                    ajax: true,
+                    type: "danger",
+                    onClick: _.bind(function () {
+                      this.props.model.destroy({ wait: true });
+                    }, this),
+                    caption: "Delete"
+                  })
+                ])
               ]),
               modal({
                 key: "modal",

@@ -13,7 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.0</jaxrs.lib.version>
-    <react.backstrap.version>0.0.18-SNAPSHOT</react.backstrap.version>
+    <react.backstrap.version>0.0.18</react.backstrap.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
