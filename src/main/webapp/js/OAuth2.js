@@ -140,7 +140,7 @@ define([ "jquery" ], function ($) {
     clearCachedToken();
     return new Promise(function (resolve, reject) {
       $.ajax({
-        path: AUTHORIZE_URL + "/logout?client_id=" + encodeURIComponent(clientId),
+        url: AUTHORIZE_URL + "/logout?client_id=" + encodeURIComponent(clientId),
         success: function () {
           resolve();
         },
