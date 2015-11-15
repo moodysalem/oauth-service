@@ -5,6 +5,7 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
 
     var pv = _.noop, lastPath = null;
     if (typeof ga === "function") {
+      util.debug("initializing google analytics...");
       ga("create", "UA-58623092-4", "auto");
       pv = _.debounce(function () {
         if (ga && window.location.pathname !== lastPath) {
@@ -13,6 +14,8 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
           });
         }
       }, 100);
+    } else {
+      util.debug("google analytics not started because GA is blocked");
     }
 
     // component that re-renders on application model change as well as wraps the children in a tap-friendly listener
@@ -20,17 +23,21 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
       displayName: "wrapper",
       mixins: [ model ],
       render: function () {
+        util.debug("wrapper rendered.");
         return tp({}, React.DOM.div({}, this.props.children));
       }
     });
 
     var renderFile = function (file, properties) {
+      util.debug("getting file to render", file);
       require([ file ], function (comp) {
+        util.debug("rendering file", file, properties);
         dom.render(wrapper({ model: m }, comp(properties)), $("#app").get(0));
         pv();
       });
     };
 
+    util.debug("rendering nav");
     dom.render(nav({ model: m }), $("#nav").get(0));
 
     return Backbone.Router.extend({
