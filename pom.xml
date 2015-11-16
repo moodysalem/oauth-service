@@ -18,6 +18,11 @@
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
+  <scm>
+    <developerConnection>https://github.com/moodysalem/oauth-service.git</developerConnection>
+    <url>https://github.com/moodysalem/oauth-service</url>
+  </scm>
+
   <developers>
     <developer>
       <name>Moody Salem</name>
