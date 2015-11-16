@@ -29,7 +29,7 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
         if (mdl.token) {
           leftLinks.push({
             text: "Applications",
-            icon: "users",
+            icon: "tachometer",
             href: "/applications"
           });
 

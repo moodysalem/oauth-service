@@ -3,9 +3,9 @@
  */
 define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
     "./AppHeader", "rbs/components/layout/Modal", "rbs/components/collection/Alerts", "rbs/components/controls/Button",
-    "./ClientForm", "rbs/components/mixins/Model", "rbs/components/layout/Dropdown", "rbs/components/layout/DropdownItem",
-    "rbs/components/model/GridRow", "rbs/components/mixins/Events", "./ConfirmDeleteModal" ],
-  function (_, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, dd, di, row, events, delModal) {
+    "./ClientForm", "rbs/components/mixins/Model", "rbs/components/model/GridRow", "rbs/components/mixins/Events",
+    "./ConfirmDeleteModal", "model", "./MustBeLoggedIn" ],
+  function (_, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli) {
     "use strict";
 
     var rpt = React.PropTypes;
@@ -86,7 +86,7 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
       },
       {
         component: util.rf({
-          displayName: "dropdown client",
+          displayName: "actions for client",
 
           mixins: [ model ],
 
@@ -164,28 +164,29 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
           },
 
           render: function () {
-            return d.div({ className: "pull-right" }, [
-              dd({
+            return d.div({}, [
+              d.div({
                 key: "dd",
-                caption: "Actions",
-                icon: "ellipsis-v",
-                size: "sm",
-                right: true
+                className: "text-center btn-container"
               }, [
-                di({
+                btn({
                   key: "edit",
+                  size: "xs",
                   caption: "Edit",
                   icon: "pencil",
                   onClick: this.openEdit
                 }),
-                di({
+                btn({
                   key: "scopes",
-                  caption: "Client Scopes",
+                  size: "xs",
+                  caption: "Scopes",
                   icon: "book",
                   onClick: this.openScopes
                 }),
-                di({
+                btn({
                   key: "del",
+                  size: "xs",
+                  type: "danger",
                   caption: "Delete",
                   icon: "trash",
                   onClick: this.openDelete
@@ -350,8 +351,10 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
       },
 
       componentDidMount: function () {
-        this.state.app.fetch();
-        this.state.clients.fetch();
+        if (m.isLoggedIn()) {
+          this.state.app.fetch();
+          this.state.clients.fetch();
+        }
       },
 
       searchChange: function (e) {
@@ -379,6 +382,9 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
       },
 
       render: function () {
+        if (!m.isLoggedIn()) {
+          return mbli();
+        }
         return d.div({ className: "container" }, [
           ah({
             key: "h",

@@ -47,6 +47,7 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
         "applications/:id": "app",
         "applications/:id/scopes": "scopes",
         "applications/:id/clients": "clients",
+        "applications/:id/users": "users",
         "(/)": "home",
         "*splat": "notFound"
       },
@@ -74,6 +75,11 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
       clients: function (id) {
         renderFile("js/views/Clients", { applicationId: id });
       },
+
+      users: function (id) {
+        renderFile("js/views/Users", { applicationId: id });
+      },
+
 
       notFound: function () {
         renderFile("js/views/NotFound");

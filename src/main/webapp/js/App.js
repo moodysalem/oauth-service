@@ -15,7 +15,11 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
   window.require([ "js/OAuth2", "backbone", "jquery", "promise-polyfill", "util" ],
     function (oauth2, Backbone, $, pp, util) {
       util.debug("defining model...");
-      var m = new Backbone.Model();
+      var m = new (Backbone.Model.extend({
+        isLoggedIn: function () {
+          return this.has("token");
+        }
+      }))();
       window.define("model", m);
 
       util.debug("defining start function..");

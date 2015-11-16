@@ -3,8 +3,8 @@
  */
 define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/controls/Button", "model",
     "rbs/components/mixins/Events", "router", "rbs/components/layout/Modal", "rbs/components/layout/Alert",
-    "rbs/components/collection/Alerts" ],
-  function (React, util, af, mdls, btn, m, events, r, modal, alt, alerts) {
+    "rbs/components/collection/Alerts", "./MustBeLoggedIn" ],
+  function (React, util, af, mdls, btn, m, events, r, modal, alt, alerts, mbli) {
     "use strict";
 
     var d = React.DOM;
@@ -25,7 +25,9 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
 
       componentDidMount: function () {
         this.listenTo(this.state.app, "sync", this.showClientsButton);
-        this.state.app.fetch();
+        if (m.isLoggedIn()) {
+          this.state.app.fetch();
+        }
       },
 
       closeDeleteModal: function () {
@@ -35,7 +37,12 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
           });
         }
       },
+
       render: function () {
+        if (!m.isLoggedIn()) {
+          return mbli();
+        }
+
         var dn = "Edit Application";
         return d.div({ className: "container" }, [
           d.h2({
@@ -50,14 +57,6 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
               href: "applications",
               icon: "long-arrow-left"
             }),
-            //btn({
-            //  key: "b",
-            //  icon: "edit",
-            //  caption: "Clients",
-            //  type: "warning",
-            //  className: "pull-right",
-            //  href: util.path("applications", this.props.id, "clients")
-            //}),
             dn
           ]),
           af({
@@ -77,19 +76,19 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
             key: "btnrow",
             className: "row"
           }, [
-            //d.div({ className: "col-xs-6", key: "1" }, d.div({ className: "form-group" }, btn({
-            //  caption: "Delete",
-            //  type: "danger",
-            //  icon: "trash",
-            //  ajax: true,
-            //  block: true,
-            //  onClick: _.bind(function () {
-            //    this.setState({
-            //      deleteModalOpen: true
-            //    });
-            //  }, this)
-            //}))),
-            d.div({ className: "col-sm-6 col-sm-offset-3", key: "2" }, d.div({ className: "form-group" }, btn({
+            d.div({ className: "col-xs-6", key: "1" }, d.div({ className: "form-group" }, btn({
+              caption: "Delete",
+              type: "danger",
+              icon: "trash",
+              ajax: true,
+              block: true,
+              onClick: _.bind(function () {
+                this.setState({
+                  deleteModalOpen: true
+                });
+              }, this)
+            }))),
+            d.div({ className: "col-xs-6", key: "2" }, d.div({ className: "form-group" }, btn({
               caption: "Save",
               type: "success",
               ajax: true,

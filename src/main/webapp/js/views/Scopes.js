@@ -1,11 +1,11 @@
 /**
  * view scopes for an application
  */
-define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
-    "rbs/components/layout/Icon", "rbs/components/mixins/Model", "rbs/components/controls/Pagination", "rbs/components/layout/Dropdown",
-    "rbs/components/layout/DropdownItem", "rbs/components/controls/Button", "rbs/components/layout/Modal", "./ScopeForm",
-    "rbs/components/collection/Alerts", "./AppHeader", "./ConfirmDeleteModal" ],
-  function (React, util, alert, mdls, table, lw, icon, model, pag, dd, di, btn, modal, sf, alerts, ah, delModal) {
+define([ "react", "util", "underscore", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
+    "rbs/components/layout/Icon", "rbs/components/mixins/Model", "rbs/components/controls/Pagination",
+    "rbs/components/controls/Button", "rbs/components/layout/Modal", "./ScopeForm",
+    "rbs/components/collection/Alerts", "./AppHeader", "./ConfirmDeleteModal", "./MustBeLoggedIn", "model" ],
+  function (React, util, _, alert, mdls, table, lw, icon, model, pag, btn, modal, sf, alerts, ah, delModal, mbli, m) {
     "use strict";
 
     var rpt = React.PropTypes;
@@ -56,7 +56,7 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
       },
       {
         component: util.rf({
-          displayName: "dropdown column",
+          displayName: "actions for scope",
 
           getInitialState: function () {
             return {
@@ -94,23 +94,23 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
           mixins: [ model ],
 
           render: function () {
-            return d.div({ className: "pull-right" }, [
-              dd({
+            return d.div({}, [
+              d.div({
                 key: "dd",
-                caption: "Actions",
-                right: true,
-                icon: "ellipsis-v",
-                size: "sm"
+                className: "text-center btn-container"
               }, [
-                di({
+                btn({
                   key: "edit",
+                  size: "xs",
                   caption: "Edit",
                   icon: "pencil",
                   onClick: this.openEdit
                 }),
-                di({
+                btn({
                   key: "del",
+                  size: "xs",
                   caption: "Delete",
+                  type: "danger",
                   icon: "trash",
                   onClick: this.openDelete
                 })
@@ -197,8 +197,10 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
       },
 
       componentDidMount: function () {
-        this.state.scopes.fetch();
-        this.state.app.fetch();
+        if (m.isLoggedIn()) {
+          this.state.scopes.fetch();
+          this.state.app.fetch();
+        }
       },
 
       closeCreate: function () {
@@ -208,6 +210,9 @@ define([ "react", "util", "rbs/components/layout/Alert", "js/Models", "rbs/compo
       },
 
       render: function () {
+        if (!m.isLoggedIn()) {
+          return mbli();
+        }
         return d.div({ className: "container" }, [
           ah({
             title: "Scopes",

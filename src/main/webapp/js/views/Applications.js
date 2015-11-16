@@ -2,10 +2,10 @@
  *
  */
 define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "rbs/components/controls/Button",
-    "./Loading", "rbs/components/layout/Modal", "rbs/components/mixins/Model", "rbs/components/layout/Dropdown",
-    "rbs/components/model/Form", "rbs/components/collection/Alerts", "router", "rbs/components/layout/DropdownItem",
-    "rbs/components/controls/Pagination" ],
-  function (React, util, mdls, m, table, btn, lw, modal, model, dd, form, alerts, r, di, pag) {
+    "./Loading", "rbs/components/layout/Modal", "rbs/components/mixins/Model",
+    "rbs/components/model/Form", "rbs/components/collection/Alerts", "router",
+    "rbs/components/controls/Pagination", "./MustBeLoggedIn" ],
+  function (React, util, mdls, m, table, btn, lw, modal, model, form, alerts, r, pag, mbli) {
     "use strict";
 
     var d = React.DOM;
@@ -34,32 +34,36 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
         component: util.rf({
           mixins: [ model ],
           render: function () {
-            return d.div({ className: "pull-right" }, dd({
-              caption: "Actions",
-              type: "primary",
-              size: "sm",
-              icon: "tachometer",
-              right: true
-            }, [
-              di({
+            return d.div({ className: "text-center btn-container" }, [
+              btn({
                 key: "edit",
+                size: "xs",
                 caption: "Edit",
                 icon: "pencil",
                 href: util.path("applications", this.state.model.id)
               }),
-              di({
+              btn({
+                key: "u",
+                size: "xs",
+                caption: "Users",
+                icon: "users",
+                href: util.path("applications", this.state.model.id, "users")
+              }),
+              btn({
                 key: "scp",
+                size: "xs",
                 caption: "Scopes",
                 icon: "book",
                 href: util.path("applications", this.state.model.id, "scopes")
               }),
-              di({
+              btn({
                 key: "mc",
-                caption: "Manage Clients",
+                size: "xs",
+                caption: "Clients",
                 icon: "gavel",
                 href: util.path("applications", this.state.model.id, "clients")
               })
-            ]))
+            ])
           }
         })
       }
@@ -108,6 +112,9 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
       },
 
       render: function () {
+        if (!m.isLoggedIn()) {
+          return mbli();
+        }
         return d.div({
           className: "container"
         }, [
