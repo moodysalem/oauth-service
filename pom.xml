@@ -13,7 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.1</jaxrs.lib.version>
-    <react.backstrap.version>0.0.20-SNAPSHOT</react.backstrap.version>
+    <react.backstrap.version>0.0.20</react.backstrap.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
@@ -159,6 +159,7 @@
               <regionName>us-west-2</regionName>
               <versionsToKeep>5</versionsToKeep>
               <dryRun>false</dryRun>
+              <versionDescription>jaxrs: ${jaxrs.lib.version}, rbs: ${react.backstrap.version}</versionDescription>
             </configuration>
           </execution>
         </executions>
