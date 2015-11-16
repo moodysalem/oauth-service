@@ -1,8 +1,8 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "./Endpoint" ],
-  function (React, util, _, ep) {
+define([ "react", "util", "underscore", "./Endpoint", "./FixToTop" ],
+  function (React, util, _, ep, fixToTop) {
     "use strict";
     var d = React.DOM;
     var rpt = React.PropTypes;
@@ -331,10 +331,13 @@ define([ "react", "util", "underscore", "./Endpoint" ],
                 ]
               })
             ]),
-            d.div({ className: "col-md-4 col-lg-3 hidden-xs hidden-sm", key: "toc-big" }, d.div({
-              className: "well",
-              key: "toc"
-            }, toc))
+            fixToTop({ key: "toc-big" },
+              d.div({
+                className: "col-md-4 col-lg-3 hidden-xs hidden-sm"
+              }, d.div({
+                className: "well"
+              }, toc))
+            )
           ])
         ]);
       }
