@@ -19,7 +19,7 @@
   </properties>
 
   <scm>
-    <developerConnection>https://github.com/moodysalem/oauth-service.git</developerConnection>
+    <developerConnection>scm:git:https://github.com/moodysalem/oauth-service.git</developerConnection>
     <url>https://github.com/moodysalem/oauth-service</url>
   </scm>
 
