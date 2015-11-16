@@ -31,8 +31,8 @@
                 <div class="form-group">
                     <label class="control-label" for="password">Password</label>
                     <input type="password" id="password" name="password" class="form-control"
-                           <#if model.lastEmail??>autofocus</#if>
-                           placeholder="Password" required>
+                           placeholder="Password" required
+                           <#if model.lastEmail??>autofocus</#if>>
                 </div>
 
                 <div class="checkbox">
@@ -233,7 +233,7 @@
                 <div class="form-group">
                     <label class="control-label" for="registerEmail">E-mail Address</label>
                     <input type="email" id="registerEmail" name="registerEmail" class="form-control"
-                           placeholder="E-mail address" required autofocus>
+                           placeholder="E-mail address" required>
                 </div>
                 <div class="form-group">
                     <label class="control-label" for="registerPassword">Password</label>
