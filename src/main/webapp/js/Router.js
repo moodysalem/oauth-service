@@ -28,12 +28,19 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
       }
     });
 
-    var renderFile = function (file, properties) {
+    var origTitle = document.title;
+
+    var renderFile = function (file, properties, title) {
       util.debug("getting file to render", file);
       require([ file ], function (comp) {
         util.debug("rendering file", file, properties);
         dom.render(wrapper({ model: m }, comp(properties)), $("#app").get(0));
         pv();
+        if (typeof title === "string") {
+          document.title = util.concatWS(" | ", origTitle, title);
+        } else {
+          document.title = origTitle;
+        }
       });
     };
 
@@ -53,31 +60,31 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
       },
 
       applications: function () {
-        renderFile("js/views/Applications");
+        renderFile("js/views/Applications", {}, "Applications");
       },
 
       docs: function () {
-        renderFile("js/views/Documentation");
+        renderFile("js/views/Documentation", {}, "Documentation");
       },
 
       app: function (id) {
-        renderFile("js/views/Application", { id: id });
+        renderFile("js/views/Application", { id: id }, "Application");
       },
 
       home: function () {
-        renderFile("js/views/Home");
+        renderFile("js/views/Home", {});
       },
 
       scopes: function (id) {
-        renderFile("js/views/Scopes", { applicationId: id });
+        renderFile("js/views/Scopes", { applicationId: id }, "Scopes");
       },
 
       clients: function (id) {
-        renderFile("js/views/Clients", { applicationId: id });
+        renderFile("js/views/Clients", { applicationId: id }, "Clients");
       },
 
       users: function (id) {
-        renderFile("js/views/Users", { applicationId: id });
+        renderFile("js/views/Users", { applicationId: id }, "Users");
       },
 
 

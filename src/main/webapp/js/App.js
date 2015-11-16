@@ -50,6 +50,10 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
                 }
                 return;
               }
+
+              if (e.metaKey || e.ctrlKey) {
+                return;
+              }
               var isInternal = util.internalLink(href);
               if (isInternal) {
                 e.preventDefault();
