@@ -12,7 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>1.0.0</jaxrs.lib.version>
+    <jaxrs.lib.version>1.0.1</jaxrs.lib.version>
     <react.backstrap.version>0.0.20-SNAPSHOT</react.backstrap.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
@@ -29,6 +29,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <dependencies>
+    <!-- servlet api -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- jaxrs library -->
     <dependency>
       <groupId>com.moodysalem.java</groupId>
