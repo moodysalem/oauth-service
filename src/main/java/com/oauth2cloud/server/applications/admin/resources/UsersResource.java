@@ -55,7 +55,7 @@ public class UsersResource extends BaseEntityResource<User> {
     String search;
 
     @QueryParam("applicationId")
-    Long appliationId;
+    Long applicationId;
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<User> root) {
@@ -64,8 +64,17 @@ public class UsersResource extends BaseEntityResource<User> {
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
 
+        if (applicationId != null) {
+            list.add(cb.equal(root.join("application").get("id"), applicationId));
+        }
+
         if (search != null) {
-            list.add(cb.like(root.get("firstName"), "%" + search + "%"));
+            String toSearch = "%" + search.trim() + "%";
+            list.add(cb.or(
+                cb.like(root.get("firstName"), toSearch),
+                cb.like(root.get("lastName"), toSearch),
+                cb.like(root.get("email"), toSearch)
+            ));
         }
     }
 

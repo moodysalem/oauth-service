@@ -70,7 +70,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
     String search;
 
     @QueryParam("applicationId")
-    Long appliationId;
+    Long applicationId;
 
 
     @Override
@@ -80,8 +80,8 @@ public class ClientsResource extends BaseEntityResource<Client> {
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
 
-        if (appliationId != null) {
-            list.add(cb.equal(root.join("application").get("id"), appliationId));
+        if (applicationId != null) {
+            list.add(cb.equal(root.join("application").get("id"), applicationId));
         }
 
         if (search != null) {
