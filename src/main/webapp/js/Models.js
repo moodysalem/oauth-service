@@ -10,6 +10,7 @@ define([ "util", "backbone" ], function (util, Backbone) {
   var SCOPES_URL = util.path(API_URL, "scopes");
   var CLIENTS_URL = util.path(API_URL, "clients");
   var CLIENT_SCOPES_URL = util.path(API_URL, "clientscopes");
+  var USERS_URL = util.path(API_URL, "users");
   return {
     Application: mdl.extend({
       urlRoot: APPLICATIONS_URL
@@ -34,6 +35,12 @@ define([ "util", "backbone" ], function (util, Backbone) {
     }),
     ClientScopes: cl.extend({
       url: CLIENT_SCOPES_URL
+    }),
+    User: mdl.extend({
+      urlRoot: USERS_URL
+    }),
+    Users: cl.extend({
+      url: USERS_URL
     }),
     ClientTypes: new cl([
       {

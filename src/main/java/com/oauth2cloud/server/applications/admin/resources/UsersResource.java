@@ -5,6 +5,7 @@ import com.oauth2cloud.server.hibernate.model.User;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import java.util.List;
 
 @Path("users")
@@ -50,12 +51,22 @@ public class UsersResource extends BaseEntityResource<User> {
 
     }
 
+    @QueryParam("search")
+    String search;
+
+    @QueryParam("applicationId")
+    Long appliationId;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<User> root) {
         mustBeLoggedIn();
         checkScope(MANAGE_USERS);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
+
+        if (search != null) {
+            list.add(cb.like(root.get("firstName"), "%" + search + "%"));
+        }
     }
 
     @Override

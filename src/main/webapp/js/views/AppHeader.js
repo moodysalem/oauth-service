@@ -6,23 +6,42 @@ define([ "react", "util", "rbs/components/mixins/Model", "rbs/components/control
     "use strict";
 
     var d = React.DOM;
+    var rpt = React.PropTypes;
 
     return util.rf({
       displayName: "Scopes Header",
       mixins: [ model ],
 
+      propTypes: {
+        title: rpt.string.isRequired,
+        onCreate: rpt.func
+      },
+
+      getDefaultProps: function () {
+        return {
+          onCreate: null
+        };
+      },
+
+      getCreateButton: function () {
+        if (this.props.onCreate !== null) {
+          return btn({
+            key: "btn",
+            className: "pull-right",
+            caption: "Create",
+            icon: "plus",
+            type: "success",
+            onClick: this.props.onCreate
+          });
+        }
+        return null;
+      },
+
       render: function () {
         var dn = this.state.model.name ? (" for " + this.state.model.name) : "";
         return d.div({}, [
           d.h2({ key: "h", className: "page-header" }, [
-            btn({
-              key: "btn",
-              className: "pull-right",
-              caption: "Create",
-              icon: "plus",
-              type: "success",
-              onClick: this.props.onCreate
-            }),
+            this.getCreateButton(),
             this.props.title,
             d.small({ key: "s" }, dn)
           ])
