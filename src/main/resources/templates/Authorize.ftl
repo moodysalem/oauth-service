@@ -101,7 +101,7 @@
                                         } else {
                                             // FB SDK did not load for whatever reason, just use traditional OAuth Flow
                                             window.location.href = "https://www.facebook.com/dialog/oauth?" +
-                                                    "client_id=${model.client.application.facebookAppId?url}" +
+                                                    "client_id=${model.client.application.facebookAppId?c}" +
                                                     "&redirect_uri=${model.requestUrl?url}";
                                         }
                                     });
@@ -119,26 +119,28 @@
                                     defer></script>
                             <script>
                                 var initGoogle = function () {
-                                    gapi.load('auth2', function () {
-                                        var auth2 = gapi.auth2.init({
-                                            client_id: "${model.client.application.googleClientId?js_string}",
-                                            fetch_basic_profile: true,
-                                            scope: 'profile email'
-                                        });
-                                        $(function () {
-                                            $("#googleLogin").click(function () {
-                                                // Sign the user in, and then retrieve their ID token for the server
-                                                // to validate
-                                                auth2.signIn().then(function () {
-                                                    var token = auth2.currentUser.get().getAuthResponse().access_token;
-                                                    if (token) {
-                                                        $("#googleToken").val(token).closest("form").submit();
-                                                    }
+                                    if (gapi && typeof gapi.load === "function") {
+                                        gapi.load('auth2', function () {
+                                            var auth2 = gapi.auth2.init({
+                                                client_id: "${model.client.application.googleClientId?js_string}",
+                                                fetch_basic_profile: true,
+                                                scope: 'profile email'
+                                            });
+                                            $(function () {
+                                                $("#googleLogin").click(function () {
+                                                    // Sign the user in, and then retrieve their ID token for the server
+                                                    // to validate
+                                                    auth2.signIn().then(function () {
+                                                        var token = auth2.currentUser.get().getAuthResponse().access_token;
+                                                        if (token) {
+                                                            $("#googleToken").val(token).closest("form").submit();
+                                                        }
+                                                    });
                                                 });
                                             });
                                         });
-                                    });
-                                };
+                                    }
+                                }
                             </script>
                         </div>
                     </#if>
