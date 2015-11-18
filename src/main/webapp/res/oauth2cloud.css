@@ -122,3 +122,7 @@ table.vertical-align-middle td {
 .btn-container > .btn {
     margin: 0.3em;
 }
+
+.navbar .navbar-toggle {
+    color: white;
+}
