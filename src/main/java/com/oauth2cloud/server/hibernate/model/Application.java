@@ -16,7 +16,7 @@ public class Application extends BaseEntity {
 
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name = "ownerId")
+    @JoinColumn(name = "ownerId", updatable = false)
     private User owner;
 
     @Email
