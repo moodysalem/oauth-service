@@ -599,8 +599,6 @@ public class AuthorizeResource extends BaseResource {
     }
 
     public User doEmailLogin(Application app, MultivaluedMap<String, String> formParams) {
-        long t1 = System.currentTimeMillis();
-
         String email = formParams.getFirst("email");
         String password = formParams.getFirst("password");
         User userWithEmail = getUser(email, app);
@@ -632,15 +630,6 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        // prevent timing attacks and brute forcing by making this type of request take 3 seconds
-        long t2 = System.currentTimeMillis();
-        if (t2 - t1 < MINIMUM_LOGIN_TIME) {
-            try {
-                Thread.sleep(MINIMUM_LOGIN_TIME - (t2 - t1));
-            } catch (InterruptedException e) {
-                LOG.log(Level.SEVERE, "Thread sleep interrupted", e);
-            }
-        }
         return toReturn;
     }
 

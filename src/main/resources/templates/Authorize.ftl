@@ -54,8 +54,8 @@
                     </a>
                 </div>
 
-                <#-- open the alternative login button section -->
-                <#if model.loginButtonSize gt 0>
+            <#-- open the alternative login button section -->
+            <#if model.loginButtonSize gt 0>
                 <div class="center-line text-center form-group">
                     <div class="or-block bg-info">OR</div>
                 </div>
@@ -77,7 +77,7 @@
                                 };
 
                                 (function (d, s, id) {
-                                    var js, fjs = d.getElementsByTagName(s)[0];
+                                    var js, fjs = d.getElementsByTagName(s)[ 0 ];
                                     if (d.getElementById(id)) {
                                         return;
                                     }
@@ -89,14 +89,21 @@
 
                                 $(function () {
                                     $("#facebookLogin").click(function () {
-                                        FB.login(function (response) {
-                                            console.log(response);
-                                            if (response.status === 'connected') {
-                                                // Logged into your app and Facebook.
-                                                $("#facebookToken").val(response.authResponse.accessToken)
-                                                        .closest("form").submit();
-                                            }
-                                        }, {scope: "public_profile,email"});
+                                        if (FB && typeof FB.login === "function") {
+                                            FB.login(function (response) {
+                                                console.log(response);
+                                                if (response.status === 'connected') {
+                                                    // Logged into your app and Facebook.
+                                                    $("#facebookToken").val(response.authResponse.accessToken)
+                                                            .closest("form").submit();
+                                                }
+                                            }, { scope: "public_profile,email" });
+                                        } else {
+                                            // FB SDK did not load for whatever reason, just use traditional OAuth Flow
+                                            window.location.href = "https://www.facebook.com/dialog/oauth?" +
+                                                    "client_id=${model.client.application.facebookAppId?url}" +
+                                                    "&redirect_uri=${model.requestUrl?url}";
+                                        }
                                     });
                                 });
                             </script>
@@ -180,8 +187,8 @@
                         </div>
                     </#if>
                 </div>
-                </#if>
-                <#-- close the alternative login button section -->
+            </#if>
+            <#-- close the alternative login button section -->
             </form>
 
             <script>

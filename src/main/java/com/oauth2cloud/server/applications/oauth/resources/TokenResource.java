@@ -256,21 +256,9 @@ public class TokenResource extends BaseResource {
         }
 
         boolean valid = false;
-        // this part of the code ALWAYS takes one second because it checks the user credentials, preventing against brute
-        // forcing and timing attacks
-        long t1 = System.currentTimeMillis();
         User user = getUser(username, client);
         if (user != null && BCrypt.checkpw(password, user.getPassword())) {
             valid = true;
-        }
-        long t2 = System.currentTimeMillis();
-        try {
-            long sleepTime = MINIMUM_LOGIN_TIME - (t2 - t1);
-            if (sleepTime > 0) {
-                Thread.sleep(sleepTime);
-            }
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Thread interrupted during wait.", e);
         }
 
         if (!valid) {

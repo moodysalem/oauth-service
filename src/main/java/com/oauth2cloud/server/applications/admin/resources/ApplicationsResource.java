@@ -1,6 +1,9 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
 import com.oauth2cloud.server.hibernate.model.Application;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Version;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -41,16 +44,45 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     @Override
     protected void validateEntity(List<String> list, Application application) {
 
+        if (application.getFacebookAppId() != null && application.getFacebookAppSecret() == null ||
+            application.getFacebookAppId() == null && application.getFacebookAppSecret() != null) {
+            list.add("Both Facebook application ID and Facebook application secret must be specified together.");
+        }
+
+        if (application.getAmazonClientId() != null && application.getAmazonClientSecret() == null ||
+            application.getAmazonClientId() == null && application.getAmazonClientSecret() != null) {
+            list.add("Both Amazon application ID and Amazon application secret must be specified together.");
+        }
+
+        if (application.getGoogleClientId() != null && application.getGoogleClientSecret() == null ||
+            application.getGoogleClientId() == null && application.getGoogleClientSecret() != null) {
+            list.add("Both Google application ID and Google application secret must be specified together.");
+        }
+
+        if (application.getFacebookAppId() != null && application.getFacebookAppSecret() != null) {
+            FacebookClient fbc = new DefaultFacebookClient(Version.VERSION_2_5);
+            try {
+                FacebookClient.AccessToken at = fbc.obtainAppAccessToken(application.getFacebookAppId().toString(), application.getFacebookAppSecret());
+                if (at.getAccessToken() == null) {
+                    list.add("Invalid Facebook application ID or secret.");
+                }
+            } catch (Exception e) {
+                list.add("Invalid Facebook application ID or secret: " + e.getMessage());
+            }
+        }
+
     }
 
     @Override
     public void beforeCreate(Application application) {
         application.setOwner(getUser());
+
+        setNullsForEmptyStrings(application);
     }
 
     @Override
     public void beforeEdit(Application application, Application t1) {
-
+        setNullsForEmptyStrings(t1);
     }
 
     @Override
@@ -68,4 +100,28 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     public void beforeSend(Application application) {
 
     }
+
+    private void setNullsForEmptyStrings(Application application) {
+        if (application.getFacebookAppSecret() != null && application.getFacebookAppSecret().isEmpty()) {
+            application.setFacebookAppSecret(null);
+        }
+
+        if (application.getGoogleClientId() != null && application.getGoogleClientId().isEmpty()) {
+            application.setGoogleClientId(null);
+        }
+
+        if (application.getGoogleClientSecret() != null && application.getGoogleClientSecret().isEmpty()) {
+            application.setGoogleClientSecret(null);
+        }
+
+        if (application.getAmazonClientId() != null && application.getAmazonClientId().isEmpty()) {
+            application.setAmazonClientId(null);
+        }
+
+        if (application.getAmazonClientSecret() != null && application.getAmazonClientSecret().isEmpty()) {
+            application.setAmazonClientSecret(null);
+        }
+    }
+
+
 }

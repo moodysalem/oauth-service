@@ -47,12 +47,14 @@ public class ScopesResource extends BaseEntityResource<Scope> {
 
     @Override
     public void beforeCreate(Scope scope) {
-
+        if (scope.getThumbnail() != null && scope.getThumbnail().trim().isEmpty()) {
+            scope.setThumbnail(null);
+        }
     }
 
     @Override
     public void beforeEdit(Scope scope, Scope t1) {
-
+        beforeCreate(t1);
     }
 
     @QueryParam("applicationId")

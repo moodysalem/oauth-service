@@ -46,17 +46,18 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     @Override
     protected void validateEntity(List<String> list, ClientScope clientScope) {
-
     }
 
     @Override
     public void beforeCreate(ClientScope clientScope) {
-
+        if (clientScope.getReason() != null && clientScope.getReason().trim().isEmpty()) {
+            clientScope.setReason(null);
+        }
     }
 
     @Override
-    public void beforeEdit(ClientScope clientScope, ClientScope t1) {
-
+    public void beforeEdit(ClientScope clientScope, ClientScope newScope) {
+        beforeCreate(newScope);
     }
 
     @QueryParam("clientId")
