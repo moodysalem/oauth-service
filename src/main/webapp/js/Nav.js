@@ -34,7 +34,7 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
           });
 
 
-          var dn = util.concatWS(" ", mdl.token.user_details.firstName, mdl.token.user_details.lastName);
+          var dn = util.concatWS(" ", mdl.token.user_details.first_name, mdl.token.user_details.last_name);
           rightLinks.push({
             text: "Logged in as " + dn
           }, {

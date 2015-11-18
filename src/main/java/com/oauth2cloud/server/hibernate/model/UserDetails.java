@@ -33,4 +33,9 @@ public class UserDetails {
         return user.getLastName();
     }
 
+    @JsonProperty("user_id")
+    public long getUserId() {
+        return user.getId();
+    }
+
 }
