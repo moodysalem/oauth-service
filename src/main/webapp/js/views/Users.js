@@ -81,7 +81,7 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
 
           render: function () {
             return d.div({}, [
-              d.div({ key: "btn", className: "btn-container" }, [
+              d.div({ key: "btn", className: "btn-container text-center" }, [
                 btn({
                   key: "edit",
                   icon: "pencil",
