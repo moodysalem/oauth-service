@@ -29,13 +29,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
             return false;
         }
         Application ap = em.find(Application.class, client.getApplication().getId());
-        if (ap == null) {
-            return false;
-        }
-        if (!ap.getOwner().equals(getUser())) {
-            return false;
-        }
-        return true;
+        return ap != null && ap.getOwner().equals(getUser());
     }
 
     @Override

@@ -1,7 +1,10 @@
 package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.moodysalem.hibernate.model.BaseEntity;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,20 +15,23 @@ import javax.persistence.ManyToOne;
 public class User extends BaseEntity {
 
     @ManyToOne
-    @JsonIgnore
-    @JoinColumn(name = "applicationId")
+    @JoinColumn(name = "applicationId", updatable = false)
     private Application application;
 
-    @Column(name = "email")
+    @Email
+    @NotEmpty
+    @Column(name = "email", updatable = false)
     private String email;
 
     @JsonIgnore
     @Column(name = "password")
     private String password;
 
+    @NotEmpty
     @Column(name = "firstName")
     private String firstName;
 
+    @NotEmpty
     @Column(name = "lastName")
     private String lastName;
 

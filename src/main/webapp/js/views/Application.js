@@ -55,7 +55,7 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
               caption: "Back",
               className: "pull-left",
               href: "applications",
-              icon: "long-arrow-left"
+              icon: "arrow-left"
             }),
             dn
           ]),
@@ -128,9 +128,11 @@ define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/cont
                 ajax: true,
                 icon: "trash",
                 onClick: _.bind(function () {
-                  this.state.app.destroy().then(function () {
-                    r.navigate("applications", { trigger: true });
-                  });
+                  if (confirm("Please confirm this deletion. All clients, scopes, and users will be permanently deleted.")) {
+                    this.state.app.destroy().then(function () {
+                      r.navigate("applications", { trigger: true });
+                    });
+                  }
                 }, this)
               })
             ])

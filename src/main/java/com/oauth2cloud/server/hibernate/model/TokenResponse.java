@@ -45,7 +45,7 @@ public class TokenResponse {
     private String clientId;
 
     @JsonProperty("user_details")
-    private User user;
+    private UserDetails userDetails;
 
     @JsonProperty("application_id")
     private Long applicationId;
@@ -98,12 +98,8 @@ public class TokenResponse {
         this.clientId = clientId;
     }
 
-    public User getUser() {
-        return user;
-    }
-
     public void setUser(User user) {
-        this.user = user;
+        this.userDetails = new UserDetails(user);
     }
 
     public Long getApplicationId() {
@@ -113,4 +109,9 @@ public class TokenResponse {
     public void setApplicationId(Long applicationId) {
         this.applicationId = applicationId;
     }
+
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.hibernate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.BaseEntity;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import org.hibernate.validator.constraints.Email;
@@ -14,6 +15,7 @@ public class Application extends BaseEntity {
     private String name;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "ownerId")
     private User owner;
 

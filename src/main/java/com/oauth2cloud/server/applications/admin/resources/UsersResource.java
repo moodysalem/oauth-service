@@ -1,11 +1,15 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
+import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.User;
 
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("users")
@@ -21,14 +25,20 @@ public class UsersResource extends BaseEntityResource<User> {
     public boolean canCreate(User user) {
         mustBeLoggedIn();
         checkScope(MANAGE_USERS);
-        return false;
+
+        if (user.getApplication() == null) {
+            return false;
+        }
+
+        Application ap = em.find(Application.class, user.getApplication().getId());
+        return ap != null && ap.getOwner().equals(getUser());
     }
 
     @Override
     public boolean canEdit(User user) {
         mustBeLoggedIn();
         checkScope(MANAGE_USERS);
-        return false;
+        return user.getApplication().getOwner().equals(getUser());
     }
 
     @Override
@@ -38,12 +48,39 @@ public class UsersResource extends BaseEntityResource<User> {
 
     @Override
     protected void validateEntity(List<String> list, User user) {
-
+        if (user.getEmail() == null || user.getEmail().trim().length() == 0) {
+            list.add("E-mail is required");
+        }
+        if (user.getFirstName() == null || user.getFirstName().trim().length() == 0) {
+            list.add("First Name is required.");
+        }
+        if (user.getLastName() == null || user.getLastName().trim().length() == 0) {
+            list.add("Last Name is required.");
+        }
     }
 
     @Override
     public void beforeCreate(User user) {
+        if (getUser(user.getEmail(), user.getApplication()) != null) {
+            throw new RequestProcessingException(Response.Status.CONFLICT, "E-mail address is already in use.");
+        }
+    }
 
+    /**
+     * Get the user corresponding to an e-mail and application
+     *
+     * @param email       email of user
+     * @param application application of user
+     * @return User if exists
+     */
+    private User getUser(String email, Application application) {
+        CriteriaQuery<User> users = cb.createQuery(User.class);
+        Root<User> u = users.from(User.class);
+        List<User> list = em.createQuery(users.select(u).where(
+            cb.equal(u.get("email"), email),
+            cb.equal(u.get("application"), application)
+        )).getResultList();
+        return list.size() == 1 ? list.get(0) : null;
     }
 
     @Override

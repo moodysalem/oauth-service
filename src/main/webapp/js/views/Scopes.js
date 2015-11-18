@@ -17,6 +17,9 @@ define([ "react", "util", "underscore", "rbs/components/layout/Alert", "js/Model
         label: "Thumbnail",
         component: util.rf({
           render: function () {
+            if (this.props.value === null) {
+              return null;
+            }
             return d.span({ className: "text-center" }, d.img({
               src: this.props.value,
               className: "scope-thumbnail"

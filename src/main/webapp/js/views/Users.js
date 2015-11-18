@@ -2,8 +2,8 @@
  *
  */
 define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/components/combo/Table", "js/Models", "./Loading",
-    "./AppHeader", "rbs/components/controls/Pagination", "rbs/components/controls/Button" ],
-  function (React, util, _, mbli, m, table, mdls, lw, ah, pag, btn) {
+    "./AppHeader", "rbs/components/controls/Pagination", "rbs/components/controls/Button", "./UserModal", "rbs/components/mixins/Model", "./ConfirmDeleteModal" ],
+  function (React, util, _, mbli, m, table, mdls, lw, ah, pag, btn, um, model, confirmDelete) {
     "use strict";
 
     var d = React.DOM;
@@ -40,6 +40,88 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
             return "No";
           }
         }
+      },
+      {
+        component: util.rf({
+          displayName: "button column",
+
+          mixins: [ model ],
+
+          getInitialState: function () {
+            return {
+              editOpen: false,
+              deleteOpen: false,
+              userCopy: new mdls.User()
+            };
+          },
+
+          openEdit: function () {
+            this.state.userCopy.set(this.props.model.toJSON());
+            this.setState({
+              editOpen: true
+            });
+          },
+
+          closeEdit: function () {
+            this.setState({
+              editOpen: false
+            });
+          },
+
+          openDelete: function () {
+            this.setState({
+              deleteOpen: true
+            });
+          },
+          closeDelete: function () {
+            this.setState({
+              deleteOpen: false
+            });
+          },
+
+          render: function () {
+            return d.div({}, [
+              d.div({ key: "btn", className: "btn-container" }, [
+                btn({
+                  key: "edit",
+                  icon: "pencil",
+                  caption: "Edit",
+                  size: "xs",
+                  onClick: this.openEdit
+                }),
+                btn({
+                  key: "del",
+                  icon: "trash",
+                  caption: "Delete",
+                  size: "xs",
+                  type: "danger",
+                  onClick: this.openDelete
+                })
+              ]),
+              um({
+                key: "modal",
+                model: this.state.userCopy,
+                open: this.state.editOpen,
+                title: "Edit User: " + this.state.model.email,
+                onClose: this.closeEdit,
+                onSave: _.bind(function (model) {
+                  this.props.model.set(model.toJSON());
+                  this.closeEdit();
+                }, this)
+              }),
+              confirmDelete({
+                key: "del",
+                title: "Confirm Delete: " + this.state.model.email,
+                open: this.state.deleteOpen,
+                onClose: this.closeDelete,
+                deleteMessage: "This operation cannot be undone.",
+                onDelete: _.bind(function () {
+                  this.props.model.destroy({ wait: true });
+                }, this)
+              })
+            ]);
+          }
+        })
       }
     ];
 
@@ -51,7 +133,9 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
           users: new mdls.Users().setParam("applicationId", this.props.applicationId),
           app: new mdls.Application({ id: this.props.applicationId }),
           search: "",
-          lastSearch: ""
+          lastSearch: "",
+          newUser: new mdls.User(),
+          createOpen: false
         };
       },
 
@@ -86,6 +170,22 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
         });
       },
 
+      openCreate: function () {
+        this.state.newUser.clear();
+        this.state.newUser.set({
+          application: { id: this.props.applicationId }
+        });
+        this.setState({
+          createOpen: true
+        });
+      },
+
+      closeCreate: function () {
+        this.setState({
+          createOpen: false
+        });
+      },
+
       render: function () {
         if (!m.isLoggedIn()) {
           return mbli();
@@ -94,7 +194,7 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
         return d.div({
           className: "container"
         }, [
-          ah({ title: "Users", key: "he", model: this.state.app }),
+          ah({ title: "Users", key: "he", model: this.state.app, onCreate: this.openCreate }),
           d.div({
             key: "search",
             className: "row"
@@ -128,7 +228,18 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
             }, pag({
               collection: this.state.users
             }))
-          ])
+          ]),
+          um({
+            onSave: _.bind(function () {
+              this.state.users.fetch();
+              this.closeCreate();
+            }, this),
+            model: this.state.newUser,
+            key: "um",
+            title: "Create User",
+            open: this.state.createOpen,
+            onClose: this.closeCreate
+          })
         ]);
       }
     });
