@@ -1,6 +1,6 @@
-define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/components/mixins/Model", "rbs/components/controls/Tappable",
+define([ "backbone", "react", "jquery", "react-dom", "model", "underscore", "rbs/components/mixins/Model", "rbs/components/controls/Tappable",
     "js/Nav", "util", "ga" ],
-  function (Backbone, React, dom, m, _, model, tp, nav, util, ga) {
+  function (Backbone, React, $, dom, m, _, model, tp, nav, util, ga) {
     "use strict";
 
     var pv = _.noop, lastPath = null;
@@ -31,6 +31,7 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
     var origTitle = document.title;
 
     var renderFile = function (file, properties, title) {
+      $("#loading-js").css("display", "block");
       util.debug("getting file to render", file);
       require([ file ], function (comp) {
         util.debug("rendering file", file, properties);
@@ -41,6 +42,7 @@ define([ "backbone", "react", "react-dom", "model", "underscore", "rbs/component
         } else {
           document.title = origTitle;
         }
+        $("#loading-js").css("display", "");
       });
     };
 

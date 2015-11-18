@@ -53,5 +53,11 @@
         <span id="loading-text">Loading JavaScript...</span>
     </div>
 </div>
+
+<div id="loading-js">
+    <div class="loader">
+    </div>
+</div>
 </body>
+
 </html>

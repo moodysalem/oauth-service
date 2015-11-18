@@ -126,3 +126,20 @@ table.vertical-align-middle td {
 .navbar .navbar-toggle {
     color: white;
 }
+
+#loading-js {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+#loading-js > .loader {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    margin-left: -25px;
+}
