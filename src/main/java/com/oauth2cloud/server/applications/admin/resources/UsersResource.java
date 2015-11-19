@@ -3,6 +3,7 @@ package com.oauth2cloud.server.applications.admin.resources;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.User;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -48,15 +49,6 @@ public class UsersResource extends BaseEntityResource<User> {
 
     @Override
     protected void validateEntity(List<String> list, User user) {
-        if (user.getEmail() == null || user.getEmail().trim().length() == 0) {
-            list.add("E-mail is required");
-        }
-        if (user.getFirstName() == null || user.getFirstName().trim().length() == 0) {
-            list.add("First Name is required.");
-        }
-        if (user.getLastName() == null || user.getLastName().trim().length() == 0) {
-            list.add("Last Name is required.");
-        }
     }
 
     @Override
@@ -64,6 +56,10 @@ public class UsersResource extends BaseEntityResource<User> {
         if (getUser(user.getEmail(), user.getApplication()) != null) {
             throw new RequestProcessingException(Response.Status.CONFLICT, "E-mail address is already in use.");
         }
+        if (user.getNewPassword() == null || user.getNewPassword().trim().length() == 0) {
+            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "User password is required.");
+        }
+        user.setPassword(BCrypt.hashpw(user.getNewPassword(), BCrypt.gensalt()));
     }
 
     /**
@@ -85,7 +81,9 @@ public class UsersResource extends BaseEntityResource<User> {
 
     @Override
     public void beforeEdit(User user, User t1) {
-
+        if (t1.getNewPassword() != null && t1.getNewPassword().trim().length() > 0) {
+            t1.setPassword(BCrypt.hashpw(t1.getNewPassword(), BCrypt.gensalt()));
+        }
     }
 
     @QueryParam("search")

@@ -75,6 +75,21 @@
                                         xfbml: false,
                                         version: 'v2.5'
                                     });
+
+                                    // add a handler to the facebook login button
+                                    $(function () {
+                                        $("#facebookLogin").click(function () {
+                                            if (FB && typeof FB.login === "function") {
+                                                FB.login(function (response) {
+                                                    if (response.status === 'connected') {
+                                                        // Logged into your app and Facebook.
+                                                        $("#facebookToken").val(response.authResponse.accessToken)
+                                                                .closest("form").submit();
+                                                    }
+                                                }, { scope: "public_profile,email" });
+                                            }
+                                        });
+                                    });
                                 };
 
                                 (function (d, s, id) {
@@ -87,21 +102,6 @@
                                     js.src = window.location.origin + "/js/vendor/facebook/sdk.js";
                                     fjs.parentNode.insertBefore(js, fjs);
                                 }(document, 'script', 'facebook-jssdk'));
-
-                                // add a handler to the facebook login button
-                                $(function () {
-                                    $("#facebookLogin").click(function () {
-                                        if (FB && typeof FB.login === "function") {
-                                            FB.login(function (response) {
-                                                if (response.status === 'connected') {
-                                                    // Logged into your app and Facebook.
-                                                    $("#facebookToken").val(response.authResponse.accessToken)
-                                                            .closest("form").submit();
-                                                }
-                                            }, { scope: "public_profile,email" });
-                                        }
-                                    });
-                                });
                             </script>
                         </div>
                     </#if>

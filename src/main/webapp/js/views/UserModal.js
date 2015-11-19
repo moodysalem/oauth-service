@@ -9,7 +9,7 @@ define([ "react", "util", "underscore", "rbs/components/layout/Modal", "rbs/comp
     var d = React.DOM;
     var rpt = React.PropTypes;
 
-    var r2 = [
+    var verifiedRow = [
       {
         attribute: "verified",
         label: "Verified",
@@ -19,7 +19,7 @@ define([ "react", "util", "underscore", "rbs/components/layout/Modal", "rbs/comp
       }
     ];
 
-    var r3 = [
+    var nameRow = [
       {
         attribute: "firstName",
         label: "First Name",
@@ -50,19 +50,23 @@ define([ "react", "util", "underscore", "rbs/components/layout/Modal", "rbs/comp
       },
 
       render: function () {
+        var existing = this.state.model.id > 0;
+
         return modal(_.extend({}, this.props), [
           d.div({ key: "mb", className: "modal-body" }, [
             form({
               key: "mb",
               ref: "f",
+              autoComplete: false,
               onSubmit: _.bind(function () {
                 this.props.model.save({}, {
                   success: this.props.onSave
                 });
               }, this)
             }, [
+              row({ key: "name", model: this.props.model, attributes: nameRow }),
               row({
-                key: "r1",
+                key: "e-mail",
                 model: this.props.model,
                 attributes: [
                   {
@@ -73,12 +77,26 @@ define([ "react", "util", "underscore", "rbs/components/layout/Modal", "rbs/comp
                     component: "email",
                     required: true,
                     xs: 12,
-                    readOnly: this.state.model.id > 0
+                    readOnly: existing
                   }
                 ]
               }),
-              row({ key: "r2", model: this.props.model, attributes: r2 }),
-              row({ key: "r3", model: this.props.model, attributes: r3 })
+              row({ key: "verified", model: this.props.model, attributes: verifiedRow }),
+              row({
+                key: "password",
+                model: this.props.model,
+                attributes: [
+                  {
+                    attribute: "newPassword",
+                    label: existing ? "New Password" : "Password",
+                    placeholder: existing ? "New Password" : "Password",
+                    tip: "Enter a password to be assigned to the user.",
+                    component: "password",
+                    xs: 12,
+                    required: !existing
+                  }
+                ]
+              })
             ]),
             alerts({ key: "alts", watch: this.props.model, showSuccess: false })
           ]),
