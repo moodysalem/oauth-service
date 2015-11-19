@@ -331,13 +331,9 @@ define([ "react", "util", "underscore", "./Endpoint", "rbs/components/layout/Fix
                 ]
               })
             ]),
-            fixToTop({ key: "toc-big" },
-              d.div({
-                className: "col-md-4 col-lg-3 hidden-xs hidden-sm"
-              }, d.div({
-                className: "well"
-              }, toc))
-            )
+            d.div({
+              className: "col-md-4 col-lg-3 hidden-xs hidden-sm"
+            }, fixToTop({ key: "toc-big", className: "well smooth-move-top" }, toc))
           ])
         ]);
       }
