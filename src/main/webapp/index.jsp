@@ -46,11 +46,13 @@
 <body>
 <div id="nav"></div>
 <div id="app">
-    <div class="loading">
-        <div class="loader">
+    <div id="page-loading-first">
+        <div class="loading">
+            <div class="loader">
+            </div>
+            <br/><br/>
+            <span id="loading-text">Loading JavaScript...</span>
         </div>
-        <br/><br/>
-        <span id="loading-text">Loading JavaScript...</span>
     </div>
 </div>
 

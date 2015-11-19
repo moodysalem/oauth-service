@@ -68,6 +68,7 @@
                                 <i class="fa fa-facebook fa-lg"></i>
                             </button>
                             <script>
+                                // define a function to be called when facebook initializes
                                 window.fbAsyncInit = function () {
                                     FB.init({
                                         appId: "${model.client.application.facebookAppId?c}",
@@ -83,26 +84,21 @@
                                     }
                                     js = d.createElement(s);
                                     js.id = id;
-                                    js.src = "//connect.facebook.net/en_US/sdk.js";
+                                    js.src = window.location.origin + "/js/vendor/facebook/sdk.js";
                                     fjs.parentNode.insertBefore(js, fjs);
                                 }(document, 'script', 'facebook-jssdk'));
 
+                                // add a handler to the facebook login button
                                 $(function () {
                                     $("#facebookLogin").click(function () {
                                         if (FB && typeof FB.login === "function") {
                                             FB.login(function (response) {
-                                                console.log(response);
                                                 if (response.status === 'connected') {
                                                     // Logged into your app and Facebook.
                                                     $("#facebookToken").val(response.authResponse.accessToken)
                                                             .closest("form").submit();
                                                 }
                                             }, { scope: "public_profile,email" });
-                                        } else {
-                                            // FB SDK did not load for whatever reason, just use traditional OAuth Flow
-                                            window.location.href = "https://www.facebook.com/dialog/oauth?" +
-                                                    "client_id=${model.client.application.facebookAppId?c}" +
-                                                    "&redirect_uri=${model.requestUrl?url}";
                                         }
                                     });
                                 });
@@ -115,10 +111,9 @@
                             <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
                                 <i class="fa fa-google fa-lg"></i>
                             </button>
-                            <script src="//apis.google.com/js/platform.js" onload="initGoogle();" async
-                                    defer></script>
                             <script>
                                 var initGoogle = function () {
+                                    // define a function to be called when google loads
                                     if (gapi && typeof gapi.load === "function") {
                                         gapi.load('auth2', function () {
                                             var auth2 = gapi.auth2.init({
@@ -140,7 +135,19 @@
                                             });
                                         });
                                     }
-                                }
+                                };
+
+                                (function (d, s, id) {
+                                    var js, fjs = d.getElementsByTagName(s)[ 0 ];
+                                    if (d.getElementById(id)) {
+                                        return;
+                                    }
+                                    js = d.createElement(s);
+                                    js.id = id;
+                                    js.onload = initGoogle;
+                                    js.src = window.location.origin + "/js/vendor/google/platform.js";
+                                    fjs.parentNode.insertBefore(js, fjs);
+                                }(document, 'script', 'google-jssdk'));
                             </script>
                         </div>
                     </#if>

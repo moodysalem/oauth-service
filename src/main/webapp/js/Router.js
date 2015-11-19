@@ -3,45 +3,54 @@ define([ "backbone", "react", "jquery", "react-dom", "model", "underscore", "rbs
   function (Backbone, React, $, dom, m, _, model, tp, nav, util, ga) {
     "use strict";
 
-    var pv = _.noop, lastPath = null;
+    var d = React.DOM;
+    var rpt = React.PropTypes;
+
+    var pv = _.noop;
     if (typeof ga === "function") {
       util.debug("initializing google analytics...");
       ga("create", "UA-58623092-4", "auto");
-      pv = _.debounce(function () {
-        if (ga && window.location.pathname !== lastPath) {
-          ga("send", "pageview", {
-            page: (lastPath = window.location.pathname)
-          });
-        }
-      }, 100);
+      pv = function () {
+        ga("send", "pageview", {
+          page: window.location.pathname
+        });
+      };
     } else {
-      util.debug("google analytics not started because GA is blocked");
+      util.debug("google analytics not started because GA is blocked...");
     }
 
     // component that re-renders on application model change as well as wraps the children in a tap-friendly listener
     var wrapper = util.rf({
       displayName: "wrapper",
+      propTypes: {
+        view: rpt.func.isRequired,
+        props: rpt.object
+      },
       mixins: [ model ],
       render: function () {
         util.debug("wrapper rendered.");
-        return tp({}, React.DOM.div({}, this.props.children));
+        return tp({}, this.props.view(this.props.props));
       }
     });
 
     var origTitle = document.title;
 
     var renderFile = function (file, properties, title) {
+      // remove the page loading first element
+      $("#app").find("#page-loading-first").remove();
+      // show the page loading indicator
       $("#loading-js").css("display", "block");
       util.debug("getting file to render", file);
       require([ file ], function (comp) {
         util.debug("rendering file", file, properties);
-        dom.render(wrapper({ model: m }, comp(properties)), $("#app").get(0));
+        dom.render(wrapper({ model: m, view: comp, props: properties }), $("#app").get(0));
         pv();
         if (typeof title === "string") {
           document.title = util.concatWS(" | ", origTitle, title);
         } else {
           document.title = origTitle;
         }
+        // remove the page loading indicator
         $("#loading-js").css("display", "");
       });
     };

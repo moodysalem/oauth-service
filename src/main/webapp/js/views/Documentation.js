@@ -1,7 +1,7 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "./Endpoint", "./FixToTop" ],
+define([ "react", "util", "underscore", "./Endpoint", "rbs/components/layout/FixToTop" ],
   function (React, util, _, ep, fixToTop) {
     "use strict";
     var d = React.DOM;
