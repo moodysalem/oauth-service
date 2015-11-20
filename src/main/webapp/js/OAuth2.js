@@ -75,18 +75,19 @@ define([ "jquery" ], function ($) {
           var url = ifr.contentWindow.location.href;
           var hash = url.split("#")[ 1 ];
           if (typeof hash !== "string" || hash.length === 0) {
-            return;
-          }
-          var pcs = hash.split("&");
-          var i;
-          var obj = {};
-          for (i = 0; i < pcs.length; i++) {
-            var pp = pcs[ i ].split("=");
-            var n = pp[ 0 ], v = pp[ 1 ];
+            reject("Could not read hash in URL");
+          } else {
+            var pcs = hash.split("&");
+            var i;
+            var obj = {};
+            for (i = 0; i < pcs.length; i++) {
+              var pp = pcs[ i ].split("=");
+              var n = pp[ 0 ], v = pp[ 1 ];
 
-            obj[ decodeURIComponent(n) ] = decodeURIComponent(v);
+              obj[ decodeURIComponent(n) ] = decodeURIComponent(v);
+            }
+            resolve(getTokenInfo(obj.access_token));
           }
-          resolve(getTokenInfo(obj.access_token));
         } catch (e) {
           reject();
         }
