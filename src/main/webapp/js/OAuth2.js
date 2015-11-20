@@ -31,12 +31,13 @@ define([ "jquery" ], function ($) {
     window.localStorage.removeItem(TOKEN_KEY);
   };
 
+  var INITIALIZE_ERROR = "Must initialize the oauth2 library before calling any other functions";
   // gets info for a token
   var getTokenInfo = function (token) {
     return new Promise(function (resolve, reject) {
       if (typeof clientId !== "string" && clientId.length === 0) {
-        console.error("Must initialize the oauth2 library before calling getTokenInfo");
-        reject();
+        console.error(INITIALIZE_ERROR);
+        reject(INITIALIZE_ERROR);
         return;
       }
       if (typeof token === "string" && token.length > 0) {
@@ -49,11 +50,11 @@ define([ "jquery" ], function ($) {
             resolve(resp);
           },
           error: function () {
-            reject();
+            reject("Invalid token");
           }
         });
       } else {
-        reject();
+        reject("Invalid token format");
       }
     });
   };
@@ -62,7 +63,8 @@ define([ "jquery" ], function ($) {
   var checkAlreadyLoggedIn = function () {
     return new Promise(function (resolve, reject) {
       if (typeof clientId !== "string" || clientId === null) {
-        reject();
+        console.error(INITIALIZE_ERROR);
+        reject(INITIALIZE_ERROR);
         return;
       }
 
@@ -75,7 +77,7 @@ define([ "jquery" ], function ($) {
           var url = ifr.contentWindow.location.href;
           var hash = url.split("#")[ 1 ];
           if (typeof hash !== "string" || hash.length === 0) {
-            reject("Could not read hash in URL");
+            reject("Hash not found in URL");
           } else {
             var pcs = hash.split("&");
             var i;
@@ -89,7 +91,7 @@ define([ "jquery" ], function ($) {
             resolve(getTokenInfo(obj.access_token));
           }
         } catch (e) {
-          reject();
+          reject("Incorrect domain for url");
         }
         ifr.parentNode.removeChild(ifr);
       };
@@ -108,7 +110,7 @@ define([ "jquery" ], function ($) {
             setCachedToken(token.access_token);
             resolve(token);
           }, function () {
-            reject();
+            reject("Invalid cached token, not logged in");
           });
         });
       } else {
@@ -116,7 +118,7 @@ define([ "jquery" ], function ($) {
           setCachedToken(token.access_token);
           resolve(token);
         }, function () {
-          reject();
+          reject("No cached token, not logged in");
         });
       }
     });
@@ -146,7 +148,7 @@ define([ "jquery" ], function ($) {
           resolve();
         },
         error: function () {
-          reject();
+          reject("Failed to log out");
         }
       });
     });

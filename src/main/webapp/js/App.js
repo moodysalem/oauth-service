@@ -93,8 +93,8 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
         util.debug("logged in");
         m.set("token", token);
         start();
-      }, function () {
-        util.debug("not logged in");
+      }, function (err) {
+        util.debug("not logged in", err);
         start();
       });
 
