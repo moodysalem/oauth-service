@@ -2,8 +2,8 @@
  *
  */
 define([ "react", "util", "underscore", "rbs/components/layout/Modal", "rbs/components/layout/Form", "rbs/components/model/GridRow",
-    "rbs/components/controls/Button", "rbs/components/collection/Alerts", "rbs/components/mixins/Model" ],
-  function (React, util, _, modal, form, row, btn, alerts, model) {
+    "rbs/components/controls/Button", "rbs/components/collection/Alerts", "rbs/components/mixins/Model", "./ViewablePassword" ],
+  function (React, util, _, modal, form, row, btn, alerts, model, vp) {
     "use strict";
 
     var d = React.DOM;
@@ -90,8 +90,8 @@ define([ "react", "util", "underscore", "rbs/components/layout/Modal", "rbs/comp
                     attribute: "newPassword",
                     label: existing ? "New Password" : "Password",
                     placeholder: existing ? "New Password" : "Password",
-                    tip: "Enter a password to be assigned to the user.",
-                    component: "password",
+                    tip: "Enter a password to be assigned to the user." + (existing ? " Leave blank to leave password unchanged." : ""),
+                    component: vp,
                     xs: 12,
                     required: !existing
                   }

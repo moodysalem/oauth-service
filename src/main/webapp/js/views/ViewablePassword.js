@@ -34,7 +34,7 @@ define([ "react", "util", "rbs/components/mixins/Model", "rbs/components/control
         return d.div({
           className: "position-relative"
         }, [
-          d.input(_.extend({ type: this.state.visible ? "text" : "password", key: "input" }, this.props), null),
+          d.input(_.extend({}, this.props, { type: this.state.visible ? "text" : "password", key: "input" }), null),
           btn({
             key: "b",
             caption: (this.state.visible) ? "Hide" : "Show",
