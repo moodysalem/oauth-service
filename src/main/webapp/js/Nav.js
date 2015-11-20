@@ -1,5 +1,5 @@
 /**
- *
+ * nav bar
  */
 define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/components/mixins/NavbarHelper",
     "rbs/components/layout/Navbar", "rbs/components/layout/NavbarGroup", "rbs/components/layout/Icon", "js/OAuth2", "util",
@@ -31,6 +31,10 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
             text: "Applications",
             icon: "tachometer",
             href: "/applications"
+          }, {
+            text: "Public Applications",
+            icon: "gavel",
+            href: "/publicapplications"
           });
 
 
