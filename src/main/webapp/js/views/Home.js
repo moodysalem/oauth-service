@@ -35,8 +35,8 @@ define([ "react", "underscore", "util" ], function (React, _, util) {
               key: "col",
               className: "col-sm-12"
             }, [
-              d.h2({ key: "1", }, "Bootstrap your Startup"),
-              d.p({ key: "2", }, "Don't spend time writing code to integrate with Facebook, Google, Amazon, or sending verification " +
+              d.h2({ key: "1" }, "Bootstrap your Startup"),
+              d.p({ key: "2" }, "Don't spend time writing code to integrate with Facebook, Google, Amazon, or sending verification " +
                 "and reset password e-mails. OAuth2Cloud provides everything you need to get users authenticated.")
             ])
           ]),

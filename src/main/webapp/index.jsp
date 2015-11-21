@@ -8,9 +8,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <meta name="description" CONTENT="OAuth2 as a Service">
+
     <link rel="stylesheet" href="rbs/css/rbs.css" type="text/css"/>
     <link rel="stylesheet" href="res/oauth2cloud.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/cosmo/bootstrap.min.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/cosmo/bootstrap.min.css"
           integrity="sha384-X1WZVl4a9n8ONvqi5NUzo9FzcyMTWJ8TeF5AiqROAUkyrMYBenoixW9fMe6aWb6L" crossorigin="anonymous">
     <link rel="shortcut icon" href="res/favicon.ico?v=1"/>
 
