@@ -37,4 +37,8 @@ public class PermissionsModel extends AuthorizeModel {
         this.rememberMe = rememberMe;
     }
 
+    @Override
+    public String getStylesheetUrl() {
+        return getClient().getApplication().getStylesheetUrl();
+    }
 }

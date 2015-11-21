@@ -36,19 +36,19 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
           render: function () {
             return d.div({ className: "text-center btn-container" }, [
               btn({
-                key: "mc",
-                size: "xs",
-                caption: "Clients",
-                icon: "gavel",
-                href: util.path("applications", this.state.model.id, "clients")
-              }),
-              btn({
                 key: "edit",
                 size: "xs",
                 type: "warning",
                 caption: "Edit",
                 icon: "pencil",
                 href: util.path("applications", this.state.model.id)
+              }),
+              btn({
+                key: "mc",
+                size: "xs",
+                caption: "Clients",
+                icon: "gavel",
+                href: util.path("applications", this.state.model.id, "clients")
               }),
               btn({
                 key: "u",

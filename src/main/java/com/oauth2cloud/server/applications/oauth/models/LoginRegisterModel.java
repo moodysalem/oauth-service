@@ -40,4 +40,8 @@ public class LoginRegisterModel extends AuthorizeModel {
         this.lastEmail = lastEmail;
     }
 
+    @Override
+    public String getStylesheetUrl() {
+        return getClient().getApplication().getStylesheetUrl();
+    }
 }

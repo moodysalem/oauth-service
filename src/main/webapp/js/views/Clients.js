@@ -1,4 +1,4 @@
-/**
+/**'
  * view scopes for an application
  */
 define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
@@ -10,6 +10,8 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
 
     var rpt = React.PropTypes;
     var d = React.DOM;
+
+    var HAS_URLS = [ "CODE", "IMPLICIT" ];
 
     var ta = [
       {
@@ -55,7 +57,8 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
               editOpen: false,
               modelCopy: new mdls.Client(),
               scopesOpen: false,
-              deleteOpen: false
+              deleteOpen: false,
+              urlsOpen: false
             };
           },
 
@@ -96,6 +99,41 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
             });
           },
 
+          openUrls: function () {
+            this.setState({
+              urlsOpen: true
+            });
+          },
+          closeUrls: function () {
+            this.setState({
+              urlsOpen: false
+            });
+          },
+
+          getUrls: function () {
+            var orig = window.location.origin;
+            return _.map(this.state.model.flows, function (oneF) {
+              if (!_.contains(HAS_URLS, oneF)) {
+                return null;
+              }
+
+              var url = "";
+              switch (oneF) {
+                case "CODE":
+                  url = util.path(orig, "oauth");
+                  break;
+                case "IMPLICIT":
+                  url = util.path(orig, "oauth");
+                  break;
+              }
+
+              return d.div({ className: "form-group", key: oneF }, [
+                d.label({ key: "label" }, [ oneF, " URL" ]),
+                d.input({ key: "input", value: url, type: "text", className: "form-control", readOnly: true })
+              ]);
+            }, this);
+          },
+
           render: function () {
             return d.div({}, [
               d.div({
@@ -110,6 +148,13 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
                   icon: "pencil",
                   onClick: this.openEdit
                 }),
+                //btn({
+                //  key: "urls",
+                //  size: "xs",
+                //  caption: "URLs",
+                //  icon: "share-alt",
+                //  onClick: this.openUrls
+                //}),
                 btn({
                   key: "scopes",
                   size: "xs",
@@ -137,6 +182,23 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
                 deleteMessage: "This operation cannot be undone.",
                 onClose: this.closeDelete
               }),
+              modal({
+                key: "urls",
+                open: this.state.urlsOpen,
+                title: "URLs for " + this.state.model.name,
+                onClose: this.closeUrls
+              }, [
+                d.div({ className: "modal-body", key: "mb" }, [
+                  this.getUrls()
+                ]),
+                d.div({ className: "modal-footer", key: "mf" }, [
+                  btn({
+                    key: "close",
+                    caption: "Done",
+                    onClick: this.closeUrls
+                  })
+                ])
+              ]),
               modal({
                 key: "modal",
                 open: this.state.editOpen,

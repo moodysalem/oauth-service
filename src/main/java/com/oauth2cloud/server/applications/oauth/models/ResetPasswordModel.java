@@ -3,7 +3,7 @@ package com.oauth2cloud.server.applications.oauth.models;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.UserCode;
 
-public class ResetPasswordModel {
+public class ResetPasswordModel implements HeadProperties {
     private Application application;
     private String error;
     private UserCode userCode;
@@ -48,5 +48,10 @@ public class ResetPasswordModel {
 
     public void setReferer(String referer) {
         this.referer = referer;
+    }
+
+    @Override
+    public String getStylesheetUrl() {
+        return application.getStylesheetUrl();
     }
 }

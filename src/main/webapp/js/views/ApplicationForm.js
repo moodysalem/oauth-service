@@ -7,7 +7,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
 
     var d = React.DOM;
 
-    var firstRow = [
+    var mainDetails = [
       {
         attribute: "id",
         label: "ID",
@@ -43,7 +43,18 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       }
     ];
 
-    var secondRow = [
+    var stylesheetUrl = [
+      {
+        attribute: "stylesheetUrl",
+        label: "Stylesheet URL",
+        placeholder: "Stylesheet URL",
+        tip: "Enter the URL of a CSS stylesheet that should be used as the theme of the login page.",
+        component: "text",
+        xs: 12
+      }
+    ];
+
+    var legacyUrl = [
       {
         attribute: "legacyUrl",
         label: "Legacy URL",
@@ -54,7 +65,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       }
     ];
 
-    var thirdRow = [
+    var fbCredentials = [
       {
         attribute: "facebookAppId",
         label: "Facebook Application ID",
@@ -73,7 +84,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       }
     ];
 
-    var fourthRow = [
+    var googleCredentials = [
       {
         attribute: "googleClientId",
         label: "Google Client ID",
@@ -92,7 +103,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       }
     ];
 
-    var fifthRow = [
+    var amazonCredentials = [
       {
         attribute: "amazonClientId",
         label: "Amazon Client ID",
@@ -123,35 +134,43 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
             key: "lw",
             watch: this.props.model
           }, form(formProps, [
-            d.div({ className: "card", key: "d1" }, [
-              d.h4({ key: "h41" }, "Application Details"),
+            d.div({ className: "card", key: "details" }, [
+              d.h3({ key: "h41" }, "Application Details"),
               row({
                 key: "r1",
                 model: this.props.model,
-                attributes: firstRow
+                attributes: mainDetails
               })
             ]),
-            d.div({ className: "card", key: "d2" }, [
-              d.h4({ key: "h4" }, "Login Methods"),
+            d.div({ className: "card", key: "customize" }, [
+              d.h3({ key: "h4" }, "Customize Application"),
+              row({
+                key: "style",
+                model: this.props.model,
+                attributes: stylesheetUrl
+              })
+            ]),
+            d.div({ className: "card", key: "credentials" }, [
+              d.h3({ key: "h4" }, "Login Methods"),
               row({
                 key: "r2",
                 model: this.props.model,
-                attributes: secondRow
+                attributes: legacyUrl
               }),
               row({
                 key: "r3",
                 model: this.props.model,
-                attributes: thirdRow
+                attributes: fbCredentials
               }),
               row({
                 key: "r4",
                 model: this.props.model,
-                attributes: fourthRow
+                attributes: googleCredentials
               }),
               row({
                 key: "r5",
                 model: this.props.model,
-                attributes: fifthRow
+                attributes: amazonCredentials
               })
             ])
           ])),

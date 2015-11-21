@@ -19,9 +19,13 @@
         integrity="sha384-pPttEvTHTuUJ9L2kCoMnNqCRcaMPMVMsWVO+RLaaaYDmfSP5//dP6eKRusbPcqhZ"
         crossorigin="anonymous"></script>
 
-<!-- bootstrap theme -->
+<!-- bootstrap theme or the theme associated with the application -->
+<#if model.stylesheetUrl??>
+<link rel="stylesheet" href="${model.stylesheetUrl?html}">
+<#else>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/cosmo/bootstrap.min.css"
       integrity="sha384-X1WZVl4a9n8ONvqi5NUzo9FzcyMTWJ8TeF5AiqROAUkyrMYBenoixW9fMe6aWb6L" crossorigin="anonymous">
+</#if>
 
 <!-- fontawesome icons -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css"

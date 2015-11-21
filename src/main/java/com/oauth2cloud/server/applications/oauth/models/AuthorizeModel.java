@@ -11,7 +11,7 @@ import java.net.URI;
 /**
  * Base class of the template models
  */
-public abstract class AuthorizeModel {
+public abstract class AuthorizeModel implements HeadProperties {
     private String requestUrl;
     private Client client;
     private String redirectUri;
