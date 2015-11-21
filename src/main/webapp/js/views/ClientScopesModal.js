@@ -134,7 +134,7 @@ define([ "react", "util", "underscore", "./Loading", "rbs/components/collection/
               type: "primary",
               caption: "Add",
               onClick: _.bind(function () {
-                this.state.clientScopes.add({ client: { id: this.state.model.id } });
+                this.state.clientScopes.add({ client: { id: this.props.clientId } });
               }, this)
             }),
             btn({
