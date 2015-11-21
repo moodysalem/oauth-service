@@ -38,6 +38,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
               btn({
                 key: "edit",
                 size: "xs",
+                type: "warning",
                 caption: "Edit",
                 icon: "pencil",
                 href: util.path("applications", this.state.model.id)
@@ -45,6 +46,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
               btn({
                 key: "u",
                 size: "xs",
+                type: "info",
                 caption: "Users",
                 icon: "users",
                 href: util.path("applications", this.state.model.id, "users")
@@ -52,6 +54,7 @@ define([ "react", "util", "js/Models", "model", "rbs/components/combo/Table", "r
               btn({
                 key: "scp",
                 size: "xs",
+                type: "primary",
                 caption: "Scopes",
                 icon: "book",
                 href: util.path("applications", this.state.model.id, "scopes")

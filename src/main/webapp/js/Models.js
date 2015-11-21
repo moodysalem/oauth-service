@@ -44,43 +44,34 @@ define([ "util", "backbone" ], function (util, Backbone) {
     }),
     ClientTypes: new cl([
       {
-        id: "CONFIDENTIAL",
         name: "CONFIDENTIAL"
       },
       {
-        id: "PUBLIC",
         name: "PUBLIC"
       }
     ]),
     ClientFlows: new cl([
       {
-        id: "IMPLICIT",
         name: "IMPLICIT"
       },
       {
-        id: "CODE",
         name: "CODE"
       },
       {
-        id: "RESOURCE_OWNER_CREDENTIALS",
         name: "RESOURCE_OWNER_CREDENTIALS"
       },
       {
-        id: "CLIENT_CREDENTIALS",
         name: "CLIENT_CREDENTIALS"
       }
     ]),
     ClientScopePriorities: new cl([
       {
-        id: "ALWAYS",
         name: "ALWAYS"
       },
       {
-        id: "ASK",
         name: "ASK"
       },
       {
-        id: "REQUIRE",
         name: "REQUIRE"
       }
     ])

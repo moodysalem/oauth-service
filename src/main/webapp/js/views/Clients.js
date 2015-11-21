@@ -21,6 +21,8 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
     var scopeAttributes = [
       {
         attribute: "priority",
+        valueAttribute: "name",
+        searchOn: "name",
         label: "Priority",
         component: "select",
         className: "form-control input-sm",
@@ -106,8 +108,9 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
           getTableAttributes: function (scopes) {
             return [
               {
-                attribute: "scope.id",
+                attribute: "scope",
                 label: "Scope",
+                searchOn: "name",
                 component: "select",
                 className: "form-control input-sm",
                 collection: scopes,
@@ -171,6 +174,7 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
               }, [
                 btn({
                   key: "edit",
+                  type: "warning",
                   size: "xs",
                   caption: "Edit",
                   icon: "pencil",
@@ -180,6 +184,7 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
                   key: "scopes",
                   size: "xs",
                   caption: "Scopes",
+                  type: "primary",
                   icon: "book",
                   onClick: this.openScopes
                 }),
@@ -284,11 +289,11 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
                   className: "modal-footer"
                 }, [
                   btn({
-                    key: "cancel",
+                    key: "done",
                     ajax: true,
-                    icon: "cancel",
+                    icon: "Done",
                     onClick: this.closeScopes,
-                    caption: "Cancel"
+                    caption: "Done"
                   }),
                   btn({
                     key: "add",

@@ -104,6 +104,7 @@ define([ "react", "util", "underscore", "rbs/components/layout/Alert", "js/Model
               }, [
                 btn({
                   key: "edit",
+                  type: "warning",
                   size: "xs",
                   caption: "Edit",
                   icon: "pencil",

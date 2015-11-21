@@ -86,6 +86,7 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
                   key: "edit",
                   icon: "pencil",
                   caption: "Edit",
+                  type: "warning",
                   size: "xs",
                   onClick: this.openEdit
                 }),

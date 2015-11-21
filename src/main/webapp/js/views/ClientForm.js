@@ -45,6 +45,8 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
         required: true,
         label: "Type",
         attribute: "type",
+        searchOn: "name",
+        valueAttribute: "name",
         component: "select",
         collection: mdls.ClientTypes,
         modelComponent: nameOpt
@@ -54,6 +56,8 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
         label: "Flows",
         attribute: "flows",
         component: "select",
+        searchOn: "name",
+        valueAttribute: "name",
         multiple: true,
         collection: mdls.ClientFlows,
         modelComponent: nameOpt
