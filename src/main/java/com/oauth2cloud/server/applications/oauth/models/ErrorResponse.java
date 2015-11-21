@@ -11,12 +11,7 @@ import java.util.stream.Collectors;
  * The OAauth2 spec for an error response
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponse implements HeadProperties {
-    @Override
-    public String getStylesheetUrl() {
-        return null;
-    }
-
+public class ErrorResponse {
     public enum Type {
         invalid_request, invalid_client, invalid_grant, unauthorized_client, unsupported_grant_type, invalid_scope, access_denied
     }

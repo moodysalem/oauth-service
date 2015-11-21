@@ -20,11 +20,8 @@
         crossorigin="anonymous"></script>
 
 <!-- bootstrap theme or the theme associated with the application -->
-<#if model.stylesheetUrl??>
+<#if (model.stylesheetUrl)??>
 <link rel="stylesheet" href="${model.stylesheetUrl?html}">
-<#else>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/cosmo/bootstrap.min.css"
-      integrity="sha384-X1WZVl4a9n8ONvqi5NUzo9FzcyMTWJ8TeF5AiqROAUkyrMYBenoixW9fMe6aWb6L" crossorigin="anonymous">
 </#if>
 
 <!-- fontawesome icons -->

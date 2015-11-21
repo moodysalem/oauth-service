@@ -102,6 +102,13 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     }
 
     private void setNullsForEmptyStrings(Application application) {
+        if (application.getLegacyUrl() != null && application.getLegacyUrl().trim().isEmpty()) {
+            application.setLegacyUrl(null);
+        }
+        if (application.getStylesheetUrl() != null && application.getStylesheetUrl().trim().isEmpty()) {
+            application.setLegacyUrl(null);
+        }
+
         if (application.getFacebookAppSecret() != null && application.getFacebookAppSecret().isEmpty()) {
             application.setFacebookAppSecret(null);
         }

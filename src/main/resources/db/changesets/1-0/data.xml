@@ -11,6 +11,9 @@
       <column name="facebookAppId">725381047606159</column>
       <column name="googleClientId">520864329427-r8nf78v9oiqatdhca5sumqjn39q9q2hs.apps.googleusercontent.com</column>
       <column name="amazonClientId">amzn1.application-oa2-client.fca66588ac9f4914ac23a931f5d45f7b</column>
+      <column name="stylesheetUrl">
+        https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/cosmo/bootstrap.min.css
+      </column>
       <column name="publicClientRegistration" valueBoolean="true"/>
     </insert>
 

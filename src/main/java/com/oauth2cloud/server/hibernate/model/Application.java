@@ -5,6 +5,8 @@ import com.moodysalem.hibernate.model.BaseEntity;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 
@@ -45,10 +47,14 @@ public class Application extends BaseEntity {
     @Convert(converter = EncryptedStringConverter.class)
     private String amazonClientSecret;
 
+    @URL
+    @NotEmpty
     @Lob
     @Column(name = "legacyUrl")
     private String legacyUrl;
 
+    @URL
+    @NotEmpty
     @Lob
     @Column(name = "stylesheetUrl")
     private String stylesheetUrl;
