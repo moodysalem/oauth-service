@@ -21,23 +21,22 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
             text: "Documentation",
             icon: "file-text",
             href: "/docs"
+          },
+          {
+            text: "Applications",
+            icon: "tachometer",
+            href: "/applications"
+          },
+          {
+            text: "Public Applications",
+            icon: "gavel",
+            href: "/publicapplications"
           }
         ];
 
         var rightLinks = [];
 
         if (mdl.token) {
-          leftLinks.push({
-            text: "Applications",
-            icon: "tachometer",
-            href: "/applications"
-          }, {
-            text: "Public Applications",
-            icon: "gavel",
-            href: "/publicapplications"
-          });
-
-
           var dn = util.concatWS(" ", mdl.token.user_details.first_name, mdl.token.user_details.last_name);
           rightLinks.push({
             text: "Logged in as " + dn
