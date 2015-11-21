@@ -52,6 +52,7 @@ public class ResetPasswordModel implements HeadProperties {
 
     @Override
     public String getStylesheetUrl() {
-        return application.getStylesheetUrl();
+        return userCode != null ? userCode.getUser().getApplication().getStylesheetUrl() :
+            (application != null ? application.getStylesheetUrl() : null);
     }
 }
