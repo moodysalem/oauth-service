@@ -1,11 +1,11 @@
 /**'
  * view scopes for an application
  */
-define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
+define([ "jquery", "underscore", "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
     "./AppHeader", "rbs/components/layout/Modal", "rbs/components/collection/Alerts", "rbs/components/controls/Button",
     "./ClientForm", "rbs/components/mixins/Model", "rbs/components/model/GridRow", "rbs/components/mixins/Events",
     "./ConfirmDeleteModal", "model", "./MustBeLoggedIn", "./ClientScopesModal" ],
-  function (_, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli, clientScopesModal) {
+  function ($, _, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli, clientScopesModal) {
     "use strict";
 
     var rpt = React.PropTypes;
@@ -111,25 +111,40 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
           },
 
           getUrls: function () {
-            var orig = window.location.origin;
-            return _.map(this.state.model.flows, function (oneF) {
+            var authorize = util.path(window.location.origin, "oauth", "authorize");
+            var flows = this.state.model.flows;
+            var uris = this.state.model.uris;
+            var cid = this.state.model.identifier;
+            return _.map(flows, function (oneF) {
               if (!_.contains(HAS_URLS, oneF)) {
                 return null;
               }
 
-              var url = "";
-              switch (oneF) {
-                case "CODE":
-                  url = util.path(orig, "oauth");
-                  break;
-                case "IMPLICIT":
-                  url = util.path(orig, "oauth");
-                  break;
-              }
-
               return d.div({ className: "form-group", key: oneF }, [
-                d.label({ key: "label" }, [ oneF, " URL" ]),
-                d.input({ key: "input", value: url, type: "text", className: "form-control", readOnly: true })
+                d.h4({ key: "header" }, [ oneF, " Flow URL" ]),
+                d.div({ key: "uris" },
+                  _.map(uris, function (uri) {
+                    var params = {
+                      redirect_uri: uri,
+                      response_type: oneF === "CODE" ? "code" : "token",
+                      client_id: cid
+                    };
+
+                    return d.div({
+                      key: "input-" + uri,
+                      className: "form-group"
+                    }, [
+                      d.label({ key: "label" }, uri),
+                      d.input({
+                        key: "input",
+                        value: authorize + "?" + $.param(params),
+                        type: "text",
+                        className: "form-control",
+                        readOnly: true
+                      })
+                    ]);
+                  }, this)
+                )
               ]);
             }, this);
           },
@@ -148,13 +163,14 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
                   icon: "pencil",
                   onClick: this.openEdit
                 }),
-                //btn({
-                //  key: "urls",
-                //  size: "xs",
-                //  caption: "URLs",
-                //  icon: "share-alt",
-                //  onClick: this.openUrls
-                //}),
+                btn({
+                  key: "urls",
+                  size: "xs",
+                  type: "info",
+                  caption: "URLs",
+                  icon: "share-alt",
+                  onClick: this.openUrls
+                }),
                 btn({
                   key: "scopes",
                   size: "xs",
@@ -185,7 +201,7 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
               modal({
                 key: "urls",
                 open: this.state.urlsOpen,
-                title: "URLs for " + this.state.model.name,
+                title: "Flow URLs for " + this.state.model.name,
                 onClose: this.closeUrls
               }, [
                 d.div({ className: "modal-body", key: "mb" }, [

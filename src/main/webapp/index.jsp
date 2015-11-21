@@ -40,7 +40,7 @@
             window.hashObject = obj;
         }
     </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"
             integrity="sha384-3Ft7qPP9cYCINavEQr8puY8Ng61an4d3jQRqlOv+NhS7aKteY9qqGaqzcGk5hT7c" crossorigin="anonymous"
             data-main="js/App.js"></script>
 </head>
