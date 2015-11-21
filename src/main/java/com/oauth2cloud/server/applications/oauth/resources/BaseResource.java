@@ -391,7 +391,9 @@ public abstract class BaseResource {
      * @return error page
      */
     protected Response error(String error) {
-        return Response.status(400).entity(new Viewable("/templates/Error", error)).build();
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("error", error);
+        return Response.status(400).entity(new Viewable("/templates/Error", model)).build();
     }
 
     /**

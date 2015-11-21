@@ -7,7 +7,7 @@
 
     <div class="alert alert-danger">
         <i class="fa fa-exclamation-triangle"></i>
-    ${model?html}
+    ${model.error?html}
     </div>
 </div>
 </body>
