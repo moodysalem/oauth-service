@@ -4,54 +4,12 @@
 define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
     "./AppHeader", "rbs/components/layout/Modal", "rbs/components/collection/Alerts", "rbs/components/controls/Button",
     "./ClientForm", "rbs/components/mixins/Model", "rbs/components/model/GridRow", "rbs/components/mixins/Events",
-    "./ConfirmDeleteModal", "model", "./MustBeLoggedIn" ],
-  function (_, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli) {
+    "./ConfirmDeleteModal", "model", "./MustBeLoggedIn", "./ClientScopesModal" ],
+  function (_, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli, clientScopesModal) {
     "use strict";
 
     var rpt = React.PropTypes;
     var d = React.DOM;
-
-    var nameComp = util.rf({
-      mixins: [ model ],
-      render: function () {
-        return d.div({}, this.state.model.name);
-      }
-    });
-
-    var scopeAttributes = [
-      {
-        attribute: "priority",
-        valueAttribute: "name",
-        searchOn: "name",
-        label: "Priority",
-        component: "select",
-        className: "form-control input-sm",
-        collection: mdls.ClientScopePriorities,
-        modelComponent: nameComp
-      },
-      {
-        attribute: "reason",
-        label: "Reason",
-        component: "textarea",
-        className: "form-control input-sm",
-        placeholder: "Reason for scope"
-      },
-      {
-        attribute: "approved",
-        label: "Approved",
-        component: "checkbox"
-      },
-      {
-        component: btn,
-        type: "danger",
-        icon: "ban",
-        size: "xs",
-        ajax: true,
-        onClick: function () {
-          this.props.model.destroy({ wait: true });
-        }
-      }
-    ];
 
     var ta = [
       {
@@ -93,30 +51,12 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
           mixins: [ model ],
 
           getInitialState: function () {
-            var scopes = (new mdls.Scopes()).setPageSize(1000);
             return {
               editOpen: false,
               modelCopy: new mdls.Client(),
               scopesOpen: false,
-              clientScopes: new mdls.ClientScopes(),
-              scopes: scopes,
-              attributes: this.getTableAttributes(scopes),
               deleteOpen: false
             };
-          },
-
-          getTableAttributes: function (scopes) {
-            return [
-              {
-                attribute: "scope",
-                label: "Scope",
-                searchOn: "name",
-                component: "select",
-                className: "form-control input-sm",
-                collection: scopes,
-                modelComponent: nameComp
-              }
-            ].concat(scopeAttributes);
           },
 
           closeEdit: function () {
@@ -133,25 +73,15 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
           },
 
           openScopes: function () {
-            this.state.clientScopes.reset();
-            this.state.scopes.setParam("applicationId", this.state.model.application.id);
-            if (this.isMounted()) {
-              this.setState({
-                scopesOpen: true
-              }, function () {
-                this.state.clientScopes.setParam("clientId", this.state.model.id);
-                this.state.clientScopes.fetch();
-                this.state.scopes.fetch();
-              });
-            }
+            this.setState({
+              scopesOpen: true
+            });
           },
 
           closeScopes: function () {
-            if (this.isMounted()) {
-              this.setState({
-                scopesOpen: false
-              });
-            }
+            this.setState({
+              scopesOpen: false
+            });
           },
 
           openDelete: function () {
@@ -260,63 +190,15 @@ define([ "underscore", "react", "util", "rbs/components/combo/Table", "js/Models
                 ])
               ]),
 
-              modal({
+              clientScopesModal({
                 key: "scopes",
                 open: this.state.scopesOpen,
                 title: "Edit Scopes for " + this.state.model.name,
                 size: "lg",
-                onClose: this.closeScopes
-              }, [
-                d.div({
-                  key: "mb",
-                  className: "modal-body"
-                }, [
-                  lw({
-                    key: "tbl",
-                    watch: [ this.state.clientScopes, this.state.scopes ]
-                  }, table({
-                    collection: this.state.clientScopes,
-                    attributes: this.state.attributes
-                  })),
-                  alerts({
-                    watch: this.state.clientScopes,
-                    key: "alts",
-                    showSuccess: false
-                  })
-                ]),
-                d.div({
-                  key: "mf",
-                  className: "modal-footer"
-                }, [
-                  btn({
-                    key: "done",
-                    ajax: true,
-                    icon: "Done",
-                    onClick: this.closeScopes,
-                    caption: "Done"
-                  }),
-                  btn({
-                    key: "add",
-                    icon: "plus",
-                    ajax: true,
-                    type: "primary",
-                    caption: "Add",
-                    onClick: _.bind(function () {
-                      this.state.clientScopes.add({ client: { id: this.state.model.id } });
-                    }, this)
-                  }),
-                  btn({
-                    key: "save",
-                    icon: "save",
-                    ajax: true,
-                    type: "success",
-                    onClick: _.bind(function () {
-                      this.state.clientScopes.save();
-                    }, this),
-                    caption: "Save"
-                  })
-                ])
-              ])
+                onClose: this.closeScopes,
+                clientId: this.state.model.id,
+                applicationId: this.state.model.application.id
+              })
             ]);
           }
         })
