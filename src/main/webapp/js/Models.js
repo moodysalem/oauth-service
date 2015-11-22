@@ -7,6 +7,7 @@ define([ "util", "backbone" ], function (util, Backbone) {
   var cl = Backbone.Collection;
 
   var APPLICATIONS_URL = util.path(API_URL, "applications");
+  var PUBLIC_APPLICATIONS_URL = util.path(API_URL, "publicapplications");
   var SCOPES_URL = util.path(API_URL, "scopes");
   var CLIENTS_URL = util.path(API_URL, "clients");
   var CLIENT_SCOPES_URL = util.path(API_URL, "clientscopes");
@@ -17,6 +18,12 @@ define([ "util", "backbone" ], function (util, Backbone) {
     }),
     Applications: cl.extend({
       url: APPLICATIONS_URL
+    }),
+    PublicApplication: mdl.extend({
+      urlRoot: PUBLIC_APPLICATIONS_URL
+    }),
+    PublicApplications: cl.extend({
+      url: PUBLIC_APPLICATIONS_URL
     }),
     Scope: mdl.extend({
       urlRoot: SCOPES_URL

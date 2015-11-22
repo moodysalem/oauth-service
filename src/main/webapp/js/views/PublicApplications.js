@@ -1,14 +1,26 @@
 /**
  * list of applications that can be registered for
  */
-define([ "react", "util", "underscore", "rbs/components/layout/Alert", "model" ],
-  function (React, util, _, alt, m) {
+define([ "react", "util", "underscore", "rbs/components/layout/Alert", "model", "js/Models" ],
+  function (React, util, _, alt, m, mdls) {
     "use strict";
 
     var d = React.DOM;
     var rpt = React.PropTypes;
 
     return util.rf({
+      displayName: "pub apps",
+
+      getInitialState: function () {
+        return {
+          pa: new mdls.PublicApplications()
+        };
+      },
+
+      componentDidMount: function () {
+        this.state.pa.fetch();
+      },
+
       render: function () {
         var li = m.isLoggedIn();
 

@@ -5,6 +5,9 @@ import com.oauth2cloud.server.applications.admin.APIApplication;
 import org.glassfish.jersey.server.ResourceConfig;
 
 public class AdminTest extends BaseTest {
+    public static final String AUTH_HEADER = "Authorization";
+    public static final String TOKEN = "bearer abc";
+
     @Override
     public ResourceConfig getResourceConfig() {
         System.setProperty("JDBC_CONNECTION_STRING", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
