@@ -8,6 +8,7 @@ import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,11 +91,18 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
             String so = name.trim();
             Predicate toAdd = null;
 
+            // de-dupe terms
+            HashSet<String> searchTerms = new HashSet<>();
             for (String s : so.split(" ")) {
                 if (!s.isEmpty()) {
-                    Predicate wordSearch = cb.like(root.get("name"), "%" + s + "%");
-                    toAdd = (toAdd == null) ? wordSearch : cb.and(toAdd, wordSearch);
+                    searchTerms.add(s.toUpperCase());
                 }
+            }
+
+            // make the predicates from the de-duped terms
+            for (String s : searchTerms) {
+                Predicate wordSearch = cb.like(cb.upper(root.get("name")), "%" + s.toUpperCase() + "%");
+                toAdd = (toAdd == null) ? wordSearch : cb.and(toAdd, wordSearch);
             }
 
             if (toAdd != null) {
