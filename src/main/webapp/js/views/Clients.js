@@ -4,14 +4,13 @@
 define([ "jquery", "underscore", "react", "util", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
     "./AppHeader", "rbs/components/layout/Modal", "rbs/components/collection/Alerts", "rbs/components/controls/Button",
     "./ClientForm", "rbs/components/mixins/Model", "rbs/components/model/GridRow", "rbs/components/mixins/Events",
-    "./ConfirmDeleteModal", "model", "./MustBeLoggedIn", "./ClientScopesModal" ],
-  function ($, _, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli, clientScopesModal) {
+    "./ConfirmDeleteModal", "model", "./MustBeLoggedIn", "./ClientScopesModal", "./ClientURLsModal" ],
+  function ($, _, React, util, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli,
+            clientScopesModal, clientUrlsModal) {
     "use strict";
 
     var rpt = React.PropTypes;
     var d = React.DOM;
-
-    var HAS_URLS = [ "CODE", "IMPLICIT" ];
 
     var ta = [
       {
@@ -110,45 +109,6 @@ define([ "jquery", "underscore", "react", "util", "rbs/components/combo/Table", 
             });
           },
 
-          getUrls: function () {
-            var authorize = util.path(window.location.origin, "oauth", "authorize");
-            var flows = this.state.model.flows;
-            var uris = this.state.model.uris;
-            var cid = this.state.model.identifier;
-            return _.map(flows, function (oneF) {
-              if (!_.contains(HAS_URLS, oneF)) {
-                return null;
-              }
-
-              return d.div({ className: "form-group", key: oneF }, [
-                d.h4({ key: "header" }, [ oneF, " Flow URL" ]),
-                d.div({ key: "uris" },
-                  _.map(uris, function (uri) {
-                    var params = {
-                      redirect_uri: uri,
-                      response_type: oneF === "CODE" ? "code" : "token",
-                      client_id: cid
-                    };
-
-                    return d.div({
-                      key: "input-" + uri,
-                      className: "form-group"
-                    }, [
-                      d.label({ key: "label" }, uri),
-                      d.input({
-                        key: "input",
-                        value: authorize + "?" + $.param(params),
-                        type: "text",
-                        className: "form-control",
-                        readOnly: true
-                      })
-                    ]);
-                  }, this)
-                )
-              ]);
-            }, this);
-          },
-
           render: function () {
             return d.div({}, [
               d.div({
@@ -198,23 +158,13 @@ define([ "jquery", "underscore", "react", "util", "rbs/components/combo/Table", 
                 deleteMessage: "This will invalidate all the tokens and user permissions distributed to this client.",
                 onClose: this.closeDelete
               }),
-              modal({
+              clientUrlsModal({
                 key: "urls",
                 open: this.state.urlsOpen,
                 title: "Flow URLs for " + this.state.model.name,
-                onClose: this.closeUrls
-              }, [
-                d.div({ className: "modal-body", key: "mb" }, [
-                  this.getUrls()
-                ]),
-                d.div({ className: "modal-footer", key: "mf" }, [
-                  btn({
-                    key: "close",
-                    caption: "Done",
-                    onClick: this.closeUrls
-                  })
-                ])
-              ]),
+                onClose: this.closeUrls,
+                model: this.props.model
+              }),
               modal({
                 key: "modal",
                 open: this.state.editOpen,

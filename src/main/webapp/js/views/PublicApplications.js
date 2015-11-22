@@ -26,13 +26,7 @@ define([ "react", "util", "underscore", "rbs/components/layout/Alert", "model", 
 
         return d.div({ className: "container" }, [
           d.h1({ key: "h1", className: "page-header" }, "Public Applications"),
-          alt({
-            key: "i",
-            level: "info",
-            icon: "info",
-            strong: "Info",
-            message: "Here you will be able to create clients for applications you do not own. This feature is coming soon."
-          })
+
         ]);
       }
     });

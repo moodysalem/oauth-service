@@ -6,6 +6,7 @@ import com.oauth2cloud.server.hibernate.model.Application;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,9 +78,29 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
 
     }
 
+    @QueryParam("name")
+    String name;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> predicates, Root<Application> root) {
         predicates.add(cb.equal(root.get("publicClientRegistration"), true));
+
+        // allow searching for applications by name
+        if (name != null) {
+            String so = name.trim();
+            Predicate toAdd = null;
+
+            for (String s : so.split(" ")) {
+                if (!s.isEmpty()) {
+                    Predicate wordSearch = cb.like(root.get("name"), "%" + s + "%");
+                    toAdd = (toAdd == null) ? wordSearch : cb.and(toAdd, wordSearch);
+                }
+            }
+
+            if (toAdd != null) {
+                predicates.add(toAdd);
+            }
+        }
     }
 
     @Override

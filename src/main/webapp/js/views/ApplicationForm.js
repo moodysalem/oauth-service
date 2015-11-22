@@ -33,7 +33,23 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
         component: "email",
         required: true,
         sm: 5
-      },
+      }
+    ];
+
+
+    var description = [
+      {
+        attribute: "description",
+        label: "Description",
+        tip: "Enter a short description of your application.",
+        placeholder: "Enter a short description of your application.",
+        component: "textarea",
+        xs: 12
+      }
+    ];
+
+
+    var publicRegistrationCheckbox = [
       {
         attribute: "publicClientRegistration",
         label: "Public for Client Registration",
@@ -137,9 +153,19 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
             d.div({ className: "card", key: "details" }, [
               d.h3({ key: "h41" }, "Application Details"),
               row({
-                key: "r1",
+                key: "nameEmail",
                 model: this.props.model,
                 attributes: mainDetails
+              }),
+              row({
+                key: "description",
+                model: this.props.model,
+                attributes: description
+              }),
+              row({
+                key: "public",
+                model: this.props.model,
+                attributes: publicRegistrationCheckbox
               })
             ]),
             d.div({ className: "card", key: "customize" }, [

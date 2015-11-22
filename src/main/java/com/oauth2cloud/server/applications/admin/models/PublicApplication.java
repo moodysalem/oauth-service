@@ -30,4 +30,8 @@ public class PublicApplication {
         return application.getSupportEmail();
     }
 
+    public String getDescription() {
+        return application.getDescription();
+    }
+
 }

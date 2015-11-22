@@ -109,6 +109,10 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
             application.setLegacyUrl(null);
         }
 
+        if (application.getDescription() != null && application.getDescription().trim().isEmpty()) {
+            application.setDescription(null);
+        }
+
         if (application.getFacebookAppSecret() != null && application.getFacebookAppSecret().isEmpty()) {
             application.setFacebookAppSecret(null);
         }

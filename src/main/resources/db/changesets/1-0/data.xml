@@ -8,6 +8,7 @@
     <insert tableName="Application">
       <column name="id">1</column>
       <column name="name">OAuth2 Cloud</column>
+      <column name="description">An OAuth2 Application as a service.</column>
       <column name="supportEmail">moody@oauth2cloud.com</column>
       <column name="facebookAppId">725381047606159</column>
       <column name="googleClientId">520864329427-r8nf78v9oiqatdhca5sumqjn39q9q2hs.apps.googleusercontent.com</column>

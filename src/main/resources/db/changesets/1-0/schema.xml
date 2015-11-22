@@ -20,6 +20,9 @@
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
+      <column name="description" type="${TEXT}">
+        <constraints nullable="true"/>
+      </column>
       <column name="supportEmail" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
