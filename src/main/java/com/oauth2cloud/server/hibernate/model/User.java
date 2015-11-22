@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.moodysalem.hibernate.model.BaseEntity;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -24,6 +25,7 @@ public class User extends BaseEntity {
     private String password;
 
     @Transient
+    @JsonIgnore
     private String newPassword;
 
     @NotEmpty
@@ -85,10 +87,12 @@ public class User extends BaseEntity {
         this.verified = verified;
     }
 
+    @JsonIgnore
     public String getNewPassword() {
         return newPassword;
     }
 
+    @JsonProperty
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
     }

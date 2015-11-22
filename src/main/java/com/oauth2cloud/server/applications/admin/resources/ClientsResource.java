@@ -51,6 +51,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public void beforeCreate(Client client) {
+        client.setCreator(getUser());
         client.setIdentifier(RandomStringUtil.randomAlphaNumeric(64));
         client.setSecret(RandomStringUtil.randomAlphaNumeric(64));
     }
@@ -65,7 +66,6 @@ public class ClientsResource extends BaseEntityResource<Client> {
 
     @QueryParam("applicationId")
     Long applicationId;
-
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Client> root) {

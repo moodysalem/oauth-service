@@ -2,12 +2,9 @@ package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.BaseEntity;
-import com.oauth2cloud.server.hibernate.validate.NoSpaces;
 import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 
@@ -65,6 +62,11 @@ public class Client extends BaseEntity {
 
     @Column(name = "tokenTtl")
     private Long tokenTtl;
+
+    @ManyToOne
+    @JoinColumn(name = "creatorId", updatable = false)
+    @JsonIgnore
+    private User creator;
 
     public String getIdentifier() {
         return identifier;
@@ -146,5 +148,15 @@ public class Client extends BaseEntity {
         this.refreshTokenTtl = refreshTokenTtl;
     }
 
+    public User getCreator() {
+        return creator;
+    }
 
+    public void setCreator(User creator) {
+        this.creator = creator;
+    }
+
+    public String getCreatorEmail() {
+        return creator != null ? creator.getEmail() : null;
+    }
 }

@@ -4,6 +4,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
   <changeSet id="Required Data" author="moody.salem">
+    <!-- this is the oauth administrative interface -->
     <insert tableName="Application">
       <column name="id">1</column>
       <column name="name">OAuth2 Cloud</column>
@@ -17,6 +18,26 @@
       <column name="publicClientRegistration" valueBoolean="true"/>
     </insert>
 
+    <!-- create the admin user of app 1 -->
+    <insert tableName="User">
+      <column name="id">1</column>
+      <column name="applicationId">1</column>
+      <column name="firstName">Moody</column>
+      <column name="lastName">Salem</column>
+      <column name="email">moody.salem@gmail.com</column>
+      <column name="password">$2a$10$jGLkWP/A24QL6wEf73FDqe1IKUhr3zKLxpLC4mjmexh1HJAi3JNwa</column>
+      <column name="verified" valueBoolean="true"/>
+    </insert>
+
+    <!-- set the owner to app 1 -->
+    <update tableName="Application">
+      <column name="ownerId" valueNumeric="1"/>
+      <where>id=1</where>
+    </update>
+
+    <!-- complete schema by making sure applications cannot be without owners -->
+    <addNotNullConstraint tableName="Application" columnName="ownerId" columnDataType="BIGINT"/>
+
     <!-- admin interface -->
     <insert tableName="Client">
       <column name="id">1</column>
@@ -26,6 +47,7 @@
       <column name="secret">0457a1fe452b7f32e4b84db9db139d9a572bad7599544ac368a079bbe8069714</column>
       <column name="applicationId">1</column>
       <column name="tokenTtl">86400</column>
+      <column name="creatorId">1</column>
     </insert>
 
     <!-- only allow implicit flow -->
@@ -128,25 +150,6 @@
       <column name="approved" valueBoolean="true"/>
     </insert>
 
-    <!-- create the admin user of app 1 -->
-    <insert tableName="User">
-      <column name="id">1</column>
-      <column name="applicationId">1</column>
-      <column name="firstName">Moody</column>
-      <column name="lastName">Salem</column>
-      <column name="email">moody.salem@gmail.com</column>
-      <column name="password">$2a$10$jGLkWP/A24QL6wEf73FDqe1IKUhr3zKLxpLC4mjmexh1HJAi3JNwa</column>
-      <column name="verified" valueBoolean="true"/>
-    </insert>
-
-    <!-- set the owner to app 1 -->
-    <update tableName="Application">
-      <column name="ownerId" valueNumeric="1"/>
-      <where>id=1</where>
-    </update>
-
-    <!-- complete schema by making sure applications cannot be without owners -->
-    <addNotNullConstraint tableName="Application" columnName="ownerId" columnDataType="BIGINT"/>
   </changeSet>
 
 
