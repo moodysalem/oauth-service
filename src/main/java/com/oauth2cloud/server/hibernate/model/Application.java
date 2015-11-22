@@ -56,9 +56,15 @@ public class Application extends BaseEntity {
     @Column(name = "stylesheetUrl")
     private String stylesheetUrl;
 
+    @URL
+    @Lob
+    @Column(name = "logoUrl")
+    private String logoUrl;
+
     @Lob
     @Column(name = "description")
     private String description;
+
 
     @Column(name = "publicClientRegistration")
     private boolean publicClientRegistration;
@@ -165,5 +171,13 @@ public class Application extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 }

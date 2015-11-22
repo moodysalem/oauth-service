@@ -36,6 +36,17 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
       }
     ];
 
+    var logoUrl = [
+      {
+        attribute: "logoUrl",
+        label: "Logo URL",
+        tip: "Enter a URL for a logo that will appear in the public applications section.",
+        placeholder: "Logo URL",
+        component: "text",
+        xs: 12
+      }
+    ];
+
 
     var description = [
       {
@@ -158,6 +169,11 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
                 attributes: mainDetails
               }),
               row({
+                key: "logoUrl",
+                model: this.props.model,
+                attributes: logoUrl
+              }),
+              row({
                 key: "description",
                 model: this.props.model,
                 attributes: description
@@ -169,7 +185,7 @@ define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/Gr
               })
             ]),
             d.div({ className: "card", key: "customize" }, [
-              d.h3({ key: "h4" }, "Customize Application"),
+              d.h3({ key: "h4" }, "Customize Appearance"),
               row({
                 key: "style",
                 model: this.props.model,

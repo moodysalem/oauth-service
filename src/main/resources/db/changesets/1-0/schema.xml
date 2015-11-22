@@ -50,6 +50,7 @@
       </column>
       <column name="legacyUrl" type="${TEXT}"/>
       <column name="stylesheetUrl" type="${TEXT}"/>
+      <column name="logoUrl" type="${TEXT}"/>
     </createTable>
     <addUniqueConstraint tableName="Application" columnNames="facebookAppId,facebookAppSecret"/>
     <addUniqueConstraint tableName="Application" columnNames="googleClientId,googleClientSecret"/>

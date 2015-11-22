@@ -34,4 +34,8 @@ public class PublicApplication {
         return application.getDescription();
     }
 
+    public String getLogoUrl() {
+        return application.getLogoUrl();
+    }
+
 }
