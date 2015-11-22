@@ -3,6 +3,7 @@ package com.oauth2cloud.server.applications.oauth.resources;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.util.RandomStringUtil;
+import com.oauth2cloud.server.applications.oauth.models.ErrorModel;
 import com.oauth2cloud.server.hibernate.model.*;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -391,9 +392,9 @@ public abstract class BaseResource {
      * @return error page
      */
     protected Response error(String error) {
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("error", error);
-        return Response.status(400).entity(new Viewable("/templates/Error", model)).build();
+        ErrorModel em = new ErrorModel();
+        em.setError(error);
+        return Response.status(400).entity(new Viewable("/templates/Error", em)).build();
     }
 
     /**
