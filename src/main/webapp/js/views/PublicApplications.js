@@ -52,6 +52,10 @@ define([ "backbone", "react", "util", "underscore", "rbs/components/layout/Alert
 
         return d.div({ className: "container" }, [
           d.h1({ key: "h1", className: "page-header" }, "Public Applications"),
+          d.p({
+            key: "lead",
+            className: "lead"
+          }, "You can use this page to register clients for other users' applications."),
           d.div({
             key: "search",
             className: "row"

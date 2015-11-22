@@ -30,7 +30,10 @@ define([ "react", "util", "underscore", "rbs/components/mixins/Model", "rbs/comp
                 icon: "external-link-square",
                 caption: "Register",
                 type: "primary",
-                disabled: true
+                onClick: function () {
+                  alert("To be implemented.");
+                },
+                size: "sm"
               })
             ])
           ])
