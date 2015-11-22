@@ -8,7 +8,7 @@ public class PublicApplication {
         if (application == null) {
             throw new NullPointerException();
         }
-        setApplication(application);
+        this.application = application;
     }
 
     @JsonIgnore
@@ -18,8 +18,8 @@ public class PublicApplication {
         return application;
     }
 
-    public void setApplication(Application application) {
-        this.application = application;
+    public long getId() {
+        return application.getId();
     }
 
     public String getName() {
