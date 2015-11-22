@@ -29,6 +29,7 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
         attribute: "tokenTtl",
         placeholder: "Access Token Time-To-Live",
         required: true,
+        min: 0,
         label: "Token TTL",
         component: "number",
         tip: "Enter how long an access or client token should last before expiring in seconds from issue time."
@@ -37,6 +38,7 @@ define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/compone
         attribute: "refreshTokenTtl",
         placeholder: "Refresh Token Time-To-Live",
         label: "Refresh Token TTL",
+        min: 0,
         component: "number",
         tip: "Enter how long a refresh token should last before expiring in seconds from issue time. Leave blank if this client should not receive refresh tokens."
       },

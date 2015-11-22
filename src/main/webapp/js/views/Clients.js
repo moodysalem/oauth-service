@@ -195,7 +195,7 @@ define([ "jquery", "underscore", "react", "util", "rbs/components/combo/Table", 
                 onDelete: _.bind(function () {
                   this.props.model.destroy({ wait: true });
                 }, this),
-                deleteMessage: "This operation cannot be undone.",
+                deleteMessage: "This will invalidate all the tokens and user permissions distributed to this client.",
                 onClose: this.closeDelete
               }),
               modal({

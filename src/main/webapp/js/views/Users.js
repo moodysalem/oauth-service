@@ -115,7 +115,7 @@ define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/compon
                 title: "Confirm Delete: " + this.state.model.email,
                 open: this.state.deleteOpen,
                 onClose: this.closeDelete,
-                deleteMessage: "This operation cannot be undone.",
+                deleteMessage: "This will remove all information about the user. This operation cannot be undone.",
                 onDelete: _.bind(function () {
                   this.props.model.destroy({ wait: true });
                 }, this)
