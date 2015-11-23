@@ -52,19 +52,19 @@ define([ "react", "util", "underscore", "backbone", "rbs/components/controls/But
             ])),
             d.tbody({ key: "tb" }, [
               d.tr({ key: "b" }, [
-                d.th({ key: "2" }, "10,000"),
+                d.th({ key: "2" }, "5,000"),
                 d.th({ key: "3" }, "10"),
                 d.th({ key: "4" }, "Free")
               ]),
               d.tr({ key: "p" }, [
                 d.th({ key: "2" }, "25,000"),
                 d.th({ key: "3" }, "30"),
-                d.th({ key: "4" }, "$30/mo.")
+                d.th({ key: "4" }, "$100/mo.")
               ]),
               d.tr({ key: "pp" }, [
                 d.th({ key: "2" }, "50,000"),
                 d.th({ key: "3" }, "45"),
-                d.th({ key: "4" }, "$50/mo.")
+                d.th({ key: "4" }, "$150/mo.")
               ]),
               d.tr({ key: "more" }, [
                 d.th({ key: "2" }, ">50,000"),
