@@ -23,6 +23,11 @@ define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/com
             href: "/docs"
           },
           {
+            text: "Pricing",
+            icon: "money",
+            href: "pricing"
+          },
+          {
             text: "Applications",
             icon: "tachometer",
             href: "/applications"

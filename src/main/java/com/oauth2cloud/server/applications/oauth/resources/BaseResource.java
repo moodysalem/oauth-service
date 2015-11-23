@@ -468,8 +468,7 @@ public abstract class BaseResource {
                 } catch (Exception e) {
                     LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
                 }
-            });
-            Transport.send(m);
+            }).run();
         } catch (Exception e) {
             LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
         }

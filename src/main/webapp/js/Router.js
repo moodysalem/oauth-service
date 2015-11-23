@@ -67,6 +67,7 @@ define([ "backbone", "react", "jquery", "react-dom", "model", "underscore", "rbs
         "applications/:id/clients": "clients",
         "applications/:id/users": "users",
         "publicapplications": "publicApplications",
+        "pricing": "pricing",
         "(/)": "home",
         "*splat": "notFound"
       },
@@ -103,6 +104,9 @@ define([ "backbone", "react", "jquery", "react-dom", "model", "underscore", "rbs
         renderFile("js/views/Users", { applicationId: id }, "Users");
       },
 
+      pricing: function () {
+        renderFile("js/views/Pricing", {}, "Pricing");
+      },
 
       notFound: function () {
         renderFile("js/views/NotFound");
