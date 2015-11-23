@@ -14,6 +14,7 @@ define([ "jquery", "react", "util", "underscore", "rbs/components/model/Form", "
         attribute: "name",
         label: "Your Name",
         placeholder: "Your Name",
+        tip: "Enter your name.",
         component: "text",
         required: true
       },
@@ -21,6 +22,7 @@ define([ "jquery", "react", "util", "underscore", "rbs/components/model/Form", "
         attribute: "email",
         label: "Your E-mail Address",
         placeholder: "Your E-mail Address",
+        tip: "Enter your e-mail address if you would like to receive a reply.",
         component: "email",
         required: true
       },
@@ -29,6 +31,7 @@ define([ "jquery", "react", "util", "underscore", "rbs/components/model/Form", "
         label: "Inquiry",
         component: "textarea",
         placeholder: "Your inquiry...",
+        tip: "Enter a description of your issue, or ask a question.",
         required: true
       }
     ];
