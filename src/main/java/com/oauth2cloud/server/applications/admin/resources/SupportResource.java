@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.applications.oauth.resources.BaseResource;
 
@@ -12,6 +13,7 @@ import javax.ws.rs.core.Response;
 @Path("support")
 public class SupportResource extends BaseResource {
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SupportRequest {
         private String email;
         private String name;
@@ -51,7 +53,7 @@ public class SupportResource extends BaseResource {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "E-mail, name, and issue are required.");
         }
 
-        sendEmail(ms.getEmail(), "moody.salem+oauth2cloud@gmail.com", "OAuth2Cloud Support Request", "Support.ftl", ms);
+        sendEmail(ms.getEmail(), "moody@oauth2cloud.com", "OAuth2Cloud Support Request", "Support.ftl", ms);
 
         return Response.noContent().build();
     }

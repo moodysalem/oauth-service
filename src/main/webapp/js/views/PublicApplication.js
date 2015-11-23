@@ -30,9 +30,7 @@ define([ "react", "util", "underscore", "rbs/components/mixins/Model", "rbs/comp
                 icon: "external-link-square",
                 caption: "Register",
                 type: "primary",
-                onClick: function () {
-                  alert("To be implemented.");
-                },
+                href: util.path("registerclient", this.state.model.id),
                 size: "sm"
               })
             ])

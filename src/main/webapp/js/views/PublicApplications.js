@@ -88,9 +88,9 @@ define([ "backbone", "react", "util", "underscore", "rbs/components/layout/Alert
             sm: 4,
             emptyNode: alt({
               key: "empty",
-              icon: "exclamation-triangle",
-              level: "warning",
-              strong: "Warning",
+              icon: "info",
+              level: "info",
+              strong: "Info",
               message: "No public applications found." + ((this.state.lastSearch !== "") ? " Please try a different search term." : "")
             })
           }))
