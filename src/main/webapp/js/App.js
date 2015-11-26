@@ -12,8 +12,8 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
   window.require.config(rc);
 
   txt("Loading dependencies...");
-  window.require([ "js/OAuth2", "backbone", "jquery", "promise-polyfill", "util" ],
-    function (oauth2, Backbone, $, pp, util) {
+  window.require([ "rbs", "js/OAuth2", "backbone", "jquery", "promise-polyfill", "util" ],
+    function (rbs, oauth2, Backbone, $, pp, util) {
       util.debug("defining model...");
       var m = new (Backbone.Model.extend({
         isLoggedIn: function () {

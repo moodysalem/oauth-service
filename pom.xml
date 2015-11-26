@@ -11,7 +11,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>1.0.1</jaxrs.lib.version>
-    <react.backstrap.version>0.0.26</react.backstrap.version>
+    <react.backstrap.version>0.0.27</react.backstrap.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
@@ -73,7 +73,6 @@
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.35</version>
-
     </dependency>
 
     <!-- password hashing -->
