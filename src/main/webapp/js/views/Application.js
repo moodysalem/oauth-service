@@ -2,7 +2,7 @@
  *
  */
 define([ "react", "rbs", "./ApplicationForm", "js/Models", "rbs/components/controls/Button", "model",
-    "rbs/components/mixins/Events", "router", "rbs/components/layout/Modal", "rbs/components/layout/Alert",
+    "rbs/mixins/Events", "router", "rbs/components/layout/Modal", "rbs/components/layout/Alert",
     "rbs/components/collection/Alerts", "./MustBeLoggedIn" ],
   function (React, rbs, af, mdls, btn, m, events, r, modal, alt, alerts, mbli) {
     "use strict";

@@ -2,7 +2,7 @@
  *
  */
 define([ "react", "rbs", "underscore", "./Loading", "rbs/components/collection/Alerts", "js/Models", "rbs/components/combo/Table",
-    "rbs/components/controls/Button", "rbs/components/layout/Modal", "rbs/components/mixins/Model" ],
+    "rbs/components/controls/Button", "rbs/components/layout/Modal", "rbs/mixins/Model" ],
   function (React, rbs, _, lw, alerts, mdls, table, btn, modal, model) {
     "use strict";
 

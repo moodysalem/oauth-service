@@ -2,7 +2,7 @@
  *
  */
 define([ "react", "rbs", "js/Models", "model", "rbs/components/combo/Table", "rbs/components/controls/Button",
-    "./Loading", "rbs/components/layout/Modal", "rbs/components/mixins/Model",
+    "./Loading", "rbs/components/layout/Modal", "rbs/mixins/Model",
     "rbs/components/model/Form", "rbs/components/collection/Alerts", "router",
     "rbs/components/controls/Pagination", "./MustBeLoggedIn" ],
   function (React, rbs, mdls, m, table, btn, lw, modal, model, form, alerts, r, pag, mbli) {

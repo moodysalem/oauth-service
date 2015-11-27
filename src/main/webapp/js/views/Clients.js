@@ -3,7 +3,7 @@
  */
 define([ "jquery", "underscore", "react", "rbs", "rbs/components/combo/Table", "js/Models", "./Loading", "rbs/components/controls/Pagination",
     "./AppHeader", "rbs/components/layout/Modal", "rbs/components/collection/Alerts", "rbs/components/controls/Button",
-    "./ClientForm", "rbs/components/mixins/Model", "rbs/components/model/GridRow", "rbs/components/mixins/Events",
+    "./ClientForm", "rbs/mixins/Model", "rbs/components/model/GridRow", "rbs/mixins/Events",
     "./ConfirmDeleteModal", "model", "./MustBeLoggedIn", "./ClientScopesModal", "./ClientURLsModal" ],
   function ($, _, React, rbs, table, mdls, lw, pag, ah, modal, alerts, btn, cf, model, row, events, delModal, m, mbli,
             clientScopesModal, clientUrlsModal) {

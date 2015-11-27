@@ -1,7 +1,7 @@
 /**
  *
  */
-define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "js/Models", "rbs/components/mixins/Model" ],
+define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "js/Models", "rbs/mixins/Model" ],
   function (React, rbs, _, alt, mdls, model) {
     "use strict";
 

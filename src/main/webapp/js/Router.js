@@ -1,4 +1,4 @@
-define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/components/mixins/Model", "rbs/components/controls/Tappable",
+define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/mixins/Model", "rbs/components/controls/Tappable",
     "js/Nav", "ga" ],
   function (rbs, React, $, dom, m, _, model, tp, nav, ga) {
     "use strict";

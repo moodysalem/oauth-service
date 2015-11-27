@@ -2,7 +2,7 @@
  *
  */
 define([ "react", "rbs", "underscore", "./MustBeLoggedIn", "model", "rbs/components/combo/Table", "js/Models", "./Loading",
-    "./AppHeader", "rbs/components/controls/Pagination", "rbs/components/controls/Button", "./UserModal", "rbs/components/mixins/Model", "./ConfirmDeleteModal" ],
+    "./AppHeader", "rbs/components/controls/Pagination", "rbs/components/controls/Button", "./UserModal", "rbs/mixins/Model", "./ConfirmDeleteModal" ],
   function (React, rbs, _, mbli, m, table, mdls, lw, ah, pag, btn, um, model, confirmDelete) {
     "use strict";
 

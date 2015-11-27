@@ -1,7 +1,7 @@
 /**
  *
  */
-define([ "react", "rbs", "rbs/components/mixins/Model", "rbs/components/controls/Button" ],
+define([ "react", "rbs", "rbs/mixins/Model", "rbs/components/controls/Button" ],
   function (React, rbs, model, btn) {
     "use strict";
     var util = rbs.util;

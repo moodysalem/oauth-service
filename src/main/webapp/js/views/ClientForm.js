@@ -1,7 +1,7 @@
 /**
  *
  */
-define([ "react", "rbs", "rbs/components/model/Form", "js/Models", "rbs/components/mixins/Model",
+define([ "react", "rbs", "rbs/components/model/Form", "js/Models", "rbs/mixins/Model",
     "rbs/components/controls/Button", "./MultiText", "./ViewablePassword" ],
   function (React, rbs, fm, mdls, model, btn, multitext, vp) {
     "use strict";
