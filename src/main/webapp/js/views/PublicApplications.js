@@ -1,11 +1,13 @@
 /**
  * list of applications that can be registered for
  */
-define([ "backbone", "react", "util", "underscore", "rbs/components/layout/Alert", "model", "js/Models",
+define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "model", "js/Models",
     "rbs/components/controls/Button", "rbs/components/collection/Rows", "./PublicApplication", "./Loading" ],
-  function (Backbone, React, util, _, alt, m, mdls, btn, rows, publicApp, lw) {
+  function (React, rbs, _, alt, m, mdls, btn, rows, publicApp, lw) {
     "use strict";
 
+    var util = rbs.util;
+    var Backbone = rbs.backbone;
     var d = React.DOM;
     var rpt = React.PropTypes;
 

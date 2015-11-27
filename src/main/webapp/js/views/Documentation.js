@@ -1,9 +1,10 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "./Endpoint", "rbs/components/layout/FixToTop" ],
-  function (React, util, _, ep, fixToTop) {
+define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixToTop" ],
+  function (React, rbs, _, ep, fixToTop) {
     "use strict";
+    var util = rbs.util;
     var d = React.DOM;
     var rpt = React.PropTypes;
 

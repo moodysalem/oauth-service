@@ -1,10 +1,12 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/model/Form", "js/Models", "rbs/components/mixins/Model",
+define([ "react", "rbs", "rbs/components/model/Form", "js/Models", "rbs/components/mixins/Model",
     "rbs/components/controls/Button", "./MultiText", "./ViewablePassword" ],
-  function (React, util, fm, mdls, model, btn, multitext, vp) {
+  function (React, rbs, fm, mdls, model, btn, multitext, vp) {
     "use strict";
+
+    var util = rbs.util;
 
     var d = React.DOM;
     var rpt = React.PropTypes;

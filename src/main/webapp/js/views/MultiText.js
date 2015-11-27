@@ -1,9 +1,11 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "rbs/components/controls/Button" ],
-  function (React, util, _, btn) {
+define([ "react", "rbs", "underscore", "rbs/components/controls/Button" ],
+  function (React, rbs, _, btn) {
     "use strict";
+
+    var util = rbs.util;
 
     var d = React.DOM;
     var rpt = React.PropTypes;

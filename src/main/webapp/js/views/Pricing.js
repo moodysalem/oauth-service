@@ -1,10 +1,12 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "backbone", "rbs/components/controls/Button", "./ContactModal" ],
-  function (React, util, _, Backbone, btn, cm) {
+define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./ContactModal" ],
+  function (React, rbs, _, btn, cm) {
     "use strict";
 
+    var util = rbs.util;
+    var Backbone = rbs.backbone;
     var d = React.DOM;
     var rpt = React.PropTypes;
 

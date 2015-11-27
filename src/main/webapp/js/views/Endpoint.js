@@ -1,9 +1,10 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "rbs/components/layout/Icon", "rbs/components/layout/Tip" ],
-  function (React, util, _, icon, tip) {
+define([ "react", "rbs", "underscore", "rbs/components/layout/Icon", "rbs/components/layout/Tip" ],
+  function (React, rbs, _, icon, tip) {
     "use strict";
+    var util = rbs.util;
 
     var rpt = React.PropTypes;
     var d = React.DOM;

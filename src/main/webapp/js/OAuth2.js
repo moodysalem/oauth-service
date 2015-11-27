@@ -1,7 +1,7 @@
 /**
  * This script provides functions for checking the login status and visiting the login page
  */
-define([ "jquery" ], function ($) {
+define([ "jquery", "promise-polyfill" ], function ($, pp) {
   "use strict";
 
   var AUTHORIZE_URL = "https://oauth2cloud.com/oauth/authorize";

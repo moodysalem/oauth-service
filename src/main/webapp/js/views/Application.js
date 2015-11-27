@@ -1,12 +1,13 @@
 /**
  *
  */
-define([ "react", "util", "./ApplicationForm", "js/Models", "rbs/components/controls/Button", "model",
+define([ "react", "rbs", "./ApplicationForm", "js/Models", "rbs/components/controls/Button", "model",
     "rbs/components/mixins/Events", "router", "rbs/components/layout/Modal", "rbs/components/layout/Alert",
     "rbs/components/collection/Alerts", "./MustBeLoggedIn" ],
-  function (React, util, af, mdls, btn, m, events, r, modal, alt, alerts, mbli) {
+  function (React, rbs, af, mdls, btn, m, events, r, modal, alt, alerts, mbli) {
     "use strict";
 
+    var util = rbs.util;
     var d = React.DOM;
 
     return util.rf({

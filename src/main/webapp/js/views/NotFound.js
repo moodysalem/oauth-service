@@ -1,8 +1,9 @@
 /**
  *
  */
-define([ "react", "util" ], function (React, util) {
+define([ "react", "rbs" ], function (React, rbs) {
   "use strict";
+  var util = rbs.util;
 
   var d = React.DOM;
 

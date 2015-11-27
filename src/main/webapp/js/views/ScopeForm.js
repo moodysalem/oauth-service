@@ -1,9 +1,10 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/model/Form" ], function (React, util, form) {
+define([ "react", "rbs", "rbs/components/model/Form" ], function (React, rbs, form) {
   "use strict";
 
+  var util = rbs.util;
   var d = React.DOM;
   var pt = React.PropTypes;
 

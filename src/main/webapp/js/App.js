@@ -1,21 +1,28 @@
 "use strict";
 
-var txt = function (tx) {
+var lt = function (tx) {
   document.getElementById("loading-text").innerText = tx;
 };
 
+// load require configuration from base url
 window.require.config({
   baseUrl: ""
 });
-txt("Loading Require...");
+
+lt("Loading Require...");
 window.define([ "rbs/RequireConfig" ], function (rc) {
+  // configure require with the paths for all the third party dependencies
   window.require.config(rc);
 
-  txt("Loading dependencies...");
-  window.require([ "rbs", "js/OAuth2", "backbone", "jquery", "promise-polyfill", "util" ],
-    function (rbs, oauth2, Backbone, $, pp, util) {
+  // load other depencies now
+  lt("Loading dependencies...");
+  window.require([ "rbs", "js/OAuth2", "jquery" ],
+    function (rbs, oauth2, $) {
+      var bb = rbs.backbone;
+      var util = rbs.util;
+
       util.debug("defining model...");
-      var m = new (Backbone.Model.extend({
+      var m = new (bb.Model.extend({
         isLoggedIn: function () {
           return this.has("token");
         }
@@ -25,7 +32,7 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
       util.debug("defining start function..");
       var start = function () {
         util.debug("start function called...");
-        txt("Initializing application...");
+        lt("Initializing application...");
         require([ "js/Router" ], function (router) {
           var r = new router();
           window.define("router", r);
@@ -65,7 +72,7 @@ window.define([ "rbs/RequireConfig" ], function (rc) {
           });
 
           util.debug("starting router..");
-          Backbone.history.start({ pushState: true });
+          bb.history.start({ pushState: true });
         });
       };
 

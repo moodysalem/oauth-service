@@ -1,9 +1,10 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/layout/Modal", "rbs/components/controls/Button" ],
-  function (React, util, modal, btn) {
+define([ "react", "rbs", "rbs/components/layout/Modal", "rbs/components/controls/Button" ],
+  function (React, rbs, modal, btn) {
     "use strict";
+    var util = rbs.util;
     var d = React.DOM;
 
     return util.rf({

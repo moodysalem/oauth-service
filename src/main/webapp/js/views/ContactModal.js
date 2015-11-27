@@ -1,10 +1,13 @@
 /**
  *
  */
-define([ "jquery", "react", "util", "underscore", "rbs/components/model/Form", "backbone", "rbs/components/layout/Modal", "model",
+define([ "jquery", "react", "rbs", "underscore", "rbs/components/model/Form", "rbs/components/layout/Modal", "model",
     "rbs/components/controls/Button", "rbs/components/layout/Alert" ],
-  function ($, React, util, _, form, Backbone, modal, m, btn, alt) {
+  function ($, React, rbs, _, form, modal, m, btn, alt) {
     "use strict";
+
+    var util = rbs.util;
+    var Backbone = rbs.backbone;
 
     var d = React.DOM;
     var rpt = React.PropTypes;

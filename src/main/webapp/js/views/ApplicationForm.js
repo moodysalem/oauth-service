@@ -1,9 +1,10 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/layout/Form", "rbs/components/model/GridRow", "./Loading" ],
-  function (React, util, form, row, lw) {
+define([ "react", "rbs", "rbs/components/layout/Form", "rbs/components/model/GridRow", "./Loading" ],
+  function (React, rbs, form, row, lw) {
     "use strict";
+    var util = rbs.util;
 
     var d = React.DOM;
 

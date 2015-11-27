@@ -1,7 +1,9 @@
-define([ "backbone", "react", "jquery", "react-dom", "model", "underscore", "rbs/components/mixins/Model", "rbs/components/controls/Tappable",
-    "js/Nav", "util", "ga" ],
-  function (Backbone, React, $, dom, m, _, model, tp, nav, util, ga) {
+define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/components/mixins/Model", "rbs/components/controls/Tappable",
+    "js/Nav", "ga" ],
+  function (rbs, React, $, dom, m, _, model, tp, nav, ga) {
     "use strict";
+    var Backbone = rbs.backbone;
+    var util = rbs.util;
 
     var d = React.DOM;
     var rpt = React.PropTypes;

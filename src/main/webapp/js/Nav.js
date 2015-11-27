@@ -2,10 +2,12 @@
  * nav bar
  */
 define([ "react", "underscore", "model", "rbs/components/mixins/Model", "rbs/components/mixins/NavbarHelper",
-    "rbs/components/layout/Navbar", "rbs/components/layout/NavbarGroup", "rbs/components/layout/Icon", "js/OAuth2", "util",
+    "rbs/components/layout/Navbar", "rbs/components/layout/NavbarGroup", "rbs/components/layout/Icon", "js/OAuth2", "rbs",
     "rbs/components/controls/Tappable" ],
-  function (React, _, m, model, nh, navbar, ng, icon, oauth2, util, tp) {
+  function (React, _, m, model, nh, navbar, ng, icon, oauth2, rbs, tp) {
     "use strict";
+
+    var util = rbs.util;
 
     return util.rf({
       mixins: [ model, nh ],

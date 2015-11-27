@@ -1,8 +1,9 @@
 /**
  * just an alert that shows a must be logged in message
  */
-define([ "react", "util", "rbs/components/layout/Alert", "js/OAuth2" ], function (React, util, alert, oauth2) {
+define([ "react", "rbs", "rbs/components/layout/Alert", "js/OAuth2" ], function (React, rbs, alert, oauth2) {
   "use strict";
+  var util = rbs.util;
 
   var d = React.DOM;
 

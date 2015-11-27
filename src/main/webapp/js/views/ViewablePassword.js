@@ -1,10 +1,10 @@
 /**
  *
  */
-define([ "react", "util", "rbs/components/mixins/Model", "rbs/components/controls/Button" ],
-  function (React, util, model, btn) {
+define([ "react", "rbs", "rbs/components/mixins/Model", "rbs/components/controls/Button" ],
+  function (React, rbs, model, btn) {
     "use strict";
-
+    var util = rbs.util;
 
     var d = React.DOM;
     var rpt = React.PropTypes;

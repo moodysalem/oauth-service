@@ -1,11 +1,12 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "./MustBeLoggedIn", "model", "rbs/components/combo/Table", "js/Models", "./Loading",
+define([ "react", "rbs", "underscore", "./MustBeLoggedIn", "model", "rbs/components/combo/Table", "js/Models", "./Loading",
     "./AppHeader", "rbs/components/controls/Pagination", "rbs/components/controls/Button", "./UserModal", "rbs/components/mixins/Model", "./ConfirmDeleteModal" ],
-  function (React, util, _, mbli, m, table, mdls, lw, ah, pag, btn, um, model, confirmDelete) {
+  function (React, rbs, _, mbli, m, table, mdls, lw, ah, pag, btn, um, model, confirmDelete) {
     "use strict";
 
+    var util = rbs.util;
     var d = React.DOM;
     var rpt = React.PropTypes;
 

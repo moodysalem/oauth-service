@@ -1,8 +1,9 @@
 /**
  *
  */
-define([ "react", "underscore", "util" ], function (React, _, util) {
+define([ "react", "underscore", "rbs" ], function (React, _, rbs) {
   "use strict";
+  var util = rbs.util;
 
   var d = React.DOM;
   var spec = "https://tools.ietf.org/html/rfc6749";

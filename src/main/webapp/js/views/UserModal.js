@@ -1,11 +1,12 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "rbs/components/layout/Modal", "rbs/components/layout/Form", "rbs/components/model/GridRow",
+define([ "react", "rbs", "underscore", "rbs/components/layout/Modal", "rbs/components/layout/Form", "rbs/components/model/GridRow",
     "rbs/components/controls/Button", "rbs/components/collection/Alerts", "rbs/components/mixins/Model", "./ViewablePassword" ],
-  function (React, util, _, modal, form, row, btn, alerts, model, vp) {
+  function (React, rbs, _, modal, form, row, btn, alerts, model, vp) {
     "use strict";
 
+    var util = rbs.util;
     var d = React.DOM;
     var rpt = React.PropTypes;
 

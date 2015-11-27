@@ -1,13 +1,14 @@
 /**
  * view scopes for an application
  */
-define([ "react", "util", "underscore", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
+define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "js/Models", "rbs/components/combo/Table", "js/views/Loading",
     "rbs/components/layout/Icon", "rbs/components/mixins/Model", "rbs/components/controls/Pagination",
     "rbs/components/controls/Button", "rbs/components/layout/Modal", "./ScopeForm",
     "rbs/components/collection/Alerts", "./AppHeader", "./ConfirmDeleteModal", "./MustBeLoggedIn", "model" ],
-  function (React, util, _, alert, mdls, table, lw, icon, model, pag, btn, modal, sf, alerts, ah, delModal, mbli, m) {
+  function (React, rbs, _, alert, mdls, table, lw, icon, model, pag, btn, modal, sf, alerts, ah, delModal, mbli, m) {
     "use strict";
 
+    var util = rbs.util;
     var rpt = React.PropTypes;
     var d = React.DOM;
 

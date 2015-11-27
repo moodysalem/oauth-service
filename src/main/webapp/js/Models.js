@@ -1,8 +1,10 @@
 /**
  *
  */
-define([ "util", "backbone" ], function (util, Backbone) {
+define([ "rbs" ], function (rbs) {
   "use strict";
+  var util = rbs.util, Backbone = rbs.backbone;
+
   var mdl = Backbone.Model;
   var cl = Backbone.Collection;
 

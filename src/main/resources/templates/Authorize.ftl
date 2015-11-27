@@ -99,7 +99,7 @@
                                     }
                                     js = d.createElement(s);
                                     js.id = id;
-                                    js.src = window.location.origin + "/js/vendor/facebook/sdk.js";
+                                    js.src = "//connect.facebook.net/en_US/sdk.js";
                                     fjs.parentNode.insertBefore(js, fjs);
                                 }(document, 'script', 'facebook-jssdk'));
                             </script>

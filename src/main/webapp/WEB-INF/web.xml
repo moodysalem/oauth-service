@@ -30,6 +30,7 @@
   </filter>
   <filter-mapping>
     <filter-name>hourcache</filter-name>
+    <url-pattern>/rbs.js</url-pattern>
     <url-pattern>/rbs/*</url-pattern>
     <url-pattern>/js/*</url-pattern>
     <url-pattern>/res/*</url-pattern>

@@ -1,10 +1,12 @@
 /**
  *
  */
-define([ "react", "util", "underscore", "./Loading", "rbs/components/collection/Alerts", "js/Models", "rbs/components/combo/Table",
+define([ "react", "rbs", "underscore", "./Loading", "rbs/components/collection/Alerts", "js/Models", "rbs/components/combo/Table",
     "rbs/components/controls/Button", "rbs/components/layout/Modal", "rbs/components/mixins/Model" ],
-  function (React, util, _, lw, alerts, mdls, table, btn, modal, model) {
+  function (React, rbs, _, lw, alerts, mdls, table, btn, modal, model) {
     "use strict";
+
+    var util = rbs.util;
 
     var d = React.DOM;
     var rpt = React.PropTypes;
