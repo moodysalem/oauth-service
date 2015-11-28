@@ -55,7 +55,7 @@ public class PublicClientsResource extends BaseEntityResource<Client> {
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> predicates, Root<Client> root) {
-
+        predicates.add(cb.equal(root.join("application").get("publicClientRegistration"), true));
     }
 
     @Override
