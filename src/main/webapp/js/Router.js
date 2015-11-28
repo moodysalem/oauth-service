@@ -37,15 +37,16 @@ define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/mixi
 
     var origTitle = document.title;
 
+    var lj = $("#loading-js");
+    var app = $("#app");
+
     var renderFile = function (file, properties, title) {
-      // remove the page loading first element
-      $("#app").find("#page-loading-first").remove();
       // show the page loading indicator
-      $("#loading-js").css("display", "block");
+      lj.addClass("loading");
       util.debug("getting file to render", file);
       require([ file ], function (comp) {
         util.debug("rendering file", file, properties);
-        dom.render(wrapper({ model: m, view: comp, props: properties }), $("#app").get(0));
+        dom.render(wrapper({ model: m, view: comp, props: properties }), app.get(0));
         pv();
         if (typeof title === "string") {
           document.title = util.concatWS(" | ", origTitle, title);
@@ -53,7 +54,7 @@ define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/mixi
           document.title = origTitle;
         }
         // remove the page loading indicator
-        $("#loading-js").css("display", "");
+        lj.removeClass("loading");
       });
     };
 
@@ -61,6 +62,11 @@ define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/mixi
     dom.render(nav({ model: m }), $("#nav").get(0));
 
     return Backbone.Router.extend({
+      initialize: function () {
+        // remove the page loading first element
+        app.find("#page-loading-first").remove();
+      },
+
       routes: {
         "applications": "applications",
         "docs": "docs",

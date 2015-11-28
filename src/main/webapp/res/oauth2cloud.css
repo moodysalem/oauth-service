@@ -133,9 +133,22 @@ table.vertical-align-middle td {
     bottom: 0;
     left: 0;
     right: 0;
-    display: none;
     z-index: 999;
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.5);
+
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+    -moz-transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+    -ms-transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+    -o-transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+    transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+}
+
+#loading-js.loading {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
 }
 
 #loading-js > .loader {
