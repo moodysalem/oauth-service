@@ -1,8 +1,8 @@
 /**
  * This is where you can register a client
  */
-define([ "react", "rbs", "underscore", "js/Models", "model", "./MustBeLoggedIn" ],
-  function (React, rbs, _, mdls, m, mbli) {
+define([ "react", "rbs", "underscore", "js/Models", "model", "./MustBeLoggedIn", "jquery" ],
+  function (React, rbs, _, mdls, m, mbli, $) {
     "use strict";
 
     var d = React.DOM;
@@ -43,6 +43,18 @@ define([ "react", "rbs", "underscore", "js/Models", "model", "./MustBeLoggedIn" 
         this.state.pa.fetch();
       },
 
+      createClient: function () {
+        $.ajax({
+          method: "POST",
+          url: util.path(API_URL, "publicclients"),
+          data: JSON.stringify(this.state.newClient.toJSON())
+        }).then(_.bind(function () {
+
+        }, this), _.bind(function () {
+
+        }, this));
+      },
+
       render: function () {
         if (!m.isLoggedIn()) {
           return mbli({});
@@ -53,17 +65,22 @@ define([ "react", "rbs", "underscore", "js/Models", "model", "./MustBeLoggedIn" 
           form({
             key: "F",
             model: this.state.newClient,
+            onSubmit: this.createClient,
             attributes: [
               {
                 attribute: "name",
                 component: "text",
                 label: "Client Name",
+                required: true,
                 placeholder: "Client Name",
                 tip: "Enter the name for your client."
               },
               {
                 component: btn,
                 caption: "Submit",
+                submit: true,
+                block: true,
+                ajax: true,
                 type: "primary",
                 icon: "plus"
               }
