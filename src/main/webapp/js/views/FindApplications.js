@@ -7,7 +7,6 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "model", "
     "use strict";
 
     var util = rbs.util;
-    var Backbone = rbs.backbone;
     var d = React.DOM;
     var rpt = React.PropTypes;
 

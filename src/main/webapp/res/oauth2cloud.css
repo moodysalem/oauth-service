@@ -157,3 +157,7 @@ table.vertical-align-middle td {
     left: 50%;
     margin-left: -25px;
 }
+
+.sm-margin-bottom {
+    margin-bottom: 10px;
+}

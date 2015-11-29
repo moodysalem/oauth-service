@@ -74,7 +74,8 @@ define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/mixi
         "applications/:id/scopes": "scopes",
         "applications/:id/clients": "clients",
         "applications/:id/users": "users",
-        "publicapplications": "publicApplications",
+        "clients": "myclients",
+        "findapplications": "findApplications",
         "registerclient/:id": "registerClient",
         "pricing": "pricing",
         "(/)": "home",
@@ -105,8 +106,12 @@ define([ "rbs", "react", "jquery", "react-dom", "model", "underscore", "rbs/mixi
         renderFile("js/views/Clients", { applicationId: id }, "Clients");
       },
 
-      publicApplications: function () {
-        renderFile("js/views/PublicApplications", {}, "Public Applications");
+      myclients: function () {
+        renderFile("js/views/MyClients", {}, "My Clients");
+      },
+
+      findApplications: function () {
+        renderFile("js/views/FindApplications", {}, "Find Applications");
       },
 
       registerClient: function (id) {

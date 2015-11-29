@@ -4,10 +4,10 @@ import com.oauth2cloud.server.applications.admin.models.PublicClient;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
 
-import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 /**
  * Gets the applications but wraps them all in PublicApplication instances
  */
-@Path("publicapplications")
-public class PublicClientsResource extends BaseEntityResource<Client> {
+@Path("publicclients")
+public class MyClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public boolean requiresLogin() {
@@ -53,9 +53,20 @@ public class PublicClientsResource extends BaseEntityResource<Client> {
 
     }
 
+    @QueryParam("applicationId")
+    Long applicationId;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> predicates, Root<Client> root) {
+        // application must be public
         predicates.add(cb.equal(root.join("application").get("publicClientRegistration"), true));
+
+        // must be created by this user
+        predicates.add(cb.equal(root.get("creator"), getUser()));
+
+        if (applicationId != null) {
+            predicates.add(cb.equal(root.join("application").get("id"), applicationId));
+        }
     }
 
     @Override

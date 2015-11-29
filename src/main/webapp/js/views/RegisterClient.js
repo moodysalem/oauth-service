@@ -1,17 +1,19 @@
 /**
- *
+ * This is where you can register a client
  */
-define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "js/Models", "rbs/mixins/Model" ],
-  function (React, rbs, _, alt, mdls, model) {
+define([ "react", "rbs", "underscore", "js/Models", "model", "./MustBeLoggedIn" ],
+  function (React, rbs, _, mdls, m, mbli) {
     "use strict";
 
-    var util = rbs.util;
     var d = React.DOM;
     var rpt = React.PropTypes;
 
+    var util = rbs.util;
+    var alt = rbs.components.layout.Alert;
+
     var header = util.rf({
       displayName: "public app header",
-      mixins: [ model ],
+      mixins: [ rbs.mixins.Model ],
       render: function () {
         var dn = null;
         if (this.state.model.name) {
@@ -37,17 +39,14 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "js/Models
         this.state.pa.fetch();
       },
 
-
       render: function () {
+        if (!m.isLoggedIn()) {
+          return mbli({});
+        }
+
         return d.div({ className: "container" }, [
           header({ key: "hdr", model: this.state.pa }),
-          alt({
-            key: "info",
-            icon: "info",
-            level: "info",
-            strong: "Info",
-            message: "This page not yet implemented."
-          })
+
         ]);
       }
     });

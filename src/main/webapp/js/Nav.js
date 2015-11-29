@@ -34,9 +34,14 @@ define([ "react", "underscore", "model", "rbs/mixins/Model", "rbs/mixins/NavbarH
             href: "/applications"
           },
           {
-            text: "Public Applications",
-            icon: "gavel",
-            href: "/publicapplications"
+            text: "Clients",
+            icon: "key",
+            href: "/clients"
+          },
+          {
+            text: "Find Applications",
+            icon: "search",
+            href: "/findapplications"
           }
         ];
 

@@ -31,7 +31,7 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
 
       render: function () {
         return d.div({ className: "container" }, [
-          d.h1({ key: "h1", className: "page-header" }, [
+          d.h2({ key: "h2", className: "page-header" }, [
             btn({
               type: "success",
               key: "cu",
@@ -75,7 +75,10 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
               ])
             ])
           ]),
-          d.small({ key: "small" }, "* Note that these pricing terms may change at any time. " +
+          d.small({
+            key: "small",
+            className: "sm-margin-bottom"
+          }, "* Note that these pricing terms may change at any time. " +
             "Best efforts will be made to accommodate existing users."),
           cm({ key: "cm", open: this.state.contactOpen, onClose: this.closeContact })
         ]);

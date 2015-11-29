@@ -48,7 +48,7 @@ define([ "react", "rbs", "js/Models", "model", "rbs/components/combo/Table", "rb
                 key: "mc",
                 size: "xs",
                 caption: "Clients",
-                icon: "gavel",
+                icon: "sitemap",
                 href: util.path("applications", this.state.model.id, "clients")
               }),
               btn({

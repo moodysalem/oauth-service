@@ -23,4 +23,16 @@ public class PublicClient {
         return client.getId();
     }
 
+    public String getName() {
+        return client.getName();
+    }
+
+    public String getIdentifier() {
+        return client.getIdentifier();
+    }
+
+    public String getSecret() {
+        return client.getSecret();
+    }
+
 }
