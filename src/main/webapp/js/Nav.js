@@ -9,7 +9,10 @@ define([ "react", "underscore", "model", "rbs/mixins/Model", "rbs/mixins/NavbarH
     var util = rbs.util;
 
     return util.rf({
+      displayName: "o2c navbar",
+
       mixins: [ model, nh ],
+
       render: function () {
         var mdl = this.state.model;
         var leftLinks = [
@@ -29,16 +32,6 @@ define([ "react", "underscore", "model", "rbs/mixins/Model", "rbs/mixins/NavbarH
             href: "pricing"
           },
           {
-            text: "Applications",
-            icon: "tachometer",
-            href: "/applications"
-          },
-          {
-            text: "Clients",
-            icon: "key",
-            href: "/clients"
-          },
-          {
             text: "Find Applications",
             icon: "search",
             href: "/findapplications"
@@ -49,21 +42,39 @@ define([ "react", "underscore", "model", "rbs/mixins/Model", "rbs/mixins/NavbarH
 
         if (mdl.token) {
           var dn = util.concatWS(" ", mdl.token.user_details.first_name, mdl.token.user_details.last_name);
-          rightLinks.push({
-            text: "Logged in as " + dn
-          }, {
-            text: "Log Out",
-            icon: "sign-out",
-            onClick: function (e) {
-              e.preventDefault();
-              m.clear();
-              oauth2.logout().then(function () {
-                util.debug("loggedout");
-              }, function () {
-                util.debug("loggedout with error");
-              });
-            }
-          });
+          rightLinks.push(
+            {
+              text: "Logged in as " + dn
+            },
+            {
+              text: "Admin",
+              icon: "wrench",
+              menu: [
+                {
+                  text: "Applications",
+                  icon: "tachometer",
+                  href: "/applications"
+                },
+                {
+                  text: "Clients",
+                  icon: "key",
+                  href: "/clients"
+                }
+              ]
+            },
+            {
+              text: "Log Out",
+              icon: "sign-out",
+              onClick: function (e) {
+                e.preventDefault();
+                m.clear();
+                oauth2.logout().then(function () {
+                  util.debug("loggedout");
+                }, function () {
+                  util.debug("loggedout with error");
+                });
+              }
+            });
         } else {
           rightLinks.push({
             text: "Log In",

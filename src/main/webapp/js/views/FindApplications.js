@@ -56,7 +56,7 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "model", "
           d.p({
             key: "lead",
             className: "lead"
-          }, "You can use this page to register clients for other users' applications."),
+          }, "Use this page to find other applications and create clients."),
           d.div({
             key: "search",
             className: "row"
