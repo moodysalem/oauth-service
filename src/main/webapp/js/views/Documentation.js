@@ -361,6 +361,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 " an OAuth2 token."),
               ep({
                 key: "lgep",
+                noSend: true,
                 endpoint: "https://your-legacy-url.com",
                 method: "POST",
                 parameters: [

@@ -36,9 +36,9 @@ define([ "react", "underscore", "rbs" ], function (React, _, rbs) {
               key: "col",
               className: "col-sm-12"
             }, [
-              d.h2({ key: "1" }, "Bootstrap your Startup"),
+              d.h2({ key: "1" }, "Bootstrap your Web Application"),
               d.p({ key: "2" }, "Don't spend time writing code to integrate with Facebook, Google, Amazon, or sending verification " +
-                "and reset password e-mails. OAuth2Cloud provides everything you need to get users authenticated.")
+                "and reset password e-mails. OAuth2Cloud provides the basics you need to get users authenticated.")
             ])
           ]),
           d.hr({ key: "hr1" }),
@@ -48,8 +48,8 @@ define([ "react", "underscore", "rbs" ], function (React, _, rbs) {
               className: "col-sm-12"
             }, [
               d.h2({ key: "1" }, "Integrate with Legacy Code"),
-              d.p({ key: "2" }, "If you already have an identity server, we provide a simple and easy method to integrate that system" +
-                "  allowing users to log in using their existing e-mail and password.")
+              d.p({ key: "2" }, "If you already have an identity server, we provide a simple method to allow users to log in " +
+                " using their existing e-mail and password.")
             ])
           ]),
           d.hr({ key: "hr2" }),
@@ -59,8 +59,8 @@ define([ "react", "underscore", "rbs" ], function (React, _, rbs) {
               className: "col-sm-12"
             }, [
               d.h2({ key: "1" }, "Own your Data"),
-              d.p({ key: "2" }, "All your application data is completely separate from every other OAuth2 Application we serve. " +
-                "We provide a powerful API to access and manipulate the data.")
+              d.p({ key: "2" }, "All your application data is separate from other Applications. " +
+                " You can query the data using the API or manage it directly on this page.")
             ])
           ]),
           d.hr({ key: "hr3" }),

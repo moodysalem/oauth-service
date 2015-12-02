@@ -44,7 +44,7 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
           ]),
           d.p({ key: "lead", className: "lead" }, [
             d.strong({ key: "s" }, "No fee or rate limiting system is currently implemented."),
-            " Please be respectful of the following suggestions and contact us to cover fees if you wish to exceed the limits."
+            " Please be respectful of the following suggestions and contact me if you wish to exceed the limits."
           ]),
           d.table({ className: "table table-bordered", key: "T" }, [
             d.thead({ key: "Th" }, d.tr({ key: "H" }, [

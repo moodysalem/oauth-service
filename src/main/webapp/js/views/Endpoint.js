@@ -28,13 +28,14 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
             value: rpt.string
           })
         ).isRequired,
-        contentType: types
+        contentType: types,
+        noSend: rpt.bool
       },
 
       getDefaultProps: function () {
         return {
           contentType: "application/x-www-form-urlencoded",
-          response: null
+          noSend: false
         };
       },
 
@@ -219,6 +220,9 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
       },
 
       canSend: function () {
+        if (this.props.noSend) {
+          return false;
+        }
         var ps = this.state.parameters;
         return _.every(this.props.parameters, function (param) {
           return !param.req || param.value || ps[ param.name ];
