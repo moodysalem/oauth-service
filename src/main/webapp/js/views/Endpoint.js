@@ -13,6 +13,7 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
     var btn = rbs.components.controls.Button;
 
     return util.rf({
+      displayName: "endpoint docs",
       propTypes: {
         method: rpt.string.isRequired,
         endpoint: rpt.string.isRequired,
@@ -209,6 +210,7 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
           }, this.state.response);
         }
         return rbs.components.layout.Alert({
+          key: "nosend",
           level: "info",
           icon: "info",
           strong: "Info",
