@@ -8,6 +8,8 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
     var d = React.DOM;
     var rpt = React.PropTypes;
 
+    var GRANT_TYPE_DESCRIPTION = "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh', or 'temporary_token'";
+
     return util.rf({
       displayName: "Docs",
 
@@ -33,7 +35,8 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 d.li({ key: "2" }, d.a({ href: "#resource_owner_password" }, "Resource Owner Password")),
                 d.li({ key: "3" }, d.a({ href: "#client_credentials" }, "Client Credentials")),
                 d.li({ key: "4" }, d.a({ href: "#refresh_token" }, "Refresh Token")),
-                d.li({ key: "5" }, d.a({ href: "#token_info" }, "Token Info"))
+                d.li({ key: "5" }, d.a({ href: "#temporary_token" }, "Temporary Token")),
+                d.li({ key: "6" }, d.a({ href: "#token_info" }, "Token Info"))
               ]),
               d.li({ key: "a2" }, d.a({ href: "#admin" }, "Admin"))
             ]),
@@ -136,7 +139,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       value: "authorization_code",
                       type: "string",
                       loc: "body",
-                      desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                      desc: GRANT_TYPE_DESCRIPTION
                     },
                     {
                       req: true,
@@ -173,7 +176,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       value: "password",
                       type: "string",
                       loc: "body",
-                      desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                      desc: GRANT_TYPE_DESCRIPTION
                     },
                     {
                       req: true,
@@ -210,7 +213,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       value: "client_credentials",
                       type: "string",
                       loc: "body",
-                      desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                      desc: GRANT_TYPE_DESCRIPTION
                     },
                     {
                       req: true,
@@ -240,7 +243,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       value: "refresh",
                       type: "string",
                       loc: "body",
-                      desc: "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh'"
+                      desc: GRANT_TYPE_DESCRIPTION
                     },
                     {
                       req: true,
@@ -264,6 +267,38 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       desc: "The scopes for which the access token should be valid. These scopes cannot exceed the scopes " +
                       " for which the refresh token was obtained, even if the user has accepted those scopes for the client " +
                       "to which the refresh token was distributed."
+                    }
+                  ]
+                }),
+                d.h5({ key: "temporary_token", id: "temporary_token" }, "Temporary Token"),
+                d.p({ key: "temporary_tokenp" }, "Use this endpoint to retrieve a short-lived token. This short-lived token is intended to be used as a query parameter to access file download endpoints."),
+                ep({
+                  key: "temporary_token_ep",
+                  method: "POST",
+                  endpoint: "https://oauth2cloud.com/oauth/token",
+                  parameters: [
+                    {
+                      req: true,
+                      name: "grant_type",
+                      value: "temporary_token",
+                      type: "string",
+                      loc: "body",
+                      desc: GRANT_TYPE_DESCRIPTION
+                    },
+                    {
+                      req: true,
+                      name: "access_token",
+                      type: "string",
+                      loc: "body",
+                      desc: "The access token that is being used to fetch a temporary token. The temporary token will have the same " +
+                      " scopes as the passed access_token."
+                    },
+                    {
+                      req: true,
+                      name: "client_id",
+                      type: "string",
+                      loc: "body",
+                      desc: "The ID of the client for which a temporary token is being retrieved."
                     }
                   ]
                 }),

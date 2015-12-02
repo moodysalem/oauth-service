@@ -146,7 +146,7 @@ public abstract class BaseResource {
             milliseconds = client.getRefreshTokenTtl() * 1000L;
         }
 
-        if (Token.Type.CODE.equals(type) || Token.Type.PERMISSION.equals(type)) {
+        if (Token.Type.CODE.equals(type) || Token.Type.PERMISSION.equals(type) || Token.Type.TEMPORARY.equals(type)) {
             milliseconds = FIVE_MINUTES;
         }
 

@@ -15,7 +15,8 @@ public class Client extends BaseEntity {
         IMPLICIT,
         CODE,
         RESOURCE_OWNER_CREDENTIALS,
-        CLIENT_CREDENTIALS;
+        CLIENT_CREDENTIALS,
+        TEMPORARY_TOKEN
     }
 
 
@@ -31,9 +32,6 @@ public class Client extends BaseEntity {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private Type type;
-
-    @Column(name = "refreshTokenTtl")
-    private Long refreshTokenTtl;
 
     @ManyToOne
     @JoinColumn(name = "applicationId")
@@ -62,6 +60,9 @@ public class Client extends BaseEntity {
 
     @Column(name = "tokenTtl")
     private Long tokenTtl;
+
+    @Column(name = "refreshTokenTtl")
+    private Long refreshTokenTtl;
 
     @ManyToOne
     @JoinColumn(name = "creatorId", updatable = false)

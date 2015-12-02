@@ -51,12 +51,12 @@ define([ "react", "underscore", "model", "rbs/mixins/Model", "rbs/mixins/NavbarH
               icon: "wrench",
               menu: [
                 {
-                  text: "Applications",
+                  text: "My Applications",
                   icon: "tachometer",
                   href: "/applications"
                 },
                 {
-                  text: "Clients",
+                  text: "My Clients",
                   icon: "key",
                   href: "/clients"
                 }

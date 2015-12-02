@@ -29,6 +29,7 @@ public class TokenResource extends BaseResource {
     public static final String PASSWORD = "password";
     public static final String CLIENT_CREDENTIALS = "client_credentials";
     public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String TEMPORARY_TOKEN = "temporary_token";
 
     @HeaderParam(" ")
     private String authorizationHeader;
@@ -92,9 +93,49 @@ public class TokenResource extends BaseResource {
                 return clientCredentiaslGrantType(formParams);
             case REFRESH_TOKEN:
                 return refreshTokenGrantType(formParams);
+            case TEMPORARY_TOKEN:
+                return temporaryTokenGrantType(formParams);
             default:
                 return error(ErrorResponse.Type.unsupported_grant_type, "The 'grant_type' specified is not supported by this server.");
         }
+    }
+
+    private Response temporaryTokenGrantType(MultivaluedMap<String, String> formParams) {
+        String token = formParams.getFirst("access_token");
+        String clientId = formParams.getFirst("client_id");
+
+        if (token == null || token.trim().isEmpty()) {
+            return error(ErrorResponse.Type.invalid_request,
+                String.format("'%s' grant type requires the 'token' parameter", TEMPORARY_TOKEN));
+        }
+
+        if (clientId == null || clientId.trim().isEmpty()) {
+            return error(ErrorResponse.Type.invalid_request,
+                String.format("'%s' grant type requires the 'client_id' parameter", TEMPORARY_TOKEN));
+        }
+
+        Client c = getClient(clientId);
+        if (c == null) {
+            return error(ErrorResponse.Type.invalid_client, "Invalid 'client_id.'");
+        }
+
+        if (!c.getFlows().contains(Client.GrantFlow.TEMPORARY_TOKEN)) {
+            return error(ErrorResponse.Type.unauthorized_client,
+                String.format("Client is not authorized for the '%s' grant flow.", TEMPORARY_TOKEN));
+        }
+
+        Token accessToken = getToken(token, c, Token.Type.ACCESS);
+        if (accessToken == null) {
+            return error(ErrorResponse.Type.invalid_grant, "Invalid or expired access token.");
+        }
+
+        List<AcceptedScope> newAcceptedScopes = new ArrayList<>(accessToken.getAcceptedScopes());
+        List<ClientScope> newClientScopes = new ArrayList<>(accessToken.getClientScopes());
+
+        Token tempToken = generateToken(Token.Type.TEMPORARY, c, accessToken.getUser(), getExpires(c, Token.Type.TEMPORARY),
+            accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes);
+
+        return noCache(Response.ok(TokenResponse.from(tempToken))).build();
     }
 
     private Response refreshTokenGrantType(MultivaluedMap<String, String> formParams) {

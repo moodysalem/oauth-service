@@ -52,7 +52,7 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Alert", "model", "
       render: function () {
 
         return d.div({ className: "container" }, [
-          d.h1({ key: "h1", className: "page-header" }, "Public Applications"),
+          d.h2({ key: "h1", className: "page-header" }, "Public Applications"),
           d.p({
             key: "lead",
             className: "lead"

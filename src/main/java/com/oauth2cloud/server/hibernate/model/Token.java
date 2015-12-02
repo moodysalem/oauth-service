@@ -16,6 +16,8 @@ public class Token extends BaseEntity {
     public enum Type {
         // the access token is used with resource servers to identify an authenticated user
         ACCESS,
+        // these tokens are access tokens that last for a very short amount of time
+        TEMPORARY,
         // the refresh token is shared only with the server as a method of getting new tokens
         REFRESH,
         // the permission is an internal token used for when the user is authenticated but not authorized

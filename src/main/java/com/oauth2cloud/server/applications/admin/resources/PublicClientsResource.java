@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Gets the applications but wraps them all in PublicApplication instances
  */
 @Path("publicclients")
-public class MyClientsResource extends BaseEntityResource<Client> {
+public class PublicClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public boolean requiresLogin() {
