@@ -196,12 +196,24 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
 
       getResponse: function () {
         if (this.state.response !== null && this.state.type !== null) {
+          if (this.state.type.indexOf("text/html") === 0) {
+            return d.iframe({
+              key: "response",
+              className: "iframe-response",
+              src: "data:" + this.state.type + "," + this.state.response
+            });
+          }
           return d.div({
             key: "response",
             className: "well well-sm well-example-response"
           }, this.state.response);
         }
-        return null;
+        return rbs.components.layout.Alert({
+          level: "info",
+          icon: "info",
+          strong: "Info",
+          message: "Enter values for the parameters and click send to see a response."
+        });
       },
 
       canSend: function () {
@@ -238,6 +250,7 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
             }))
           ]),
           this.getParameterTable(),
+          d.h5({ key: "resheader" }, "Response"),
           this.getResponse()
         ])
       }

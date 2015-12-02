@@ -166,3 +166,11 @@ table.vertical-align-middle td {
     max-height: 300px;
     overflow: auto;
 }
+
+.iframe-response {
+    width: 100%;
+    -webkit-box-shadow: 0 0 1px gray;
+    -moz-box-shadow: 0 0 1px gray;
+    box-shadow: 0 0 1px gray;
+    max-height: 300px;
+}

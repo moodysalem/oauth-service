@@ -177,7 +177,7 @@
         <constraints nullable="false" unique="true"/>
       </column>
       <column name="secret" type="VARCHAR(191)">
-        <constraints nullable="true" unique="true"/>
+        <constraints nullable="false" unique="true"/>
       </column>
       <column name="creatorId" type="BIGINT">
         <constraints nullable="false"/>

@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Gets the applications but wraps them all in PublicApplication instances
+ * Gets the clients but wraps them all in PublicClient instances to hide fields that shouldn't be seen by the client owner.
  */
 @Path("publicclients")
 public class PublicClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public boolean requiresLogin() {
-        return false;
+        return true;
     }
 
     @Override

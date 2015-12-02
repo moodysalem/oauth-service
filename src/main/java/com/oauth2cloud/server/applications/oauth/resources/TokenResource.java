@@ -187,13 +187,13 @@ public class TokenResource extends BaseResource {
         }
 
         if (!client.getFlows().contains(Client.GrantFlow.CLIENT_CREDENTIALS)) {
-            return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + CLIENT_CREDENTIALS +
-                "' grant flow.");
+            return error(ErrorResponse.Type.unauthorized_client,
+                String.format("Client is not authorized for the '%s' grant flow.", CLIENT_CREDENTIALS));
         }
 
         if (!client.getType().equals(Client.Type.CONFIDENTIAL)) {
-            return error(ErrorResponse.Type.unauthorized_client, "Client must be " + Client.Type.CONFIDENTIAL.toString() +
-                " for the '" + CLIENT_CREDENTIALS + "' grant flow.");
+            return error(ErrorResponse.Type.unauthorized_client,
+                String.format("Client must be %s for the '%s' grant flow.", Client.Type.CONFIDENTIAL.toString(), CLIENT_CREDENTIALS));
         }
 
         List<String> scopes = scopeList(scope);
@@ -245,9 +245,10 @@ public class TokenResource extends BaseResource {
             return error(ErrorResponse.Type.invalid_client, "Client authentication does not match client ID.");
         }
 
-        if ((client.getSecret() != null || client.getType().equals(Client.Type.CONFIDENTIAL)) && this.client == null) {
-            return error(ErrorResponse.Type.invalid_client, "Client authentication is required for confidential clients or " +
-                "clients that have credentials for the '" + AUTHORIZATION_CODE + "' grant flow.");
+        if (client.getType().equals(Client.Type.CONFIDENTIAL) && this.client == null) {
+            return error(ErrorResponse.Type.invalid_client,
+                String.format("Client authentication is required for CONFIDENTIAL clients in the '%s' grant flow.",
+                    AUTHORIZATION_CODE));
         }
 
         Token codeToken = getToken(code, client, Token.Type.CODE);

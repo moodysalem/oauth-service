@@ -10,6 +10,11 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
 
     var GRANT_TYPE_DESCRIPTION = "The grant_type is one of the following values: 'authorization_code', 'password', 'client_credentials', 'refresh', or 'temporary_token'";
 
+    var OAUTH = util.path(window.location.origin, "oauth");
+    var AUTHORIZE = util.path(OAUTH, "authorize");
+    var TOKEN = util.path(OAUTH, "token");
+    var TOKEN_INFO = util.path(TOKEN, "info");
+
     return util.rf({
       displayName: "Docs",
 
@@ -84,7 +89,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 ep({
                   key: "2",
                   method: "GET",
-                  endpoint: "https://oauth2cloud.com/oauth/authorize",
+                  endpoint: AUTHORIZE,
                   parameters: [
                     {
                       req: true,
@@ -132,7 +137,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 ep({
                   key: "4",
                   method: "POST",
-                  endpoint: "https://oauth2cloud.com/oauth/token",
+                  endpoint: TOKEN,
                   parameters: [
                     {
                       req: true,
@@ -141,6 +146,13 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       type: "string",
                       loc: "body",
                       desc: GRANT_TYPE_DESCRIPTION
+                    },
+                    {
+                      req: true,
+                      name: "Authorization",
+                      type: "string",
+                      loc: "header",
+                      desc: "'Basic ' followed by the base64-encoded clientid:secret. This is required if the client is confidential."
                     },
                     {
                       req: true,
@@ -169,7 +181,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 ep({
                   key: "password",
                   method: "POST",
-                  endpoint: "https://oauth2cloud.com/oauth/token",
+                  endpoint: TOKEN,
                   parameters: [
                     {
                       req: true,
@@ -206,7 +218,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 ep({
                   key: "client_credentials",
                   method: "POST",
-                  endpoint: "https://oauth2cloud.com/oauth/token",
+                  endpoint: TOKEN,
                   parameters: [
                     {
                       req: true,
@@ -236,7 +248,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 ep({
                   key: "refresh",
                   method: "POST",
-                  endpoint: "https://oauth2cloud.com/oauth/token",
+                  endpoint: TOKEN,
                   parameters: [
                     {
                       req: true,
@@ -277,7 +289,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 ep({
                   key: "temporary_token_ep",
                   method: "POST",
-                  endpoint: "https://oauth2cloud.com/oauth/token",
+                  endpoint: TOKEN,
                   parameters: [
                     {
                       req: true,
@@ -309,7 +321,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                 ep({
                   key: "tokeninfo_ep",
                   method: "POST",
-                  endpoint: "https://oauth2cloud.com/oauth/token/info",
+                  endpoint: TOKEN_INFO,
                   parameters: [
                     {
                       req: true,

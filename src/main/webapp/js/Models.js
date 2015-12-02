@@ -71,6 +71,9 @@ define([ "rbs" ], function (rbs) {
       },
       {
         name: "CLIENT_CREDENTIALS"
+      },
+      {
+        name: "TEMPORARY_TOKEN"
       }
     ]),
     ClientScopePriorities: new cl([
