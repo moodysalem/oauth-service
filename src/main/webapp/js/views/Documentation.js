@@ -149,13 +149,6 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                     },
                     {
                       req: true,
-                      name: "Authorization",
-                      type: "string",
-                      loc: "header",
-                      desc: "'Basic ' followed by the base64-encoded clientid:secret. This is required if the client is confidential."
-                    },
-                    {
-                      req: true,
                       name: "code",
                       type: "string",
                       loc: "body",
@@ -174,6 +167,13 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       type: "string",
                       loc: "body",
                       desc: "The ID of the client that requested the authorization code "
+                    },
+                    {
+                      req: false,
+                      name: "Authorization",
+                      type: "string",
+                      loc: "header",
+                      desc: "'Basic ' followed by the base64-encoded clientid:secret. This is required if the client is confidential."
                     }
                   ]
                 }),
