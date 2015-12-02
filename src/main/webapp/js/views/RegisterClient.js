@@ -62,30 +62,37 @@ define([ "react", "rbs", "underscore", "js/Models", "model", "./MustBeLoggedIn",
 
         return d.div({ className: "container" }, [
           header({ key: "hdr", model: this.state.pa }),
-          form({
-            key: "F",
-            model: this.state.newClient,
-            onSubmit: this.createClient,
-            attributes: [
-              {
-                attribute: "name",
-                component: "text",
-                label: "Client Name",
-                required: true,
-                placeholder: "Client Name",
-                tip: "Enter the name for your client."
-              },
-              {
-                component: btn,
-                caption: "Submit",
-                submit: true,
-                block: true,
-                ajax: true,
-                type: "primary",
-                icon: "plus"
-              }
-            ]
+          alt({
+            strong: "Info",
+            icon: "info",
+            level: "info",
+            key: "nyi",
+            message: "Not yet implemented."
           })
+          //form({
+          //  key: "F",
+          //  model: this.state.newClient,
+          //  onSubmit: this.createClient,
+          //  attributes: [
+          //    {
+          //      attribute: "name",
+          //      component: "text",
+          //      label: "Client Name",
+          //      required: true,
+          //      placeholder: "Client Name",
+          //      tip: "Enter the name for your client."
+          //    },
+          //    {
+          //      component: btn,
+          //      caption: "Submit",
+          //      submit: true,
+          //      block: true,
+          //      ajax: true,
+          //      type: "primary",
+          //      icon: "plus"
+          //    }
+          //  ]
+          //})
         ]);
       }
     });

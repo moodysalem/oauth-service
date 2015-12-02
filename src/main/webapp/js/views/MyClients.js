@@ -8,6 +8,7 @@ define([ "rbs", "react", "underscore", "./MustBeLoggedIn", "model" ], function (
   var rpt = React.PropTypes;
   var util = rbs.util;
 
+  var alt = rbs.components.layout.Alert;
   return util.rf({
     propTypes: {},
     getInitialState: function () {
@@ -28,7 +29,14 @@ define([ "rbs", "react", "underscore", "./MustBeLoggedIn", "model" ], function (
       }
 
       return d.div({ className: "container" }, [
-        d.h2({ key: "h2", className: "page-header" }, "My Clients")
+        d.h2({ key: "h2", className: "page-header" }, "My Clients"),
+        alt({
+          strong: "Info",
+          icon: "info",
+          level: "info",
+          key: "nyi",
+          message: "Not yet implemented."
+        })
       ]);
     }
   });
