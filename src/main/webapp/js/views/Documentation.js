@@ -121,6 +121,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                       name: "logout",
                       type: "boolean",
                       loc: "query",
+                      opts: [ "true" ],
                       desc: "Pass true to log the user out. This is especially useful when the user must accept certain scopes to continue."
                     }
                   ]
@@ -271,7 +272,8 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                   ]
                 }),
                 d.h5({ key: "temporary_token", id: "temporary_token" }, "Temporary Token"),
-                d.p({ key: "temporary_tokenp" }, "Use this endpoint to retrieve a short-lived token. This short-lived token is intended to be used as a query parameter to access file download endpoints."),
+                d.p({ key: "temporary_tokenp" }, "Use this endpoint to retrieve a short-lived token. This short-lived lasts five minutes" +
+                  " and is intended to be used where the token cannot be communicated via header, e.g. private file download links."),
                 ep({
                   key: "temporary_token_ep",
                   method: "POST",

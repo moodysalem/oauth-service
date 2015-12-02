@@ -161,3 +161,8 @@ table.vertical-align-middle td {
 .sm-margin-bottom {
     margin-bottom: 10px;
 }
+
+.well-example-response {
+    max-height: 300px;
+    overflow: auto;
+}

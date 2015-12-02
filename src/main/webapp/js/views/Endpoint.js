@@ -1,13 +1,16 @@
 /**
  *
  */
-define([ "react", "rbs", "underscore", "rbs/components/layout/Icon", "rbs/components/layout/Tip" ],
-  function (React, rbs, _, icon, tip) {
+define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "rbs/components/layout/Tip" ],
+  function (React, $, rbs, _, icon, tip) {
     "use strict";
     var util = rbs.util;
 
     var rpt = React.PropTypes;
     var d = React.DOM;
+
+    var types = rpt.oneOf([ "application/x-www-form-urlencoded", "application/json" ]);
+    var btn = rbs.components.controls.Button;
 
     return util.rf({
       propTypes: {
@@ -18,18 +21,19 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Icon", "rbs/compon
             req: rpt.bool.isRequired,
             name: rpt.string.isRequired,
             type: rpt.string.isRequired,
-            loc: rpt.string.isRequired,
+            loc: rpt.oneOf([ "header", "body", "query" ]).isRequired,
             desc: rpt.string.isRequired,
             opts: rpt.arrayOf(rpt.string),
             value: rpt.string
-          }).isRequired
-        ),
-        contentType: rpt.oneOf([ "application/x-www-form-urlencoded", "application/json" ])
+          })
+        ).isRequired,
+        contentType: types
       },
 
       getDefaultProps: function () {
         return {
-          contentType: "application/x-www-form-urlencoded"
+          contentType: "application/x-www-form-urlencoded",
+          response: null
         };
       },
 
@@ -42,7 +46,9 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Icon", "rbs/compon
         });
 
         return {
-          parameters: p
+          parameters: p,
+          response: null,
+          type: null
         };
       },
 
@@ -128,16 +134,21 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Icon", "rbs/compon
         return dataObj;
       },
 
-      getBody: function () {
+      getBody: function (forCurl) {
         var dataObj = this.getParamObj("body");
         if (_.keys(dataObj).length > 0) {
-          var toReturn = "-d '";
+          var toReturn = "";
+          if (forCurl) {
+            toReturn += " -d '";
+          }
           if (this.props.contentType === "application/json") {
             toReturn += JSON.stringify(dataObj);
           } else {
             toReturn += $.param(dataObj, true);
           }
-          toReturn += "'";
+          if (forCurl) {
+            toReturn += "'";
+          }
           return toReturn;
         }
         return "";
@@ -160,20 +171,74 @@ define([ "react", "rbs", "underscore", "rbs/components/layout/Icon", "rbs/compon
         return this.props.endpoint + (_.keys(paramObj).length > 0 ? ("?" + $.param(paramObj, true)) : "");
       },
 
+      doRequest: function () {
+        this.setState({
+          response: null,
+          type: null
+        });
+        $.ajax({
+          method: this.props.method,
+          url: this.getEndpoint(),
+          data: this.getBody(false),
+          headers: this.getParamObj("header")
+        }).then(_.bind(function (data, jqXhr) {
+          this.setState({
+            response: data,
+            type: jqXhr.getResponseHeader("Content-Type")
+          });
+        }, this), _.bind(function (jqXhr) {
+          this.setState({
+            response: jqXhr.responseText,
+            type: jqXhr.getResponseHeader("Content-Type")
+          });
+        }, this));
+      },
+
+      getResponse: function () {
+        if (this.state.response !== null && this.state.type !== null) {
+          return d.div({
+            key: "response",
+            className: "well well-sm well-example-response"
+          }, this.state.response);
+        }
+        return null;
+      },
+
+      canSend: function () {
+        var ps = this.state.parameters;
+        return _.every(this.props.parameters, function (param) {
+          return !param.req || param.value || ps[ param.name ];
+        });
+      },
+
       render: function () {
         return d.div({ className: "card " }, [
-          d.div({ key: "ep", className: "well well-sm nowrap-scroll" }, [
-            "curl",
-            " ",
-            (this.props.method !== "GET" ? d.strong({ key: "m" }, [ " -X ", this.props.method ]) : ""),
-            " ",
-            this.getEndpoint(),
-            " ",
-            this.getBody(),
-            " ",
-            this.getHeaders()
+          d.div({ className: "row", key: "urlrow" }, [
+            d.div({ className: "col-sm-10", key: "url" }, d.div({
+              key: "ep",
+              className: "well well-sm nowrap-scroll"
+            }, [
+              "curl",
+              " ",
+              (this.props.method !== "GET" ? d.strong({ key: "m" }, [ " -X ", this.props.method ]) : ""),
+              " ",
+              this.getEndpoint(),
+              " ",
+              this.getBody(true),
+              " ",
+              this.getHeaders()
+            ])),
+            d.div({ key: "response", className: "col-sm-2" }, btn({
+              icon: "paper-plane",
+              type: "primary",
+              ajax: true,
+              block: true,
+              disabled: !this.canSend(),
+              onClick: this.doRequest
+            }))
           ]),
-          this.getParameterTable()
+          this.getParameterTable(),
+          this.getResponse()
         ])
       }
     });
