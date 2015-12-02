@@ -232,7 +232,7 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
       render: function () {
         return d.div({ className: "card " }, [
           d.div({ className: "row", key: "urlrow" }, [
-            d.div({ className: "col-sm-10", key: "url" }, d.div({
+            d.div({ className: (this.props.noSend ? "col-sm-12" : "col-sm-10"), key: "url" }, d.div({
               key: "ep",
               className: "well well-sm nowrap-scroll"
             }, [
@@ -246,14 +246,14 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
               " ",
               this.getHeaders()
             ])),
-            d.div({ key: "response", className: "col-sm-2" }, btn({
+            (this.props.noSend ? null : d.div({ key: "response", className: "col-sm-2" }, btn({
               icon: "paper-plane",
               type: "primary",
               ajax: true,
               block: true,
               disabled: !this.canSend(),
               onClick: this.doRequest
-            }))
+            })))
           ]),
           this.getParameterTable(),
           d.h5({ key: "resheader" }, "Response"),
