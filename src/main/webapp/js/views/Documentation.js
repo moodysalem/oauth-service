@@ -253,7 +253,7 @@ define([ "react", "rbs", "underscore", "./Endpoint", "rbs/components/layout/FixT
                     {
                       req: true,
                       name: "grant_type",
-                      value: "refresh",
+                      value: "refresh_token",
                       type: "string",
                       loc: "body",
                       desc: GRANT_TYPE_DESCRIPTION
