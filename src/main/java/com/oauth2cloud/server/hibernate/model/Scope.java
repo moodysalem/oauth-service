@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.hibernate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.BaseEntity;
 import com.oauth2cloud.server.hibernate.validate.NoSpaces;
 import org.hibernate.validator.constraints.NotBlank;
@@ -32,6 +33,10 @@ public class Scope extends BaseEntity {
 
     @Column(name = "requiresApprovalFromApplication")
     private boolean requiresApprovalFromApplication;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted;
 
     public Application getApplication() {
         return application;
@@ -79,5 +84,13 @@ public class Scope extends BaseEntity {
 
     public void setRequiresApprovalFromApplication(boolean requiresApprovalFromApplication) {
         this.requiresApprovalFromApplication = requiresApprovalFromApplication;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

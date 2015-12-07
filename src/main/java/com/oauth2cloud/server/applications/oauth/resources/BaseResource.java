@@ -174,7 +174,11 @@ public abstract class BaseResource {
         CriteriaQuery<Client> cq = cb.createQuery(Client.class);
         Root<Client> ct = cq.from(Client.class);
         cq.select(ct);
-        cq.where(cb.equal(ct.get("identifier"), clientId));
+        cq.where(
+            cb.equal(ct.get("identifier"), clientId),
+            cb.equal(ct.get("deleted"), false),
+            cb.equal(ct.join("application").get("deleted"), false)
+        );
 
         List<Client> cts = em.createQuery(cq).getResultList();
         Client c = (cts.size() != 1) ? null : cts.get(0);
@@ -560,8 +564,12 @@ public abstract class BaseResource {
             throw new NullPointerException();
         }
         CallLog cl = new CallLog();
-        cl.setClient(client);
-        cl.setApplication(application);
+        if (client != null) {
+            cl.setClient(client);
+            cl.setApplication(client.getApplication());
+        } else {
+            cl.setApplication(application);
+        }
         if (forwardedIp != null) {
             cl.setIp(forwardedIp);
         } else {

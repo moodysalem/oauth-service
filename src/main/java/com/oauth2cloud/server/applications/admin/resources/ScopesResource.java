@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.applications.admin.resources;
 
 import com.oauth2cloud.server.hibernate.model.Application;
+import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.hibernate.model.Scope;
 
 import javax.persistence.criteria.Predicate;
@@ -66,6 +67,7 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         checkScope(MANAGE_SCOPES);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
+        list.add(cb.equal(root.get("deleted"), false));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));
@@ -80,5 +82,11 @@ public class ScopesResource extends BaseEntityResource<Scope> {
     @Override
     public void beforeSend(Scope scope) {
 
+    }
+
+    @Override
+    protected void deleteEntity(Scope entityToDelete) {
+        entityToDelete.setDeleted(true);
+        em.merge(entityToDelete);
     }
 }

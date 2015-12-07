@@ -69,6 +69,10 @@ public class Application extends BaseEntity {
     @Column(name = "publicClientRegistration")
     private boolean publicClientRegistration;
 
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted;
+
     public String getName() {
         return name;
     }
@@ -179,5 +183,13 @@ public class Application extends BaseEntity {
 
     public void setLogoUrl(String logoUrl) {
         this.logoUrl = logoUrl;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

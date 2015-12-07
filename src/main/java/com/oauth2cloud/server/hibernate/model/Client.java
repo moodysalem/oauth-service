@@ -69,6 +69,11 @@ public class Client extends BaseEntity {
     @JsonIgnore
     private User creator;
 
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted;
+
     public String getIdentifier() {
         return identifier;
     }
@@ -160,4 +165,13 @@ public class Client extends BaseEntity {
     public String getCreatorEmail() {
         return creator != null ? creator.getEmail() : null;
     }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
 }

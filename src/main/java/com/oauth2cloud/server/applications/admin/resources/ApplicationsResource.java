@@ -89,6 +89,7 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
         checkScope(MANAGE_APPLICATIONS);
         list.add(cb.equal(root.get("owner"), getUser()));
+        list.add(cb.equal(root.get("deleted"), false));
     }
 
     @Override
@@ -137,5 +138,9 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
         }
     }
 
-
+    @Override
+    protected void deleteEntity(Application entityToDelete) {
+        entityToDelete.setDeleted(true);
+        em.merge(entityToDelete);
+    }
 }

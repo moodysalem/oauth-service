@@ -48,6 +48,9 @@
       <column name="amazonClientSecret" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
+      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
       <column name="legacyUrl" type="${TEXT}"/>
       <column name="stylesheetUrl" type="${TEXT}"/>
       <column name="logoUrl" type="${TEXT}"/>
@@ -90,12 +93,14 @@
       <column name="requiresApprovalFromApplication" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
+      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
                              constraintName="FK_Scope_Application"
                              referencedTableName="Application"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addUniqueConstraint tableName="Scope" columnNames="applicationId,name"/>
     <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
@@ -132,11 +137,13 @@
       <column name="verified" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
+      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="User" baseColumnNames="applicationId" constraintName="FK_User_Application"
                              referencedTableName="Application"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="Application" baseColumnNames="ownerId" constraintName="FK_Application_Owner"
                              referencedTableName="User"
                              referencedColumnNames="id"/>
@@ -182,17 +189,18 @@
       <column name="creatorId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
+      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="Client" baseColumnNames="applicationId"
                              constraintName="FK_CLIENT_APPLICATION"
                              referencedTableName="Application"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="Client" baseColumnNames="creatorId"
                              constraintName="FK_CLIENT_USER"
                              referencedTableName="User"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE Client CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
@@ -210,8 +218,7 @@
     <addForeignKeyConstraint baseTableName="Client_URI" baseColumnNames="clientId"
                              constraintName="FK_Client_URI_Client"
                              referencedTableName="Client"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE Client_URI CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
@@ -230,7 +237,7 @@
                              constraintName="FK_Client_Flow_Client"
                              referencedTableName="Client"
                              referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+    />
     <sql dbms="mysql">ALTER TABLE Client_Flow CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
@@ -272,17 +279,14 @@
     </createTable>
     <addForeignKeyConstraint baseTableName="Token" baseColumnNames="userId" constraintName="FK_Token_User"
                              referencedTableName="User"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="Token" baseColumnNames="clientId" constraintName="FK_Token_Client"
                              referencedTableName="Client"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="Token" baseColumnNames="refreshTokenId"
                              constraintName="FK_Token_Refresh_Token"
                              referencedTableName="Token"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
@@ -317,13 +321,11 @@
     <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="clientId"
                              constraintName="FK_ClientScope_Client"
                              referencedTableName="Client"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="scopeId"
                              constraintName="FK_ClientScope_Scope"
                              referencedTableName="Scope"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addUniqueConstraint tableName="ClientScope" columnNames="clientId,scopeId"/>
   </changeSet>
 
@@ -351,8 +353,8 @@
     <addForeignKeyConstraint baseTableName="AcceptedScope" baseColumnNames="userId"
                              constraintName="FK_AcceptedScope_User"
                              referencedTableName="User"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
+    <!-- if you delete the client scope, it is unaccepted for all users -->
     <addForeignKeyConstraint baseTableName="AcceptedScope" baseColumnNames="clientScopeId"
                              constraintName="FK_AcceptedScope_ClientScope"
                              referencedTableName="ClientScope"
@@ -374,8 +376,8 @@
     <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="tokenId"
                              constraintName="FK_Token_AcceptedScope_Token"
                              referencedTableName="Token"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
+    <!-- if you delete the accepted scope, all the tokens drop the scope -->
     <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="acceptedScopeId"
                              constraintName="FK_Token_AcceptedScope_AcceptedScope"
                              referencedTableName="AcceptedScope"
@@ -396,8 +398,7 @@
     <addForeignKeyConstraint baseTableName="Token_ClientScope" baseColumnNames="tokenId"
                              constraintName="FK_Token_ClientScope_Token"
                              referencedTableName="Token"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="Token_ClientScope" baseColumnNames="clientScopeId"
                              constraintName="FK_Token_ClientScope_ClientScope"
                              referencedTableName="ClientScope"
@@ -434,8 +435,7 @@
     </createTable>
     <addForeignKeyConstraint baseTableName="LoginCookie" baseColumnNames="userId" constraintName="FK_LoginCookie_User"
                              referencedTableName="User"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE LoginCookie CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
@@ -472,8 +472,7 @@
     </createTable>
     <addForeignKeyConstraint baseTableName="UserCode" baseColumnNames="userId" constraintName="FK_UserCode_User"
                              referencedTableName="User"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <sql dbms="mysql">ALTER TABLE UserCode CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
@@ -507,7 +506,15 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <sql dbms="mysql">ALTER TABLE UserCode CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
+
+    <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Client"
+                             referencedTableName="Client"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Client"
+                             referencedTableName="Client"
+                             referencedColumnNames="id"/>
+
+    <sql dbms="mysql">ALTER TABLE CallLog CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
 

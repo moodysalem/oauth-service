@@ -73,6 +73,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
         checkScope(MANAGE_CLIENTS);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
+        list.add(cb.equal(root.get("deleted"), false));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));
@@ -100,5 +101,11 @@ public class ClientsResource extends BaseEntityResource<Client> {
     @Override
     public void beforeSend(Client client) {
 
+    }
+
+    @Override
+    protected void deleteEntity(Client entityToDelete) {
+        entityToDelete.setDeleted(true);
+        em.merge(entityToDelete);
     }
 }

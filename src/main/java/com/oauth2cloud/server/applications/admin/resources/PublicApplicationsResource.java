@@ -85,6 +85,7 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> predicates, Root<Application> root) {
         predicates.add(cb.equal(root.get("publicClientRegistration"), true));
+        predicates.add(cb.equal(root.get("deleted"), false));
 
         // allow searching for applications by name
         if (name != null) {
