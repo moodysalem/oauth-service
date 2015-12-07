@@ -510,7 +510,7 @@
     <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Client"
                              referencedTableName="Client"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Client"
+    <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Application"
                              referencedTableName="Client"
                              referencedColumnNames="id"/>
 
