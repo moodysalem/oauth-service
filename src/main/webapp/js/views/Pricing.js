@@ -42,17 +42,17 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
             "Pricing"
           ]),
           d.p({ key: "lead", className: "lead" }, [
-            "Pricing is very simple. One-tenth of a cent per oauth API call, or 1000 calls per dollar. "
+            "One-tenth of a cent per oauth API call, or 1000 calls per dollar, or ($0.001 USD / call)."
           ]),
           d.p({ key: "more" }, [
-            "That excludes any calls made to the administrative API to manage users, clients, or tokens. " +
-            "Each Application gets 5000 free calls per month. Bills are calculated at the first of the month."
+            "That excludes any calls made to the administrative API to manage users, clients, scopes or tokens. " +
+            "Each Application gets 10000 free calls per month. Bills are calculated on the first of the month."
           ]),
           d.small({
             key: "small",
             className: "sm-margin-bottom"
           }, "* These pricing terms may change at any time. " +
-            "Best efforts will be made to accommodate existing users, and export your data if necessary. At least 1 month of notice will be given."),
+            "Best efforts will be made to accommodate existing users, and export your data if necessary. At least 1 month of notice will be given for pricing increases."),
           cm({ key: "cm", open: this.state.contactOpen, onClose: this.closeContact })
         ]);
       }
