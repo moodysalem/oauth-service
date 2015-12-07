@@ -29,6 +29,7 @@ public class VerifyEmailResource extends BaseResource {
         if (uc == null) {
             return error(INVALID_VERIFICATION_LINK);
         }
+        logCall(uc.getUser().getApplication());
 
         VerifyEmailModel vem = new VerifyEmailModel();
         vem.setUserCode(uc);

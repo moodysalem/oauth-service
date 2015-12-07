@@ -73,6 +73,8 @@ public class AuthorizeResource extends BaseResource {
             return error("Invalid client ID.");
         }
 
+        logCall(c);
+
         LoginCookie loginCookie = getLoginCookie(c);
         deleteLoginCookie(loginCookie);
 
@@ -188,6 +190,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         Client client = getClient(clientId);
+        logCall(client);
 
         LoginCookie loginCookie = getLoginCookie(client);
         if (loginCookie != null) {
@@ -238,6 +241,8 @@ public class AuthorizeResource extends BaseResource {
         lrm.setRedirectUri(redirectUri);
         Client client = getClient(clientId);
         lrm.setClient(client);
+
+        logCall(client);
 
         // this resource is used for a few different actions which are represented as hidden inputs in the forms
         // this is done so that the query string can be preserved across all requests without any special handling

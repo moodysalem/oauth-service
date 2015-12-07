@@ -477,5 +477,37 @@
     <sql dbms="mysql">ALTER TABLE UserCode CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
+  <changeSet id="Call Log" author="moody.salem">
+    <createTable tableName="CallLog">
+      <column name="id" autoIncrement="true" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ip" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="clientId" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="applicationId" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="path" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="method" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
 
 </databaseChangeLog>

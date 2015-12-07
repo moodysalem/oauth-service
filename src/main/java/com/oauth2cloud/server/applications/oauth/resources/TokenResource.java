@@ -118,6 +118,7 @@ public class TokenResource extends BaseResource {
         if (c == null) {
             return error(ErrorResponse.Type.invalid_client, "Invalid 'client_id.'");
         }
+        logCall(c);
 
         if (!c.getFlows().contains(Client.GrantFlow.TEMPORARY_TOKEN)) {
             return error(ErrorResponse.Type.unauthorized_client,
@@ -158,6 +159,7 @@ public class TokenResource extends BaseResource {
         if (refreshToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid or expired refresh token.");
         }
+        logCall(refreshToken.getClient());
 
         List<AcceptedScope> newTokenScopes = new ArrayList<>(refreshToken.getAcceptedScopes());
 
@@ -185,6 +187,7 @@ public class TokenResource extends BaseResource {
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Client authorization failed.");
         }
+        logCall(client);
 
         if (!client.getFlows().contains(Client.GrantFlow.CLIENT_CREDENTIALS)) {
             return error(ErrorResponse.Type.unauthorized_client,
@@ -236,6 +239,7 @@ public class TokenResource extends BaseResource {
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Invalid client ID.");
         }
+        logCall(client);
 
         if (!client.getFlows().contains(Client.GrantFlow.CODE)) {
             return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + AUTHORIZATION_CODE + "' grant flow.");
@@ -288,6 +292,7 @@ public class TokenResource extends BaseResource {
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Client authentication is ALWAYS required for the '" + PASSWORD + "' grant type.");
         }
+        logCall(client);
 
         if (!client.getType().equals(Client.Type.CONFIDENTIAL)) {
             return error(ErrorResponse.Type.invalid_client, "Client must be CONFIDENTIAL to use this the '" + PASSWORD + "' grant type.");
@@ -384,12 +389,21 @@ public class TokenResource extends BaseResource {
             if (c == null) {
                 throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client ID.");
             }
+            logCall(c);
             applicationId = c.getApplication().getId();
         }
 
         Token t = getToken(token, c, Token.Type.ACCESS, Token.Type.REFRESH);
         if (t == null || t.getClient().getApplication().getId() != applicationId) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
+        }
+
+        // call made on behalf of a client
+        if (clientId != null) {
+            logCall(t.getClient());
+        } else {
+            // otherwise call made on behalf of the application
+            logCall(t.getClient().getApplication());
         }
 
         return noCache(Response.ok(TokenResponse.from(t))).build();

@@ -24,6 +24,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
@@ -545,6 +547,46 @@ public abstract class BaseResource {
         StringWriter sw = new StringWriter();
         cfg.getTemplate(template).process(model, sw);
         return sw.toString();
+    }
+
+
+    @HeaderParam("X-Forwarded-For")
+    String forwardedIp;
+    @Context
+    HttpServletRequest servletRequest;
+
+    protected CallLog logCall(Client client, Application application) {
+        if (client == null && application == null) {
+            throw new NullPointerException();
+        }
+        CallLog cl = new CallLog();
+        cl.setClient(client);
+        cl.setApplication(application);
+        if (forwardedIp != null) {
+            cl.setIp(forwardedIp);
+        } else {
+            cl.setIp(servletRequest.getRemoteAddr());
+        }
+        cl.setPath(containerRequestContext.getUriInfo().getPath());
+        cl.setMethod(containerRequestContext.getMethod());
+        try {
+            beginTransaction();
+            em.persist(cl);
+            commit();
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to log a call.", e);
+            rollback();
+            throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to log call.", e.getMessage());
+        }
+        return cl;
+    }
+
+    protected CallLog logCall(Client c) {
+        return logCall(c, null);
+    }
+
+    protected CallLog logCall(Application app) {
+        return logCall(null, app);
     }
 
 }

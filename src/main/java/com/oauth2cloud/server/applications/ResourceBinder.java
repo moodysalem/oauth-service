@@ -15,6 +15,7 @@ public class ResourceBinder extends AbstractBinder {
     protected void configure() {
         String context = System.getProperty("LIQUIBASE_CONTEXT", "");
 
+        // this is used to talk to the DB via JPA entity manager
         bindFactory(new JAXRSEntityManagerFactory(
             System.getProperty("JDBC_CONNECTION_STRING"),
             System.getProperty("JDBC_CONNECTION_USERNAME"),
@@ -25,7 +26,7 @@ public class ResourceBinder extends AbstractBinder {
             context
         )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
-
+        // get the port configuration
         int port = 25;
         if (System.getProperty("SMTP_PORT") != null) {
             try {
@@ -34,6 +35,7 @@ public class ResourceBinder extends AbstractBinder {
             }
         }
 
+        // this is used to send e-mails
         bindFactory(
             new MailSessionFactory(
                 System.getProperty("SMTP_HOST"),
@@ -43,6 +45,7 @@ public class ResourceBinder extends AbstractBinder {
             )
         ).to(Session.class).in(RequestScoped.class);
 
+        // this is used for generating e-mails from freemarker templates
         Configuration freemarkerConfiguration = new Configuration(Configuration.VERSION_2_3_23);
         freemarkerConfiguration.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));
         freemarkerConfiguration.setDefaultEncoding("UTF-8");

@@ -1,10 +1,10 @@
 package com.oauth2cloud.server.applications.oauth.resources;
 
+import com.oauth2cloud.server.applications.oauth.models.ResetPasswordModel;
+import com.oauth2cloud.server.applications.oauth.models.UserCodeEmailModel;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.hibernate.model.UserCode;
-import com.oauth2cloud.server.applications.oauth.models.ResetPasswordModel;
-import com.oauth2cloud.server.applications.oauth.models.UserCodeEmailModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -21,10 +21,10 @@ public class PasswordResetResource extends BaseResource {
 
     public static final String INVALID_RESET_PASSWORD_URL = "Invalid reset password URL.";
     public static final String INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL =
-            "Invalid or expired link. Please request another reset password e-mail.";
+        "Invalid or expired link. Please request another reset password e-mail.";
     public static final String PASSWORD_IS_REQUIRED_AND_WAS_NOT_INCLUDED = "Password is required and was not included.";
     public static final String AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD =
-            "An internal server error prevented you from changing your password.";
+        "An internal server error prevented you from changing your password.";
 
     @QueryParam("applicationId")
     Long applicationId;
@@ -60,6 +60,7 @@ public class PasswordResetResource extends BaseResource {
             if (application == null) {
                 return error(INVALID_RESET_PASSWORD_URL);
             }
+            logCall(application);
             rm.setApplication(application);
         }
 
@@ -101,6 +102,7 @@ public class PasswordResetResource extends BaseResource {
         if (application == null) {
             return error(INVALID_RESET_PASSWORD_URL);
         }
+        logCall(application);
 
         rm.setApplication(application);
 
@@ -119,13 +121,13 @@ public class PasswordResetResource extends BaseResource {
 
     private void emailCode(UserCode pc) {
         String url = containerRequestContext.getUriInfo().getBaseUriBuilder().path("reset")
-                .replaceQuery("").queryParam("code", pc.getCode()).toString();
+            .replaceQuery("").queryParam("code", pc.getCode()).toString();
         UserCodeEmailModel prem = new UserCodeEmailModel();
         prem.setUserCode(pc);
         prem.setUrl(url);
         sendEmail(pc.getUser().getApplication().getSupportEmail(), pc.getUser().getEmail(),
-                "Your password reset code from " + pc.getUser().getApplication().getName(),
-                "PasswordReset.ftl", prem);
+            "Your password reset code from " + pc.getUser().getApplication().getName(),
+            "PasswordReset.ftl", prem);
     }
 
 

@@ -22,8 +22,7 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
         this.setState({
           contactOpen: true
         });
-      },
-      closeContact: function () {
+      }, closeContact: function () {
         this.setState({
           contactOpen: false
         });
@@ -43,43 +42,17 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
             "Pricing"
           ]),
           d.p({ key: "lead", className: "lead" }, [
-            d.strong({ key: "s" }, "No fee or rate limiting system is currently implemented."),
-            " Please be respectful of the following suggestions and contact me if you wish to exceed the limits."
+            "Pricing is very simple. One-tenth of a cent per oauth API call, or 1000 calls per dollar. "
           ]),
-          d.table({ className: "table table-bordered", key: "T" }, [
-            d.thead({ key: "Th" }, d.tr({ key: "H" }, [
-              d.th({ key: "#" }, "Max # Users"),
-              d.th({ key: "calls" }, "Requests per second"),
-              d.th({ key: "cost" }, "Suggested Fee")
-            ])),
-            d.tbody({ key: "tb" }, [
-              d.tr({ key: "b" }, [
-                d.th({ key: "2" }, "5,000"),
-                d.th({ key: "3" }, "10"),
-                d.th({ key: "4" }, "Free")
-              ]),
-              d.tr({ key: "p" }, [
-                d.th({ key: "2" }, "25,000"),
-                d.th({ key: "3" }, "30"),
-                d.th({ key: "4" }, "$100/mo.")
-              ]),
-              d.tr({ key: "pp" }, [
-                d.th({ key: "2" }, "50,000"),
-                d.th({ key: "3" }, "45"),
-                d.th({ key: "4" }, "$150/mo.")
-              ]),
-              d.tr({ key: "more" }, [
-                d.th({ key: "2" }, ">50,000"),
-                d.th({ key: "3" }, ">45"),
-                d.th({ key: "4" }, d.a({ key: "cu", href: "#", onClick: this.openContact }, " Contact Us"))
-              ])
-            ])
+          d.p({ key: "more" }, [
+            "That excludes any calls made to the administrative API to manage users, clients, or tokens. " +
+            "Each Application gets 5000 free calls per month. Bills are calculated at the first of the month."
           ]),
           d.small({
             key: "small",
             className: "sm-margin-bottom"
-          }, "* Note that these pricing terms may change at any time. " +
-            "Best efforts will be made to accommodate existing users."),
+          }, "* These pricing terms may change at any time. " +
+            "Best efforts will be made to accommodate existing users, and export your data if necessary. At least 1 month of notice will be given."),
           cm({ key: "cm", open: this.state.contactOpen, onClose: this.closeContact })
         ]);
       }
