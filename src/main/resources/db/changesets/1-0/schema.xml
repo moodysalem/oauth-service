@@ -507,6 +507,7 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+    <sql dbms="mysql">ALTER TABLE UserCode CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
 
