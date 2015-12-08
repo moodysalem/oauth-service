@@ -2,6 +2,7 @@ package com.oauth2cloud.server.applications.admin.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.applications.oauth.resources.BaseResource;
 
 import javax.ws.rs.Consumes;
@@ -11,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("support")
+@CORSFilter.Skip
 public class SupportResource extends BaseResource {
 
     @JsonIgnoreProperties(ignoreUnknown = true)

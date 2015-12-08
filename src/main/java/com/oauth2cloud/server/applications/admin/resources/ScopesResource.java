@@ -66,7 +66,7 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         checkScope(MANAGE_SCOPES);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.get("deleted"), false));
+        list.add(cb.equal(root.join("application").get("deleted"), false));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));

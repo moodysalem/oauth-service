@@ -61,6 +61,10 @@ public class PublicClientsResource extends BaseEntityResource<Client> {
         // application must be public
         predicates.add(cb.equal(root.join("application").get("publicClientRegistration"), true));
 
+        predicates.add(cb.equal(root.get("deleted"), false));
+        predicates.add(cb.equal(root.join("application").get("deleted"), false));
+
+
         // must be created by this user
         predicates.add(cb.equal(root.get("creator"), getUser()));
 
