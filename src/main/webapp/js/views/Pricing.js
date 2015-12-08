@@ -6,12 +6,12 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
     "use strict";
 
     var util = rbs.util;
-    var Backbone = rbs.backbone;
     var d = React.DOM;
     var rpt = React.PropTypes;
 
     return util.rf({
-      displayName: "pricing",
+      displayName: "Pricing",
+
       getInitialState: function () {
         return {
           contactOpen: false
@@ -22,7 +22,9 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
         this.setState({
           contactOpen: true
         });
-      }, closeContact: function () {
+      },
+
+      closeContact: function () {
         this.setState({
           contactOpen: false
         });
@@ -36,13 +38,14 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "./Cont
               key: "cu",
               caption: "Contact Us",
               icon: "question",
+              size: "sm",
               className: "pull-right",
               onClick: this.openContact
             }),
             "Pricing"
           ]),
           d.p({ key: "lead", className: "lead" }, [
-            "One-tenth of a cent per oauth API call, or 1000 calls per dollar, or ($0.001 USD / call)."
+            "One-tenth of a cent ($0.001 USD) per API call, or 1000 calls per dollar."
           ]),
           d.p({ key: "more" }, [
             "That excludes any calls made to the administrative API to manage users, clients, scopes or tokens. " +

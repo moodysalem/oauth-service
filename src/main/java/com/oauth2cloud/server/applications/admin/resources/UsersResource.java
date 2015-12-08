@@ -2,7 +2,6 @@ package com.oauth2cloud.server.applications.admin.resources;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.hibernate.model.Scope;
 import com.oauth2cloud.server.hibernate.model.User;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -33,7 +32,7 @@ public class UsersResource extends BaseEntityResource<User> {
         }
 
         Application ap = em.find(Application.class, user.getApplication().getId());
-        return ap != null && ap.getOwner().equals(getUser());
+        return ap != null && !ap.isDeleted() && ap.getOwner().equals(getUser());
     }
 
     @Override
@@ -99,7 +98,7 @@ public class UsersResource extends BaseEntityResource<User> {
         checkScope(MANAGE_USERS);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.get("deleted"), false));
+        list.add(cb.equal(root.join("application").get("deleted"), false));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));
@@ -123,11 +122,5 @@ public class UsersResource extends BaseEntityResource<User> {
     @Override
     public void beforeSend(User user) {
 
-    }
-
-    @Override
-    protected void deleteEntity(User entityToDelete) {
-        entityToDelete.setDeleted(true);
-        em.merge(entityToDelete);
     }
 }

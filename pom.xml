@@ -10,8 +10,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>1.0.1</jaxrs.lib.version>
-    <react.backstrap.version>0.1.1</react.backstrap.version>
+    <jaxrs.lib.version>1.0.3</jaxrs.lib.version>
+    <react.backstrap.version>0.1.2-SNAPSHOT</react.backstrap.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>

@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.applications.oauth.models.LoginRegisterModel;
 import com.oauth2cloud.server.applications.oauth.models.PermissionsModel;
@@ -76,12 +77,12 @@ public class AuthorizeResource extends BaseResource {
         logCall(c);
 
         LoginCookie loginCookie = getLoginCookie(c);
-        deleteLoginCookie(loginCookie);
+        expireLoginCookie(loginCookie);
 
-        return Response.status(Response.Status.NO_CONTENT).build();
+        return Response.noContent().build();
     }
 
-    private void deleteLoginCookie(LoginCookie loginCookie) {
+    private void expireLoginCookie(LoginCookie loginCookie) {
         if (loginCookie == null) {
             return;
         }
@@ -104,7 +105,7 @@ public class AuthorizeResource extends BaseResource {
      * @param clientId     valid id of a client
      * @param redirectUri  a URI that the client is allowed to redirect to
      * @param scopes       a list of scopes that the client is requesting
-     * @return an error if anything is wrong with the aforementioned parameters
+     * @return an error if anything is wrong with the aforementioned parameters, otherwise null
      */
     private Response getErrorResponse(String responseType, String clientId, String redirectUri, List<String> scopes) {
         if (valid) {
@@ -183,7 +184,9 @@ public class AuthorizeResource extends BaseResource {
      * @return a login screen
      */
     @GET
+    @CORSFilter.Skip
     public Response auth() {
+
         Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
@@ -195,7 +198,7 @@ public class AuthorizeResource extends BaseResource {
         LoginCookie loginCookie = getLoginCookie(client);
         if (loginCookie != null) {
             if (logout) {
-                deleteLoginCookie(loginCookie);
+                expireLoginCookie(loginCookie);
             } else {
                 return getSuccessfulLoginResponse(loginCookie.getUser(), client, scopes, redirectUri, responseType, state,
                     loginCookie.isRememberMe());
@@ -220,13 +223,16 @@ public class AuthorizeResource extends BaseResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @CORSFilter.Skip
     public Response login(MultivaluedMap<String, String> formParams) {
-        boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
-
         // validate the client id stuff again
         Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
+        }
+
+        if (formParams == null) {
+            return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
 
         String action = formParams.getFirst("action");
@@ -234,6 +240,7 @@ public class AuthorizeResource extends BaseResource {
             return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
 
+        boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
 
         LoginRegisterModel lrm = new LoginRegisterModel();
         lrm.setURLs(containerRequestContext);

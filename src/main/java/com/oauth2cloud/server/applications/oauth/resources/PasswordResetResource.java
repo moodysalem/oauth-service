@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.applications.oauth.resources;
 
+import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.applications.oauth.models.ResetPasswordModel;
 import com.oauth2cloud.server.applications.oauth.models.UserCodeEmailModel;
 import com.oauth2cloud.server.hibernate.model.Application;
@@ -39,11 +40,16 @@ public class PasswordResetResource extends BaseResource {
         if (applicationId == null) {
             return null;
         }
-        return em.find(Application.class, applicationId);
+        Application application = em.find(Application.class, applicationId);
+        if (application != null && application.isDeleted()) {
+            return null;
+        }
+        return application;
     }
 
 
     @GET
+    @CORSFilter.Skip
     public Response sendEmailPage(@QueryParam("code") String code) {
         ResetPasswordModel rm = new ResetPasswordModel();
 
@@ -70,6 +76,7 @@ public class PasswordResetResource extends BaseResource {
     }
 
     @POST
+    @CORSFilter.Skip
     public Response doPost(@FormParam("code") String code, @FormParam("password") String password, @FormParam("email") String email) {
         ResetPasswordModel rm = new ResetPasswordModel();
 

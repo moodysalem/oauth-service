@@ -39,10 +39,6 @@ public class User extends BaseEntity {
     @Column(name = "verified")
     private boolean verified;
 
-    @JsonIgnore
-    @Column(name = "deleted")
-    private boolean deleted;
-
     public String getFirstName() {
         return firstName;
     }
@@ -101,11 +97,4 @@ public class User extends BaseEntity {
         this.newPassword = newPassword;
     }
 
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
 }

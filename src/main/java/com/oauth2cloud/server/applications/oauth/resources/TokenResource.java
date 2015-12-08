@@ -393,7 +393,7 @@ public class TokenResource extends BaseResource {
             applicationId = c.getApplication().getId();
         }
 
-        Token t = getToken(token, c, Token.Type.ACCESS, Token.Type.REFRESH);
+        Token t = getToken(token, c, Token.Type.ACCESS, Token.Type.REFRESH, Token.Type.TEMPORARY);
         if (t == null || t.getClient().getApplication().getId() != applicationId) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }

@@ -93,9 +93,6 @@
       <column name="requiresApprovalFromApplication" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
-      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
-        <constraints nullable="false"/>
-      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
                              constraintName="FK_Scope_Application"
@@ -135,9 +132,6 @@
         <constraints nullable="false"/>
       </column>
       <column name="verified" type="${BOOLEAN}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
         <constraints nullable="false"/>
       </column>
     </createTable>
@@ -325,7 +319,8 @@
     <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="scopeId"
                              constraintName="FK_ClientScope_Scope"
                              referencedTableName="Scope"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addUniqueConstraint tableName="ClientScope" columnNames="clientId,scopeId"/>
   </changeSet>
 

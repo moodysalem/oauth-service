@@ -2,6 +2,7 @@ package com.oauth2cloud.server.applications.oauth.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.applications.oauth.models.ErrorModel;
 import com.oauth2cloud.server.hibernate.model.*;
@@ -596,5 +597,4 @@ public abstract class BaseResource {
     protected CallLog logCall(Application app) {
         return logCall(null, app);
     }
-
 }

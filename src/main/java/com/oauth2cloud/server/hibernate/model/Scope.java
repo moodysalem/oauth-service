@@ -34,10 +34,6 @@ public class Scope extends BaseEntity {
     @Column(name = "requiresApprovalFromApplication")
     private boolean requiresApprovalFromApplication;
 
-    @JsonIgnore
-    @Column(name = "deleted")
-    private boolean deleted;
-
     public Application getApplication() {
         return application;
     }
@@ -84,13 +80,5 @@ public class Scope extends BaseEntity {
 
     public void setRequiresApprovalFromApplication(boolean requiresApprovalFromApplication) {
         this.requiresApprovalFromApplication = requiresApprovalFromApplication;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 }

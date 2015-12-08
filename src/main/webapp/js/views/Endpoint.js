@@ -15,7 +15,7 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
     return util.rf({
       displayName: "endpoint docs",
       propTypes: {
-        method: rpt.string.isRequired,
+        method: rpt.oneOf([ "GET", "POST", "PUT", "DELETE" ]).isRequired,
         endpoint: rpt.string.isRequired,
         parameters: rpt.arrayOf(
           rpt.shape({
@@ -178,12 +178,17 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
           response: null,
           type: null
         });
+
+        var data = this.getBody(false);
+        var hdrs = this.getParamObj("header");
+
+        // we can just use AJAX here since it's on the same domain and thus not a CORS request
         $.ajax({
           method: this.props.method,
           url: this.getEndpoint(),
-          data: this.getBody(false),
-          headers: this.getParamObj("header")
-        }).then(_.bind(function (data, jqXhr) {
+          data: data,
+          headers: hdrs
+        }).then(_.bind(function (data, code, jqXhr) {
           this.setState({
             response: data,
             type: jqXhr.getResponseHeader("Content-Type")
@@ -198,17 +203,25 @@ define([ "react", "jquery", "rbs", "underscore", "rbs/components/layout/Icon", "
 
       getResponse: function () {
         if (this.state.response !== null && this.state.type !== null) {
-          if (this.state.type.indexOf("text/html") === 0) {
+          var t = this.state.type;
+          var r = this.state.response;
+          if (t.indexOf("text/html") === 0) {
             return d.iframe({
               key: "response",
               className: "iframe-response",
               src: "data:" + this.state.type + "," + this.state.response
             });
           }
+          var dataString = "";
+          if (typeof r === "string") {
+            dataString = r;
+          } else if (typeof r === "object") {
+            dataString = JSON.stringify(r);
+          }
           return d.div({
             key: "response",
             className: "well well-sm well-example-response"
-          }, this.state.response);
+          }, dataString);
         }
         return rbs.components.layout.Alert({
           key: "nosend",

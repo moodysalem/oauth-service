@@ -27,14 +27,16 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         if (clientScope.getClient() != null && clientScope.getClient().getId() > 0) {
             c = em.find(Client.class, clientScope.getClient().getId());
         }
-        return c != null && c.getApplication().getOwner().equals(getUser());
+        return c != null && !c.isDeleted() && !c.getApplication().isDeleted() &&
+            c.getApplication().getOwner().equals(getUser());
     }
 
     @Override
     public boolean canEdit(ClientScope clientScope) {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENT_SCOPES);
-        return clientScope.getClient().getApplication().getOwner().equals(getUser());
+        return !clientScope.getClient().isDeleted() && !clientScope.getClient().getApplication().isDeleted() &&
+            clientScope.getClient().getApplication().getOwner().equals(getUser());
     }
 
     @Override
@@ -72,6 +74,8 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         checkScope(MANAGE_CLIENT_SCOPES);
 
         list.add(cb.equal(root.join("scope").join("application").get("owner"), getUser()));
+        list.add(cb.equal(root.join("client").get("deleted"), false));
+        list.add(cb.equal(root.join("client").join("application").get("deleted"), false));
 
         if (clientId != null) {
             list.add(cb.equal(root.join("client").get("id"), clientId));
