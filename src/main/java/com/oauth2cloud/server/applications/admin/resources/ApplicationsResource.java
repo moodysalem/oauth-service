@@ -31,14 +31,14 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     public boolean canEdit(Application application) {
         mustBeLoggedIn();
         checkScope(MANAGE_APPLICATIONS);
-        return application.getOwner().equals(getUser());
+        return application.getOwner().idMatch(getUser());
     }
 
     @Override
     public boolean canDelete(Application application) {
         mustBeLoggedIn();
         checkScope(MANAGE_APPLICATIONS);
-        return application.getOwner().equals(getUser());
+        return application.getOwner().idMatch(getUser());
     }
 
     @Override

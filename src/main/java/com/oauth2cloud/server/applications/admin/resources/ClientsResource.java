@@ -30,14 +30,14 @@ public class ClientsResource extends BaseEntityResource<Client> {
         }
 
         Application ap = em.find(Application.class, client.getApplication().getId());
-        return ap != null && ap.getOwner().equals(getUser());
+        return ap != null && ap.getOwner().idMatch(getUser());
     }
 
     @Override
     public boolean canEdit(Client client) {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENTS);
-        return client.getApplication().getOwner().equals(getUser());
+        return client.getApplication().getOwner().idMatch(getUser());
     }
 
     @Override

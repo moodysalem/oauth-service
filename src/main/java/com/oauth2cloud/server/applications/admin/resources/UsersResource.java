@@ -32,14 +32,14 @@ public class UsersResource extends BaseEntityResource<User> {
         }
 
         Application ap = em.find(Application.class, user.getApplication().getId());
-        return ap != null && !ap.isDeleted() && ap.getOwner().equals(getUser());
+        return ap != null && !ap.isDeleted() && ap.getOwner().idMatch(getUser());
     }
 
     @Override
     public boolean canEdit(User user) {
         mustBeLoggedIn();
         checkScope(MANAGE_USERS);
-        return user.getApplication().getOwner().equals(getUser());
+        return user.getApplication().getOwner().idMatch(getUser());
     }
 
     @Override

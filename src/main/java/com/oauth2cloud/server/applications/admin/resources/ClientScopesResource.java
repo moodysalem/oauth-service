@@ -28,7 +28,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
             c = em.find(Client.class, clientScope.getClient().getId());
         }
         return c != null && !c.isDeleted() && !c.getApplication().isDeleted() &&
-            c.getApplication().getOwner().equals(getUser());
+            c.getApplication().getOwner().idMatch(getUser());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENT_SCOPES);
         return !clientScope.getClient().isDeleted() && !clientScope.getClient().getApplication().isDeleted() &&
-            clientScope.getClient().getApplication().getOwner().equals(getUser());
+            clientScope.getClient().getApplication().getOwner().idMatch(getUser());
     }
 
     @Override

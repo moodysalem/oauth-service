@@ -26,14 +26,14 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         Application ap = scope.getApplication() != null && scope.getApplication().getId() != 0 ?
             em.find(Application.class, scope.getApplication().getId()) : null;
 
-        return ap != null && !ap.isDeleted() && ap.getOwner().equals(getUser());
+        return ap != null && !ap.isDeleted() && ap.getOwner().idMatch(getUser());
     }
 
     @Override
     public boolean canEdit(Scope scope) {
         mustBeLoggedIn();
         checkScope(MANAGE_SCOPES);
-        return scope.getApplication().getOwner().equals(getUser());
+        return scope.getApplication().getOwner().idMatch(getUser());
     }
 
     @Override

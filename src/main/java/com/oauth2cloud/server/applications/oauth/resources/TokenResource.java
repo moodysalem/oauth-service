@@ -31,7 +31,7 @@ public class TokenResource extends BaseResource {
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String TEMPORARY_TOKEN = "temporary_token";
 
-    @HeaderParam(" ")
+    @HeaderParam("Authorization")
     private String authorizationHeader;
 
     private Client client = null;
