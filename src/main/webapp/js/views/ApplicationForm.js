@@ -43,7 +43,7 @@ define([ "react", "rbs", "rbs/components/layout/Form", "rbs/components/model/Gri
         label: "Logo URL",
         tip: "Enter a URL for a logo that will appear in the public applications section.",
         placeholder: "Logo URL",
-        component: "text",
+        component: "url",
         xs: 12
       }
     ];
@@ -77,7 +77,7 @@ define([ "react", "rbs", "rbs/components/layout/Form", "rbs/components/model/Gri
         label: "Stylesheet URL",
         placeholder: "Stylesheet URL",
         tip: "Enter the URL of a CSS stylesheet that should be used as the theme of the login page.",
-        component: "text",
+        component: "url",
         xs: 12
       }
     ];
@@ -88,7 +88,7 @@ define([ "react", "rbs", "rbs/components/layout/Form", "rbs/components/model/Gri
         label: "Legacy URL",
         placeholder: "Legacy URL",
         tip: "Enter a URL to be treated as a webhook for legacy login account requests.",
-        component: "text",
+        component: "url",
         xs: 12
       }
     ];

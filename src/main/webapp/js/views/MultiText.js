@@ -1,14 +1,16 @@
 /**
  *
  */
-define([ "react", "rbs", "underscore", "rbs/components/controls/Button" ],
-  function (React, rbs, _, btn) {
+define([ "react", "rbs", "underscore", "rbs/components/controls/Button", "modernizr" ],
+  function (React, rbs, _, btn, modernizr) {
     "use strict";
 
     var util = rbs.util;
 
     var d = React.DOM;
     var rpt = React.PropTypes;
+
+    var urlInputType = modernizr.inputtypes.url ? "url" : "text";
 
     var KEY_ENTER = 13;
 
@@ -60,7 +62,7 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button" ],
         var i = 0;
         var children = _.map(this.props.value, function (val) {
           return d.div({ key: "val-" + val, className: "position-relative multitext-value" }, [
-            d.input({ key: "in", type: "text", className: this.props.className, value: val, readOnly: true }),
+            d.input({ key: "in", type: urlInputType, className: this.props.className, value: val, readOnly: true }),
             btn({
               key: "btn",
               className: "right-absolute",
@@ -76,7 +78,7 @@ define([ "react", "rbs", "underscore", "rbs/components/controls/Button" ],
           key: "newValue",
           ref: "newValue",
           className: this.props.className,
-          type: "text",
+          type: urlInputType,
           onChange: this.setNewValue,
           value: this.state.newValue,
           onBlur: _.bind(this.addValue, this, false),

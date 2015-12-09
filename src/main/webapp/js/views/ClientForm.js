@@ -14,7 +14,7 @@ define([ "react", "rbs", "rbs/components/model/Form", "js/Models", "rbs/mixins/M
     var nameOpt = util.rf({
       mixins: [ model ],
       render: function () {
-        return d.div({}, this.state.model.name);
+        return d.span({}, this.state.model.name);
       }
     });
 
