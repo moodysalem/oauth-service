@@ -11,6 +11,9 @@
 
     <meta name="description" CONTENT="OAuth2 as a Service">
 
+    <%-- seo with prerender.io --%>
+    <meta name="fragment" content="!">
+
     <link rel="stylesheet" href="rbs/css/rbs.css" type="text/css"/>
     <link rel="stylesheet" href="res/oauth2cloud.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.5/cosmo/bootstrap.min.css"

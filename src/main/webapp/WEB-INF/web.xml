@@ -19,6 +19,19 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
+  <filter>
+    <filter-name>prerender</filter-name>
+    <filter-class>com.github.greengerong.PreRenderSEOFilter</filter-class>
+    <init-param>
+      <param-name>prerenderToken</param-name>
+      <param-value>9BI7K3jMZnx1HpwpQMQ6</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>prerender</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <!-- caching js files -->
   <filter>
     <filter-name>hourcache</filter-name>

@@ -48,11 +48,10 @@
       <version>${jaxrs.lib.version}</version>
     </dependency>
 
-    <!-- UI library -->
     <dependency>
       <groupId>com.moodysalem.js</groupId>
       <artifactId>react-backstrap</artifactId>
-      <version>${react.backstrap.version}</version>
+      <version>0.1.2-SNAPSHOT</version>
     </dependency>
 
     <!-- for caching the js/css files -->
@@ -87,6 +86,13 @@
       <groupId>com.restfb</groupId>
       <artifactId>restfb</artifactId>
       <version>1.16.0</version>
+    </dependency>
+
+    <!-- prerender -->
+    <dependency>
+      <groupId>com.github.greengerong</groupId>
+      <artifactId>prerender-java</artifactId>
+      <version>1.6.4</version>
     </dependency>
 
     <!-- TESTING DEPENDENCIES -->
