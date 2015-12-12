@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <groupId>com.oauth2cloud.server.oauth</groupId>
   <artifactId>war</artifactId>
@@ -48,25 +49,6 @@
       <version>${jaxrs.lib.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.moodysalem.js</groupId>
-      <artifactId>react-backstrap</artifactId>
-      <version>0.1.2-SNAPSHOT</version>
-    </dependency>
-
-    <!-- for caching the js/css files -->
-    <dependency>
-      <groupId>com.samaxes.filter</groupId>
-      <artifactId>cachefilter</artifactId>
-      <version>2.3.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.4</version>
-    </dependency>
-
     <!-- mysql connector -->
     <dependency>
       <groupId>mysql</groupId>
@@ -86,13 +68,6 @@
       <groupId>com.restfb</groupId>
       <artifactId>restfb</artifactId>
       <version>1.16.0</version>
-    </dependency>
-
-    <!-- prerender -->
-    <dependency>
-      <groupId>com.github.greengerong</groupId>
-      <artifactId>prerender-java</artifactId>
-      <version>1.6.4</version>
     </dependency>
 
     <!-- TESTING DEPENDENCIES -->
@@ -121,6 +96,7 @@
         <plugin>
           <artifactId>maven-war-plugin</artifactId>
           <configuration>
+            <failOnMissingWebXml>false</failOnMissingWebXml>
             <webResources>
               <resource>
                 <directory>src/main/ebextensions</directory>
