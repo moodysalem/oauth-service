@@ -99,7 +99,7 @@
                                     }
                                     js = d.createElement(s);
                                     js.id = id;
-                                    js.src = "//connect.facebook.net/en_US/sdk.js";
+                                    js.src = "https://connect.facebook.net/en_US/sdk.js";
                                     fjs.parentNode.insertBefore(js, fjs);
                                 }(document, 'script', 'facebook-jssdk'));
                             </script>
@@ -136,19 +136,8 @@
                                         });
                                     }
                                 };
-
-                                (function (d, s, id) {
-                                    var js, fjs = d.getElementsByTagName(s)[ 0 ];
-                                    if (d.getElementById(id)) {
-                                        return;
-                                    }
-                                    js = d.createElement(s);
-                                    js.id = id;
-                                    js.onload = initGoogle;
-                                    js.src = window.location.origin + "/js/vendor/google/platform.js";
-                                    fjs.parentNode.insertBefore(js, fjs);
-                                }(document, 'script', 'google-jssdk'));
                             </script>
+                            <script src="https://apis.google.com/js/platform.js" async defer></script>
                         </div>
                     </#if>
                     <#if model.amazonLogin>
