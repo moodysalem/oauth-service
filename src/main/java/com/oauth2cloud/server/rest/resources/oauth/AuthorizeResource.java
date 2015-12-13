@@ -142,9 +142,7 @@ public class AuthorizeResource extends BaseResource {
             try {
                 URI cUri = new URI(uri);
                 // scheme, host, and port must match
-                if (cUri.getScheme().equalsIgnoreCase(toRedirect.getScheme()) &&
-                        cUri.getHost().equalsIgnoreCase(toRedirect.getHost()) &&
-                        cUri.getPort() == toRedirect.getPort()) {
+                if (partialMatch(cUri, toRedirect)) {
                     validRedirect = true;
                     break;
                 }
