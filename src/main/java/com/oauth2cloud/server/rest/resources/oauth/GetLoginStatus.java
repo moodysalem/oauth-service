@@ -45,6 +45,8 @@ public class GetLoginStatus extends BaseResource {
             return error("Invalid client ID.");
         }
 
+        logCall(c);
+
         if (referrer == null) {
             return error("This page must be accessed from inside an iframe.");
         }
