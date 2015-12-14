@@ -1,10 +1,8 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
-import com.oauth2cloud.server.hibernate.model.Client;
-import com.oauth2cloud.server.hibernate.model.LoginCookie;
-import com.oauth2cloud.server.hibernate.model.Token;
-import com.oauth2cloud.server.hibernate.model.User;
+import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.OAuth2Cloud;
 import com.oauth2cloud.server.rest.models.LoginStatusModel;
 import com.oauth2cloud.server.rest.resources.BaseResource;
@@ -19,6 +17,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 @Path(OAuth2Cloud.OAUTH + "/loginstatus")
 @Produces(MediaType.TEXT_HTML)
@@ -60,7 +59,12 @@ public class GetLoginStatus extends BaseResource {
                     if (partialMatch(u2, u)) {
                         validReferrer = true;
                         // remove the path
-                        referrerOrigin = UriBuilder.fromUri(u2).replacePath("").build().toString();
+                        referrerOrigin = UriBuilder
+                            .fromUri(u2)
+                            .replacePath("")
+                            .replaceQuery("")
+                            .build()
+                            .toString();
                         break;
                     }
                 } catch (Exception ignored) {
@@ -80,7 +84,17 @@ public class GetLoginStatus extends BaseResource {
         lsm.setLoginCookie(lc);
 
         if (lc != null) {
-            lsm.setTokens(getUserTokens(c, lc.getUser()));
+            List<Token> tokens = getUserTokens(c, lc.getUser());
+
+            tokens.sort((a, b) -> b.getExpires().compareTo(a.getExpires()));
+
+            if (tokens.size() > 0) {
+                try {
+                    lsm.setAuthResponse(om.writeValueAsString(TokenResponse.from(tokens.get(0))));
+                } catch (JsonProcessingException e) {
+                    LOG.log(Level.SEVERE, "Failed to write token response in getLoginStatus", e);
+                }
+            }
         }
 
         return Response.ok(new Viewable("LoginStatus.ftl", lsm)).build();
@@ -91,10 +105,10 @@ public class GetLoginStatus extends BaseResource {
         Root<Token> tkn = tq.from(Token.class);
 
         tq.select(tkn).where(
-                cb.equal(tkn.get("client"), client),
-                cb.equal(tkn.get("user"), user),
-                cb.equal(tkn.get("type"), Token.Type.ACCESS),
-                cb.greaterThan(tkn.get("expires"), new Date())
+            cb.equal(tkn.get("client"), client),
+            cb.equal(tkn.get("user"), user),
+            cb.equal(tkn.get("type"), Token.Type.ACCESS),
+            cb.greaterThan(tkn.get("expires"), new Date())
         );
 
         return em.createQuery(tq).getResultList();

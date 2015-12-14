@@ -58,7 +58,7 @@ public abstract class BaseResource {
     protected ContainerRequestContext containerRequestContext;
 
     @Context
-    ObjectMapper om;
+    protected ObjectMapper om;
 
     @Inject
     protected EntityManager em;
