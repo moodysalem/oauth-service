@@ -12,7 +12,7 @@
                 <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
                     <div class="alert alert-${model.alertLevel?html}">
                         ${model.message?html}
-                        Click <a class="alert-link" href="${model.userCode.referer?html}">here</a> to return to where you
+                        Click <a class="alert-link" href="${model.userCode.referrer?html}">here</a> to return to where you
                         registered.
                     </div>
                 </div>

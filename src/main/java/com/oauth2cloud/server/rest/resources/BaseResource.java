@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.rest.resources;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
@@ -533,7 +532,7 @@ public abstract class BaseResource {
         pw.setExpires(expires);
         pw.setUser(user);
         pw.setCode(RandomStringUtil.randomAlphaNumeric(64));
-        pw.setReferer(referer);
+        pw.setReferrer(referer);
         pw.setType(type);
         pw.setExpires(expires);
         try {

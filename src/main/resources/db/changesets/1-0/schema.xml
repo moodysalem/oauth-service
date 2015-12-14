@@ -204,7 +204,7 @@
       <column name="clientId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="uri" type="${TEXT}">
+      <column name="uri" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
     </createTable>
@@ -463,7 +463,7 @@
       <column name="used" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
-      <column name="referer" type="${TEXT}"/>
+      <column name="referrer" type="${TEXT}"/>
     </createTable>
     <addForeignKeyConstraint baseTableName="UserCode" baseColumnNames="userId" constraintName="FK_UserCode_User"
                              referencedTableName="User"

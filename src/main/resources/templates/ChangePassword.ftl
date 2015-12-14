@@ -40,8 +40,8 @@
                     <div class="alert alert-success">
                         <i class="fa fa-check"></i>
                         <strong>Success</strong> Your password has been changed.
-                        <#if model.userCode.referer??>
-                            Click <a class="alert-link" href="${model.userCode.referer?html}">here</a> to
+                        <#if model.userCode.referrer??>
+                            Click <a class="alert-link" href="${model.userCode.referrer?html}">here</a> to
                             return.
                         </#if>
                     </div>

@@ -21,11 +21,11 @@
                                    placeholder="E-mail address" required autofocus>
                         </div>
 
-                        <#if model.referer??>
+                        <#if model.referrer??>
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <a class="btn btn-primary btn-block" id="back" href="${model.referer?html}">
+                                        <a class="btn btn-primary btn-block" id="back" href="${model.referrer?html}">
                                             <i class="fa fa-arrow-left"></i>
                                             <span>Back</span>
                                         </a>

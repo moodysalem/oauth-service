@@ -37,8 +37,8 @@ public class UserCode extends BaseEntity {
     private boolean used;
 
     @Lob
-    @Column(name = "referer")
-    private String referer;
+    @Column(name = "referrer")
+    private String referrer;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
@@ -76,11 +76,11 @@ public class UserCode extends BaseEntity {
         this.used = used;
     }
 
-    public String getReferer() {
-        return referer;
+    public String getReferrer() {
+        return referrer;
     }
 
-    public void setReferer(String referer) {
-        this.referer = referer;
+    public void setReferrer(String referrer) {
+        this.referrer = referrer;
     }
 }

@@ -3,10 +3,7 @@ package com.oauth2cloud.server.hibernate.model;
 import com.moodysalem.hibernate.model.BaseEntity;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class CallLog extends BaseEntity {
@@ -22,6 +19,7 @@ public class CallLog extends BaseEntity {
     @JoinColumn(name = "applicationId")
     private Application application;
 
+    @Lob
     @Column(name = "path")
     private String path;
 

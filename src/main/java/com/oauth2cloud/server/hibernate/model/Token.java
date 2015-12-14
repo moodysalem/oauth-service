@@ -51,6 +51,7 @@ public class Token extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Type type;
 
+    @Lob
     @Column(name = "redirectUri")
     private String redirectUri;
 

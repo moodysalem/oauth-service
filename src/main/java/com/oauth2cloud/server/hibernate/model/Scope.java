@@ -1,14 +1,10 @@
 package com.oauth2cloud.server.hibernate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.BaseEntity;
 import com.oauth2cloud.server.hibernate.validate.NoSpaces;
 import org.hibernate.validator.constraints.NotBlank;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class Scope extends BaseEntity {
@@ -25,9 +21,11 @@ public class Scope extends BaseEntity {
     @Column(name = "displayName")
     private String displayName;
 
+    @Lob
     @Column(name = "thumbnail")
     private String thumbnail;
 
+    @Lob
     @Column(name = "description")
     private String description;
 
