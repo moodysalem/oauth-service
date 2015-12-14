@@ -84,10 +84,10 @@
       <column name="displayName" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="thumbnail" type="VARCHAR(191)">
+      <column name="thumbnail" type="${TEXT}">
         <constraints nullable="true"/>
       </column>
-      <column name="description" type="VARCHAR(191)">
+      <column name="description" type="${TEXT}">
         <constraints nullable="true"/>
       </column>
       <column name="requiresApprovalFromApplication" type="${BOOLEAN}">
@@ -204,7 +204,7 @@
       <column name="clientId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="uri" type="VARCHAR(191)">
+      <column name="uri" type="${TEXT}">
         <constraints nullable="false"/>
       </column>
     </createTable>
@@ -222,7 +222,7 @@
       <column name="clientId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="flow" type="VARCHAR(191)">
+      <column name="flow" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
     </createTable>
@@ -261,7 +261,7 @@
       <column name="refreshTokenId" type="BIGINT">
         <constraints nullable="true"/>
       </column>
-      <column name="redirectUri" type="VARCHAR(191)">
+      <column name="redirectUri" type="${TEXT}">
         <constraints nullable="true"/>
       </column>
       <column name="expires" type="TIMESTAMP">
@@ -304,7 +304,7 @@
       <column name="scopeId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="priority" type="VARCHAR(191)">
+      <column name="priority" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
       <column name="reason" type="${TEXT}"/>
@@ -451,7 +451,7 @@
       <column name="userId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="type" type="VARCHAR(191)">
+      <column name="type" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
       <column name="code" type="VARCHAR(191)">
@@ -485,7 +485,7 @@
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="ip" type="VARCHAR(191)">
+      <column name="ip" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
       <column name="clientId" type="BIGINT">
@@ -494,10 +494,10 @@
       <column name="applicationId" type="BIGINT">
         <constraints nullable="true"/>
       </column>
-      <column name="path" type="VARCHAR(191)">
+      <column name="path" type="${TEXT}">
         <constraints nullable="false"/>
       </column>
-      <column name="method" type="VARCHAR(191)">
+      <column name="method" type="VARCHAR(10)">
         <constraints nullable="false"/>
       </column>
     </createTable>
