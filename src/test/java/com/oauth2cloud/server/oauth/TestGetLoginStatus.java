@@ -18,10 +18,10 @@ public class TestGetLoginStatus extends OAuth2CloudTest {
         assert wtCid.request().get().getStatus() == 400;
 
         assert wtCid.request()
-            .header("Referrer", "http://localhost:8080").get().getStatus() == 200;
+            .header("Referer", "http://localhost:8080").get().getStatus() == 200;
 
         assert wtCid.request()
-            .header("Referrer", "http://localhost:8080")
+            .header("Referer", "http://localhost:8080")
             .header("Cookie", BaseResource.COOKIE_NAME_PREFIX + "1=abc").get().getStatus() == 200;
     }
 

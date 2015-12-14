@@ -6,9 +6,11 @@ import javax.ws.rs.container.*;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
+@Provider
 public class NoXFrameOptionsFeature implements DynamicFeature {
-    @Provider
     @Priority(Priorities.HEADER_DECORATOR)
     public static class NoXFrameOptionsFilter implements ContainerResponseFilter {
 
@@ -17,18 +19,19 @@ public class NoXFrameOptionsFeature implements DynamicFeature {
 
         @Override
         public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext containerResponseContext)
-                throws IOException {
+            throws IOException {
             containerResponseContext.getHeaders().putSingle(X_FRAME_OPTIONS, DENY);
         }
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface NoXFrame {
     }
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext featureContext) {
         if (resourceInfo.getResourceMethod().isAnnotationPresent(NoXFrame.class) ||
-                resourceInfo.getResourceClass().isAnnotationPresent(NoXFrame.class)) {
+            resourceInfo.getResourceClass().isAnnotationPresent(NoXFrame.class)) {
             featureContext.register(NoXFrameOptionsFeature.class);
         }
     }

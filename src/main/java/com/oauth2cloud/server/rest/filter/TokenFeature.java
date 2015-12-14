@@ -16,17 +16,19 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
 import java.util.List;
 
+@Provider
 public class TokenFeature implements DynamicFeature {
     public static final String BEARER = "bearer ";
     public static final String TOKEN = "TOKEN";
     private static final long APPLICATION_ID = 1;
 
-    @Provider
     @Priority(Priorities.AUTHENTICATION)
-    public class TokenFilter implements ContainerRequestFilter {
+    public static class TokenFilter implements ContainerRequestFilter {
         @Inject
         EntityManager em;
 
@@ -40,10 +42,10 @@ public class TokenFeature implements DynamicFeature {
                     CriteriaQuery<Token> cq = cb.createQuery(Token.class);
                     Root<Token> rt = cq.from(Token.class);
                     List<Token> tks = em.createQuery(cq.select(rt).where(
-                            cb.equal(rt.get("token"), token),
-                            cb.greaterThan(rt.get("expires"), new Date()),
-                            cb.equal(rt.get("type"), Token.Type.ACCESS),
-                            cb.equal(rt.join("client").join("application").get("id"), APPLICATION_ID)
+                        cb.equal(rt.get("token"), token),
+                        cb.greaterThan(rt.get("expires"), new Date()),
+                        cb.equal(rt.get("type"), Token.Type.ACCESS),
+                        cb.equal(rt.join("client").join("application").get("id"), APPLICATION_ID)
                     )).getResultList();
                     if (tks.size() == 1) {
                         containerRequestContext.setProperty(TOKEN, tks.get(0));
@@ -53,13 +55,14 @@ public class TokenFeature implements DynamicFeature {
         }
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface ReadToken {
     }
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext featureContext) {
         if (resourceInfo.getResourceMethod().isAnnotationPresent(ReadToken.class) ||
-                resourceInfo.getResourceClass().isAnnotationPresent(ReadToken.class)) {
+            resourceInfo.getResourceClass().isAnnotationPresent(ReadToken.class)) {
             featureContext.register(TokenFilter.class);
         }
     }

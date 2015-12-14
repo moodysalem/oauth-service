@@ -3,6 +3,7 @@ package com.oauth2cloud.server.rest.resources.oauth;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.models.LoginStatusModel;
 import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -27,12 +28,13 @@ public class GetLoginStatus extends BaseResource {
      * logged in.
      *
      * @param clientId id of the client checking login status
-     * @return an html page that
+     * @return an html page that posts a message to the parent window
      */
     @GET
     @CORSFilter.Skip
+    @TokenFeature.ReadToken
     public Response get(@QueryParam("client_id") String clientId,
-                        @HeaderParam("Referrer") String referrer) {
+                        @HeaderParam("Referer") String referrer) {
         if (clientId == null) {
             return error("'client_id' parameter is required to check login status.");
         }
