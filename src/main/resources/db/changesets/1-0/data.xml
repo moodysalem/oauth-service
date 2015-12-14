@@ -159,6 +159,10 @@
       <column name="clientId">1</column>
       <column name="uri">http://localhost:8080</column>
     </insert>
+    <insert tableName="Client_URI">
+      <column name="clientId">1</column>
+      <column name="uri">http://localhost:3000</column>
+    </insert>
 
     <insert tableName="Token">
       <column name="id">1</column>
