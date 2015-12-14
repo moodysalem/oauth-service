@@ -1,12 +1,13 @@
 package com.oauth2cloud.server.rest.models;
 
 import com.oauth2cloud.server.hibernate.model.LoginCookie;
+import com.oauth2cloud.server.hibernate.model.TokenResponse;
 
 public class LoginStatusModel {
 
     private LoginCookie loginCookie;
     private String targetOrigin;
-    private String authResponse;
+    private TokenResponse tokenResponse;
 
     public LoginCookie getLoginCookie() {
         return loginCookie;
@@ -16,7 +17,6 @@ public class LoginStatusModel {
         this.loginCookie = loginCookie;
     }
 
-
     public String getTargetOrigin() {
         return targetOrigin;
     }
@@ -25,11 +25,11 @@ public class LoginStatusModel {
         this.targetOrigin = targetOrigin;
     }
 
-    public String getAuthResponse() {
-        return authResponse;
+    public TokenResponse getTokenResponse() {
+        return tokenResponse;
     }
 
-    public void setAuthResponse(String authResponse) {
-        this.authResponse = authResponse;
+    public void setTokenResponse(TokenResponse tokenResponse) {
+        this.tokenResponse = tokenResponse;
     }
 }

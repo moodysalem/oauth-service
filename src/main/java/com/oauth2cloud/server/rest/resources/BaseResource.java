@@ -43,9 +43,6 @@ import java.util.logging.Logger;
 
 public abstract class BaseResource {
     public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
-    // this is the minimum amount of time we should wait to validate a password
-    // this serves two purposes - minimizing the threat of brute force attacks, and preventing timing attacks
-    public static final long MINIMUM_LOGIN_TIME = 1000L;
     public static final String COOKIE_NAME_PREFIX = "_AID_";
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
     private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
@@ -56,9 +53,6 @@ public abstract class BaseResource {
 
     @Context
     protected ContainerRequestContext containerRequestContext;
-
-    @Context
-    protected ObjectMapper om;
 
     @Inject
     protected EntityManager em;
@@ -87,9 +81,9 @@ public abstract class BaseResource {
         Root<Token> t = tq.from(Token.class);
 
         Predicate p = cb.and(
-                cb.equal(t.get("token"), token),
-                t.get("type").in(types),
-                cb.greaterThan(t.<Date>get("expires"), new Date())
+            cb.equal(t.get("token"), token),
+            t.get("type").in(types),
+            cb.greaterThan(t.<Date>get("expires"), new Date())
         );
         if (client != null) {
             p = cb.and(p, cb.equal(t.get("client"), client));
@@ -176,9 +170,9 @@ public abstract class BaseResource {
         Root<Client> ct = cq.from(Client.class);
         cq.select(ct);
         cq.where(
-                cb.equal(ct.get("identifier"), clientId),
-                cb.equal(ct.get("deleted"), false),
-                cb.equal(ct.join("application").get("deleted"), false)
+            cb.equal(ct.get("identifier"), clientId),
+            cb.equal(ct.get("deleted"), false),
+            cb.equal(ct.join("application").get("deleted"), false)
         );
 
         List<Client> cts = em.createQuery(cq).getResultList();
@@ -222,8 +216,8 @@ public abstract class BaseResource {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-                cb.equal(ras.get("user"), user),
-                cb.equal(ras.get("clientScope"), clientScope)
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.get("clientScope"), clientScope)
         ))).getResultList();
         if (las.size() == 1) {
             return las.get(0);
@@ -346,9 +340,9 @@ public abstract class BaseResource {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
         Root<LoginCookie> rlc = lc.from(LoginCookie.class);
         lc.select(rlc).where(
-                cb.equal(rlc.get("secret"), secret),
-                cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-                cb.equal(rlc.join("user").get("application"), client.getApplication())
+            cb.equal(rlc.get("secret"), secret),
+            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+            cb.equal(rlc.join("user").get("application"), client.getApplication())
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -394,6 +388,7 @@ public abstract class BaseResource {
 
     /**
      * Check that two URIs match enough per the OAuth2 spec
+     *
      * @param one one uri to check
      * @param two uri to check against
      * @return true if the uris match well enough
@@ -403,8 +398,8 @@ public abstract class BaseResource {
             return false;
         }
         return one.getScheme().equalsIgnoreCase(two.getScheme()) &&
-                one.getHost().equalsIgnoreCase(two.getHost()) &&
-                one.getPort() == two.getPort();
+            one.getHost().equalsIgnoreCase(two.getHost()) &&
+            one.getPort() == two.getPort();
     }
 
     /**
@@ -431,12 +426,12 @@ public abstract class BaseResource {
         Root<User> u = uq.from(User.class);
 
         List<User> users = em.createQuery(
-                uq.select(u).where(
-                        cb.and(
-                                cb.equal(u.get("application"), application),
-                                cb.equal(u.get("email"), email)
-                        )
+            uq.select(u).where(
+                cb.and(
+                    cb.equal(u.get("application"), application),
+                    cb.equal(u.get("email"), email)
                 )
+            )
         ).getResultList();
 
         if (users.size() != 1) {
@@ -513,11 +508,11 @@ public abstract class BaseResource {
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
         Root<UserCode> rp = pw.from(UserCode.class);
         pw.select(rp).where(
-                cb.equal(rp.get("code"), code),
-                cb.greaterThan(rp.<Date>get("expires"), new Date()),
-                cb.equal(rp.get("type"), type),
-                // if we are including used, then use a predicate that will always be true
-                includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
+            cb.equal(rp.get("code"), code),
+            cb.greaterThan(rp.<Date>get("expires"), new Date()),
+            cb.equal(rp.get("type"), type),
+            // if we are including used, then use a predicate that will always be true
+            includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
         );
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;

@@ -171,5 +171,14 @@
     </insert>
   </changeSet>
 
+  <changeSet id="Test LoginCookie" author="moody.salem" context="test">
+    <insert tableName="LoginCookie">
+      <column name="secret">abc</column>
+      <column name="rememberMe" valueBoolean="true"/>
+      <column name="userId">1</column>
+      <column name="expires" valueComputed="TIMESTAMPADD(DAY, 1, ${now})"/>
+    </insert>
+  </changeSet>
+
 
 </databaseChangeLog>

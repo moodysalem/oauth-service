@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.OAuth2Cloud;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 
 @Path(OAuth2Cloud.OAUTH + "/loginstatus")
 @Produces(MediaType.TEXT_HTML)
@@ -89,15 +87,11 @@ public class GetLoginStatus extends BaseResource {
             tokens.sort((a, b) -> b.getExpires().compareTo(a.getExpires()));
 
             if (tokens.size() > 0) {
-                try {
-                    lsm.setAuthResponse(om.writeValueAsString(TokenResponse.from(tokens.get(0))));
-                } catch (JsonProcessingException e) {
-                    LOG.log(Level.SEVERE, "Failed to write token response in getLoginStatus", e);
-                }
+                lsm.setTokenResponse(TokenResponse.from(tokens.get(0)));
             }
         }
 
-        return Response.ok(new Viewable("LoginStatus.ftl", lsm)).build();
+        return Response.ok(new Viewable("/templates/LoginStatus", lsm)).build();
     }
 
     List<Token> getUserTokens(Client client, User user) {
