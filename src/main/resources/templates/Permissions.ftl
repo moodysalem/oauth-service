@@ -39,11 +39,14 @@
                         </div>
                         <div class="col-sm-2 text-center">
                             <div class="toggle-checkbox">
-                                <input type="checkbox" checked
-                                       id="SCOPE${cScope.scope.id}" name="SCOPE${cScope.scope.id}"
-                                       name="SCOPE${cScope.scope.id}"
-                                ${(cScope.priority=="REQUIRE")?then("disabled","")}/>
-                                <label for="SCOPE${cScope.scope.id}"></label>
+                                <#if (cScope.priority == "REQUIRE")>
+                                    REQUIRED
+                                <#else>
+                                    <input type="checkbox" checked
+                                           id="SCOPE${cScope.scope.id?c}" name="SCOPE${cScope.scope.id?c}"
+                                           name="SCOPE${cScope.scope.id?c}"
+                                    <label for="SCOPE${cScope.scope.id?c}"></label>
+                                </#if>
                             </div>
                         </div>
                     </div>
@@ -57,7 +60,7 @@
                 <div class="row">
                     <div class="col-sm-4 col-sm-offset-2">
                         <div class="form-group">
-                            <a href="${model.cancelUrl}" class="btn btn-danger btn-block">
+                            <a href="${model.cancelUrl?html}" class="btn btn-danger btn-block">
                                 <i class="fa fa-ban"></i>
                                 Cancel
                             </a>
