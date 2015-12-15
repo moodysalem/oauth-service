@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="form-group">
-                    <a href="${model.baseUri?html}reset?applicationId=${model.client.application.id}&referrer=${model.requestUrl?url}">
+                    <a href="${model.baseUri?html}oauth/reset?applicationId=${model.client.application.id?c}&referrer=${model.requestUrl?url}">
                         Forgot Password?
                     </a>
                 </div>
@@ -153,7 +153,7 @@
                                     client_id: "${model.client.application.amazonClientId?js_string}"
                                 };
 
-                                var redirect = "&redirect_uri=${model.baseUri?js_string}amazon";
+                                var redirect = "&redirect_uri=${model.baseUri?js_string}oauth/amazon";
                                 var loginUrl = "https://www.amazon.com/ap/oa?";
                                 var completeUrl = loginUrl + $.param(params, true) + redirect;
 

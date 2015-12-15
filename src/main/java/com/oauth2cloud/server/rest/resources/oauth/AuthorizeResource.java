@@ -869,7 +869,7 @@ public class AuthorizeResource extends BaseResource {
         predicates.add(cb.equal(rcs.get("client"), client));
 
         // only approved scopes should be asked for
-        predicates.add(cb.equal(rcs.get("approved"), false));
+        predicates.add(cb.equal(rcs.get("approved"), true));
 
         // since a client will always have these scopes, we don't show them
         predicates.add(cb.notEqual(rcs.get("priority"), ClientScope.Priority.ALWAYS));
