@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import java.util.logging.Level;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Cloud.OAUTH + "verify")
+@Path(OAuth2Cloud.OAUTH + "/verify")
 public class VerifyEmailResource extends BaseResource {
 
     public static final String INVALID_VERIFICATION_LINK = "Invalid verification link.";
