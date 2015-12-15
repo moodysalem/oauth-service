@@ -38,16 +38,16 @@
                             <p>${(cScope.reason)!"No reason given."?html}</p>
                         </div>
                         <div class="col-sm-2 text-center">
-                            <div class="toggle-checkbox">
-                                <#if (cScope.priority == "REQUIRE")>
-                                    REQUIRED
-                                <#else>
+                            <#if (cScope.priority == "REQUIRE")>
+                                REQUIRED
+                            <#else>
+                                <div class="toggle-checkbox">
                                     <input type="checkbox" checked
-                                           id="SCOPE${cScope.scope.id?c}" name="SCOPE${cScope.scope.id?c}"
+                                           id="SCOPE${cScope.scope.id?c}"
                                            name="SCOPE${cScope.scope.id?c}"
                                     <label for="SCOPE${cScope.scope.id?c}"></label>
-                                </#if>
-                            </div>
+                                </div>
+                            </#if>
                         </div>
                     </div>
                 </div>

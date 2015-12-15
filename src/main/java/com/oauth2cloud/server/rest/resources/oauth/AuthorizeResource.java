@@ -301,7 +301,7 @@ public class AuthorizeResource extends BaseResource {
                 String firstName = formParams.getFirst("firstName");
                 String lastName = formParams.getFirst("lastName");
                 String email = formParams.getFirst("registerEmail");
-                String password = formParams.getFirst("registerEmail");
+                String password = formParams.getFirst("registerPassword");
                 if (isEmpty(firstName) || isEmpty(lastName) || isEmpty(email) || isEmpty(password)) {
                     lrm.setRegisterError("First name, last name, e-mail address and password are all required fields.");
                 } else {

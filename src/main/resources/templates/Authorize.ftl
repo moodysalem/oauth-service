@@ -242,7 +242,7 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label" for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" name="registerEmail" class="form-control"
+                    <input type="password" id="registerPassword" name="registerPassword" class="form-control"
                            placeholder="Password" required>
                 </div>
 
