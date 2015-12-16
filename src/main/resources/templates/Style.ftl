@@ -38,11 +38,39 @@
         }
     }
 
-    .scope-thumbnail {
+    /*
+        permissions page
+    */
+
+    .client-scope-row {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+    }
+
+    .client-scope-row .client-scope-thumbnail {
+        width: 125px;
+        flex: none;
+    }
+
+    .client-scope-row .client-scope-thumbnail img.scope-thumbnail {
         width: 100%;
-        max-width: 150px;
-        border-radius: 100%;
         box-shadow: 0 0 1px inset;
+        -webkit-border-radius: 0.2em;
+        -moz-border-radius: 0.2em;
+        border-radius: 0.2em;;
+    }
+
+    .client-scope-row .client-scope-description {
+        flex: 1 0;
+    }
+
+    .client-scope-row .client-scope-toggle {
+        flex: none;
+        width: 120px;
+        text-align: center;
+        color: blue;
+        text-shadow: 0 0 1px rgba(0, 0, 0, 0.8);
     }
 
     .toggle-checkbox input[type=checkbox] {
@@ -54,7 +82,6 @@
         width: 120px;
         height: 40px;
         background: #333;
-        margin-top: 50px;
 
         border-radius: 50px;
         position: relative;
@@ -86,11 +113,11 @@
         height: 22px;
         border-radius: 50px;
 
-        -webkit-transition: all .5s ease;
-        -moz-transition: all .5s ease;
-        -o-transition: all .5s ease;
-        -ms-transition: all .5s ease;
-        transition: all .5s ease;
+        -webkit-transition: all 0.2s;
+        -moz-transition: all 0.2s;
+        -ms-transition: all 0.2s;
+        -o-transition: all 0.2s;
+        transition: all 0.2s;
         cursor: pointer;
         position: absolute;
         top: 9px;

@@ -21,30 +21,29 @@
 
             <#list model.clientScopes as cScope>
                 <div class="well well-sm">
-                    <div class="row">
-                        <div class="col-sm-2 text-center">
+                    <div class="client-scope-row">
+                        <div class="client-scope-thumbnail">
                             <#if cScope.scope.thumbnail??>
                                 <img class="scope-thumbnail" src="${cScope.scope.thumbnail?html}">
                             </#if>
                         </div>
-                        <div class="col-sm-8">
+                        <div class="client-scope-description">
                             <h3>
                             ${cScope.scope.displayName?html}
                                 <i class="fa fa-question-circle"
                                    data-title="${cScope.scope.description?html}"></i>
-                                <small>${(cScope.priority=="REQUIRE")?then("Required","")}</small>
                             </h3>
 
                             <p>${(cScope.reason)!"No reason given."?html}</p>
                         </div>
-                        <div class="col-sm-2 text-center">
+                        <div class="client-scope-toggle">
                             <#if (cScope.priority == "REQUIRE")>
                                 REQUIRED
                             <#else>
                                 <div class="toggle-checkbox">
                                     <input type="checkbox" checked
                                            id="SCOPE${cScope.scope.id?c}"
-                                           name="SCOPE${cScope.scope.id?c}"
+                                           name="SCOPE${cScope.scope.id?c}"/>
                                     <label for="SCOPE${cScope.scope.id?c}"></label>
                                 </div>
                             </#if>
