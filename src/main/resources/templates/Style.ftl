@@ -51,14 +51,11 @@
     .client-scope-row .client-scope-thumbnail {
         width: 125px;
         flex: none;
+        padding: 0.5em;
     }
 
     .client-scope-row .client-scope-thumbnail img.scope-thumbnail {
         width: 100%;
-        box-shadow: 0 0 1px inset;
-        -webkit-border-radius: 0.2em;
-        -moz-border-radius: 0.2em;
-        border-radius: 0.2em;;
     }
 
     .client-scope-row .client-scope-description {
