@@ -111,33 +111,31 @@
                             <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
                                 <i class="fa fa-google fa-lg"></i>
                             </button>
+                            <script src="https://apis.google.com/js/platform.js"></script>
                             <script>
-                                var initGoogle = function () {
-                                    // define a function to be called when google loads
-                                    if (gapi && typeof gapi.load === "function") {
-                                        gapi.load('auth2', function () {
-                                            var auth2 = gapi.auth2.init({
-                                                client_id: "${model.client.application.googleClientId?js_string}",
-                                                fetch_basic_profile: true,
-                                                scope: 'profile email'
-                                            });
-                                            $(function () {
-                                                $("#googleLogin").click(function () {
-                                                    // Sign the user in, and then retrieve their ID token for the server
-                                                    // to validate
-                                                    auth2.signIn().then(function () {
-                                                        var token = auth2.currentUser.get().getAuthResponse().access_token;
-                                                        if (token) {
-                                                            $("#googleToken").val(token).closest("form").submit();
-                                                        }
-                                                    });
+                                // define a function to be called when google loads
+                                if (gapi && typeof gapi.load === "function") {
+                                    gapi.load('auth2', function () {
+                                        var auth2 = gapi.auth2.init({
+                                            client_id: "${model.client.application.googleClientId?js_string}",
+                                            fetch_basic_profile: true,
+                                            scope: 'profile email'
+                                        });
+                                        $(function () {
+                                            $("#googleLogin").click(function () {
+                                                // Sign the user in, and then retrieve their ID token for the server
+                                                // to validate
+                                                auth2.signIn().then(function () {
+                                                    var token = auth2.currentUser.get().getAuthResponse().access_token;
+                                                    if (token) {
+                                                        $("#googleToken").val(token).closest("form").submit();
+                                                    }
                                                 });
                                             });
                                         });
-                                    }
-                                };
+                                    });
+                                }
                             </script>
-                            <script src="https://apis.google.com/js/platform.js" async defer></script>
                         </div>
                     </#if>
                     <#if model.amazonLogin>
