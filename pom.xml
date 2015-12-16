@@ -3,7 +3,7 @@
 
   <groupId>com.oauth2cloud.server.oauth</groupId>
   <artifactId>war</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.9-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <name>OAuth2Cloud</name>
@@ -19,7 +19,7 @@
   <scm>
     <developerConnection>scm:git:https://github.com/moodysalem/oauth-service.git</developerConnection>
     <url>https://github.com/moodysalem/oauth-service</url>
-    <tag>war-1.0.8</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
