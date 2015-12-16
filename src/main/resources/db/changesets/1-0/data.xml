@@ -88,7 +88,7 @@
       <column name="id">3</column>
       <column name="applicationId">1</column>
       <column name="name">manage_client_scopes</column>
-      <column name="displayName">Manage Scopes</column>
+      <column name="displayName">Manage Client Scopes</column>
       <column name="description">
         Permission to change the scopes that a client can use and their priorities.
       </column>
