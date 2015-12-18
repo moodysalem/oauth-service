@@ -563,6 +563,21 @@ public abstract class BaseResource {
         return sw.toString();
     }
 
+    /**
+     * Get the scopes that a user has given a client permission to use
+     * @param client client to which scopes have been given
+     * @param user user that has given permission for these scopes
+     * @return a list of accepted scopes
+     */
+    protected List<AcceptedScope> getAcceptedScopes(Client client, User user) {
+        CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
+        Root<AcceptedScope> ras = as.from(AcceptedScope.class);
+        return em.createQuery(as.select(ras).where(
+            cb.equal(ras.join("clientScope").get("client"), client),
+            cb.equal(ras.get("user"), user)
+        )).getResultList();
+    }
+
 
     @HeaderParam("X-Forwarded-For")
     String forwardedIp;

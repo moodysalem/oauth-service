@@ -92,6 +92,22 @@ public class GetLoginStatus extends BaseResource {
 
             if (tokens.size() > 0) {
                 lsm.setTokenResponse(TokenResponse.from(tokens.get(0)));
+            } else {
+                // generate a token
+                lsm.setTokenResponse(
+                    TokenResponse.from(
+                        generateToken(
+                            Token.Type.ACCESS,
+                            c,
+                            lc.getUser(),
+                            getExpires(c, Token.Type.ACCESS),
+                            referrer,
+                            getAcceptedScopes(c, lc.getUser()),
+                            null,
+                            null
+                        )
+                    )
+                );
             }
         }
 
