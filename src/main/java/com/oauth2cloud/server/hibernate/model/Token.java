@@ -81,11 +81,15 @@ public class Token extends BaseEntity {
 
         if (getType().equals(Type.CLIENT)) {
             // client credential tokens only point to client scopes
-            clientScopeList = getClientScopes();
+            clientScopeList = getClientScopes().stream()
+                .filter(ClientScope::isApproved)
+                .collect(Collectors.toList());
         } else {
             // otherwise get the accepted scopes
             if (getAcceptedScopes() != null && getAcceptedScopes().size() > 0) {
-                clientScopeList = getAcceptedScopes().stream().map(AcceptedScope::getClientScope).collect(Collectors.toList());
+                clientScopeList = getAcceptedScopes().stream().map(AcceptedScope::getClientScope)
+                    .filter(ClientScope::isApproved)
+                    .collect(Collectors.toList());
             }
         }
 

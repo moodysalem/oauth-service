@@ -48,11 +48,11 @@ public class ClientScope extends BaseEntity implements Comparable<ClientScope> {
     }
 
     @ManyToOne
-    @JoinColumn(name = "clientId")
+    @JoinColumn(name = "clientId", updatable = false)
     private Client client;
 
     @ManyToOne
-    @JoinColumn(name = "scopeId")
+    @JoinColumn(name = "scopeId", updatable = false)
     private Scope scope;
 
     @Column(name = "priority")

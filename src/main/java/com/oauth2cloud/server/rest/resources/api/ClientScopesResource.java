@@ -45,9 +45,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     @Override
     public boolean canDelete(ClientScope clientScope) {
-        mustBeLoggedIn();
-        checkScope(MANAGE_CLIENT_SCOPES);
-        return canEdit(clientScope);
+        return false;
     }
 
     @Override
