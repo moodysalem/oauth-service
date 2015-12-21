@@ -184,5 +184,12 @@
     </insert>
   </changeSet>
 
+  <changeSet id="set favicon for application 1" author="moody.salem">
+    <update tableName="Application">
+      <column name="faviconUrl" value="https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-chain.ico"/>
+      <where>id = 1</where>
+    </update>
+  </changeSet>
+
 
 </databaseChangeLog>

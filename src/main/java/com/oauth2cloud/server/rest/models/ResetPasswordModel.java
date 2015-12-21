@@ -55,4 +55,10 @@ public class ResetPasswordModel implements HeadProperties {
         return userCode != null ? userCode.getUser().getApplication().getStylesheetUrl() :
             (application != null ? application.getStylesheetUrl() : null);
     }
+
+    @Override
+    public String getFaviconUrl() {
+        return userCode != null ? userCode.getUser().getApplication().getFaviconUrl() :
+            (application != null ? application.getFaviconUrl() : null);
+    }
 }

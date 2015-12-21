@@ -16,6 +16,11 @@ public class VerifyEmailModel implements HeadProperties {
         return userCode != null ? userCode.getUser().getApplication().getStylesheetUrl() : null;
     }
 
+    @Override
+    public String getFaviconUrl() {
+        return userCode != null ? userCode.getUser().getApplication().getFaviconUrl() : null;
+    }
+
     public enum AlertLevel {
         danger, warning, success
     }

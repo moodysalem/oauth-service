@@ -4,4 +4,6 @@ public interface HeadProperties {
 
     String getStylesheetUrl();
 
+    String getFaviconUrl();
+
 }

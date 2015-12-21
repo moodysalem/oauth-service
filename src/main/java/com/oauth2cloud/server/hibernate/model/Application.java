@@ -61,6 +61,11 @@ public class Application extends BaseEntity {
     @Column(name = "logoUrl")
     private String logoUrl;
 
+    @URL
+    @Lob
+    @Column(name = "faviconUrl")
+    private String faviconUrl;
+
     @Lob
     @Column(name = "description")
     private String description;
@@ -191,5 +196,13 @@ public class Application extends BaseEntity {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getFaviconUrl() {
+        return faviconUrl;
+    }
+
+    public void setFaviconUrl(String faviconUrl) {
+        this.faviconUrl = faviconUrl;
     }
 }

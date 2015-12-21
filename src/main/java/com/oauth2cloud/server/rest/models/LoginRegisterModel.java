@@ -44,4 +44,9 @@ public class LoginRegisterModel extends AuthorizeModel {
     public String getStylesheetUrl() {
         return getClient().getApplication().getStylesheetUrl();
     }
+
+    @Override
+    public String getFaviconUrl() {
+        return getClient().getApplication().getFaviconUrl();
+    }
 }

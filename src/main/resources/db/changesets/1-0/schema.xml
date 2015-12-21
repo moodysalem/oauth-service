@@ -512,5 +512,13 @@
     <sql dbms="mysql">ALTER TABLE CallLog CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
+  <changeSet author="moody.salem" id="Add faviconUrl column to application">
+    <addColumn tableName="Application">
+      <column name="faviconUrl" type="${TEXT}">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+  </changeSet>
+
 
 </databaseChangeLog>

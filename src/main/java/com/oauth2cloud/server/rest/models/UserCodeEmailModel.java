@@ -26,4 +26,9 @@ public class UserCodeEmailModel implements HeadProperties {
     public String getStylesheetUrl() {
         return userCode != null ? userCode.getUser().getApplication().getStylesheetUrl() : null;
     }
+
+    @Override
+    public String getFaviconUrl() {
+        return userCode != null ? userCode.getUser().getApplication().getFaviconUrl() : null;
+    }
 }

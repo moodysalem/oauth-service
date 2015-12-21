@@ -6,6 +6,11 @@ public class ErrorModel implements HeadProperties {
         return null;
     }
 
+    @Override
+    public String getFaviconUrl() {
+        return null;
+    }
+
     private String error;
 
     public String getError() {
