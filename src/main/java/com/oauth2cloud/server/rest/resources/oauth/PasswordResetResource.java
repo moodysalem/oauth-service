@@ -37,8 +37,8 @@ public class PasswordResetResource extends BaseResource {
     @QueryParam("code")
     String code;
 
-    @QueryParam("referer")
-    String referer;
+    @QueryParam("referrer")
+    String referrer;
 
     private Application getApplication() {
         if (applicationId == null) {
@@ -74,7 +74,7 @@ public class PasswordResetResource extends BaseResource {
             rm.setApplication(application);
         }
 
-        rm.setReferer(referer);
+        rm.setReferrer(referrer);
 
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
     }
@@ -119,14 +119,14 @@ public class PasswordResetResource extends BaseResource {
 
         User u = getUser(email, application);
         if (u != null) {
-            UserCode pc = makeCode(u, referer, UserCode.Type.RESET, new Date(System.currentTimeMillis() + FIVE_MINUTES));
+            UserCode pc = makeCode(u, referrer, UserCode.Type.RESET, new Date(System.currentTimeMillis() + FIVE_MINUTES));
             // do the e-mail
             emailCode(pc);
         }
 
         // always show success
         rm.setSuccess(true);
-        rm.setReferer(referer);
+        rm.setReferrer(referrer);
         return Response.ok(new Viewable("/templates/ResetPassword", rm)).build();
     }
 

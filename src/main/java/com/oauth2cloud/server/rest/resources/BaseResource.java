@@ -522,17 +522,17 @@ public abstract class BaseResource {
      * Make a UserCode
      *
      * @param user    user for which the code is created
-     * @param referer the referer to which the user should be redirected after using the code
+     * @param referrer the referrer to which the user should be redirected after using the code
      * @param type    the type of code
      * @param expires when it expires
      * @return
      */
-    protected UserCode makeCode(User user, String referer, UserCode.Type type, Date expires) {
+    protected UserCode makeCode(User user, String referrer, UserCode.Type type, Date expires) {
         UserCode pw = new UserCode();
         pw.setExpires(expires);
         pw.setUser(user);
         pw.setCode(RandomStringUtil.randomAlphaNumeric(64));
-        pw.setReferrer(referer);
+        pw.setReferrer(referrer);
         pw.setType(type);
         pw.setExpires(expires);
         try {

@@ -8,7 +8,7 @@ public class ResetPasswordModel implements HeadProperties {
     private String error;
     private UserCode userCode;
     private boolean success;
-    private String referer;
+    private String referrer;
 
     public String getError() {
         return error;
@@ -42,12 +42,12 @@ public class ResetPasswordModel implements HeadProperties {
         this.userCode = userCode;
     }
 
-    public String getReferer() {
-        return referer;
+    public String getReferrer() {
+        return referrer;
     }
 
-    public void setReferer(String referer) {
-        this.referer = referer;
+    public void setReferrer(String referrer) {
+        this.referrer = referrer;
     }
 
     @Override
