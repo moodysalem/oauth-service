@@ -2,16 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <groupId>com.oauth2cloud.server.oauth</groupId>
-  <artifactId>war</artifactId>
+  <artifactId>oauth-api</artifactId>
   <version>1.0.9-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>OAuth2Cloud</name>
+  <name>OAuth2Cloud API</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>1.0.4</jaxrs.lib.version>
-    <react.backstrap.version>0.1.2-SNAPSHOT</react.backstrap.version>
+    <jaxrs.lib.version>1.0.8</jaxrs.lib.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
@@ -139,7 +138,7 @@
               <regionName>us-west-2</regionName>
               <versionsToKeep>5</versionsToKeep>
               <dryRun>false</dryRun>
-              <versionDescription>jaxrs: ${jaxrs.lib.version}, rbs: ${react.backstrap.version}</versionDescription>
+              <versionDescription>jaxrs: ${jaxrs.lib.version}</versionDescription>
             </configuration>
           </execution>
         </executions>
