@@ -113,6 +113,9 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
         if (application.getStylesheetUrl() != null && application.getStylesheetUrl().trim().isEmpty()) {
             application.setLegacyUrl(null);
         }
+        if (application.getFaviconUrl() != null && application.getFaviconUrl().trim().isEmpty()) {
+            application.setFaviconUrl(null);
+        }
         if (application.getLogoUrl() != null && application.getLogoUrl().trim().isEmpty()) {
             application.setLogoUrl(null);
         }
