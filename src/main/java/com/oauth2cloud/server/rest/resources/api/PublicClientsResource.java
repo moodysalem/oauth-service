@@ -11,6 +11,7 @@ import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -27,6 +28,7 @@ public class PublicClientsResource extends BaseEntityResource<Client> {
 
     public static final String PUBLIC_CLIENTS = "public_clients";
 
+    @POST
     @Path("register")
     public Response makeClient(RegisterClientRequest req) {
         mustBeLoggedIn();
@@ -42,7 +44,9 @@ public class PublicClientsResource extends BaseEntityResource<Client> {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid application ID.");
         }
 
-        Client newClient = new Client();
+        Client newClient = req.getClient();
+        newClient.setApplication(req.getApplication());
+        newClient.setCreator(getUser());
 
         return get(newClient.getId());
     }

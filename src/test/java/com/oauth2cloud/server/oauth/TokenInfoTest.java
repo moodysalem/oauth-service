@@ -17,7 +17,7 @@ public class TokenInfoTest extends OAuth2CloudTest {
                 .post(
                         Entity.form(
                                 new Form().param("application_id", "1")
-                                        .param("token", "abc")
+                                        .param("token", getToken().getAccessToken())
                         )
                 );
 

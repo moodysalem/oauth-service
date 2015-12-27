@@ -12,7 +12,7 @@ public class PublicApplicationsTest extends OAuth2CloudTest {
     public void testGet() {
         Response r = target("api/publicapplications")
                 .request()
-                .header(AUTH_HEADER, TOKEN).get();
+                .get();
         assert r.getStatus() == 200;
         assert r.readEntity(JsonNode.class).size() == 1;
     }

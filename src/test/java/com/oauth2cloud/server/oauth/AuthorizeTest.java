@@ -10,7 +10,6 @@ import static org.testng.Assert.assertTrue;
 
 public class AuthorizeTest extends OAuth2CloudTest {
 
-    private static final String CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
 
     @Test
     public void testAuthorizeEndpoint() {

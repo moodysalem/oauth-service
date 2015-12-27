@@ -163,25 +163,6 @@
       <column name="clientId">1</column>
       <column name="uri">http://localhost:3000</column>
     </insert>
-
-    <insert tableName="Token">
-      <column name="id">1</column>
-      <column name="token">abc</column>
-      <column name="clientId">1</column>
-      <column name="userId">1</column>
-      <column name="redirectUri">http://localhost:8080/</column>
-      <column name="expires" valueComputed="TIMESTAMPADD(DAY, 1, ${now})"/>
-      <column name="type">ACCESS</column>
-    </insert>
-  </changeSet>
-
-  <changeSet id="Test LoginCookie" author="moody.salem" context="test">
-    <insert tableName="LoginCookie">
-      <column name="secret">abc</column>
-      <column name="rememberMe" valueBoolean="true"/>
-      <column name="userId">1</column>
-      <column name="expires" valueComputed="TIMESTAMPADD(DAY, 1, ${now})"/>
-    </insert>
   </changeSet>
 
   <changeSet id="set favicon for application 1" author="moody.salem">
