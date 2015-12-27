@@ -99,7 +99,7 @@ public class TokenResponse {
     }
 
     public void setUser(User user) {
-        this.userDetails = new UserDetails(user);
+        this.userDetails = UserDetails.from(user);
     }
 
     public Long getApplicationId() {

@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.hibernate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -8,34 +7,61 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class UserDetails {
 
-    public UserDetails(User u) {
+    public UserDetails() {
+    }
+
+    public static UserDetails from(User u) {
         if (u == null) {
             throw new NullPointerException("Null user passed to UserDetails constructor.");
         }
-        this.user = u;
-    }
 
-    @JsonIgnore
-    private User user;
+        UserDetails ud = new UserDetails();
+        ud.setEmail(u.getEmail());
+        ud.setFirstName(u.getFirstName());
+        ud.setLastName(u.getLastName());
+        ud.setUserId(u.getId());
+
+        return ud;
+    }
 
     @JsonProperty("email")
-    public String getEmail() {
-        return user.getEmail();
-    }
-
+    private String email;
     @JsonProperty("first_name")
-    public String getFirstName() {
-        return user.getFirstName();
-    }
-
+    private String firstName;
     @JsonProperty("last_name")
-    public String getLastName() {
-        return user.getLastName();
-    }
-
+    private String lastName;
     @JsonProperty("user_id")
-    public long getUserId() {
-        return user.getId();
+    private long userId;
+
+    public String getEmail() {
+        return email;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
 }

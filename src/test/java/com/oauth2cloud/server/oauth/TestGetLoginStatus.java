@@ -9,13 +9,16 @@ import javax.ws.rs.client.WebTarget;
 
 public class TestGetLoginStatus extends OAuth2CloudTest {
 
+    /**
+     * Verify that the login status endpoint returns appropriate error codes
+     * when not coming from an iframe
+     */
     @Test
     public void testLoginStatus() {
         WebTarget wt = target(OAuth2Cloud.OAUTH).path("loginstatus");
         assert wt.request().get().getStatus() == 400;
 
-        WebTarget wtCid = wt.queryParam("client_id",
-            "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4");
+        WebTarget wtCid = wt.queryParam("client_id", CLIENT_ID);
         assert wtCid.request().get().getStatus() == 400;
 
         assert wtCid.request()
