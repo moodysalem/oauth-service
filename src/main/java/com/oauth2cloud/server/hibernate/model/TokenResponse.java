@@ -23,8 +23,10 @@ public class TokenResponse {
         tr.setClientId(accessToken.getClient().getIdentifier());
         tr.setUser(accessToken.getUser());
         tr.setApplicationId(accessToken.getClient().getApplication().getId());
-        tr.setProviderName(accessToken.getProvider().name());
-        tr.setProviderAccessToken(accessToken.getProviderAccessToken());
+        if (accessToken.getProvider() != null) {
+            tr.setProviderName(accessToken.getProvider().name());
+            tr.setProviderAccessToken(accessToken.getProviderAccessToken());
+        }
         return tr;
     }
 

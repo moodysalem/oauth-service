@@ -49,12 +49,8 @@ public class ApplicationsTest extends OAuth2CloudTest {
         assert target(OAuth2Cloud.API).path("applications").path(Long.toString(app.getId()))
             .request()
             .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
-            .delete().getStatus() == 204;
+            .delete().getStatus() == 403;
 
-        assert target(OAuth2Cloud.API).path("applications").path(Long.toString(app.getId()))
-            .request()
-            .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
-            .get().getStatus() == 404;
     }
 
 }
