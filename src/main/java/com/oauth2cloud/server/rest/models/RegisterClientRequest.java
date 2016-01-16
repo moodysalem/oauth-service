@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.rest.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.hibernate.model.Scope;
@@ -9,24 +10,24 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterClientRequest {
-    private Application application;
-    private List<Scope> scopes;
+    private PublicApplication publicApplication;
+    private List<PublicScope> publicScopes;
     private Client client;
 
-    public Application getApplication() {
-        return application;
+    public PublicApplication getPublicApplication() {
+        return publicApplication;
     }
 
-    public void setApplication(Application application) {
-        this.application = application;
+    public void setPublicApplication(PublicApplication publicApplication) {
+        this.publicApplication = publicApplication;
     }
 
-    public List<Scope> getScopes() {
-        return scopes;
+    public List<PublicScope> getPublicScopes() {
+        return publicScopes;
     }
 
-    public void setScopes(List<Scope> scopes) {
-        this.scopes = scopes;
+    public void setPublicScopes(List<PublicScope> publicScopes) {
+        this.publicScopes = publicScopes;
     }
 
     public Client getClient() {

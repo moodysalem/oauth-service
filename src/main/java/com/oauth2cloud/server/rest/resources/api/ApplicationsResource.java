@@ -11,6 +11,7 @@ import com.restfb.Version;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -88,10 +89,17 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
         setNullsForEmptyStrings(t1);
     }
 
+    @QueryParam("active")
+    Boolean active;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
         checkScope(MANAGE_APPLICATIONS);
         list.add(cb.equal(root.get("owner"), getUser()));
+
+        if (active != null) {
+            list.add(cb.equal(root.get("active"), active));
+        }
     }
 
     @Override

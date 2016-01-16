@@ -32,7 +32,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
             c = em.find(Client.class, clientScope.getClient().getId());
         }
         return c != null && c.isActive() && c.getApplication().isActive() &&
-                c.getApplication().getOwner().idMatch(getUser());
+            c.getApplication().getOwner().idMatch(getUser());
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENT_SCOPES);
         return clientScope.getClient().isActive() && clientScope.getClient().getApplication().isActive() &&
-                clientScope.getClient().getApplication().getOwner().idMatch(getUser());
+            clientScope.getClient().getApplication().getOwner().idMatch(getUser());
     }
 
     @Override
@@ -70,14 +70,15 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
     @QueryParam("scopeId")
     Long scopeId;
 
+    @QueryParam("active")
+    Boolean active;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<ClientScope> root) {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENT_SCOPES);
 
         list.add(cb.equal(root.join("scope").join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.join("client").get("active"), true));
-        list.add(cb.equal(root.join("client").join("application").get("active"), true));
 
         if (clientId != null) {
             list.add(cb.equal(root.join("client").get("id"), clientId));
@@ -85,6 +86,10 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
         if (scopeId != null) {
             list.add(cb.equal(root.join("scope").get("id"), scopeId));
+        }
+
+        if (active != null) {
+            list.add(cb.equal(root.get("active"), active));
         }
     }
 

@@ -64,16 +64,22 @@ public class ScopesResource extends BaseEntityResource<Scope> {
     @QueryParam("applicationId")
     Long applicationId;
 
+    @QueryParam("active")
+    Boolean active;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Scope> root) {
         mustBeLoggedIn();
         checkScope(MANAGE_SCOPES);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.join("application").get("active"), true));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));
+        }
+
+        if (active != null) {
+            list.add(cb.equal(root.get("active"), true));
         }
     }
 

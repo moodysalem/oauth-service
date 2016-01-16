@@ -72,6 +72,9 @@ public class ClientsResource extends BaseEntityResource<Client> {
     @QueryParam("applicationId")
     Long applicationId;
 
+    @QueryParam("active")
+    Boolean active;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Client> root) {
         mustBeLoggedIn();
@@ -96,6 +99,10 @@ public class ClientsResource extends BaseEntityResource<Client> {
             if (toAdd != null) {
                 list.add(toAdd);
             }
+        }
+
+        if (active != null) {
+            list.add(cb.equal(root.get("active"), active));
         }
     }
 

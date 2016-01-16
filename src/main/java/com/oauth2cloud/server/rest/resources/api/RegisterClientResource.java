@@ -28,6 +28,7 @@ public class RegisterClientResource extends BaseResource {
 
     /**
      * Get the information needed for the register client screen
+     *
      * @param applicationId the application id for which the info is required
      * @return the info required for the registration screen
      */
@@ -35,13 +36,13 @@ public class RegisterClientResource extends BaseResource {
     public Response getApplicationData(@QueryParam("applicationId") Long applicationId) {
         if (applicationId == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST,
-                    "Application ID is a required query parameter.");
+                "Application ID is a required query parameter.");
         }
 
         Application app = em.find(Application.class, applicationId);
 
-        if (app == null || !app.isPublicClientRegistration()) {
-            throw new RequestProcessingException(Response.Status.NOT_FOUND, "A public application with the provided ID is not found.");
+        if (app == null || !app.isPublicClientRegistration() || !app.isActive()) {
+            throw new RequestProcessingException(Response.Status.NOT_FOUND, "A public application with the provided ID could not be found.");
         }
 
         RegisterClientInfo rci = new RegisterClientInfo();
@@ -63,7 +64,8 @@ public class RegisterClientResource extends BaseResource {
         Root<Scope> root = scopes.from(Scope.class);
 
         scopes.select(root).where(
-                cb.equal(root.get("application"), app)
+            cb.equal(root.get("application"), app),
+            cb.equal(root.get("requestable"), true)
         );
 
         List<Scope> scopeList = em.createQuery(scopes).getResultList();

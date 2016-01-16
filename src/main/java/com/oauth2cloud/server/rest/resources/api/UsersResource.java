@@ -96,13 +96,15 @@ public class UsersResource extends BaseEntityResource<User> {
     @QueryParam("applicationId")
     Long applicationId;
 
+    @QueryParam("active")
+    Boolean active;
+
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<User> root) {
         mustBeLoggedIn();
         checkScope(MANAGE_USERS);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.join("application").get("active"), true));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));
@@ -115,6 +117,10 @@ public class UsersResource extends BaseEntityResource<User> {
                 cb.like(root.get("lastName"), toSearch),
                 cb.like(root.get("email"), toSearch)
             ));
+        }
+
+        if (active != null) {
+            list.add(cb.equal(root.get("active"), true));
         }
     }
 

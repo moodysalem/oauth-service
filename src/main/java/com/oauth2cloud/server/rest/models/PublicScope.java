@@ -16,7 +16,7 @@ public class PublicScope {
     private boolean requiresApprovalFromApplication;
 
     public PublicScope(Scope scope) {
-        if (scope != null) {
+        if (scope == null) {
             throw new NullPointerException();
         }
         setId(scope.getId());
