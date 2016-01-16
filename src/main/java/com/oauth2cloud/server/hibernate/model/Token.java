@@ -77,6 +77,7 @@ public class Token extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
+    @Lob
     @Column(name = "providerAccessToken")
     private String providerAccessToken;
 
