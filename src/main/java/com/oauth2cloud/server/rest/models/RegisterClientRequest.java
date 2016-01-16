@@ -1,11 +1,13 @@
 package com.oauth2cloud.server.rest.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.hibernate.model.Scope;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterClientRequest {
     private Application application;
     private List<Scope> scopes;

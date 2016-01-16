@@ -173,8 +173,8 @@ public abstract class BaseResource {
         cq.select(ct);
         cq.where(
                 cb.equal(ct.get("identifier"), clientId),
-                cb.equal(ct.get("deleted"), false),
-                cb.equal(ct.join("application").get("deleted"), false)
+                cb.equal(ct.get("active"), true),
+                cb.equal(ct.join("application").get("active"), true)
         );
 
         List<Client> cts = em.createQuery(cq).getResultList();

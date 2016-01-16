@@ -41,9 +41,7 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
 
     @Override
     public boolean canDelete(Application application) {
-        mustBeLoggedIn();
-        checkScope(MANAGE_APPLICATIONS);
-        return application.getOwner().idMatch(getUser());
+        return false;
     }
 
     @Override
@@ -94,7 +92,6 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
         checkScope(MANAGE_APPLICATIONS);
         list.add(cb.equal(root.get("owner"), getUser()));
-        list.add(cb.equal(root.get("deleted"), false));
     }
 
     @Override
@@ -144,11 +141,5 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
         if (application.getAmazonClientSecret() != null && application.getAmazonClientSecret().isEmpty()) {
             application.setAmazonClientSecret(null);
         }
-    }
-
-    @Override
-    protected void deleteEntity(Application entityToDelete) {
-        entityToDelete.setDeleted(true);
-        em.merge(entityToDelete);
     }
 }

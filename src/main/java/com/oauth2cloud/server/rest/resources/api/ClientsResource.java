@@ -46,7 +46,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
 
     @Override
     public boolean canDelete(Client client) {
-        return canEdit(client);
+        return false;
     }
 
     @Override
@@ -78,8 +78,8 @@ public class ClientsResource extends BaseEntityResource<Client> {
         checkScope(MANAGE_CLIENTS);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.get("deleted"), false));
-        list.add(cb.equal(root.join("application").get("deleted"), false));
+        list.add(cb.equal(root.get("active"), true));
+        list.add(cb.equal(root.join("application").get("active"), true));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));
@@ -107,11 +107,5 @@ public class ClientsResource extends BaseEntityResource<Client> {
     @Override
     public void beforeSend(Client client) {
 
-    }
-
-    @Override
-    protected void deleteEntity(Client entityToDelete) {
-        entityToDelete.setDeleted(true);
-        em.merge(entityToDelete);
     }
 }

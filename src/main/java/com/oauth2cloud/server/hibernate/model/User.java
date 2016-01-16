@@ -39,6 +39,9 @@ public class User extends BaseEntity {
     @Column(name = "verified")
     private boolean verified;
 
+    @Column(name = "active")
+    private boolean active;
+
     public String getFirstName() {
         return firstName;
     }
@@ -97,4 +100,11 @@ public class User extends BaseEntity {
         this.newPassword = newPassword;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

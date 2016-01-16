@@ -32,6 +32,12 @@ public class Scope extends BaseEntity {
     @Column(name = "requiresApprovalFromApplication")
     private boolean requiresApprovalFromApplication;
 
+    @Column(name = "active")
+    private boolean active;
+
+    @Column(name = "requestable")
+    private boolean requestable;
+
     public Application getApplication() {
         return application;
     }
@@ -78,5 +84,21 @@ public class Scope extends BaseEntity {
 
     public void setRequiresApprovalFromApplication(boolean requiresApprovalFromApplication) {
         this.requiresApprovalFromApplication = requiresApprovalFromApplication;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isRequestable() {
+        return requestable;
+    }
+
+    public void setRequestable(boolean requestable) {
+        this.requestable = requestable;
     }
 }

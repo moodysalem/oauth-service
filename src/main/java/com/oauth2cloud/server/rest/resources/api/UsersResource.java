@@ -36,7 +36,7 @@ public class UsersResource extends BaseEntityResource<User> {
         }
 
         Application ap = em.find(Application.class, user.getApplication().getId());
-        return ap != null && !ap.isDeleted() && ap.getOwner().idMatch(getUser());
+        return ap != null && ap.isActive() && ap.getOwner().idMatch(getUser());
     }
 
     @Override
@@ -48,7 +48,7 @@ public class UsersResource extends BaseEntityResource<User> {
 
     @Override
     public boolean canDelete(User user) {
-        return canEdit(user);
+        return false;
     }
 
     @Override
@@ -77,8 +77,8 @@ public class UsersResource extends BaseEntityResource<User> {
         CriteriaQuery<User> users = cb.createQuery(User.class);
         Root<User> u = users.from(User.class);
         List<User> list = em.createQuery(users.select(u).where(
-                cb.equal(u.get("email"), email),
-                cb.equal(u.get("application"), application)
+            cb.equal(u.get("email"), email),
+            cb.equal(u.get("application"), application)
         )).getResultList();
         return list.size() == 1 ? list.get(0) : null;
     }
@@ -102,7 +102,7 @@ public class UsersResource extends BaseEntityResource<User> {
         checkScope(MANAGE_USERS);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.join("application").get("deleted"), false));
+        list.add(cb.equal(root.join("application").get("active"), true));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));
@@ -111,9 +111,9 @@ public class UsersResource extends BaseEntityResource<User> {
         if (search != null) {
             String toSearch = "%" + search.trim() + "%";
             list.add(cb.or(
-                    cb.like(root.get("firstName"), toSearch),
-                    cb.like(root.get("lastName"), toSearch),
-                    cb.like(root.get("email"), toSearch)
+                cb.like(root.get("firstName"), toSearch),
+                cb.like(root.get("lastName"), toSearch),
+                cb.like(root.get("email"), toSearch)
             ));
         }
     }

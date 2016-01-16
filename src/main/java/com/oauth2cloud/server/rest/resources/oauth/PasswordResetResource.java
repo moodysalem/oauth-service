@@ -40,15 +40,15 @@ public class PasswordResetResource extends BaseResource {
     @QueryParam("referrer")
     String referrer;
 
-    private Application getApplication() {
+    private Application getApplication(Long applicationId) {
         if (applicationId == null) {
             return null;
         }
         Application application = em.find(Application.class, applicationId);
-        if (application != null && application.isDeleted()) {
-            return null;
+        if (application != null && application.isActive()) {
+            return application;
         }
-        return application;
+        return null;
     }
 
 
@@ -66,7 +66,7 @@ public class PasswordResetResource extends BaseResource {
                 return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
             }
         } else {
-            Application application = getApplication();
+            Application application = getApplication(applicationId);
             if (application == null) {
                 return error(INVALID_RESET_PASSWORD_URL);
             }
@@ -109,7 +109,7 @@ public class PasswordResetResource extends BaseResource {
             return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
         }
 
-        Application application = getApplication();
+        Application application = getApplication(applicationId);
         if (application == null) {
             return error(INVALID_RESET_PASSWORD_URL);
         }

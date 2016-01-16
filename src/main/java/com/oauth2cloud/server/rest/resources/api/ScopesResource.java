@@ -30,7 +30,7 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         Application ap = scope.getApplication() != null && scope.getApplication().getId() != 0 ?
             em.find(Application.class, scope.getApplication().getId()) : null;
 
-        return ap != null && !ap.isDeleted() && ap.getOwner().idMatch(getUser());
+        return ap != null && ap.isActive() && ap.getOwner().idMatch(getUser());
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ScopesResource extends BaseEntityResource<Scope> {
 
     @Override
     public boolean canDelete(Scope scope) {
-        return canEdit(scope);
+        return false;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         checkScope(MANAGE_SCOPES);
 
         list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.join("application").get("deleted"), false));
+        list.add(cb.equal(root.join("application").get("active"), true));
 
         if (applicationId != null) {
             list.add(cb.equal(root.join("application").get("id"), applicationId));

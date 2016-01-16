@@ -74,9 +74,8 @@ public class Application extends BaseEntity {
     @Column(name = "publicClientRegistration")
     private boolean publicClientRegistration;
 
-    @JsonIgnore
-    @Column(name = "deleted")
-    private boolean deleted;
+    @Column(name = "active")
+    private boolean active;
 
     public String getName() {
         return name;
@@ -190,19 +189,19 @@ public class Application extends BaseEntity {
         this.logoUrl = logoUrl;
     }
 
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
     public String getFaviconUrl() {
         return faviconUrl;
     }
 
     public void setFaviconUrl(String faviconUrl) {
         this.faviconUrl = faviconUrl;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

@@ -48,7 +48,7 @@
       <column name="amazonClientSecret" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
-      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
         <constraints nullable="false"/>
       </column>
       <column name="legacyUrl" type="${TEXT}"/>
@@ -183,7 +183,7 @@
       <column name="creatorId" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
         <constraints nullable="false"/>
       </column>
     </createTable>
@@ -319,8 +319,7 @@
     <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="scopeId"
                              constraintName="FK_ClientScope_Scope"
                              referencedTableName="Scope"
-                             referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+                             referencedColumnNames="id"/>
     <addUniqueConstraint tableName="ClientScope" columnNames="clientId,scopeId"/>
   </changeSet>
 
@@ -354,7 +353,7 @@
                              constraintName="FK_AcceptedScope_ClientScope"
                              referencedTableName="ClientScope"
                              referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+    />
     <addUniqueConstraint tableName="AcceptedScope" columnNames="userId,clientScopeId"/>
   </changeSet>
 
@@ -377,7 +376,7 @@
                              constraintName="FK_Token_AcceptedScope_AcceptedScope"
                              referencedTableName="AcceptedScope"
                              referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+    />
   </changeSet>
 
   <!-- this table lists all the client scopes that are granted with a token -->
@@ -398,7 +397,7 @@
                              constraintName="FK_Token_ClientScope_ClientScope"
                              referencedTableName="ClientScope"
                              referencedColumnNames="id"
-                             onDelete="CASCADE"/>
+    />
   </changeSet>
 
   <changeSet id="LoginCookie Table" author="moody.salem">
@@ -520,7 +519,7 @@
     </addColumn>
   </changeSet>
 
-  <changeSet id="Add provider_token and provider columns to Token table" author="moody.salem">
+  <changeSet id="Add provider and providerAccessToken columns to Token table" author="moody.salem">
     <addColumn tableName="Token">
       <column name="provider" type="VARCHAR(20)">
         <constraints nullable="true"/>
@@ -533,6 +532,22 @@
     </addColumn>
     <addUniqueConstraint tableName="Token" columnNames="provider,providerAccessToken"
                          constraintName="UK_Token_Provider_ProviderAccessToken"/>
+  </changeSet>
+
+  <changeSet id="Add an active flag to users" author="moody.salem">
+    <addColumn tableName="User">
+      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+    <addColumn tableName="Scope">
+      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+        <constraints nullable="false"/>
+      </column>
+      <column name="requestable" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
   </changeSet>
 
 
