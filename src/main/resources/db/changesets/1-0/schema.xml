@@ -526,12 +526,10 @@
       </column>
     </addColumn>
     <addColumn tableName="Token">
-      <column name="providerAccessToken" type="VARCHAR(191)">
+      <column name="providerAccessToken" type="${TEXT}">
         <constraints nullable="true"/>
       </column>
     </addColumn>
-    <addUniqueConstraint tableName="Token" columnNames="provider,providerAccessToken"
-                         constraintName="UK_Token_Provider_ProviderAccessToken"/>
   </changeSet>
 
   <changeSet id="Add an active flag to users" author="moody.salem">
