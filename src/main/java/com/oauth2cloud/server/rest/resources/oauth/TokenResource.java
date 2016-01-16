@@ -138,7 +138,7 @@ public class TokenResource extends BaseResource {
         List<ClientScope> newClientScopes = new ArrayList<>(accessToken.getClientScopes());
 
         Token tempToken = generateToken(Token.Type.TEMPORARY, c, accessToken.getUser(), getExpires(c, Token.Type.TEMPORARY),
-            accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes);
+            accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes, accessToken.getProvider(), accessToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(tempToken))).build();
     }
@@ -180,7 +180,7 @@ public class TokenResource extends BaseResource {
         }
 
         Token accessToken = generateToken(Token.Type.ACCESS, client, refreshToken.getUser(), getExpires(client, Token.Type.ACCESS),
-            refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null);
+            refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null, refreshToken.getProvider(), refreshToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
@@ -211,7 +211,7 @@ public class TokenResource extends BaseResource {
             return error(ErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + invalidScopes);
         }
 
-        Token token = generateToken(Token.Type.CLIENT, client, null, getExpires(client, Token.Type.CLIENT), null, null, null, clientScopes);
+        Token token = generateToken(Token.Type.CLIENT, client, null, getExpires(client, Token.Type.CLIENT), null, null, null, clientScopes, null, null);
 
         return noCache(Response.ok(TokenResponse.from(token))).build();
     }
@@ -276,10 +276,10 @@ public class TokenResource extends BaseResource {
         // only confidential clients may receive refresh tokens
         if (client.getRefreshTokenTtl() != null && client.getType().equals(Client.Type.CONFIDENTIAL)) {
             refreshToken = generateToken(Token.Type.REFRESH, client, codeToken.getUser(), getExpires(client, Token.Type.REFRESH), redirectUri,
-                new ArrayList<>(codeToken.getAcceptedScopes()), null, null);
+                new ArrayList<>(codeToken.getAcceptedScopes()), null, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
         }
         Token accessToken = generateToken(Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, Token.Type.ACCESS), redirectUri,
-            new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken, null);
+            new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
@@ -334,10 +334,10 @@ public class TokenResource extends BaseResource {
         Token refreshToken = null;
         if (client.getRefreshTokenTtl() != null) {
             refreshToken = generateToken(Token.Type.REFRESH, client, user, getExpires(client, Token.Type.REFRESH), null,
-                new ArrayList<>(acceptedScopes), null, null);
+                new ArrayList<>(acceptedScopes), null, null, null, null);
         }
         Token accessToken = generateToken(Token.Type.ACCESS, client, user, getExpires(client, Token.Type.ACCESS), null,
-            new ArrayList<>(acceptedScopes), refreshToken, null);
+            new ArrayList<>(acceptedScopes), refreshToken, null, null, null);
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }

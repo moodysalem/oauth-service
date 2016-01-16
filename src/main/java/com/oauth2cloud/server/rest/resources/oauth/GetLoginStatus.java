@@ -104,8 +104,9 @@ public class GetLoginStatus extends BaseResource {
                             referrer,
                             getAcceptedScopes(c, lc.getUser()),
                             null,
-                            null
-                        )
+                            null,
+                            null,
+                            null)
                     )
                 );
             }

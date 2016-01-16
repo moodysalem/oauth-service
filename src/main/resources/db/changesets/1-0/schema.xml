@@ -520,5 +520,20 @@
     </addColumn>
   </changeSet>
 
+  <changeSet id="Add provider_token and provider columns to Token table" author="moody.salem">
+    <addColumn tableName="Token">
+      <column name="provider" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+    <addColumn tableName="Token">
+      <column name="providerAccessToken" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+    <addUniqueConstraint tableName="Token" columnNames="provider,providerAccessToken"
+                         constraintName="UK_Token_Provider_ProviderAccessToken"/>
+  </changeSet>
+
 
 </databaseChangeLog>

@@ -80,9 +80,9 @@ public abstract class BaseResource {
         Root<Token> t = tq.from(Token.class);
 
         Predicate p = cb.and(
-            cb.equal(t.get("token"), token),
-            t.get("type").in(types),
-            cb.greaterThan(t.<Date>get("expires"), new Date())
+                cb.equal(t.get("token"), token),
+                t.get("type").in(types),
+                cb.greaterThan(t.<Date>get("expires"), new Date())
         );
         if (client != null) {
             p = cb.and(p, cb.equal(t.get("client"), client));
@@ -95,15 +95,18 @@ public abstract class BaseResource {
     /**
      * Create and persist a token
      *
-     * @param type    the token's type
-     * @param client  the client for which the token is being created
-     * @param user    the to which the token is associated
-     * @param expires when the token becomes invalid
-     * @param scopes  the scopes for which the token is valid
+     * @param type                the token's type
+     * @param client              the client for which the token is being created
+     * @param user                the to which the token is associated
+     * @param expires             when the token becomes invalid
+     * @param scopes              the scopes for which the token is valid
+     * @param provider            the provider that was used to get this token
+     * @param providerAccessToken the access token from the provider used to log in
      * @return a Token with the aforementioned properties
      */
     protected Token generateToken(Token.Type type, Client client, User user, Date expires, String redirectUri,
-                                  List<AcceptedScope> scopes, Token refreshToken, List<ClientScope> clientScopes) {
+                                  List<AcceptedScope> scopes, Token refreshToken, List<ClientScope> clientScopes,
+                                  Provider provider, String providerAccessToken) {
         Token toReturn = new Token();
         toReturn.setClient(client);
         toReturn.setExpires(expires);
@@ -169,9 +172,9 @@ public abstract class BaseResource {
         Root<Client> ct = cq.from(Client.class);
         cq.select(ct);
         cq.where(
-            cb.equal(ct.get("identifier"), clientId),
-            cb.equal(ct.get("deleted"), false),
-            cb.equal(ct.join("application").get("deleted"), false)
+                cb.equal(ct.get("identifier"), clientId),
+                cb.equal(ct.get("deleted"), false),
+                cb.equal(ct.join("application").get("deleted"), false)
         );
 
         List<Client> cts = em.createQuery(cq).getResultList();
@@ -215,8 +218,8 @@ public abstract class BaseResource {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-            cb.equal(ras.get("user"), user),
-            cb.equal(ras.get("clientScope"), clientScope)
+                cb.equal(ras.get("user"), user),
+                cb.equal(ras.get("clientScope"), clientScope)
         ))).getResultList();
         if (las.size() == 1) {
             return las.get(0);
@@ -339,9 +342,9 @@ public abstract class BaseResource {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
         Root<LoginCookie> rlc = lc.from(LoginCookie.class);
         lc.select(rlc).where(
-            cb.equal(rlc.get("secret"), secret),
-            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-            cb.equal(rlc.join("user").get("application"), client.getApplication())
+                cb.equal(rlc.get("secret"), secret),
+                cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+                cb.equal(rlc.join("user").get("application"), client.getApplication())
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -397,8 +400,8 @@ public abstract class BaseResource {
             return false;
         }
         return one.getScheme().equalsIgnoreCase(two.getScheme()) &&
-            one.getHost().equalsIgnoreCase(two.getHost()) &&
-            one.getPort() == two.getPort();
+                one.getHost().equalsIgnoreCase(two.getHost()) &&
+                one.getPort() == two.getPort();
     }
 
     /**
@@ -425,12 +428,12 @@ public abstract class BaseResource {
         Root<User> u = uq.from(User.class);
 
         List<User> users = em.createQuery(
-            uq.select(u).where(
-                cb.and(
-                    cb.equal(u.get("application"), application),
-                    cb.equal(u.get("email"), email)
+                uq.select(u).where(
+                        cb.and(
+                                cb.equal(u.get("application"), application),
+                                cb.equal(u.get("email"), email)
+                        )
                 )
-            )
         ).getResultList();
 
         if (users.size() != 1) {
@@ -507,11 +510,11 @@ public abstract class BaseResource {
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
         Root<UserCode> rp = pw.from(UserCode.class);
         pw.select(rp).where(
-            cb.equal(rp.get("code"), code),
-            cb.greaterThan(rp.<Date>get("expires"), new Date()),
-            cb.equal(rp.get("type"), type),
-            // if we are including used, then use a predicate that will always be true
-            includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
+                cb.equal(rp.get("code"), code),
+                cb.greaterThan(rp.<Date>get("expires"), new Date()),
+                cb.equal(rp.get("type"), type),
+                // if we are including used, then use a predicate that will always be true
+                includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
         );
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;
@@ -521,10 +524,10 @@ public abstract class BaseResource {
     /**
      * Make a UserCode
      *
-     * @param user    user for which the code is created
+     * @param user     user for which the code is created
      * @param referrer the referrer to which the user should be redirected after using the code
-     * @param type    the type of code
-     * @param expires when it expires
+     * @param type     the type of code
+     * @param expires  when it expires
      * @return
      */
     protected UserCode makeCode(User user, String referrer, UserCode.Type type, Date expires) {
@@ -565,16 +568,17 @@ public abstract class BaseResource {
 
     /**
      * Get the scopes that a user has given a client permission to use
+     *
      * @param client client to which scopes have been given
-     * @param user user that has given permission for these scopes
+     * @param user   user that has given permission for these scopes
      * @return a list of accepted scopes
      */
     protected List<AcceptedScope> getAcceptedScopes(Client client, User user) {
         CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = as.from(AcceptedScope.class);
         return em.createQuery(as.select(ras).where(
-            cb.equal(ras.join("clientScope").get("client"), client),
-            cb.equal(ras.get("user"), user)
+                cb.equal(ras.join("clientScope").get("client"), client),
+                cb.equal(ras.get("user"), user)
         )).getResultList();
     }
 

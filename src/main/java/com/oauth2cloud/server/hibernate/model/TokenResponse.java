@@ -23,6 +23,8 @@ public class TokenResponse {
         tr.setClientId(accessToken.getClient().getIdentifier());
         tr.setUser(accessToken.getUser());
         tr.setApplicationId(accessToken.getClient().getApplication().getId());
+        tr.setProviderName(accessToken.getProvider().name());
+        tr.setProviderAccessToken(accessToken.getProviderAccessToken());
         return tr;
     }
 
@@ -49,6 +51,12 @@ public class TokenResponse {
 
     @JsonProperty("application_id")
     private Long applicationId;
+
+    @JsonProperty("provider")
+    private String providerName;
+
+    @JsonProperty("provider_access_token")
+    private String providerAccessToken;
 
     public String getAccessToken() {
         return accessToken;
@@ -114,4 +122,19 @@ public class TokenResponse {
         return userDetails;
     }
 
+    public String getProviderName() {
+        return providerName;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
+
+    public String getProviderAccessToken() {
+        return providerAccessToken;
+    }
+
+    public void setProviderAccessToken(String providerAccessToken) {
+        this.providerAccessToken = providerAccessToken;
+    }
 }

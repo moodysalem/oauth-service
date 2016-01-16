@@ -42,7 +42,7 @@ public class AuthorizeResource extends BaseResource {
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
     public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
     public static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
-            "Invalid request. Please contact an administrator if this continues.";
+        "Invalid request. Please contact an administrator if this continues.";
     public static final String AMAZON_API_URL = "https://api.amazon.com";
 
     @QueryParam("response_type")
@@ -168,7 +168,7 @@ public class AuthorizeResource extends BaseResource {
         // verify all the requested scopes are available to the client
         if (scopes != null && scopes.size() > 0) {
             Set<String> scopeNames = c.getClientScopes().stream()
-                    .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
+                .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
             if (!scopeNames.containsAll(scopes)) {
                 String joinedScopes = scopes.stream().filter((s) -> !scopeNames.contains(s)).collect(Collectors.joining(", "));
                 return error("The following scopes are requested but not allowed for this client: " + joinedScopes);
@@ -202,7 +202,7 @@ public class AuthorizeResource extends BaseResource {
                 expireLoginCookie(loginCookie);
             } else {
                 return getSuccessfulLoginResponse(loginCookie.getUser(), client, scopes, redirectUri, responseType, state,
-                        loginCookie.isRememberMe());
+                    loginCookie.isRememberMe(), null, null);
             }
         }
 
@@ -257,8 +257,8 @@ public class AuthorizeResource extends BaseResource {
         switch (action) {
             // handle the login action
             case "login":
-                // get the KIND of login we should attempt
-                Provider p = getProvider(formParams);
+                // get the provider information
+                ProviderInfo p = getProviderInfo(formParams);
 
                 // by default, the credentials are invalid
                 lrm.setLoginError(INVALID_LOGIN_CREDENTIALS);
@@ -266,20 +266,21 @@ public class AuthorizeResource extends BaseResource {
                 if (p != null) {
                     User user = null;
                     try {
-                        switch (p) {
-                            case EMAIL:
-                                lrm.setLastEmail(formParams.getFirst("email"));
-                                user = doEmailLogin(client.getApplication(), formParams);
-                                break;
-                            case GOOGLE:
-                                user = doGoogleLogin(client.getApplication(), formParams);
-                                break;
-                            case FACEBOOK:
-                                user = doFacebookLogin(client.getApplication(), formParams);
-                                break;
-                            case AMAZON:
-                                user = doAmazonLogin(client.getApplication(), formParams);
-                                break;
+                        if (p.provider != null) {
+                            switch (p.provider) {
+                                case GOOGLE:
+                                    user = doGoogleLogin(client.getApplication(), formParams);
+                                    break;
+                                case FACEBOOK:
+                                    user = doFacebookLogin(client.getApplication(), formParams);
+                                    break;
+                                case AMAZON:
+                                    user = doAmazonLogin(client.getApplication(), formParams);
+                                    break;
+                            }
+                        } else {
+                            lrm.setLastEmail(formParams.getFirst("email"));
+                            user = doEmailLogin(client.getApplication(), formParams);
                         }
                     } catch (Exception e) {
                         LOG.log(Level.WARNING, "login exception", e);
@@ -290,7 +291,7 @@ public class AuthorizeResource extends BaseResource {
                         if (!user.isVerified()) {
                             lrm.setLoginError("Your e-mail is not yet verified. Register again to receive another verification e-mail.");
                         } else {
-                            return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe);
+                            return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe, p.provider, p.providerToken);
                         }
                     }
                 }
@@ -358,8 +359,8 @@ public class AuthorizeResource extends BaseResource {
                             Set<Long> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
                                 try {
                                     return s != null && s.startsWith("SCOPE") &&
-                                            "on".equalsIgnoreCase(formParams.getFirst(s)) ?
-                                            Long.parseLong(s.substring("SCOPE".length())) : null;
+                                        "on".equalsIgnoreCase(formParams.getFirst(s)) ?
+                                        Long.parseLong(s.substring("SCOPE".length())) : null;
                                 } catch (Exception e) {
                                     return null;
                                 }
@@ -367,7 +368,7 @@ public class AuthorizeResource extends BaseResource {
                             for (ClientScope cs : clientScopes) {
                                 // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
                                 if (!cs.getPriority().equals(ClientScope.Priority.ASK) ||
-                                        acceptedScopeIds.contains(cs.getScope().getId())) {
+                                    acceptedScopeIds.contains(cs.getScope().getId())) {
                                     // create/find the accepted scope for this client scope
                                     tokenScopes.add(acceptScope(t.getUser(), cs));
                                 }
@@ -389,17 +390,17 @@ public class AuthorizeResource extends BaseResource {
 
     private void sendVerificationEmail(User user) {
         UserCode uc = makeCode(user, containerRequestContext.getUriInfo().getRequestUri().toString(),
-                UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
+            UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
 
         UserCodeEmailModel ucem = new UserCodeEmailModel();
         ucem.setUserCode(uc);
         ucem.setUrl(containerRequestContext.getUriInfo().getBaseUriBuilder()
-                .path("oauth").path("verify").replaceQuery("").queryParam("code", uc.getCode())
-                .build().toString());
+            .path("oauth").path("verify").replaceQuery("").queryParam("code", uc.getCode())
+            .build().toString());
 
         sendEmail(user.getApplication().getSupportEmail(), user.getEmail(),
-                "Your confirmation e-mail for " + user.getApplication().getName(),
-                "VerifyEmail.ftl", ucem);
+            "Your confirmation e-mail for " + user.getApplication().getName(),
+            "VerifyEmail.ftl", ucem);
     }
 
     private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
@@ -410,8 +411,8 @@ public class AuthorizeResource extends BaseResource {
         String token = formParams.getFirst("amazonToken");
 
         Response info = ClientBuilder.newClient()
-                .target(AMAZON_API_URL).path("auth").path("o2").path("tokeninfo")
-                .queryParam("access_token", token).request().get();
+            .target(AMAZON_API_URL).path("auth").path("o2").path("tokeninfo")
+            .queryParam("access_token", token).request().get();
         if (info.getStatus() != 200) {
             throw new IllegalArgumentException("Invalid Amazon login credentials.");
         }
@@ -425,9 +426,9 @@ public class AuthorizeResource extends BaseResource {
         }
 
         Response userInfo = ClientBuilder.newClient()
-                .target(AMAZON_API_URL).path("user").path("profile")
-                .request().header("Authorization", "bearer " + token)
-                .get();
+            .target(AMAZON_API_URL).path("user").path("profile")
+            .request().header("Authorization", "bearer " + token)
+            .get();
 
         if (userInfo.getStatus() != 200) {
             throw new IllegalArgumentException("Failed to get the user information.");
@@ -494,7 +495,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         Response tokenInfo = ClientBuilder.newClient().target("https://www.googleapis.com/oauth2/v1/tokeninfo")
-                .queryParam("access_token", googleToken).request(MediaType.APPLICATION_JSON).get();
+            .queryParam("access_token", googleToken).request(MediaType.APPLICATION_JSON).get();
 
         if (tokenInfo.getStatus() != 200) {
             throw new IllegalArgumentException("Invalid Google Token supplied.");
@@ -525,9 +526,9 @@ public class AuthorizeResource extends BaseResource {
 //        }
 
         Response userInfo = ClientBuilder.newClient().target("https://www.googleapis.com/plus/v1/people/me")
-                .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + googleToken)
-                .get();
+            .request(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + googleToken)
+            .get();
 
         if (userInfo.getStatus() != 200) {
             throw new IllegalArgumentException("Failed to get user info.");
@@ -591,22 +592,28 @@ public class AuthorizeResource extends BaseResource {
         return u;
     }
 
-    public enum Provider {
-        EMAIL, FACEBOOK, GOOGLE, AMAZON
+    private class ProviderInfo {
+        public ProviderInfo(Provider provider, String providerToken) {
+            this.provider = provider;
+            this.providerToken = providerToken;
+        }
+
+        public Provider provider;
+        public String providerToken;
     }
 
-    public Provider getProvider(MultivaluedMap<String, String> formParams) {
+    public ProviderInfo getProviderInfo(MultivaluedMap<String, String> formParams) {
         if (!isEmpty(formParams.getFirst("facebookToken"))) {
-            return Provider.FACEBOOK;
+            return new ProviderInfo(Provider.FACEBOOK, formParams.getFirst("facebookToken"));
         }
         if (!isEmpty(formParams.getFirst("googleToken"))) {
-            return Provider.GOOGLE;
+            return new ProviderInfo(Provider.GOOGLE, formParams.getFirst("googleToken"));
         }
         if (!isEmpty(formParams.getFirst("amazonToken"))) {
-            return Provider.AMAZON;
+            return new ProviderInfo(Provider.AMAZON, formParams.getFirst("amazonToken"));
         }
         if (!isEmpty(formParams.getFirst("email")) && !isEmpty(formParams.getFirst("password"))) {
-            return Provider.EMAIL;
+            return new ProviderInfo(null, null);
         }
         return null;
     }
@@ -626,7 +633,7 @@ public class AuthorizeResource extends BaseResource {
             Form f = new Form();
             f.param("email", email).param("password", password);
             Response r = ClientBuilder.newClient().target(app.getLegacyUrl()).request(MediaType.APPLICATION_JSON_TYPE)
-                    .post(Entity.form(f));
+                .post(Entity.form(f));
 
             if (r.getStatus() == 200) {
                 JsonNode ui = r.readEntity(JsonNode.class);
@@ -647,12 +654,12 @@ public class AuthorizeResource extends BaseResource {
     }
 
     private Response getSuccessfulLoginResponse(User user, Client client, List<String> scopes, String redirectUri,
-                                                String responseType, String state, boolean rememberMe) {
+                                                String responseType, String state, boolean rememberMe, Provider provider, String providerAccessToken) {
         // successfully authenticated the user
         List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
         if (toAsk.size() > 0) {
             // we need to generate a temporary token for them to get to the next step with
-            Token t = generatePermissionToken(user, client, redirectUri);
+            Token t = generatePermissionToken(user, client, redirectUri, provider, providerAccessToken);
             PermissionsModel pr = new PermissionsModel();
             pr.setClientScopes(toAsk);
             pr.setToken(t);
@@ -672,7 +679,7 @@ public class AuthorizeResource extends BaseResource {
             Token.Type type = getTokenType(responseType);
             // redirect with token since they've already asked for all the permissions
             Token t = generateToken(type, client, user, getExpires(client, type),
-                    redirectUri, acceptedScopes, null, null);
+                redirectUri, acceptedScopes, null, null, provider, providerAccessToken);
             return getRedirectResponse(redirectUri, state, t, rememberMe);
         }
     }
@@ -698,8 +705,8 @@ public class AuthorizeResource extends BaseResource {
         UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
         String scope = tkn.getAcceptedScopes().stream()
-                .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
-                .collect(Collectors.joining(" "));
+            .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
+            .collect(Collectors.joining(" "));
         String expiresIn = Long.toString((tkn.getExpires().getTime() - System.currentTimeMillis()) / 1000L);
 
         if (tkn.getType().equals(Token.Type.ACCESS)) {
@@ -711,6 +718,12 @@ public class AuthorizeResource extends BaseResource {
             }
             params.putSingle("expires_in", expiresIn);
             params.putSingle("scope", scope);
+
+            if (tkn.getProvider() != null) {
+                params.putSingle("provider", tkn.getProvider().name());
+                params.putSingle("provider_access_token", tkn.getProviderAccessToken());
+            }
+
             toRedirect.fragment(mapToQueryString(params));
         }
 
@@ -722,9 +735,9 @@ public class AuthorizeResource extends BaseResource {
         }
 
         return Response.status(Response.Status.FOUND)
-                .location(toRedirect.build())
-                .cookie(getNewCookie(tkn, rememberMe))
-                .build();
+            .location(toRedirect.build())
+            .cookie(getNewCookie(tkn, rememberMe))
+            .build();
     }
 
     @HeaderParam("X-Forwarded-Proto")
@@ -766,7 +779,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         return new NewCookie(getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", domain, NewCookie.DEFAULT_VERSION,
-                OAUTH2_CLOUD_LOGIN_COOKIE, maxAge, expiry, isHTTPS, true);
+            OAUTH2_CLOUD_LOGIN_COOKIE, maxAge, expiry, isHTTPS, true);
     }
 
     private LoginCookie makeLoginCookie(User user, String secret, Date expires, boolean rememberMe) {
@@ -798,7 +811,8 @@ public class AuthorizeResource extends BaseResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
-                getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null);
+            getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null,
+            permissionToken.getProvider(), permissionToken.getProviderAccessToken());
     }
 
     /**
@@ -812,9 +826,9 @@ public class AuthorizeResource extends BaseResource {
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         Root<Token> tk = tq.from(Token.class);
         List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
-                cb.equal(tk.get("token"), token),
-                cb.equal(tk.get("type"), Token.Type.PERMISSION),
-                cb.equal(tk.get("client"), client)
+            cb.equal(tk.get("token"), token),
+            cb.equal(tk.get("type"), Token.Type.PERMISSION),
+            cb.equal(tk.get("client"), client)
         ))).getResultList();
         return tks.size() == 1 ? tks.get(0) : null;
     }
@@ -823,11 +837,12 @@ public class AuthorizeResource extends BaseResource {
      * Generate a temporary token to represent correct credentials, giving the user 5 minutes to accept the permissions
      * before expiring
      *
-     * @param user   the user to generate the token for
-     * @param client the client to generate the token for
-     * @return a temporary token for use on the permission form
+     * @param user                the user to generate the token for
+     * @param client              the client to generate the token for
+     * @param provider
+     * @param providerAccessToken @return a temporary token for use on the permission form
      */
-    private Token generatePermissionToken(User user, Client client, String redirectUri) {
+    private Token generatePermissionToken(User user, Client client, String redirectUri, Provider provider, String providerAccessToken) {
         Token t = new Token();
         Date expires = new Date();
         expires.setTime(expires.getTime() + FIVE_MINUTES);
@@ -837,6 +852,8 @@ public class AuthorizeResource extends BaseResource {
         t.setRandomToken(64);
         t.setType(Token.Type.PERMISSION);
         t.setRedirectUri(redirectUri);
+        t.setProvider(provider);
+        t.setProviderAccessToken(providerAccessToken);
         try {
             beginTransaction();
             em.persist(t);
@@ -903,8 +920,8 @@ public class AuthorizeResource extends BaseResource {
 
         Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
         sq.select(ras.get("clientScope")).where(
-                cb.equal(ras.get("user"), user),
-                cb.equal(ras.join("clientScope").get("approved"), true)
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.join("clientScope").get("approved"), true)
         );
 
         return sq;

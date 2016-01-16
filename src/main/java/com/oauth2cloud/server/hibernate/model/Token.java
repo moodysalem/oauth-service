@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.moodysalem.hibernate.model.BaseEntity;
 import com.moodysalem.util.RandomStringUtil;
 
@@ -11,7 +12,6 @@ import java.util.stream.Collectors;
 
 @Entity
 public class Token extends BaseEntity {
-
 
     public enum Type {
         // the access token is used with resource servers to identify an authenticated user
@@ -57,21 +57,28 @@ public class Token extends BaseEntity {
 
     @ManyToMany
     @JoinTable(
-        name = "Token_AcceptedScope",
-        joinColumns = @JoinColumn(name = "tokenId"),
-        inverseJoinColumns = @JoinColumn(name = "acceptedScopeId")
+            name = "Token_AcceptedScope",
+            joinColumns = @JoinColumn(name = "tokenId"),
+            inverseJoinColumns = @JoinColumn(name = "acceptedScopeId")
     )
     @JsonIgnore
     private List<AcceptedScope> acceptedScopes;
 
     @ManyToMany
     @JoinTable(
-        name = "Token_ClientScope",
-        joinColumns = @JoinColumn(name = "tokenId"),
-        inverseJoinColumns = @JoinColumn(name = "clientScopeId")
+            name = "Token_ClientScope",
+            joinColumns = @JoinColumn(name = "tokenId"),
+            inverseJoinColumns = @JoinColumn(name = "clientScopeId")
     )
     @JsonIgnore
     private List<ClientScope> clientScopes;
+
+    @Column(name = "provider")
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    @Column(name = "providerAccessToken")
+    private String providerAccessToken;
 
     /**
      * @return a space delimited list of scope names
@@ -82,14 +89,14 @@ public class Token extends BaseEntity {
         if (getType().equals(Type.CLIENT)) {
             // client credential tokens only point to client scopes
             clientScopeList = getClientScopes().stream()
-                .filter(ClientScope::isApproved)
-                .collect(Collectors.toList());
+                    .filter(ClientScope::isApproved)
+                    .collect(Collectors.toList());
         } else {
             // otherwise get the accepted scopes
             if (getAcceptedScopes() != null && getAcceptedScopes().size() > 0) {
                 clientScopeList = getAcceptedScopes().stream().map(AcceptedScope::getClientScope)
-                    .filter(ClientScope::isApproved)
-                    .collect(Collectors.toList());
+                        .filter(ClientScope::isApproved)
+                        .collect(Collectors.toList());
             }
         }
 
@@ -98,8 +105,8 @@ public class Token extends BaseEntity {
         }
 
         return clientScopeList.stream()
-            .map(ClientScope::getScope).map(Scope::getName)
-            .collect(Collectors.joining(" "));
+                .map(ClientScope::getScope).map(Scope::getName)
+                .collect(Collectors.joining(" "));
     }
 
     /**
@@ -185,4 +192,19 @@ public class Token extends BaseEntity {
         this.clientScopes = clientScopes;
     }
 
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderAccessToken() {
+        return providerAccessToken;
+    }
+
+    public void setProviderAccessToken(String providerAccessToken) {
+        this.providerAccessToken = providerAccessToken;
+    }
 }
