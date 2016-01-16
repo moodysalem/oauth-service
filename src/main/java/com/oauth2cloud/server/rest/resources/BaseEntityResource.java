@@ -120,7 +120,7 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
 
     protected void mustBeLoggedIn() {
         if (getUser() == null) {
-            throw new RequestProcessingException(Response.Status.UNAUTHORIZED, "You must be logged in to access this reosurce.");
+            throw new RequestProcessingException(Response.Status.UNAUTHORIZED, "You must be logged in to access this resource.");
         }
     }
 

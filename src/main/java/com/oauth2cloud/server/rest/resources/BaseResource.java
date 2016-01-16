@@ -80,9 +80,9 @@ public abstract class BaseResource {
         Root<Token> t = tq.from(Token.class);
 
         Predicate p = cb.and(
-                cb.equal(t.get("token"), token),
-                t.get("type").in(types),
-                cb.greaterThan(t.<Date>get("expires"), new Date())
+            cb.equal(t.get("token"), token),
+            t.get("type").in(types),
+            cb.greaterThan(t.<Date>get("expires"), new Date())
         );
         if (client != null) {
             p = cb.and(p, cb.equal(t.get("client"), client));
@@ -116,6 +116,9 @@ public abstract class BaseResource {
         toReturn.setRandomToken(64);
         toReturn.setAcceptedScopes(scopes);
         toReturn.setRefreshToken(refreshToken);
+        toReturn.setClientScopes(clientScopes);
+        toReturn.setProvider(provider);
+        toReturn.setProviderAccessToken(providerAccessToken);
         try {
             beginTransaction();
             em.persist(toReturn);
@@ -172,9 +175,9 @@ public abstract class BaseResource {
         Root<Client> ct = cq.from(Client.class);
         cq.select(ct);
         cq.where(
-                cb.equal(ct.get("identifier"), clientId),
-                cb.equal(ct.get("active"), true),
-                cb.equal(ct.join("application").get("active"), true)
+            cb.equal(ct.get("identifier"), clientId),
+            cb.equal(ct.get("active"), true),
+            cb.equal(ct.join("application").get("active"), true)
         );
 
         List<Client> cts = em.createQuery(cq).getResultList();
@@ -218,8 +221,8 @@ public abstract class BaseResource {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-                cb.equal(ras.get("user"), user),
-                cb.equal(ras.get("clientScope"), clientScope)
+            cb.equal(ras.get("user"), user),
+            cb.equal(ras.get("clientScope"), clientScope)
         ))).getResultList();
         if (las.size() == 1) {
             return las.get(0);
@@ -295,8 +298,8 @@ public abstract class BaseResource {
     /**
      * Get the Cookie object for a specific client
      *
-     * @param client
-     * @return
+     * @param client the client for which a cookie should be found
+     * @return the Cookie corresponding to the client
      */
     protected Cookie getCookie(Client client) {
         if (client == null) {
@@ -342,9 +345,11 @@ public abstract class BaseResource {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
         Root<LoginCookie> rlc = lc.from(LoginCookie.class);
         lc.select(rlc).where(
-                cb.equal(rlc.get("secret"), secret),
-                cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-                cb.equal(rlc.join("user").get("application"), client.getApplication())
+            cb.equal(rlc.get("secret"), secret),
+            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+            cb.equal(rlc.join("user").get("application"), client.getApplication()),
+            cb.equal(rlc.join("user").get("active"), true),
+            cb.equal(rlc.join("user").get("application").get("active"), true)
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -396,12 +401,11 @@ public abstract class BaseResource {
      * @return true if the uris match well enough
      */
     protected boolean partialMatch(URI one, URI two) {
-        if (one == null || two == null) {
-            return false;
-        }
-        return one.getScheme().equalsIgnoreCase(two.getScheme()) &&
-                one.getHost().equalsIgnoreCase(two.getHost()) &&
-                one.getPort() == two.getPort();
+        boolean validParams = one != null && two != null;
+        return validParams &&
+            one.getScheme().equalsIgnoreCase(two.getScheme()) &&
+            one.getHost().equalsIgnoreCase(two.getHost()) &&
+            one.getPort() == two.getPort();
     }
 
     /**
@@ -428,12 +432,12 @@ public abstract class BaseResource {
         Root<User> u = uq.from(User.class);
 
         List<User> users = em.createQuery(
-                uq.select(u).where(
-                        cb.and(
-                                cb.equal(u.get("application"), application),
-                                cb.equal(u.get("email"), email)
-                        )
+            uq.select(u).where(
+                cb.and(
+                    cb.equal(u.get("application"), application),
+                    cb.equal(u.get("email"), email)
                 )
+            )
         ).getResultList();
 
         if (users.size() != 1) {
@@ -500,8 +504,8 @@ public abstract class BaseResource {
     /**
      * Get a UserCode based on the user code string
      *
-     * @param code
-     * @return
+     * @param code code being requested
+     * @return UserCode corresponding to the code and type
      */
     protected UserCode getCode(String code, UserCode.Type type, boolean includeUsed) {
         if (code == null) {
@@ -510,11 +514,11 @@ public abstract class BaseResource {
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
         Root<UserCode> rp = pw.from(UserCode.class);
         pw.select(rp).where(
-                cb.equal(rp.get("code"), code),
-                cb.greaterThan(rp.<Date>get("expires"), new Date()),
-                cb.equal(rp.get("type"), type),
-                // if we are including used, then use a predicate that will always be true
-                includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
+            cb.equal(rp.get("code"), code),
+            cb.greaterThan(rp.<Date>get("expires"), new Date()),
+            cb.equal(rp.get("type"), type),
+            // if we are including used, then use a predicate that will always be true
+            includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
         );
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;
@@ -528,7 +532,7 @@ public abstract class BaseResource {
      * @param referrer the referrer to which the user should be redirected after using the code
      * @param type     the type of code
      * @param expires  when it expires
-     * @return
+     * @return UserCode created
      */
     protected UserCode makeCode(User user, String referrer, UserCode.Type type, Date expires) {
         UserCode pw = new UserCode();
@@ -556,7 +560,7 @@ public abstract class BaseResource {
      *
      * @param template template to process
      * @param model    object to inject into template
-     * @return
+     * @return String of the processed template
      * @throws IOException
      * @throws TemplateException
      */
@@ -577,8 +581,8 @@ public abstract class BaseResource {
         CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = as.from(AcceptedScope.class);
         return em.createQuery(as.select(ras).where(
-                cb.equal(ras.join("clientScope").get("client"), client),
-                cb.equal(ras.get("user"), user)
+            cb.equal(ras.join("clientScope").get("client"), client),
+            cb.equal(ras.get("user"), user)
         )).getResultList();
     }
 
