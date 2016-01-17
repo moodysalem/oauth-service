@@ -926,7 +926,9 @@ public class AuthorizeResource extends BaseResource {
         Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
         sq.select(ras.get("clientScope")).where(
             cb.equal(ras.get("user"), user),
-            cb.equal(ras.join("clientScope").get("approved"), true)
+            cb.equal(ras.join("clientScope").get("approved"), true),
+            cb.equal(ras.join("clientScope").join("scope").get("active"), true),
+            cb.equal(ras.join("clientScope").join("client").get("active"), true)
         );
 
         return sq;

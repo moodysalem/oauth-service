@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.moodysalem.hibernate.model.BaseEntity;
 import com.moodysalem.util.RandomStringUtil;
 
@@ -57,18 +56,18 @@ public class Token extends BaseEntity {
 
     @ManyToMany
     @JoinTable(
-            name = "Token_AcceptedScope",
-            joinColumns = @JoinColumn(name = "tokenId"),
-            inverseJoinColumns = @JoinColumn(name = "acceptedScopeId")
+        name = "Token_AcceptedScope",
+        joinColumns = @JoinColumn(name = "tokenId"),
+        inverseJoinColumns = @JoinColumn(name = "acceptedScopeId")
     )
     @JsonIgnore
     private List<AcceptedScope> acceptedScopes;
 
     @ManyToMany
     @JoinTable(
-            name = "Token_ClientScope",
-            joinColumns = @JoinColumn(name = "tokenId"),
-            inverseJoinColumns = @JoinColumn(name = "clientScopeId")
+        name = "Token_ClientScope",
+        joinColumns = @JoinColumn(name = "tokenId"),
+        inverseJoinColumns = @JoinColumn(name = "clientScopeId")
     )
     @JsonIgnore
     private List<ClientScope> clientScopes;
@@ -82,7 +81,7 @@ public class Token extends BaseEntity {
     private String providerAccessToken;
 
     /**
-     * @return a space delimited list of scope names
+     * @return a space delimited list of scope names, for approved client scopes that are active
      */
     public String getScope() {
         List<ClientScope> clientScopeList = null;
@@ -90,14 +89,16 @@ public class Token extends BaseEntity {
         if (getType().equals(Type.CLIENT)) {
             // client credential tokens only point to client scopes
             clientScopeList = getClientScopes().stream()
-                    .filter(ClientScope::isApproved)
-                    .collect(Collectors.toList());
+                .filter(ClientScope::isApproved)
+                .filter(clientScope -> clientScope.getScope().isActive())
+                .collect(Collectors.toList());
         } else {
             // otherwise get the accepted scopes
             if (getAcceptedScopes() != null && getAcceptedScopes().size() > 0) {
                 clientScopeList = getAcceptedScopes().stream().map(AcceptedScope::getClientScope)
-                        .filter(ClientScope::isApproved)
-                        .collect(Collectors.toList());
+                    .filter(ClientScope::isApproved)
+                    .filter(clientScope -> clientScope.getScope().isActive())
+                    .collect(Collectors.toList());
             }
         }
 
@@ -106,8 +107,8 @@ public class Token extends BaseEntity {
         }
 
         return clientScopeList.stream()
-                .map(ClientScope::getScope).map(Scope::getName)
-                .collect(Collectors.joining(" "));
+            .map(ClientScope::getScope).map(Scope::getName)
+            .collect(Collectors.joining(" "));
     }
 
     /**

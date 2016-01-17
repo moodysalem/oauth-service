@@ -8,11 +8,13 @@ import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.models.PublicApplication;
 import com.oauth2cloud.server.rest.models.PublicScope;
 import com.oauth2cloud.server.rest.models.RegisterClientInfo;
+import com.oauth2cloud.server.rest.models.RegisterClientRequest;
 import com.oauth2cloud.server.rest.resources.BaseResource;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -34,6 +36,16 @@ public class RegisterClientResource extends BaseResource {
      */
     @GET
     public Response getApplicationData(@QueryParam("applicationId") Long applicationId) {
+        Application app = getApplication(applicationId);
+
+        RegisterClientInfo rci = new RegisterClientInfo();
+        rci.setApplication(new PublicApplication(app));
+        rci.setScopes(getPublicScopes(app));
+
+        return Response.ok(rci).build();
+    }
+
+    private Application getApplication(Long applicationId) {
         if (applicationId == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST,
                 "Application ID is a required query parameter.");
@@ -42,14 +54,19 @@ public class RegisterClientResource extends BaseResource {
         Application app = em.find(Application.class, applicationId);
 
         if (app == null || !app.isPublicClientRegistration() || !app.isActive()) {
-            throw new RequestProcessingException(Response.Status.NOT_FOUND, "A public application with the provided ID could not be found.");
+            throw new RequestProcessingException(Response.Status.NOT_FOUND,
+                "A public application with the provided ID could not be found.");
         }
 
-        RegisterClientInfo rci = new RegisterClientInfo();
-        rci.setApplication(new PublicApplication(app));
-        rci.setScopes(getPublicScopes(app));
+        return app;
+    }
 
-        return Response.ok(rci).build();
+    @POST
+    public Response makeClient(@QueryParam("applicationId") Long applicationId, RegisterClientRequest req) {
+        Application app = getApplication(applicationId);
+
+
+        return Response.noContent().build();
     }
 
     /**
@@ -65,7 +82,8 @@ public class RegisterClientResource extends BaseResource {
 
         scopes.select(root).where(
             cb.equal(root.get("application"), app),
-            cb.equal(root.get("requestable"), true)
+            cb.equal(root.get("requestable"), true),
+            cb.equal(root.get("active"), true)
         );
 
         List<Scope> scopeList = em.createQuery(scopes).getResultList();
