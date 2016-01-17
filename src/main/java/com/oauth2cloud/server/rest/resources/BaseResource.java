@@ -82,7 +82,13 @@ public abstract class BaseResource {
         Predicate p = cb.and(
             cb.equal(t.get("token"), token),
             t.get("type").in(types),
-            cb.greaterThan(t.<Date>get("expires"), new Date())
+            cb.greaterThan(t.<Date>get("expires"), new Date()),
+            cb.or(
+                cb.equal(t.join("user").get("active"), true),
+                cb.isNull(t.get("user"))
+            ),
+            cb.equal(t.join("client").get("active"), true),
+            cb.equal(t.join("client").join("application").get("active"), true)
         );
         if (client != null) {
             p = cb.and(p, cb.equal(t.get("client"), client));
@@ -349,7 +355,7 @@ public abstract class BaseResource {
             cb.greaterThan(rlc.<Date>get("expires"), new Date()),
             cb.equal(rlc.join("user").get("application"), client.getApplication()),
             cb.equal(rlc.join("user").get("active"), true),
-            cb.equal(rlc.join("user").get("application").get("active"), true)
+            cb.equal(rlc.join("user").join("application").get("active"), true)
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -513,13 +519,20 @@ public abstract class BaseResource {
         }
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
         Root<UserCode> rp = pw.from(UserCode.class);
-        pw.select(rp).where(
+        Predicate queryPredicate = cb.and(
             cb.equal(rp.get("code"), code),
             cb.greaterThan(rp.<Date>get("expires"), new Date()),
-            cb.equal(rp.get("type"), type),
-            // if we are including used, then use a predicate that will always be true
-            includeUsed ? cb.isNotNull(rp.get("id")) : cb.equal(rp.get("used"), false)
+            cb.equal(rp.get("type"), type)
         );
+
+        if (!includeUsed) {
+            queryPredicate = cb.and(
+                queryPredicate,
+                cb.equal(rp.get("used"), false)
+            );
+        }
+
+        pw.select(rp).where(queryPredicate);
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;
     }

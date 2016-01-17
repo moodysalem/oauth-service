@@ -44,6 +44,8 @@ public class AuthorizeResource extends BaseResource {
     public static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
         "Invalid request. Please contact an administrator if this continues.";
     public static final String AMAZON_API_URL = "https://api.amazon.com";
+    public static final String E_MAIL_NOT_YET_VERIFIED_MESSAGE = "Your e-mail is not yet verified. Register again to receive another verification e-mail.";
+    public static final String USER_NOT_ACTIVE_MESSAGE = "Your user is not active. Please contact %s to have your user re-activated.";
 
     @QueryParam("response_type")
     String responseType;
@@ -288,8 +290,11 @@ public class AuthorizeResource extends BaseResource {
                         lrm.setLoginError(e.getMessage());
                     }
                     if (user != null) {
-                        if (!user.isVerified()) {
-                            lrm.setLoginError("Your e-mail is not yet verified. Register again to receive another verification e-mail.");
+                        if (!user.isActive()) {
+                            lrm.setLoginError(String.format(USER_NOT_ACTIVE_MESSAGE,
+                                user.getApplication().getSupportEmail()));
+                        } else if (!user.isVerified()) {
+                            lrm.setLoginError(E_MAIL_NOT_YET_VERIFIED_MESSAGE);
                         } else {
                             return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe, p.provider, p.providerToken);
                         }

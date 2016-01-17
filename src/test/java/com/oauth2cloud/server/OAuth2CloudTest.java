@@ -36,7 +36,6 @@ public class OAuth2CloudTest extends com.moodysalem.jaxrs.lib.test.BaseTest {
         return new OAuth2Cloud();
     }
 
-
     /**
      * This method returns a TokenResponse corresponding to a log in to the admin application
      * from the administrative user
