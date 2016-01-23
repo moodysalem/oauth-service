@@ -14,6 +14,9 @@
     <jaxrs.lib.version>1.0.8</jaxrs.lib.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
+
+    <!-- don't fail if no tests run -->
+    <failIfNoTests>false</failIfNoTests>
   </properties>
 
   <scm>
@@ -80,6 +83,13 @@
       <groupId>com.moodysalem.java</groupId>
       <artifactId>jaxrs-lib-test</artifactId>
       <version>${jaxrs.lib.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>2.0.40-beta</version>
       <scope>test</scope>
     </dependency>
 

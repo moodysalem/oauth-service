@@ -5,11 +5,13 @@ import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
+import org.codemonkey.simplejavamail.TransportStrategy;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.process.internal.RequestScoped;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.ApplicationPath;
+import java.util.Properties;
 
 @ApplicationPath("/")
 public class OAuth2Application extends BaseApplication {
@@ -44,15 +46,21 @@ public class OAuth2Application extends BaseApplication {
                     }
                 }
 
+                // create the mailer that uses amazon
+                Mailer amazonMailer = new Mailer(
+                    System.getProperty("SMTP_HOST"),
+                    port,
+                    System.getProperty("SMTP_USERNAME"),
+                    System.getProperty("SMTP_PASSWORD"),
+                    TransportStrategy.SMTP_TLS
+                );
+
+                Properties addtl = new Properties();
+                addtl.put("mail.smtp.starttls.required", "true");
+                amazonMailer.applyProperties(addtl);
+
                 // this is used to send e-mails
-                bind(
-                    new Mailer(
-                        System.getProperty("SMTP_HOST"),
-                        port,
-                        System.getProperty("SMTP_USERNAME"),
-                        System.getProperty("SMTP_PASSWORD")
-                    )
-                ).to(Mailer.class);
+                bind(amazonMailer).to(Mailer.class);
 
                 // this is used for generating e-mails from freemarker templates
                 Configuration freemarkerConfiguration = new Configuration(Configuration.VERSION_2_3_23);

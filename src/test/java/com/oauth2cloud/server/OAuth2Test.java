@@ -7,13 +7,13 @@ import com.oauth2cloud.server.hibernate.model.TokenResponse;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
+import org.codemonkey.simplejavamail.Email;
 import org.codemonkey.simplejavamail.Mailer;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.mail.Session;
 import javax.persistence.EntityManager;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
@@ -24,13 +24,23 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 public class OAuth2Test extends BaseTest {
     public static final String AUTH_HEADER = "Authorization";
     public static final String CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
+
+    private final List<Email> sentEmails = new ArrayList<>();
+
+    protected Email getLastEmail() {
+        return sentEmails.size() > 0 ? sentEmails.get(sentEmails.size() - 1) : null;
+    }
 
     @Override
     public ResourceConfig getResourceConfig() {
@@ -63,6 +73,9 @@ public class OAuth2Test extends BaseTest {
                 )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 Mailer m = mock(Mailer.class);
+                doAnswer(invocationOnMock -> sentEmails.add((Email) invocationOnMock.getArguments()[0]))
+                    .when(m)
+                    .sendMail(any());
                 bind(m).to(Mailer.class);
 
                 // this is used for generating e-mails from freemarker templates

@@ -72,6 +72,8 @@ public class ResetPasswordFormTest extends OAuth2Test {
 
         // assert a success message
         assert doc.select(".alert.alert-success").size() == 1;
+
+        assert getLastEmail() != null;
     }
 
 
