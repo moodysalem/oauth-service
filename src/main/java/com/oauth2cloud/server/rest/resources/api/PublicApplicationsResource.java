@@ -80,8 +80,7 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
-        list.add(cb.equal(root.get("publicClientRegistration"), true));
-        list.add(cb.equal(root.get("active"), true));
+
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.rest.resources.api;
 
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.resources.BaseEntityResource;
@@ -15,36 +16,36 @@ import java.util.List;
 
 @TokenFeature.ReadToken
 @Path(OAuth2Application.API + "/applications")
-public class ApplicationsResource extends BaseEntityResource<com.oauth2cloud.server.hibernate.model.Application> {
+public class ApplicationsResource extends BaseEntityResource<Application> {
 
     public static final String MANAGE_APPLICATIONS = "manage_applications";
 
     @Override
-    public Class<com.oauth2cloud.server.hibernate.model.Application> getEntityClass() {
-        return com.oauth2cloud.server.hibernate.model.Application.class;
+    public Class<Application> getEntityClass() {
+        return Application.class;
     }
 
     @Override
-    public boolean canCreate(com.oauth2cloud.server.hibernate.model.Application application) {
+    public boolean canCreate(Application application) {
         mustBeLoggedIn();
         checkScope(MANAGE_APPLICATIONS);
         return true;
     }
 
     @Override
-    public boolean canEdit(com.oauth2cloud.server.hibernate.model.Application application) {
+    public boolean canEdit(Application application) {
         mustBeLoggedIn();
         checkScope(MANAGE_APPLICATIONS);
         return application.getOwner().idMatch(getUser());
     }
 
     @Override
-    public boolean canDelete(com.oauth2cloud.server.hibernate.model.Application application) {
+    public boolean canDelete(Application application) {
         return false;
     }
 
     @Override
-    protected void validateEntity(List<String> list, com.oauth2cloud.server.hibernate.model.Application application) {
+    protected void validateEntity(List<String> list, Application application) {
 
         if (application.getFacebookAppId() != null && application.getFacebookAppSecret() == null ||
             application.getFacebookAppId() == null && application.getFacebookAppSecret() != null) {
@@ -76,14 +77,14 @@ public class ApplicationsResource extends BaseEntityResource<com.oauth2cloud.ser
     }
 
     @Override
-    public void beforeCreate(com.oauth2cloud.server.hibernate.model.Application application) {
+    public void beforeCreate(Application application) {
         application.setOwner(getUser());
 
         setNullsForEmptyStrings(application);
     }
 
     @Override
-    public void beforeEdit(com.oauth2cloud.server.hibernate.model.Application application, com.oauth2cloud.server.hibernate.model.Application t1) {
+    public void beforeEdit(Application application, Application t1) {
         setNullsForEmptyStrings(t1);
     }
 
@@ -91,7 +92,7 @@ public class ApplicationsResource extends BaseEntityResource<com.oauth2cloud.ser
     Boolean active;
 
     @Override
-    protected void getPredicatesFromRequest(List<Predicate> list, Root<com.oauth2cloud.server.hibernate.model.Application> root) {
+    protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
         checkScope(MANAGE_APPLICATIONS);
         list.add(cb.equal(root.get("owner"), getUser()));
 
@@ -101,16 +102,16 @@ public class ApplicationsResource extends BaseEntityResource<com.oauth2cloud.ser
     }
 
     @Override
-    public void afterCreate(com.oauth2cloud.server.hibernate.model.Application application) {
+    public void afterCreate(Application application) {
 
     }
 
     @Override
-    public void beforeSend(com.oauth2cloud.server.hibernate.model.Application application) {
+    public void beforeSend(Application application) {
 
     }
 
-    private void setNullsForEmptyStrings(com.oauth2cloud.server.hibernate.model.Application application) {
+    private void setNullsForEmptyStrings(Application application) {
         if (application.getLegacyUrl() != null && application.getLegacyUrl().trim().isEmpty()) {
             application.setLegacyUrl(null);
         }
