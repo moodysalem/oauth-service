@@ -1,10 +1,9 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
-import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.hibernate.model.UserCode;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.ResetPasswordModel;
 import com.oauth2cloud.server.rest.models.UserCodeEmailModel;
@@ -19,7 +18,7 @@ import java.util.Date;
 import java.util.logging.Level;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Cloud.OAUTH + "/reset")
+@Path(OAuth2Application.OAUTH + "/reset")
 @Produces(MediaType.TEXT_HTML)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class PasswordResetResource extends BaseResource {
@@ -40,11 +39,11 @@ public class PasswordResetResource extends BaseResource {
     @QueryParam("referrer")
     String referrer;
 
-    private Application getApplication(Long applicationId) {
+    private com.oauth2cloud.server.hibernate.model.Application getApplication(Long applicationId) {
         if (applicationId == null) {
             return null;
         }
-        Application application = em.find(Application.class, applicationId);
+        com.oauth2cloud.server.hibernate.model.Application application = em.find(com.oauth2cloud.server.hibernate.model.Application.class, applicationId);
         if (application != null && application.isActive()) {
             return application;
         }
@@ -66,7 +65,7 @@ public class PasswordResetResource extends BaseResource {
                 return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
             }
         } else {
-            Application application = getApplication(applicationId);
+            com.oauth2cloud.server.hibernate.model.Application application = getApplication(applicationId);
             if (application == null) {
                 return error(INVALID_RESET_PASSWORD_URL);
             }
@@ -109,7 +108,7 @@ public class PasswordResetResource extends BaseResource {
             return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
         }
 
-        Application application = getApplication(applicationId);
+        com.oauth2cloud.server.hibernate.model.Application application = getApplication(applicationId);
         if (application == null) {
             return error(INVALID_RESET_PASSWORD_URL);
         }

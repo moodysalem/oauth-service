@@ -3,7 +3,7 @@ package com.oauth2cloud.server.rest.resources.api;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.resources.BaseResource;
 
 import javax.ws.rs.Consumes;
@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 
 
 @CORSFilter.Skip
-@Path(OAuth2Cloud.API + "/support")
+@Path(OAuth2Application.API + "/support")
 public class SupportResource extends BaseResource {
 
     @JsonIgnoreProperties(ignoreUnknown = true)

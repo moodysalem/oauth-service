@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.rest.resources.api;
 
-import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 import com.restfb.DefaultFacebookClient;
@@ -12,41 +11,40 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 @TokenFeature.ReadToken
-@Path(OAuth2Cloud.API + "/applications")
-public class ApplicationsResource extends BaseEntityResource<Application> {
+@Path(OAuth2Application.API + "/applications")
+public class ApplicationsResource extends BaseEntityResource<com.oauth2cloud.server.hibernate.model.Application> {
 
     public static final String MANAGE_APPLICATIONS = "manage_applications";
 
     @Override
-    public Class<Application> getEntityClass() {
-        return Application.class;
+    public Class<com.oauth2cloud.server.hibernate.model.Application> getEntityClass() {
+        return com.oauth2cloud.server.hibernate.model.Application.class;
     }
 
     @Override
-    public boolean canCreate(Application application) {
+    public boolean canCreate(com.oauth2cloud.server.hibernate.model.Application application) {
         mustBeLoggedIn();
         checkScope(MANAGE_APPLICATIONS);
         return true;
     }
 
     @Override
-    public boolean canEdit(Application application) {
+    public boolean canEdit(com.oauth2cloud.server.hibernate.model.Application application) {
         mustBeLoggedIn();
         checkScope(MANAGE_APPLICATIONS);
         return application.getOwner().idMatch(getUser());
     }
 
     @Override
-    public boolean canDelete(Application application) {
+    public boolean canDelete(com.oauth2cloud.server.hibernate.model.Application application) {
         return false;
     }
 
     @Override
-    protected void validateEntity(List<String> list, Application application) {
+    protected void validateEntity(List<String> list, com.oauth2cloud.server.hibernate.model.Application application) {
 
         if (application.getFacebookAppId() != null && application.getFacebookAppSecret() == null ||
             application.getFacebookAppId() == null && application.getFacebookAppSecret() != null) {
@@ -78,14 +76,14 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     }
 
     @Override
-    public void beforeCreate(Application application) {
+    public void beforeCreate(com.oauth2cloud.server.hibernate.model.Application application) {
         application.setOwner(getUser());
 
         setNullsForEmptyStrings(application);
     }
 
     @Override
-    public void beforeEdit(Application application, Application t1) {
+    public void beforeEdit(com.oauth2cloud.server.hibernate.model.Application application, com.oauth2cloud.server.hibernate.model.Application t1) {
         setNullsForEmptyStrings(t1);
     }
 
@@ -93,7 +91,7 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     Boolean active;
 
     @Override
-    protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
+    protected void getPredicatesFromRequest(List<Predicate> list, Root<com.oauth2cloud.server.hibernate.model.Application> root) {
         checkScope(MANAGE_APPLICATIONS);
         list.add(cb.equal(root.get("owner"), getUser()));
 
@@ -103,16 +101,16 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     }
 
     @Override
-    public void afterCreate(Application application) {
+    public void afterCreate(com.oauth2cloud.server.hibernate.model.Application application) {
 
     }
 
     @Override
-    public void beforeSend(Application application) {
+    public void beforeSend(com.oauth2cloud.server.hibernate.model.Application application) {
 
     }
 
-    private void setNullsForEmptyStrings(Application application) {
+    private void setNullsForEmptyStrings(com.oauth2cloud.server.hibernate.model.Application application) {
         if (application.getLegacyUrl() != null && application.getLegacyUrl().trim().isEmpty()) {
             application.setLegacyUrl(null);
         }

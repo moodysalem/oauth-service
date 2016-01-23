@@ -1,9 +1,8 @@
 package com.oauth2cloud.server.rest.resources.api;
 
 import com.moodysalem.util.RandomStringUtil;
-import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Client;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 
@@ -14,7 +13,7 @@ import javax.ws.rs.QueryParam;
 import java.util.List;
 
 @TokenFeature.ReadToken
-@Path(OAuth2Cloud.API + "/clients")
+@Path(OAuth2Application.API + "/clients")
 public class ClientsResource extends BaseEntityResource<Client> {
     public static final String MANAGE_CLIENTS = "manage_clients";
 
@@ -33,7 +32,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
             return false;
         }
 
-        Application ap = em.find(Application.class, client.getApplication().getId());
+        com.oauth2cloud.server.hibernate.model.Application ap = em.find(com.oauth2cloud.server.hibernate.model.Application.class, client.getApplication().getId());
         return ap != null && ap.getOwner().idMatch(getUser());
     }
 

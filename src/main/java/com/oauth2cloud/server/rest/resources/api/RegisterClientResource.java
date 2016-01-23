@@ -1,9 +1,8 @@
 package com.oauth2cloud.server.rest.resources.api;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
-import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Scope;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.models.PublicApplication;
 import com.oauth2cloud.server.rest.models.PublicScope;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
  * This resource has all the endpoints that are required for
  */
 @TokenFeature.ReadToken
-@Path(OAuth2Cloud.API + "/registerclient")
+@Path(OAuth2Application.API + "/registerclient")
 public class RegisterClientResource extends BaseResource {
 
     /**
@@ -36,7 +35,7 @@ public class RegisterClientResource extends BaseResource {
      */
     @GET
     public Response getApplicationData(@QueryParam("applicationId") Long applicationId) {
-        Application app = getApplication(applicationId);
+        com.oauth2cloud.server.hibernate.model.Application app = getApplication(applicationId);
 
         RegisterClientInfo rci = new RegisterClientInfo();
         rci.setApplication(new PublicApplication(app));
@@ -45,13 +44,13 @@ public class RegisterClientResource extends BaseResource {
         return Response.ok(rci).build();
     }
 
-    private Application getApplication(Long applicationId) {
+    private com.oauth2cloud.server.hibernate.model.Application getApplication(Long applicationId) {
         if (applicationId == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST,
                 "Application ID is a required query parameter.");
         }
 
-        Application app = em.find(Application.class, applicationId);
+        com.oauth2cloud.server.hibernate.model.Application app = em.find(com.oauth2cloud.server.hibernate.model.Application.class, applicationId);
 
         if (app == null || !app.isPublicClientRegistration() || !app.isActive()) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND,
@@ -63,7 +62,7 @@ public class RegisterClientResource extends BaseResource {
 
     @POST
     public Response makeClient(@QueryParam("applicationId") Long applicationId, RegisterClientRequest req) {
-        Application app = getApplication(applicationId);
+        com.oauth2cloud.server.hibernate.model.Application app = getApplication(applicationId);
 
 
         return Response.noContent().build();
@@ -75,7 +74,7 @@ public class RegisterClientResource extends BaseResource {
      * @param app the app to get scopes for
      * @return a list of scopes
      */
-    private List<PublicScope> getPublicScopes(Application app) {
+    private List<PublicScope> getPublicScopes(com.oauth2cloud.server.hibernate.model.Application app) {
         CriteriaQuery<Scope> scopes = cb.createQuery(Scope.class);
 
         Root<Scope> root = scopes.from(Scope.class);

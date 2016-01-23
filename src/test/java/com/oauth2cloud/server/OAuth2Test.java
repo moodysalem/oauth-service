@@ -1,10 +1,20 @@
 package com.oauth2cloud.server;
 
+import com.moodysalem.jaxrs.lib.BaseApplication;
+import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
+import com.moodysalem.jaxrs.lib.test.BaseTest;
 import com.oauth2cloud.server.hibernate.model.TokenResponse;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.template.Configuration;
+import org.codemonkey.simplejavamail.Mailer;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import javax.mail.Session;
+import javax.persistence.EntityManager;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -16,24 +26,56 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.regex.Pattern;
 
-public class OAuth2CloudTest extends com.moodysalem.jaxrs.lib.test.BaseTest {
+import static org.mockito.Mockito.mock;
+
+public class OAuth2Test extends BaseTest {
     public static final String AUTH_HEADER = "Authorization";
     public static final String CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
 
     @Override
     public ResourceConfig getResourceConfig() {
-        System.setProperty("JDBC_CONNECTION_STRING", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
-        System.setProperty("JDBC_CONNECTION_USERNAME", "sa");
-        System.setProperty("JDBC_CONNECTION_PASSWORD", "sa");
-        System.setProperty("LIQUIBASE_CONTEXT", "test");
+        BaseApplication ba = new BaseApplication() {
+            @Override
+            public boolean forceHttps() {
+                return true;
+            }
 
-        System.setProperty("SMTP_HOST", "localhost");
-        System.setProperty("SMTP_USERNAME", "fake");
-        System.setProperty("SMTP_PASSWORD", "fake");
+            @Override
+            public boolean allowCORS() {
+                return true;
+            }
+        };
+
+        ba.packages("com.oauth2cloud.server.rest");
+
+        ba.register(new AbstractBinder() {
+            @Override
+            protected void configure() {
+                // this is used to talk to the DB via JPA entity manager
+                bindFactory(new JAXRSEntityManagerFactory(
+                    "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
+                    "sa",
+                    "sa",
+                    "oauth-service",
+                    "db/master-changelog.xml",
+                    true,
+                    "test"
+                )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
+
+                Mailer m = mock(Mailer.class);
+                bind(m).to(Mailer.class);
+
+                // this is used for generating e-mails from freemarker templates
+                Configuration freemarkerConfiguration = new Configuration(Configuration.VERSION_2_3_23);
+                freemarkerConfiguration.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));
+                freemarkerConfiguration.setDefaultEncoding("UTF-8");
+                bind(freemarkerConfiguration).to(Configuration.class);
+            }
+        });
 
         System.setProperty("ENCRYPTION_SECRET", "xTUf4mP2SI6nfeLO");
 
-        return new OAuth2Cloud();
+        return ba;
     }
 
     /**
@@ -47,7 +89,7 @@ public class OAuth2CloudTest extends com.moodysalem.jaxrs.lib.test.BaseTest {
             .param("password", "moody")
             .param("action", "login");
 
-        Response loginScreen = target(OAuth2Cloud.OAUTH)
+        Response loginScreen = target(OAuth2Application.OAUTH)
             .property(ClientProperties.FOLLOW_REDIRECTS, false)
             .path("authorize")
             .queryParam("client_id", CLIENT_ID)

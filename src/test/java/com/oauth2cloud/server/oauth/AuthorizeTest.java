@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.oauth;
 
-import com.oauth2cloud.server.OAuth2CloudTest;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.OAuth2Test;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,12 +11,12 @@ import org.testng.annotations.Test;
 import javax.ws.rs.core.Response;
 
 
-public class AuthorizeTest extends OAuth2CloudTest {
+public class AuthorizeTest extends OAuth2Test {
 
     @Test
     public void testBadRequests() {
         // code is not allowed for this client
-        assert target(OAuth2Cloud.OAUTH).path("authorize")
+        assert target(OAuth2Application.OAUTH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
             .queryParam("redirect_uri", "http://localhost:8080")
             .queryParam("response_type", "code")
@@ -24,7 +24,7 @@ public class AuthorizeTest extends OAuth2CloudTest {
             .get().getStatus() == 400;
 
         // invalid redirect URI
-        assert target(OAuth2Cloud.OAUTH).path("authorize")
+        assert target(OAuth2Application.OAUTH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
             .queryParam("redirect_uri", "http://localhost:8081")
             .queryParam("response_type", "token")
@@ -33,7 +33,7 @@ public class AuthorizeTest extends OAuth2CloudTest {
 
 
         // invalid client id
-        assert target(OAuth2Cloud.OAUTH).path("authorize")
+        assert target(OAuth2Application.OAUTH).path("authorize")
             .queryParam("client_id", CLIENT_ID + "1")
             .queryParam("redirect_uri", "http://localhost:8080")
             .queryParam("response_type", "token")
@@ -44,7 +44,7 @@ public class AuthorizeTest extends OAuth2CloudTest {
 
     @Test
     public void testAuthorizeEndpoint() {
-        Response auth = target(OAuth2Cloud.OAUTH).path("authorize")
+        Response auth = target(OAuth2Application.OAUTH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
             .queryParam("redirect_uri", "http://localhost:8080")
             .queryParam("response_type", "token")

@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
  * to the parent window allowing the user login form to be submitted
  */
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Cloud.OAUTH + "/amazon")
+@Path(OAuth2Application.OAUTH + "/amazon")
 public class AmazonLoginResource extends BaseResource {
     @GET
     public Response getToken() {

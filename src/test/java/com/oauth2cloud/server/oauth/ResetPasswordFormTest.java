@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.oauth;
 
-import com.oauth2cloud.server.OAuth2CloudTest;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.OAuth2Test;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,11 +11,11 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
 
-public class ResetPasswordFormTest extends OAuth2CloudTest {
+public class ResetPasswordFormTest extends OAuth2Test {
 
     @Test
     public void testFormGet() {
-        Response r = target(OAuth2Cloud.OAUTH).path("reset")
+        Response r = target(OAuth2Application.OAUTH).path("reset")
             .queryParam("applicationId", 1)
             .request().get();
 
@@ -33,7 +33,7 @@ public class ResetPasswordFormTest extends OAuth2CloudTest {
 
     @Test
     public void testFormGetWithReferrer() {
-        Response r = target(OAuth2Cloud.OAUTH).path("reset")
+        Response r = target(OAuth2Application.OAUTH).path("reset")
             .queryParam("applicationId", 1)
             .queryParam("referrer", "http://localhost:8080")
             .request().get();
@@ -54,7 +54,7 @@ public class ResetPasswordFormTest extends OAuth2CloudTest {
     public void testPost() {
         Form f = new Form();
         f.param("email", "moody.salem@gmail.com");
-        Response r = target(OAuth2Cloud.OAUTH).path("reset")
+        Response r = target(OAuth2Application.OAUTH).path("reset")
             .queryParam("applicationId", 1)
             .queryParam("referrer", "http://localhost:8080")
             .request()

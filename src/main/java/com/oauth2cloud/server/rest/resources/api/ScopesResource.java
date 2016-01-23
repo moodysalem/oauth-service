@@ -1,8 +1,7 @@
 package com.oauth2cloud.server.rest.resources.api;
 
-import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Scope;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 
@@ -13,7 +12,7 @@ import javax.ws.rs.QueryParam;
 import java.util.List;
 
 @TokenFeature.ReadToken
-@Path(OAuth2Cloud.API + "/scopes")
+@Path(OAuth2Application.API + "/scopes")
 public class ScopesResource extends BaseEntityResource<Scope> {
     public static final String MANAGE_SCOPES = "manage_scopes";
 
@@ -27,8 +26,8 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         mustBeLoggedIn();
         checkScope(MANAGE_SCOPES);
 
-        Application ap = scope.getApplication() != null && scope.getApplication().getId() != 0 ?
-            em.find(Application.class, scope.getApplication().getId()) : null;
+        com.oauth2cloud.server.hibernate.model.Application ap = scope.getApplication() != null && scope.getApplication().getId() != 0 ?
+            em.find(com.oauth2cloud.server.hibernate.model.Application.class, scope.getApplication().getId()) : null;
 
         return ap != null && ap.isActive() && ap.getOwner().idMatch(getUser());
     }

@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.ErrorResponse;
 import com.oauth2cloud.server.hibernate.model.*;
@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Cloud.OAUTH + "/token")
+@Path(OAuth2Application.OAUTH + "/token")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class TokenResource extends BaseResource {

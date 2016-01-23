@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.rest.resources;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

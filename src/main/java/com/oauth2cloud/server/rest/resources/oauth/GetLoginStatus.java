@@ -2,7 +2,7 @@ package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.hibernate.model.*;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.models.LoginStatusModel;
 import com.oauth2cloud.server.rest.resources.BaseResource;
@@ -18,7 +18,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
-@Path(OAuth2Cloud.OAUTH + "/loginstatus")
+@Path(OAuth2Application.OAUTH + "/loginstatus")
 @Produces(MediaType.TEXT_HTML)
 public class GetLoginStatus extends BaseResource {
 

@@ -1,13 +1,13 @@
 package com.oauth2cloud.server.oauth;
 
-import com.oauth2cloud.server.OAuth2CloudTest;
+import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.hibernate.model.TokenResponse;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 
-public class TokenInfoTest extends OAuth2CloudTest {
+public class TokenInfoTest extends OAuth2Test {
 
     @Test
     public void testToken() {

@@ -2,7 +2,7 @@ package com.oauth2cloud.server.rest.resources.api;
 
 import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.hibernate.model.ClientScope;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 
@@ -13,7 +13,7 @@ import javax.ws.rs.QueryParam;
 import java.util.List;
 
 @TokenFeature.ReadToken
-@Path(OAuth2Cloud.API + "/clientscopes")
+@Path(OAuth2Application.API + "/clientscopes")
 public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     public static final String MANAGE_CLIENT_SCOPES = "manage_client_scopes";

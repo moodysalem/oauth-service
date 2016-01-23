@@ -1,9 +1,8 @@
 package com.oauth2cloud.server.rest.resources.api;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
-import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.User;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 import org.mindrot.jbcrypt.BCrypt;
@@ -17,7 +16,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 @TokenFeature.ReadToken
-@Path(OAuth2Cloud.API + "/users")
+@Path(OAuth2Application.API + "/users")
 public class UsersResource extends BaseEntityResource<User> {
     public static final String MANAGE_USERS = "manage_users";
 
@@ -35,7 +34,7 @@ public class UsersResource extends BaseEntityResource<User> {
             return false;
         }
 
-        Application ap = em.find(Application.class, user.getApplication().getId());
+        com.oauth2cloud.server.hibernate.model.Application ap = em.find(com.oauth2cloud.server.hibernate.model.Application.class, user.getApplication().getId());
         return ap != null && ap.isActive() && ap.getOwner().idMatch(getUser());
     }
 
@@ -73,7 +72,7 @@ public class UsersResource extends BaseEntityResource<User> {
      * @param application application of user
      * @return User if exists
      */
-    private User getUser(String email, Application application) {
+    private User getUser(String email, com.oauth2cloud.server.hibernate.model.Application application) {
         CriteriaQuery<User> users = cb.createQuery(User.class);
         Root<User> u = users.from(User.class);
         List<User> list = em.createQuery(users.select(u).where(

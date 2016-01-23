@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.oauth2cloud.server.hibernate.model.UserCode;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.VerifyEmailModel;
 import com.oauth2cloud.server.rest.resources.BaseResource;
@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import java.util.logging.Level;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Cloud.OAUTH + "/verify")
+@Path(OAuth2Application.OAUTH + "/verify")
 public class VerifyEmailResource extends BaseResource {
 
     public static final String INVALID_VERIFICATION_LINK = "Invalid verification link.";

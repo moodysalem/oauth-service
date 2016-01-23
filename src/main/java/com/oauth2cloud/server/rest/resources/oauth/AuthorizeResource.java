@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
-import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.LoginRegisterModel;
 import com.oauth2cloud.server.rest.models.PermissionsModel;
@@ -32,7 +31,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Cloud.OAUTH + "/authorize")
+@Path(OAuth2Application.OAUTH + "/authorize")
 @Produces(MediaType.TEXT_HTML)
 public class AuthorizeResource extends BaseResource {
 
@@ -408,7 +407,7 @@ public class AuthorizeResource extends BaseResource {
             "VerifyEmail.ftl", ucem);
     }
 
-    private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
+    private User doAmazonLogin(com.oauth2cloud.server.hibernate.model.Application application, MultivaluedMap<String, String> formParams) {
         if (application.getAmazonClientId() == null || application.getAmazonClientSecret() == null) {
             throw new IllegalArgumentException("The application is not fully configured for Amazon Login.");
         }
@@ -460,7 +459,7 @@ public class AuthorizeResource extends BaseResource {
         return makeOrUpdateUser(application, email, firstName, lastName, null, true);
     }
 
-    private User doFacebookLogin(Application application, MultivaluedMap<String, String> formParams) {
+    private User doFacebookLogin(com.oauth2cloud.server.hibernate.model.Application application, MultivaluedMap<String, String> formParams) {
         if (application.getFacebookAppId() == null || application.getFacebookAppSecret() == null) {
             throw new IllegalArgumentException("The application is not fully configured for Facebook Login.");
         }
@@ -489,7 +488,7 @@ public class AuthorizeResource extends BaseResource {
         return makeOrUpdateUser(application, email, fbUser.getFirstName(), fbUser.getLastName(), null, true);
     }
 
-    private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
+    private User doGoogleLogin(com.oauth2cloud.server.hibernate.model.Application application, MultivaluedMap<String, String> formParams) {
         if (application.getGoogleClientId() == null || application.getGoogleClientSecret() == null) {
             throw new IllegalArgumentException(String.format("The application %s is not fully configured for Google Login.", application.getName()));
         }
@@ -557,7 +556,7 @@ public class AuthorizeResource extends BaseResource {
         return makeOrUpdateUser(application, email, firstName, lastName, null, true);
     }
 
-    private User makeOrUpdateUser(Application app, String email, String firstName, String lastName, String rawPass, boolean verified) {
+    private User makeOrUpdateUser(com.oauth2cloud.server.hibernate.model.Application app, String email, String firstName, String lastName, String rawPass, boolean verified) {
         User u = getUser(email, app);
 
         if (u == null) {
@@ -623,7 +622,7 @@ public class AuthorizeResource extends BaseResource {
         return null;
     }
 
-    public User doEmailLogin(Application app, MultivaluedMap<String, String> formParams) {
+    public User doEmailLogin(com.oauth2cloud.server.hibernate.model.Application app, MultivaluedMap<String, String> formParams) {
         String email = formParams.getFirst("email");
         String password = formParams.getFirst("password");
         User userWithEmail = getUser(email, app);

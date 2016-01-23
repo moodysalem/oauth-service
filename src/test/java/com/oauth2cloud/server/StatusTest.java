@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.core.Response;
 
-public class StatusTest extends OAuth2CloudTest {
+public class StatusTest extends OAuth2Test {
 
     @Test
     public void testStatus() {

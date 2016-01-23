@@ -6,17 +6,14 @@ import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.models.ErrorModel;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import org.codemonkey.simplejavamail.Email;
+import org.codemonkey.simplejavamail.Mailer;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.mail.Address;
 import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -462,7 +459,7 @@ public abstract class BaseResource {
     }
 
     @Inject
-    private Session mailSession;
+    private Mailer mailer;
 
     @Inject
     private Configuration cfg;
@@ -478,26 +475,19 @@ public abstract class BaseResource {
      */
     protected void sendEmail(String replyTo, String to, String subject, String template, Object model) {
         try {
-            final MimeMessage m = new MimeMessage(mailSession);
-            m.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            Address fromAddress = new InternetAddress(FROM_EMAIL);
-            m.setFrom(fromAddress);
+            final Email email = new Email();
+            email.setFromAddress("OAuth2Cloud Admin", FROM_EMAIL);
+            email.setSubject(subject);
+            email.addRecipient(to, to, Message.RecipientType.TO);
             if (replyTo != null) {
-                try {
-                    m.setReplyTo(new Address[]{new InternetAddress(replyTo)});
-                } catch (Exception e) {
-                    LOG.log(Level.WARNING, "Failed to set reply-to for e-mail", e);
-                }
+                email.setReplyToAddress(replyTo, replyTo);
             }
-            m.setSubject(subject);
-            m.setContent(processTemplate(template, model), "text/html");
-            new Thread(() -> {
-                try {
-                    Transport.send(m);
-                } catch (Exception e) {
-                    LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
-                }
-            }).run();
+            email.setTextHTML(processTemplate(template, model));
+            try {
+                mailer.sendMail(email);
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
+            }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, FAILED_TO_SEND_E_MAIL_MESSAGE, e);
         }

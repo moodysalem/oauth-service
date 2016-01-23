@@ -41,6 +41,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.codemonkey.simplejavamail</groupId>
+      <artifactId>simple-java-mail</artifactId>
+      <version>2.5.1</version>
+    </dependency>
+
     <!-- jaxrs library -->
     <dependency>
       <groupId>com.moodysalem.java</groupId>

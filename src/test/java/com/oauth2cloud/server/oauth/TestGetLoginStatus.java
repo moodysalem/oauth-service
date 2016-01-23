@@ -1,13 +1,13 @@
 package com.oauth2cloud.server.oauth;
 
-import com.oauth2cloud.server.OAuth2CloudTest;
-import com.oauth2cloud.server.rest.OAuth2Cloud;
+import com.oauth2cloud.server.OAuth2Test;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.WebTarget;
 
-public class TestGetLoginStatus extends OAuth2CloudTest {
+public class TestGetLoginStatus extends OAuth2Test {
 
     /**
      * Verify that the login status endpoint returns appropriate error codes
@@ -15,7 +15,7 @@ public class TestGetLoginStatus extends OAuth2CloudTest {
      */
     @Test
     public void testLoginStatus() {
-        WebTarget wt = target(OAuth2Cloud.OAUTH).path("loginstatus");
+        WebTarget wt = target(OAuth2Application.OAUTH).path("loginstatus");
         assert wt.request().get().getStatus() == 400;
 
         WebTarget wtCid = wt.queryParam("client_id", CLIENT_ID);
