@@ -1,22 +1,29 @@
-package com.oauth2cloud.server.rest.resources;
+package com.oauth2cloud.server.rest.resources.api;
 
 import com.moodysalem.hibernate.model.BaseEntity;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.resources.EntityResource;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.hibernate.model.Application;
+import com.oauth2cloud.server.hibernate.model.Scope;
 import com.oauth2cloud.server.hibernate.model.Token;
 import com.oauth2cloud.server.hibernate.model.User;
+import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.models.PublicScope;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class BaseEntityResource<T extends BaseEntity> extends EntityResource<T> {
     public static final String SORT = "sort";
@@ -141,6 +148,12 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
 
     private Set<String> scopes;
 
+    /**
+     * Boolean about whether user has a scope
+     *
+     * @param scope
+     * @return
+     */
     protected boolean hasScope(String scope) {
         if (scopes == null) {
             scopes = new HashSet<>();
@@ -152,9 +165,15 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
         return scopes.contains(scope);
     }
 
+    /**
+     * Check that the user has a specific scope
+     *
+     * @param scope
+     */
     protected void checkScope(String scope) {
         if (!hasScope(scope)) {
             throw new RequestProcessingException(Response.Status.FORBIDDEN, String.format("'%s' scope is required for this resource.", scope));
         }
     }
+
 }

@@ -2,7 +2,6 @@ package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
-import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.ws.rs.GET;
@@ -15,7 +14,7 @@ import javax.ws.rs.core.Response;
  */
 @NoXFrameOptionsFeature.NoXFrame
 @Path(OAuth2Application.OAUTH + "/amazon")
-public class AmazonLoginResource extends BaseResource {
+public class AmazonLoginResource extends OAuthResource {
     @GET
     public Response getToken() {
         return Response.ok(new Viewable("/templates/AmazonLogin")).build();

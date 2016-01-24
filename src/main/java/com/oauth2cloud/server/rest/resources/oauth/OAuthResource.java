@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.rest.resources;
+package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.util.RandomStringUtil;
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class BaseResource {
+public abstract class OAuthResource {
     public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     public static final String COOKIE_NAME_PREFIX = "_AID_";
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
@@ -45,7 +45,7 @@ public abstract class BaseResource {
 
     protected static final String FROM_EMAIL = System.getProperty("SEND_EMAILS_FROM", "admin@oauth2cloud.com");
 
-    protected Logger LOG = Logger.getLogger(BaseResource.class.getName());
+    protected Logger LOG = Logger.getLogger(OAuthResource.class.getName());
 
     @Context
     protected ContainerRequestContext containerRequestContext;
@@ -590,12 +590,28 @@ public abstract class BaseResource {
     }
 
 
+    protected CallLog logCall(Client c) {
+        return logCall(c, null);
+    }
+
+    protected CallLog logCall(Application app) {
+        return logCall(null, app);
+    }
+
     @HeaderParam("X-Forwarded-For")
     String forwardedIp;
+
     @Context
     HttpServletRequest servletRequest;
 
-    protected CallLog logCall(Client client, Application application) {
+    /**
+     * Log an API call
+     *
+     * @param client      client making the call
+     * @param application application making the call
+     * @return
+     */
+    private CallLog logCall(Client client, Application application) {
         if (client == null && application == null) {
             throw new NullPointerException();
         }
@@ -623,13 +639,5 @@ public abstract class BaseResource {
             throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to log call.", e.getMessage());
         }
         return cl;
-    }
-
-    protected CallLog logCall(Client c) {
-        return logCall(c, null);
-    }
-
-    protected CallLog logCall(Application app) {
-        return logCall(null, app);
     }
 }

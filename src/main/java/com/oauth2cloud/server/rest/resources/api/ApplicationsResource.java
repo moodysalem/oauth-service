@@ -3,7 +3,6 @@ package com.oauth2cloud.server.rest.resources.api;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
-import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Version;

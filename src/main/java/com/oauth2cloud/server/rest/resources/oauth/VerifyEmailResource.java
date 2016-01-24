@@ -4,7 +4,6 @@ import com.oauth2cloud.server.hibernate.model.UserCode;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.VerifyEmailModel;
-import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.ws.rs.GET;
@@ -15,7 +14,7 @@ import java.util.logging.Level;
 
 @NoXFrameOptionsFeature.NoXFrame
 @Path(OAuth2Application.OAUTH + "/verify")
-public class VerifyEmailResource extends BaseResource {
+public class VerifyEmailResource extends OAuthResource {
 
     public static final String INVALID_VERIFICATION_LINK = "Invalid verification link.";
     public static final String ALREADY_VERIFIED = "Your user is already verified.";

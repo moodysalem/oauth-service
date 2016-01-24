@@ -9,7 +9,6 @@ import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.LoginRegisterModel;
 import com.oauth2cloud.server.rest.models.PermissionsModel;
 import com.oauth2cloud.server.rest.models.UserCodeEmailModel;
-import com.oauth2cloud.server.rest.resources.BaseResource;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 @NoXFrameOptionsFeature.NoXFrame
 @Path(OAuth2Application.OAUTH + "/authorize")
 @Produces(MediaType.TEXT_HTML)
-public class AuthorizeResource extends BaseResource {
+public class AuthorizeResource extends OAuthResource {
 
     public static final String TOKEN = "token";
     public static final String CODE = "code";

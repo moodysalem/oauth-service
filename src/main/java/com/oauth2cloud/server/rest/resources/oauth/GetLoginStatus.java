@@ -5,7 +5,6 @@ import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
 import com.oauth2cloud.server.rest.models.LoginStatusModel;
-import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.persistence.criteria.CriteriaQuery;
@@ -20,7 +19,7 @@ import java.util.List;
 
 @Path(OAuth2Application.OAUTH + "/loginstatus")
 @Produces(MediaType.TEXT_HTML)
-public class GetLoginStatus extends BaseResource {
+public class GetLoginStatus extends OAuthResource {
 
     /**
      * This endpoint returns a page that uses HTML5 window.postMessage to send information to the

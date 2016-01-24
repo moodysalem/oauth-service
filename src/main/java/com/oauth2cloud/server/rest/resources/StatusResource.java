@@ -2,12 +2,17 @@ package com.oauth2cloud.server.rest.resources;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 @Path("status")
-public class StatusResource extends BaseResource {
+public class StatusResource {
+
+    @Inject
+    EntityManager em;
 
     @GET
     public Response status() {

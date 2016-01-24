@@ -7,7 +7,6 @@ import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.ResetPasswordModel;
 import com.oauth2cloud.server.rest.models.UserCodeEmailModel;
-import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -21,7 +20,7 @@ import java.util.logging.Level;
 @Path(OAuth2Application.OAUTH + "/reset")
 @Produces(MediaType.TEXT_HTML)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-public class PasswordResetResource extends BaseResource {
+public class PasswordResetResource extends OAuthResource {
 
     public static final String INVALID_RESET_PASSWORD_URL = "Invalid reset password URL.";
     public static final String INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL =

@@ -32,7 +32,7 @@ public class NoXFrameOptionsFeature implements DynamicFeature {
     public void configure(ResourceInfo resourceInfo, FeatureContext featureContext) {
         if (resourceInfo.getResourceMethod().isAnnotationPresent(NoXFrame.class) ||
             resourceInfo.getResourceClass().isAnnotationPresent(NoXFrame.class)) {
-            featureContext.register(NoXFrameOptionsFeature.class);
+            featureContext.register(NoXFrameOptionsFilter.class);
         }
     }
 }

@@ -4,7 +4,6 @@ import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
-import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.criteria.CriteriaQuery;

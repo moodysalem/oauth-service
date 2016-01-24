@@ -3,7 +3,6 @@ package com.oauth2cloud.server.rest.resources.api;
 import com.oauth2cloud.server.hibernate.model.Scope;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
-import com.oauth2cloud.server.rest.resources.BaseEntityResource;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;

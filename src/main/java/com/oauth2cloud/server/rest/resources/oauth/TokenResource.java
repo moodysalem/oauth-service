@@ -5,7 +5,6 @@ import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.ErrorResponse;
 import com.oauth2cloud.server.hibernate.model.*;
-import com.oauth2cloud.server.rest.resources.BaseResource;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.annotation.PostConstruct;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 @Path(OAuth2Application.OAUTH + "/token")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-public class TokenResource extends BaseResource {
+public class TokenResource extends OAuthResource {
 
     private static final String BASIC = "Basic ";
     private static final int BASIC_LENGTH = BASIC.length();
