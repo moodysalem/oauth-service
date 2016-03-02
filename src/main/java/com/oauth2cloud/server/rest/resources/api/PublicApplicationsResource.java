@@ -2,8 +2,6 @@ package com.oauth2cloud.server.rest.resources.api;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.hibernate.model.Client;
-import com.oauth2cloud.server.hibernate.model.ClientScope;
 import com.oauth2cloud.server.hibernate.model.Scope;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
@@ -111,33 +109,29 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
      */
     @GET
     @Path("{id}/info")
-    public Response getApplicationData(@PathParam("id") Long applicationId) {
-        Application app = getApplication(applicationId);
+    public Response getRegistrationInfo(@PathParam("id") long applicationId) {
+        PublicApplication app = new PublicApplication(getApplication(applicationId));
 
         RegisterClientInfo rci = new RegisterClientInfo();
-        rci.setApplication(new PublicApplication(app));
-        rci.setScopes(getPublicScopes(app));
+        rci.setPublicApplication(app);
+        rci.setPublicScopes(getScopes(app.getId()).stream().map(PublicScope::new).collect(Collectors.toList()));
 
         return Response.ok(rci).build();
     }
 
+    /**
+     * Register a client
+     *
+     * @param applicationId id of application registered for
+     * @param req           the request body
+     * @return no content
+     */
     @POST
     @Path("{id}/register")
     public Response makeClient(@PathParam("id") Long applicationId, RegisterClientRequest req) {
-
         if (req == null || req.getClient() == null || req.getClientScopes() == null) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Client and scopes are required");
         }
-        Application app = getApplication(applicationId);
-
-        Client c = req.getClient();
-        c.setApplication(app);
-        c.setCreator(getUser());
-
-        for (ClientScope cs : req.getClientScopes()) {
-
-        }
-
 
         return Response.noContent().build();
     }
@@ -148,12 +142,7 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
      * @param applicationId id of applicatino
      * @return application if visible
      */
-    private Application getApplication(Long applicationId) {
-        if (applicationId == null) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST,
-                "Application ID is a required query parameter.");
-        }
-
+    private Application getApplication(long applicationId) {
         Application app = em.find(Application.class, applicationId);
 
         if (app == null || !app.isPublicClientRegistration() || !app.isActive()) {
@@ -167,22 +156,21 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
     /**
      * Get a list of scopes that a client can request for an app
      *
-     * @param app the app to get scopes for
+     * @param applicationId the ID of the application to get the list of scopes for
      * @return a list of scopes
      */
-    private List<PublicScope> getPublicScopes(Application app) {
+    private List<Scope> getScopes(long applicationId) {
         CriteriaQuery<Scope> scopes = cb.createQuery(Scope.class);
 
         Root<Scope> root = scopes.from(Scope.class);
 
         scopes.select(root).where(
-            cb.equal(root.get("application"), app),
+            cb.equal(root.join("application").get("id"), applicationId),
             cb.equal(root.get("requestable"), true),
             cb.equal(root.get("active"), true)
         );
 
-        List<Scope> scopeList = em.createQuery(scopes).getResultList();
-        return scopeList.stream().map(PublicScope::new).collect(Collectors.toList());
+        return em.createQuery(scopes).getResultList();
     }
 
 }
