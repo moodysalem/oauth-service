@@ -4,7 +4,7 @@ import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.Scope;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import com.oauth2cloud.server.rest.models.PublicApplication;
 import com.oauth2cloud.server.rest.models.PublicScope;
 import com.oauth2cloud.server.rest.models.RegisterClientInfo;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@TokenFeature.ReadToken
+@AuthorizationHeaderTokenFeature.ReadToken
 @Path(OAuth2Application.API + "/publicapplications")
 public class PublicApplicationsResource extends BaseEntityResource<Application> {
 

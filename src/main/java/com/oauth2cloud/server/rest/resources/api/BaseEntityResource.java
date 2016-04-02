@@ -5,7 +5,7 @@ import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.resources.EntityResource;
 import com.oauth2cloud.server.hibernate.model.Token;
 import com.oauth2cloud.server.hibernate.model.User;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -104,7 +104,7 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
     }
 
     public Token getToken() {
-        return (Token) req.getProperty(TokenFeature.TOKEN);
+        return (Token) req.getProperty(AuthorizationHeaderTokenFeature.TOKEN);
     }
 
     public User getUser() {

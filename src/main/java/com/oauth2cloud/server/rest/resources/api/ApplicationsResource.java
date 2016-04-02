@@ -2,7 +2,7 @@ package com.oauth2cloud.server.rest.resources.api;
 
 import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Version;
@@ -13,7 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.util.List;
 
-@TokenFeature.ReadToken
+@AuthorizationHeaderTokenFeature.ReadToken
 @Path(OAuth2Application.API + "/applications")
 public class ApplicationsResource extends BaseEntityResource<Application> {
 

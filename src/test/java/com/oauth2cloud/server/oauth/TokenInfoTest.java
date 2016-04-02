@@ -18,14 +18,14 @@ public class TokenInfoTest extends OAuth2Test {
             .request()
             .post(
                 Entity.form(
-                    new Form().param("application_id", "1")
+                    new Form().param("application_id", APPLICATION_ID.toString())
                         .param("token", tr.getAccessToken())
                 ),
                 TokenResponse.class
             );
 
         assert ti.getAccessToken().equals(tr.getAccessToken());
-        assert ti.getApplicationId().equals(1L);
+        assert ti.getApplicationId().equals(APPLICATION_ID);
         assert ti.getClientId().equals(CLIENT_ID);
         assert ti.getTokenType().equalsIgnoreCase("bearer");
         assert ti.getUserDetails() != null;

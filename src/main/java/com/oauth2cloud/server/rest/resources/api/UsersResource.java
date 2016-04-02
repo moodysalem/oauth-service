@@ -3,7 +3,7 @@ package com.oauth2cloud.server.rest.resources.api;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.criteria.CriteriaQuery;
@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
-@TokenFeature.ReadToken
+@AuthorizationHeaderTokenFeature.ReadToken
 @Path(OAuth2Application.API + "/users")
 public class UsersResource extends BaseEntityResource<User> {
     public static final String MANAGE_USERS = "manage_users";

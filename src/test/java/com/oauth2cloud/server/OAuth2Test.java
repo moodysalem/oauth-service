@@ -67,14 +67,15 @@ public class OAuth2Test extends BaseTest {
             protected void configure() {
                 if (jrem == null) {
                     jrem = new JAXRSEntityManagerFactory(
-                            "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
-                            "sa", "sa",
+                            "jdbc:mysql://localhost:3306/oauthtest",
+                            "root", "",
                             "oauth-service",
                             "db/master-changelog.xml",
                             // show sql
                             true,
-                            false,
-                            // context
+                            // validate
+                            true,
+                            // migration context
                             "test",
                             null
                     );
@@ -118,7 +119,7 @@ public class OAuth2Test extends BaseTest {
                 .property(ClientProperties.FOLLOW_REDIRECTS, false)
                 .path("authorize")
                 .queryParam("client_id", CLIENT_ID)
-                .queryParam("redirect_uri", "http://localhost:8080")
+                .queryParam("redirect_uri", "https://oauth2cloud.com")
                 .queryParam("response_type", "token")
                 .request()
                 .post(Entity.form(up));

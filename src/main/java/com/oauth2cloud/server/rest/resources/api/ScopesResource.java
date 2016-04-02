@@ -2,7 +2,7 @@ package com.oauth2cloud.server.rest.resources.api;
 
 import com.oauth2cloud.server.hibernate.model.Scope;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
 import java.util.List;
 import java.util.UUID;
 
-@TokenFeature.ReadToken
+@AuthorizationHeaderTokenFeature.ReadToken
 @Path(OAuth2Application.API + "/scopes")
 public class ScopesResource extends BaseEntityResource<Scope> {
     public static final String MANAGE_SCOPES = "manage_scopes";

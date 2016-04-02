@@ -1,11 +1,14 @@
 package com.oauth2cloud.server.admin;
 
 import com.oauth2cloud.server.OAuth2Test;
+import com.oauth2cloud.server.hibernate.model.Application;
 import com.oauth2cloud.server.hibernate.model.TokenResponse;
 import com.oauth2cloud.server.rest.OAuth2Application;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.Entity;
+import java.util.UUID;
 
 public class ApplicationsTest extends OAuth2Test {
 
@@ -14,41 +17,45 @@ public class ApplicationsTest extends OAuth2Test {
         TokenResponse tr = getToken();
 
         assert target(OAuth2Application.API).path("applications")
-            .request()
-            .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
-            .get().getStatus() == 200;
+                .request()
+                .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
+                .get().getStatus() == 200;
     }
 
     @Test
-    public void testCRUD() {
+    public void testCreateAndEdit() {
         TokenResponse tr = getToken();
         String faviconUrl = "https://google.com/test.png";
-        com.oauth2cloud.server.hibernate.model.Application app = new com.oauth2cloud.server.hibernate.model.Application();
-        app.setName("Test App");
+        Application app = new Application();
+        app.setName("Test App Creation");
+        UUID id = UUID.randomUUID();
+        app.setId(id);
         app.setSupportEmail("moody.salem@gmail.com");
 
         app = target(OAuth2Application.API).path("applications")
-            .request()
-            .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
-            .post(Entity.json(app), com.oauth2cloud.server.hibernate.model.Application.class);
+                .request()
+                .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER + tr.getAccessToken())
+                .post(Entity.json(app), Application.class);
 
-        assert app.getId() != null;
-        assert app.getName().equals("Test App");
+        assert id.equals(app.getId());
+        assert app.getName().equals("Test App Creation");
         assert app.getFaviconUrl() == null;
 
         // test edit
         app.setFaviconUrl(faviconUrl);
+        app.setName("Test App Editing");
         app = target(OAuth2Application.API).path("applications").path(app.getId().toString())
-            .request()
-            .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
-            .put(Entity.json(app), com.oauth2cloud.server.hibernate.model.Application.class);
+                .request()
+                .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER  + tr.getAccessToken())
+                .put(Entity.json(app), Application.class);
 
+        assert app.getName().equals("Test App Editing");
         assert app.getFaviconUrl().equals(faviconUrl);
 
         assert target(OAuth2Application.API).path("applications").path(app.getId().toString())
-            .request()
-            .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
-            .delete().getStatus() == 403;
+                .request()
+                .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER  + tr.getAccessToken())
+                .delete().getStatus() == 403;
 
     }
 

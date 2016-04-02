@@ -3,6 +3,10 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
+  <changeSet id="Change default collation for mysql database to utf8mb4" author="moody.salem" dbms="mysql">
+    <sql>ALTER DATABASE DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
+  </changeSet>
+
   <changeSet id="Application Table" author="moody.salem">
     <createTable tableName="Application">
       <column name="id" type="${UUID_TYPE}">
@@ -59,7 +63,6 @@
     <addUniqueConstraint tableName="Application" columnNames="facebookAppId,facebookAppSecret"/>
     <addUniqueConstraint tableName="Application" columnNames="googleClientId,googleClientSecret"/>
     <addUniqueConstraint tableName="Application" columnNames="amazonClientId,amazonClientSecret"/>
-    <sql dbms="mysql">ALTER TABLE Application CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="Scopes Table" author="moody.salem">
@@ -106,7 +109,6 @@
                              referencedTableName="Application"
                              referencedColumnNames="id"/>
     <addUniqueConstraint tableName="Scope" columnNames="applicationId,name"/>
-    <sql dbms="mysql">ALTER TABLE Scope CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="User Table" author="moody.salem">
@@ -152,7 +154,6 @@
                              referencedTableName="User"
                              referencedColumnNames="id"/>
     <addUniqueConstraint tableName="User" columnNames="applicationId,email"/>
-    <sql dbms="mysql">ALTER TABLE User CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
   <changeSet id="Client Table" author="moody.salem">
@@ -205,7 +206,6 @@
                              constraintName="FK_CLIENT_USER"
                              referencedTableName="User"
                              referencedColumnNames="id"/>
-    <sql dbms="mysql">ALTER TABLE Client CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="Client Redirect URI table" author="moody.salem">
@@ -218,12 +218,11 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addUniqueConstraint tableName="Client_URI" columnNames="clientId,uri"/>
     <addForeignKeyConstraint baseTableName="Client_URI" baseColumnNames="clientId"
                              constraintName="FK_Client_URI_Client"
                              referencedTableName="Client"
                              referencedColumnNames="id"/>
-    <sql dbms="mysql">ALTER TABLE Client_URI CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
+    <addUniqueConstraint tableName="Client_URI" columnNames="clientId,uri"/>
   </changeSet>
 
   <changeSet id="Client Permitted Flows" author="moody.salem">
@@ -236,13 +235,11 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addUniqueConstraint tableName="Client_Flow" columnNames="clientId,flow"/>
     <addForeignKeyConstraint baseTableName="Client_Flow" baseColumnNames="clientId"
                              constraintName="FK_Client_Flow_Client"
                              referencedTableName="Client"
-                             referencedColumnNames="id"
-    />
-    <sql dbms="mysql">ALTER TABLE Client_Flow CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="Client_Flow" columnNames="clientId,flow"/>
   </changeSet>
 
   <changeSet id="Token Table" author="moody.salem">
@@ -297,7 +294,6 @@
                              constraintName="FK_Token_Refresh_Token"
                              referencedTableName="Token"
                              referencedColumnNames="id"/>
-    <sql dbms="mysql">ALTER TABLE Token CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet author="moody.salem" id="ClientScope Table">
@@ -368,8 +364,7 @@
     <addForeignKeyConstraint baseTableName="AcceptedScope" baseColumnNames="clientScopeId"
                              constraintName="FK_AcceptedScope_ClientScope"
                              referencedTableName="ClientScope"
-                             referencedColumnNames="id"
-    />
+                             referencedColumnNames="id"/>
     <addUniqueConstraint tableName="AcceptedScope" columnNames="userId,clientScopeId"/>
   </changeSet>
 
@@ -391,8 +386,7 @@
     <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="acceptedScopeId"
                              constraintName="FK_Token_AcceptedScope_AcceptedScope"
                              referencedTableName="AcceptedScope"
-                             referencedColumnNames="id"
-    />
+                             referencedColumnNames="id"/>
   </changeSet>
 
   <!-- this table lists all the client scopes that are granted with a token -->
@@ -412,8 +406,7 @@
     <addForeignKeyConstraint baseTableName="Token_ClientScope" baseColumnNames="clientScopeId"
                              constraintName="FK_Token_ClientScope_ClientScope"
                              referencedTableName="ClientScope"
-                             referencedColumnNames="id"
-    />
+                             referencedColumnNames="id"/>
   </changeSet>
 
   <changeSet id="LoginCookie Table" author="moody.salem">
@@ -446,7 +439,6 @@
     <addForeignKeyConstraint baseTableName="LoginCookie" baseColumnNames="userId" constraintName="FK_LoginCookie_User"
                              referencedTableName="User"
                              referencedColumnNames="id"/>
-    <sql dbms="mysql">ALTER TABLE LoginCookie CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="UserCode Table" author="moody.salem">
@@ -483,7 +475,6 @@
     <addForeignKeyConstraint baseTableName="UserCode" baseColumnNames="userId" constraintName="FK_UserCode_User"
                              referencedTableName="User"
                              referencedColumnNames="id"/>
-    <sql dbms="mysql">ALTER TABLE UserCode CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;</sql>
   </changeSet>
 
   <changeSet id="Call Log" author="moody.salem">
@@ -516,15 +507,12 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-
     <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Client"
                              referencedTableName="Client"
                              referencedColumnNames="id"/>
     <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Application"
                              referencedTableName="Client"
                              referencedColumnNames="id"/>
-
-    <sql dbms="mysql">ALTER TABLE CallLog CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
 

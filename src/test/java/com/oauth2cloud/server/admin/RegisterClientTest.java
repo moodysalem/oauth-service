@@ -9,8 +9,9 @@ import javax.ws.rs.core.Response;
 public class RegisterClientTest extends OAuth2Test {
     @Test
     public void testGetInfo() {
-        Response r = target(OAuth2Application.API).path("publicapplications").path("1").path("info")
-            .request().get();
+        Response r = target(OAuth2Application.API).path("publicapplications")
+                .path(APPLICATION_ID.toString()).path("info")
+                .request().get();
         assert r.getStatus() == 200;
     }
 }

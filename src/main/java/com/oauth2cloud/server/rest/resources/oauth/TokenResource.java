@@ -1,10 +1,10 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.ErrorResponse;
-import com.oauth2cloud.server.hibernate.model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.annotation.PostConstruct;
@@ -109,12 +109,12 @@ public class TokenResource extends OAuthResource {
 
         if (token == null || token.trim().isEmpty()) {
             return error(ErrorResponse.Type.invalid_request,
-                String.format("'%s' grant type requires the 'token' parameter", TEMPORARY_TOKEN));
+                    String.format("'%s' grant type requires the 'token' parameter", TEMPORARY_TOKEN));
         }
 
         if (clientId == null || clientId.trim().isEmpty()) {
             return error(ErrorResponse.Type.invalid_request,
-                String.format("'%s' grant type requires the 'client_id' parameter", TEMPORARY_TOKEN));
+                    String.format("'%s' grant type requires the 'client_id' parameter", TEMPORARY_TOKEN));
         }
 
         Client c = getClient(clientId);
@@ -125,7 +125,7 @@ public class TokenResource extends OAuthResource {
 
         if (!c.getFlows().contains(Client.GrantFlow.TEMPORARY_TOKEN)) {
             return error(ErrorResponse.Type.unauthorized_client,
-                String.format("Client is not authorized for the '%s' grant flow.", TEMPORARY_TOKEN));
+                    String.format("Client is not authorized for the '%s' grant flow.", TEMPORARY_TOKEN));
         }
 
         Token accessToken = getToken(token, c, Token.Type.ACCESS);
@@ -137,7 +137,7 @@ public class TokenResource extends OAuthResource {
         List<ClientScope> newClientScopes = new ArrayList<>(accessToken.getClientScopes());
 
         Token tempToken = generateToken(Token.Type.TEMPORARY, c, accessToken.getUser(), getExpires(c, Token.Type.TEMPORARY),
-            accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes, accessToken.getProvider(), accessToken.getProviderAccessToken());
+                accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes, accessToken.getProvider(), accessToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(tempToken))).build();
     }
@@ -169,7 +169,7 @@ public class TokenResource extends OAuthResource {
         List<String> scopes = scopeList(scope);
         if (scopes.size() > 0) {
             Set<String> acceptedScopeNames = newTokenScopes.stream().map(AcceptedScope::getClientScope)
-                .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
+                    .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
 
             if (!acceptedScopeNames.containsAll(scopes)) {
                 List<ClientScope> clientScopes = newTokenScopes.stream().map(AcceptedScope::getClientScope).collect(Collectors.toList());
@@ -179,7 +179,7 @@ public class TokenResource extends OAuthResource {
         }
 
         Token accessToken = generateToken(Token.Type.ACCESS, client, refreshToken.getUser(), getExpires(client, Token.Type.ACCESS),
-            refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null, refreshToken.getProvider(), refreshToken.getProviderAccessToken());
+                refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null, refreshToken.getProvider(), refreshToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
@@ -194,12 +194,12 @@ public class TokenResource extends OAuthResource {
 
         if (!client.getFlows().contains(Client.GrantFlow.CLIENT_CREDENTIALS)) {
             return error(ErrorResponse.Type.unauthorized_client,
-                String.format("Client is not authorized for the '%s' grant flow.", CLIENT_CREDENTIALS));
+                    String.format("Client is not authorized for the '%s' grant flow.", CLIENT_CREDENTIALS));
         }
 
         if (!client.getType().equals(Client.Type.CONFIDENTIAL)) {
             return error(ErrorResponse.Type.unauthorized_client,
-                String.format("Client must be %s for the '%s' grant flow.", Client.Type.CONFIDENTIAL.toString(), CLIENT_CREDENTIALS));
+                    String.format("Client must be %s for the '%s' grant flow.", Client.Type.CONFIDENTIAL.toString(), CLIENT_CREDENTIALS));
         }
 
         List<String> scopes = scopeList(scope);
@@ -235,7 +235,7 @@ public class TokenResource extends OAuthResource {
 
         if (code == null || redirectUri == null || clientId == null) {
             return error(ErrorResponse.Type.invalid_request,
-                "'code', 'redirect_uri', and 'client_id' are all required for the " + AUTHORIZATION_CODE + " grant flow.");
+                    "'code', 'redirect_uri', and 'client_id' are all required for the " + AUTHORIZATION_CODE + " grant flow.");
         }
 
         Client client = getClient(clientId);
@@ -254,8 +254,8 @@ public class TokenResource extends OAuthResource {
 
         if (client.getType().equals(Client.Type.CONFIDENTIAL) && this.client == null) {
             return error(ErrorResponse.Type.invalid_client,
-                String.format("Client authentication is required for CONFIDENTIAL clients in the '%s' grant flow.",
-                    AUTHORIZATION_CODE));
+                    String.format("Client authentication is required for CONFIDENTIAL clients in the '%s' grant flow.",
+                            AUTHORIZATION_CODE));
         }
 
         Token codeToken = getToken(code, client, Token.Type.CODE);
@@ -275,10 +275,10 @@ public class TokenResource extends OAuthResource {
         // only confidential clients may receive refresh tokens
         if (client.getRefreshTokenTtl() != null && client.getType().equals(Client.Type.CONFIDENTIAL)) {
             refreshToken = generateToken(Token.Type.REFRESH, client, codeToken.getUser(), getExpires(client, Token.Type.REFRESH), redirectUri,
-                new ArrayList<>(codeToken.getAcceptedScopes()), null, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
+                    new ArrayList<>(codeToken.getAcceptedScopes()), null, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
         }
         Token accessToken = generateToken(Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, Token.Type.ACCESS), redirectUri,
-            new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
+                new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
@@ -333,10 +333,10 @@ public class TokenResource extends OAuthResource {
         Token refreshToken = null;
         if (client.getRefreshTokenTtl() != null) {
             refreshToken = generateToken(Token.Type.REFRESH, client, user, getExpires(client, Token.Type.REFRESH), null,
-                new ArrayList<>(acceptedScopes), null, null, null, null);
+                    new ArrayList<>(acceptedScopes), null, null, null, null);
         }
         Token accessToken = generateToken(Token.Type.ACCESS, client, user, getExpires(client, Token.Type.ACCESS), null,
-            new ArrayList<>(acceptedScopes), refreshToken, null, null, null);
+                new ArrayList<>(acceptedScopes), refreshToken, null, null, null);
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
@@ -352,8 +352,8 @@ public class TokenResource extends OAuthResource {
         CriteriaQuery<User> uq = cb.createQuery(User.class);
         Root<User> ur = uq.from(User.class);
         uq.select(ur).where(
-            cb.equal(ur.get("email"), username),
-            cb.equal(ur.join("application"), client.getApplication())
+                cb.equal(ur.get("email"), username),
+                cb.equal(ur.join("application"), client.getApplication())
         );
         List<User> users = em.createQuery(uq).getResultList();
         return users.size() == 1 ? users.get(0) : null;
@@ -381,9 +381,11 @@ public class TokenResource extends OAuthResource {
      */
     @POST
     @Path("info")
-    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId, @FormParam("application_id") UUID applicationId) {
+    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId,
+                              @FormParam("application_id") UUID applicationId) {
         if (token == null || (applicationId == null && clientId == null)) {
-            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and the 'application_id' or 'client_id' form parameters are required.");
+            throw new RequestProcessingException(Response.Status.BAD_REQUEST,
+                    "'token' and the 'application_id' or 'client_id' form parameters are required.");
         }
 
         Client c = null;
@@ -397,7 +399,7 @@ public class TokenResource extends OAuthResource {
         }
 
         Token t = getToken(token, c, Token.Type.ACCESS, Token.Type.REFRESH, Token.Type.TEMPORARY);
-        if (t == null || t.getClient().getApplication().getId() != applicationId) {
+        if (t == null || !t.getClient().getApplication().getId().equals(applicationId)) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }
 

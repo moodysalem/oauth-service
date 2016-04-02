@@ -3,7 +3,7 @@ package com.oauth2cloud.server.rest.resources.api;
 import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.hibernate.model.ClientScope;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -12,7 +12,7 @@ import javax.ws.rs.QueryParam;
 import java.util.List;
 import java.util.UUID;
 
-@TokenFeature.ReadToken
+@AuthorizationHeaderTokenFeature.ReadToken
 @Path(OAuth2Application.API + "/clientscopes")
 public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 

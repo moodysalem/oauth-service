@@ -3,7 +3,7 @@ package com.oauth2cloud.server.rest.resources.oauth;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.TokenFeature;
+import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import com.oauth2cloud.server.rest.models.LoginStatusModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 
@@ -31,7 +31,7 @@ public class GetLoginStatus extends OAuthResource {
      */
     @GET
     @CORSFilter.Skip
-    @TokenFeature.ReadToken
+    @AuthorizationHeaderTokenFeature.ReadToken
     public Response get(@QueryParam("client_id") String clientId,
                         @HeaderParam("Referer") String referrer) {
         if (clientId == null) {

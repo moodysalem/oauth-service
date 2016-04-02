@@ -22,11 +22,11 @@ public class TestGetLoginStatus extends OAuth2Test {
         assert wtCid.request().get().getStatus() == 400;
 
         assert wtCid.request()
-            .header("Referer", "http://localhost:8080").get().getStatus() == 200;
+            .header("Referer", "https://oauth2cloud.com").get().getStatus() == 200;
 
         assert wtCid.request()
-            .header("Referer", "http://localhost:8080")
-            .header("Cookie", OAuthResource.COOKIE_NAME_PREFIX + "1=abc").get().getStatus() == 200;
+            .header("Referer", "https://oauth2cloud.com")
+            .header("Cookie", OAuthResource.COOKIE_NAME_PREFIX + APPLICATION_ID + "=abc").get().getStatus() == 200;
     }
 
 

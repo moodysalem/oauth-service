@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
 
 /**
- * The OAauth2 spec for an token response
+ * The OAauth2 spec for a token response
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TokenResponse {
