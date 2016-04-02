@@ -66,19 +66,15 @@ public class OAuth2Test extends BaseTest {
             @Override
             protected void configure() {
                 if (jrem == null) {
-                    jrem = new JAXRSEntityManagerFactory(
-                            "jdbc:mysql://localhost:3306/oauthtest",
-                            "root", "",
-                            "oauth-service",
-                            "db/master-changelog.xml",
-                            // show sql
-                            true,
-                            // validate
-                            true,
-                            // migration context
-                            "test",
-                            null
-                    );
+                    jrem = JAXRSEntityManagerFactory.builder("main-em")
+                            .withUrl("jdbc:mysql://localhost:3306/oauthtest")
+//                            .withUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
+                            .withUser("root")
+                            .withPersistenceUnit("oauth-service")
+                            .withChangelogFile("db/master-changelog.xml")
+                            .withShowSql(true)
+                            .withContext("test")
+                            .build();
                 }
 
                 // this is used to talk to the DB via JPA entity manager

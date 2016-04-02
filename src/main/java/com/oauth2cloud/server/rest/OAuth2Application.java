@@ -28,17 +28,17 @@ public class OAuth2Application extends BaseApplication {
             @Override
             protected void configure() {
                 // this is used to talk to the DB via JPA entity manager
-                bindFactory(new JAXRSEntityManagerFactory(
-                        System.getProperty("JDBC_CONNECTION_STRING"),
-                        System.getProperty("JDBC_CONNECTION_USERNAME"),
-                        System.getProperty("JDBC_CONNECTION_PASSWORD"),
-                        "oauth-service",
-                        "db/master-changelog.xml",
-                        System.getProperty("DEBUG") != null,
-                        false,
-                        System.getProperty("LIQUIBASE_CONTEXT", "prod"),
-                        null
-                )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
+                bindFactory(
+                        JAXRSEntityManagerFactory.builder("main-em")
+                                .withUrl(System.getProperty("JDBC_CONNECTION_STRING"))
+                                .withUser(System.getProperty("JDBC_CONNECTION_USERNAME"))
+                                .withPassword(System.getProperty("JDBC_CONNECTION_PASSWORD"))
+                                .withPersistenceUnit("oauth-service")
+                                .withChangelogFile("db/master-changelog.xml")
+                                .withShowSql(System.getProperty("SHOW_SQL") != null)
+                                .withContext(System.getProperty("LIQUIBASE_CONTEXT", "prod"))
+                                .build()
+                ).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // create the mailer that uses amazon
                 Mailer amazonMailer = new Mailer(
