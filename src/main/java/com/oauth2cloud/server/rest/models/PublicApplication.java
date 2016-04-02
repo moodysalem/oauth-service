@@ -1,15 +1,11 @@
 package com.oauth2cloud.server.rest.models;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.oauth2cloud.server.hibernate.model.Application;
-import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
-@JsonIdentityInfo(
-        generator = JSOGGenerator.class
-)
+import java.util.UUID;
+
 public class PublicApplication {
-    private long id;
+    private UUID id;
     private String name;
     private String supportEmail;
     private String description;
@@ -27,11 +23,11 @@ public class PublicApplication {
         setSupportEmail(application.getSupportEmail());
     }
 
-    public long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

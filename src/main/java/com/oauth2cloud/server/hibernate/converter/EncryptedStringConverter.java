@@ -9,6 +9,9 @@ import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This class allows storing encrypted data in the database
+ */
 @Converter
 public class EncryptedStringConverter implements AttributeConverter<String, String> {
 
@@ -21,7 +24,7 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
 
     private static final Cipher ENCRYPTION_CIPHER;
     private static final Cipher DECRYPTION_CIPHER;
-    public static final String UTF_8 = "UTF-8";
+    private static final String UTF_8 = "UTF-8";
 
     static {
         KEY = new SecretKeySpec(KEY_STRING, "AES");
@@ -49,7 +52,8 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
         }
 
         try {
-            return Base64.getEncoder().encodeToString(ENCRYPTION_CIPHER.doFinal(toEncrypt.getBytes(UTF_8)));
+            return Base64.getEncoder()
+                    .encodeToString(ENCRYPTION_CIPHER.doFinal(toEncrypt.getBytes(UTF_8)));
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to encrypt database column", e);
             return null;
@@ -63,7 +67,10 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
         }
 
         try {
-            return new String(DECRYPTION_CIPHER.doFinal(Base64.getDecoder().decode(toDecrypt)), UTF_8);
+            return new String(
+                    DECRYPTION_CIPHER.doFinal(Base64.getDecoder().decode(toDecrypt)),
+                    UTF_8
+            );
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to decrypt database column", e);
             return null;

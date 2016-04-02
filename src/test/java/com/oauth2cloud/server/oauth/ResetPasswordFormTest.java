@@ -16,14 +16,14 @@ public class ResetPasswordFormTest extends OAuth2Test {
     @Test
     public void testFormGet() {
         Response r = target(OAuth2Application.OAUTH).path("reset")
-            .queryParam("applicationId", 1)
-            .request().get();
+                .queryParam("applicationId", APPLICATION_ID)
+                .request().get();
 
         assert r.getStatus() == 200;
 
         Document doc = Jsoup.parse(r.readEntity(String.class));
 
-        assert "OAuth2 Cloud".equals(doc.select("h1.page-header").first().text());
+        assert "OAuth2Cloud".equals(doc.select("h1.page-header").first().text());
         Element fr = doc.select("form#form-reset").first();
         assert fr != null;
         assert "POST".equalsIgnoreCase(fr.attr("method"));
@@ -34,15 +34,15 @@ public class ResetPasswordFormTest extends OAuth2Test {
     @Test
     public void testFormGetWithReferrer() {
         Response r = target(OAuth2Application.OAUTH).path("reset")
-            .queryParam("applicationId", 1)
-            .queryParam("referrer", "http://localhost:8080")
-            .request().get();
+                .queryParam("applicationId", APPLICATION_ID)
+                .queryParam("referrer", "http://localhost:8080")
+                .request().get();
 
         assert r.getStatus() == 200;
 
         Document doc = Jsoup.parse(r.readEntity(String.class));
 
-        assert "OAuth2 Cloud".equals(doc.select("h1.page-header").first().text());
+        assert "OAuth2Cloud".equals(doc.select("h1.page-header").first().text());
         Element fr = doc.select("form#form-reset").first();
         assert fr != null;
         assert "POST".equalsIgnoreCase(fr.attr("method"));
@@ -55,15 +55,15 @@ public class ResetPasswordFormTest extends OAuth2Test {
         Form f = new Form();
         f.param("email", "moody.salem@gmail.com");
         Response r = target(OAuth2Application.OAUTH).path("reset")
-            .queryParam("applicationId", 1)
-            .queryParam("referrer", "http://localhost:8080")
-            .request()
-            .post(Entity.form(f));
+                .queryParam("applicationId", APPLICATION_ID)
+                .queryParam("referrer", "http://localhost:8080")
+                .request()
+                .post(Entity.form(f));
         assert r.getStatus() == 200;
 
         Document doc = Jsoup.parse(r.readEntity(String.class));
 
-        assert "OAuth2 Cloud".equals(doc.select("h1.page-header").first().text());
+        assert "OAuth2Cloud".equals(doc.select("h1.page-header").first().text());
         Element fr = doc.select("form#form-reset").first();
         assert fr != null;
         assert "POST".equalsIgnoreCase(fr.attr("method"));
@@ -74,8 +74,9 @@ public class ResetPasswordFormTest extends OAuth2Test {
         assert doc.select(".alert.alert-success").size() == 1;
 
         assert getLastEmail() != null;
+        assert getLastEmail().getRecipients().stream()
+                .allMatch((rec) -> rec.getAddress().equals("moody.salem@gmail.com"));
     }
-
 
 
 }

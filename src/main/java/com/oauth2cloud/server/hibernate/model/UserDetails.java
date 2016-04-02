@@ -2,6 +2,8 @@ package com.oauth2cloud.server.hibernate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.UUID;
+
 /**
  * A simple wrapper around a user that is communicated to clients
  */
@@ -31,7 +33,7 @@ public class UserDetails {
     @JsonProperty("last_name")
     private String lastName;
     @JsonProperty("user_id")
-    private long userId;
+    private UUID userId;
 
     public String getEmail() {
         return email;
@@ -57,11 +59,11 @@ public class UserDetails {
         this.lastName = lastName;
     }
 
-    public long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 }

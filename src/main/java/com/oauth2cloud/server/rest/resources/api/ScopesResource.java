@@ -9,6 +9,7 @@ import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.util.List;
+import java.util.UUID;
 
 @TokenFeature.ReadToken
 @Path(OAuth2Application.API + "/scopes")
@@ -25,8 +26,8 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         mustBeLoggedIn();
         checkScope(MANAGE_SCOPES);
 
-        com.oauth2cloud.server.hibernate.model.Application ap = scope.getApplication() != null && scope.getApplication().getId() != 0 ?
-            em.find(com.oauth2cloud.server.hibernate.model.Application.class, scope.getApplication().getId()) : null;
+        com.oauth2cloud.server.hibernate.model.Application ap = scope.getApplication() != null && scope.getApplication().getId() != null ?
+                em.find(com.oauth2cloud.server.hibernate.model.Application.class, scope.getApplication().getId()) : null;
 
         return ap != null && ap.isActive() && ap.getOwner().idMatch(getUser());
     }
@@ -60,7 +61,7 @@ public class ScopesResource extends BaseEntityResource<Scope> {
     }
 
     @QueryParam("applicationId")
-    Long applicationId;
+    UUID applicationId;
 
     @QueryParam("active")
     Boolean active;

@@ -1,11 +1,11 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
-import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.models.ErrorModel;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.codemonkey.simplejavamail.Email;
 import org.codemonkey.simplejavamail.Mailer;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -77,15 +77,15 @@ public abstract class OAuthResource {
         Root<Token> t = tq.from(Token.class);
 
         Predicate p = cb.and(
-            cb.equal(t.get("token"), token),
-            t.get("type").in(types),
-            cb.greaterThan(t.<Date>get("expires"), new Date()),
-            cb.or(
-                cb.equal(t.join("user").get("active"), true),
-                cb.isNull(t.get("user"))
-            ),
-            cb.equal(t.join("client").get("active"), true),
-            cb.equal(t.join("client").join("application").get("active"), true)
+                cb.equal(t.get("token"), token),
+                t.get("type").in(types),
+                cb.greaterThan(t.<Date>get("expires"), new Date()),
+                cb.or(
+                        cb.equal(t.join("user").get("active"), true),
+                        cb.isNull(t.get("user"))
+                ),
+                cb.equal(t.join("client").get("active"), true),
+                cb.equal(t.join("client").join("application").get("active"), true)
         );
         if (client != null) {
             p = cb.and(p, cb.equal(t.get("client"), client));
@@ -178,9 +178,9 @@ public abstract class OAuthResource {
         Root<Client> ct = cq.from(Client.class);
         cq.select(ct);
         cq.where(
-            cb.equal(ct.get("identifier"), clientId),
-            cb.equal(ct.get("active"), true),
-            cb.equal(ct.join("application").get("active"), true)
+                cb.equal(ct.get("identifier"), clientId),
+                cb.equal(ct.get("active"), true),
+                cb.equal(ct.join("application").get("active"), true)
         );
 
         List<Client> cts = em.createQuery(cq).getResultList();
@@ -224,8 +224,8 @@ public abstract class OAuthResource {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-            cb.equal(ras.get("user"), user),
-            cb.equal(ras.get("clientScope"), clientScope)
+                cb.equal(ras.get("user"), user),
+                cb.equal(ras.get("clientScope"), clientScope)
         ))).getResultList();
         if (las.size() == 1) {
             return las.get(0);
@@ -348,11 +348,11 @@ public abstract class OAuthResource {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
         Root<LoginCookie> rlc = lc.from(LoginCookie.class);
         lc.select(rlc).where(
-            cb.equal(rlc.get("secret"), secret),
-            cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-            cb.equal(rlc.join("user").get("application"), client.getApplication()),
-            cb.equal(rlc.join("user").get("active"), true),
-            cb.equal(rlc.join("user").join("application").get("active"), true)
+                cb.equal(rlc.get("secret"), secret),
+                cb.greaterThan(rlc.<Date>get("expires"), new Date()),
+                cb.equal(rlc.join("user").get("application"), client.getApplication()),
+                cb.equal(rlc.join("user").get("active"), true),
+                cb.equal(rlc.join("user").join("application").get("active"), true)
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -406,9 +406,9 @@ public abstract class OAuthResource {
     protected boolean partialMatch(URI one, URI two) {
         boolean validParams = one != null && two != null;
         return validParams &&
-            one.getScheme().equalsIgnoreCase(two.getScheme()) &&
-            one.getHost().equalsIgnoreCase(two.getHost()) &&
-            one.getPort() == two.getPort();
+                one.getScheme().equalsIgnoreCase(two.getScheme()) &&
+                one.getHost().equalsIgnoreCase(two.getHost()) &&
+                one.getPort() == two.getPort();
     }
 
     /**
@@ -435,12 +435,12 @@ public abstract class OAuthResource {
         Root<User> u = uq.from(User.class);
 
         List<User> users = em.createQuery(
-            uq.select(u).where(
-                cb.and(
-                    cb.equal(u.get("application"), application),
-                    cb.equal(u.get("email"), email)
+                uq.select(u).where(
+                        cb.and(
+                                cb.equal(u.get("application"), application),
+                                cb.equal(u.get("email"), email)
+                        )
                 )
-            )
         ).getResultList();
 
         if (users.size() != 1) {
@@ -510,15 +510,15 @@ public abstract class OAuthResource {
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
         Root<UserCode> rp = pw.from(UserCode.class);
         Predicate queryPredicate = cb.and(
-            cb.equal(rp.get("code"), code),
-            cb.greaterThan(rp.<Date>get("expires"), new Date()),
-            cb.equal(rp.get("type"), type)
+                cb.equal(rp.get("code"), code),
+                cb.greaterThan(rp.<Date>get("expires"), new Date()),
+                cb.equal(rp.get("type"), type)
         );
 
         if (!includeUsed) {
             queryPredicate = cb.and(
-                queryPredicate,
-                cb.equal(rp.get("used"), false)
+                    queryPredicate,
+                    cb.equal(rp.get("used"), false)
             );
         }
 
@@ -541,7 +541,7 @@ public abstract class OAuthResource {
         UserCode pw = new UserCode();
         pw.setExpires(expires);
         pw.setUser(user);
-        pw.setCode(RandomStringUtil.randomAlphaNumeric(64));
+        pw.setCode(RandomStringUtils.randomAlphanumeric(64));
         pw.setReferrer(referrer);
         pw.setType(type);
         pw.setExpires(expires);
@@ -584,8 +584,8 @@ public abstract class OAuthResource {
         CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = as.from(AcceptedScope.class);
         return em.createQuery(as.select(ras).where(
-            cb.equal(ras.join("clientScope").get("client"), client),
-            cb.equal(ras.get("user"), user)
+                cb.equal(ras.join("clientScope").get("client"), client),
+                cb.equal(ras.get("user"), user)
         )).getResultList();
     }
 

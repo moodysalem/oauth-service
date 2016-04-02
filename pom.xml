@@ -11,7 +11,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>1.0.8</jaxrs.lib.version>
+    <jaxrs.lib.version>2.0.2</jaxrs.lib.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
 
@@ -44,10 +44,18 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- simpler for sending e-mails -->
     <dependency>
       <groupId>org.codemonkey.simplejavamail</groupId>
       <artifactId>simple-java-mail</artifactId>
       <version>2.5.1</version>
+    </dependency>
+
+    <!-- commons lang for random utilities -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.4</version>
     </dependency>
 
     <!-- jaxrs library -->
@@ -86,6 +94,7 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- mocking external services -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -93,7 +102,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- for parsing the authorize resource DOM -->
+    <!-- for parsing the authorize resource DOM in testing -->
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>

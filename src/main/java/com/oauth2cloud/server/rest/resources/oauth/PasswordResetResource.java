@@ -14,6 +14,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
+import java.util.UUID;
 import java.util.logging.Level;
 
 @NoXFrameOptionsFeature.NoXFrame
@@ -24,13 +25,13 @@ public class PasswordResetResource extends OAuthResource {
 
     public static final String INVALID_RESET_PASSWORD_URL = "Invalid reset password URL.";
     public static final String INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL =
-        "Invalid or expired link. Please request another reset password e-mail.";
+            "Invalid or expired link. Please request another reset password e-mail.";
     public static final String PASSWORD_IS_REQUIRED_AND_WAS_NOT_INCLUDED = "Password is required and was not included.";
     public static final String AN_INTERNAL_SERVER_ERROR_PREVENTED_YOU_FROM_CHANGING_YOUR_PASSWORD =
-        "An internal server error prevented you from changing your password.";
+            "An internal server error prevented you from changing your password.";
 
     @QueryParam("applicationId")
-    Long applicationId;
+    UUID applicationId;
 
     @QueryParam("code")
     String code;
@@ -38,7 +39,7 @@ public class PasswordResetResource extends OAuthResource {
     @QueryParam("referrer")
     String referrer;
 
-    private com.oauth2cloud.server.hibernate.model.Application getApplication(Long applicationId) {
+    private com.oauth2cloud.server.hibernate.model.Application getApplication(UUID applicationId) {
         if (applicationId == null) {
             return null;
         }
@@ -130,13 +131,13 @@ public class PasswordResetResource extends OAuthResource {
 
     private void emailCode(UserCode pc) {
         String url = containerRequestContext.getUriInfo().getBaseUriBuilder()
-            .path("oauth").path("reset").replaceQuery("").queryParam("code", pc.getCode()).toString();
+                .path("oauth").path("reset").replaceQuery("").queryParam("code", pc.getCode()).toString();
         UserCodeEmailModel prem = new UserCodeEmailModel();
         prem.setUserCode(pc);
         prem.setUrl(url);
         sendEmail(pc.getUser().getApplication().getSupportEmail(), pc.getUser().getEmail(),
-            "Your password reset code from " + pc.getUser().getApplication().getName(),
-            "PasswordReset.ftl", prem);
+                "Your password reset code from " + pc.getUser().getApplication().getName(),
+                "PasswordReset.ftl", prem);
     }
 
 

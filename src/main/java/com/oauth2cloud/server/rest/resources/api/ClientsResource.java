@@ -1,15 +1,16 @@
 package com.oauth2cloud.server.rest.resources.api;
 
-import com.moodysalem.util.RandomStringUtil;
 import com.oauth2cloud.server.hibernate.model.Client;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.util.List;
+import java.util.UUID;
 
 @TokenFeature.ReadToken
 @Path(OAuth2Application.API + "/clients")
@@ -55,8 +56,8 @@ public class ClientsResource extends BaseEntityResource<Client> {
     @Override
     public void beforeCreate(Client client) {
         client.setCreator(getUser());
-        client.setIdentifier(RandomStringUtil.randomAlphaNumeric(64));
-        client.setSecret(RandomStringUtil.randomAlphaNumeric(64));
+        client.setIdentifier(RandomStringUtils.randomAlphanumeric(64));
+        client.setSecret(RandomStringUtils.randomAlphanumeric(64));
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
     String search;
 
     @QueryParam("applicationId")
-    Long applicationId;
+    UUID applicationId;
 
     @QueryParam("active")
     Boolean active;

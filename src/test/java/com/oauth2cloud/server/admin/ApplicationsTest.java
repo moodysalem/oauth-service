@@ -32,20 +32,20 @@ public class ApplicationsTest extends OAuth2Test {
             .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
             .post(Entity.json(app), com.oauth2cloud.server.hibernate.model.Application.class);
 
-        assert app.getId() != 0;
+        assert app.getId() != null;
         assert app.getName().equals("Test App");
         assert app.getFaviconUrl() == null;
 
         // test edit
         app.setFaviconUrl(faviconUrl);
-        app = target(OAuth2Application.API).path("applications").path(Long.toString(app.getId()))
+        app = target(OAuth2Application.API).path("applications").path(app.getId().toString())
             .request()
             .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
             .put(Entity.json(app), com.oauth2cloud.server.hibernate.model.Application.class);
 
         assert app.getFaviconUrl().equals(faviconUrl);
 
-        assert target(OAuth2Application.API).path("applications").path(Long.toString(app.getId()))
+        assert target(OAuth2Application.API).path("applications").path(app.getId().toString())
             .request()
             .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
             .delete().getStatus() == 403;

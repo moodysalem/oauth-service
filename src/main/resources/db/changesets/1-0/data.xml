@@ -1,14 +1,14 @@
 <databaseChangeLog
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
   <changeSet id="Required Data" author="moody.salem">
     <!-- this is the oauth administrative interface -->
     <insert tableName="Application">
-      <column name="id">1</column>
-      <column name="name">OAuth2 Cloud</column>
-      <column name="description">An OAuth2 Application as a service.</column>
+      <column name="id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
+      <column name="name">OAuth2Cloud</column>
+      <column name="description">OAuth2 as a service</column>
       <column name="supportEmail">moody@oauth2cloud.com</column>
       <column name="facebookAppId">725381047606159</column>
       <column name="googleClientId">520864329427-r8nf78v9oiqatdhca5sumqjn39q9q2hs.apps.googleusercontent.com</column>
@@ -16,13 +16,16 @@
       <column name="stylesheetUrl">
         https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/cosmo/bootstrap.min.css
       </column>
+      <column name="faviconUrl">
+        https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-chain.ico?v=2
+      </column>
       <column name="publicClientRegistration" valueBoolean="true"/>
     </insert>
 
-    <!-- create the admin user of app 1 -->
+    <!-- create the admin user of app -->
     <insert tableName="User">
-      <column name="id">1</column>
-      <column name="applicationId">1</column>
+      <column name="id">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
+      <column name="applicationId">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="firstName">Moody</column>
       <column name="lastName">Salem</column>
       <column name="email">moody.salem@gmail.com</column>
@@ -30,43 +33,43 @@
       <column name="verified" valueBoolean="true"/>
     </insert>
 
-    <!-- set the owner to app 1 -->
+    <!-- set the owner to app -->
     <update tableName="Application">
-      <column name="ownerId" valueNumeric="1"/>
-      <where>id=1</where>
+      <column name="ownerId">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
+      <where>id='9966e7e3-ac4f-4d8e-9710-2971450cb504'</where>
     </update>
 
     <!-- complete schema by making sure applications cannot be without owners -->
-    <addNotNullConstraint tableName="Application" columnName="ownerId" columnDataType="BIGINT"/>
+    <addNotNullConstraint tableName="Application" columnName="ownerId" columnDataType="${UUID_TYPE}"/>
 
     <!-- admin interface -->
     <insert tableName="Client">
-      <column name="id">1</column>
+      <column name="id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="name">Administration</column>
       <column name="type">PUBLIC</column>
       <column name="identifier">6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4</column>
       <column name="secret">0457a1fe452b7f32e4b84db9db139d9a572bad7599544ac368a079bbe8069714</column>
-      <column name="applicationId">1</column>
+      <column name="applicationId">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="tokenTtl">86400</column>
-      <column name="creatorId">1</column>
+      <column name="creatorId">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
     </insert>
 
     <!-- only allow implicit flow -->
     <insert tableName="Client_Flow">
-      <column name="clientId">1</column>
+      <column name="clientId">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="flow">IMPLICIT</column>
     </insert>
 
     <!-- allow https://oauth2cloud.com -->
     <insert tableName="Client_URI">
-      <column name="clientId">1</column>
+      <column name="clientId">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="uri">https://oauth2cloud.com</column>
     </insert>
 
     <!-- create scopes we use in the api -->
     <insert tableName="Scope">
-      <column name="id">1</column>
-      <column name="applicationId">1</column>
+      <column name="id">fcdafa69-6bd1-4afa-9dd9-3526e784b86d</column>
+      <column name="applicationId">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_applications</column>
       <column name="displayName">Manage Applications</column>
       <column name="description">
@@ -75,8 +78,8 @@
       <column name="requiresApprovalFromApplication" valueBoolean="true"/>
     </insert>
     <insert tableName="Scope">
-      <column name="id">2</column>
-      <column name="applicationId">1</column>
+      <column name="id">3b00548d-80be-492e-81fe-dfee450dfc25</column>
+      <column name="applicationId">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_clients</column>
       <column name="displayName">Manage Clients</column>
       <column name="description">
@@ -85,8 +88,8 @@
       <column name="requiresApprovalFromApplication" valueBoolean="true"/>
     </insert>
     <insert tableName="Scope">
-      <column name="id">3</column>
-      <column name="applicationId">1</column>
+      <column name="id">b0e674d6-6d36-4bdd-9226-05496af8bef1</column>
+      <column name="applicationId">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_client_scopes</column>
       <column name="displayName">Manage Client Scopes</column>
       <column name="description">
@@ -95,8 +98,8 @@
       <column name="requiresApprovalFromApplication" valueBoolean="true"/>
     </insert>
     <insert tableName="Scope">
-      <column name="id">4</column>
-      <column name="applicationId">1</column>
+      <column name="id">463057d0-9117-4104-83c2-f621b2bc623a</column>
+      <column name="applicationId">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_scopes</column>
       <column name="displayName">Manage Scopes</column>
       <column name="description">
@@ -105,8 +108,8 @@
       <column name="requiresApprovalFromApplication" valueBoolean="true"/>
     </insert>
     <insert tableName="Scope">
-      <column name="id">5</column>
-      <column name="applicationId">1</column>
+      <column name="id">c6c42fce-323c-4682-94d0-885fbc13f0d4</column>
+      <column name="applicationId">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_users</column>
       <column name="displayName">Manage Users</column>
       <column name="description">
@@ -117,60 +120,44 @@
 
     <!-- give it all the scopes -->
     <insert tableName="ClientScope">
-      <column name="clientId">1</column>
-      <column name="scopeId">1</column>
+      <column name="id">455e6e2b-34f8-40ea-82a5-6902945c55c0</column>
+      <column name="clientId">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
+      <column name="scopeId">fcdafa69-6bd1-4afa-9dd9-3526e784b86d</column>
       <column name="priority">ALWAYS</column>
       <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="ClientScope">
-      <column name="clientId">1</column>
-      <column name="scopeId">2</column>
+      <column name="id">f92e7d68-754c-45f5-85d4-a01a7f5f721d</column>
+      <column name="clientId">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
+      <column name="scopeId">3b00548d-80be-492e-81fe-dfee450dfc25</column>
       <column name="priority">ALWAYS</column>
       <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="ClientScope">
-      <column name="clientId">1</column>
-      <column name="scopeId">3</column>
+      <column name="id">e87648ae-45ff-4923-a066-3ee689712eb4</column>
+      <column name="clientId">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
+      <column name="scopeId">b0e674d6-6d36-4bdd-9226-05496af8bef1</column>
       <column name="priority">ALWAYS</column>
       <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="ClientScope">
-      <column name="clientId">1</column>
-      <column name="scopeId">4</column>
+      <column name="id">12b3072f-c64c-4c7a-98ff-b32dc7a6d402</column>
+      <column name="clientId">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
+      <column name="scopeId">463057d0-9117-4104-83c2-f621b2bc623a</column>
       <column name="priority">ALWAYS</column>
       <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="ClientScope">
-      <column name="clientId">1</column>
-      <column name="scopeId">5</column>
+      <column name="id">3c2329cd-47c8-4baa-8f76-14c8ff159638</column>
+      <column name="clientId">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
+      <column name="scopeId">c6c42fce-323c-4682-94d0-885fbc13f0d4</column>
       <column name="priority">ALWAYS</column>
       <column name="approved" valueBoolean="true"/>
-    </insert>
-
-  </changeSet>
-
-
-  <changeSet id="Testing Data" author="moody.salem" context="test">
-    <insert tableName="Client_URI">
-      <column name="clientId">1</column>
-      <column name="uri">http://localhost:8080</column>
-    </insert>
-    <insert tableName="Client_URI">
-      <column name="clientId">1</column>
-      <column name="uri">http://localhost:3000</column>
     </insert>
   </changeSet>
-
-  <changeSet id="set favicon for application 1" author="moody.salem">
-    <update tableName="Application">
-      <column name="faviconUrl" value="https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-chain.ico"/>
-      <where>id = 1</where>
-    </update>
-  </changeSet>
-
 
 </databaseChangeLog>

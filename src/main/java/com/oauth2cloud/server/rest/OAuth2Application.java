@@ -21,6 +21,7 @@ public class OAuth2Application extends BaseApplication {
     public OAuth2Application() {
         super();
 
+
         packages("com.oauth2cloud.server.rest");
 
         register(new AbstractBinder() {
@@ -28,31 +29,24 @@ public class OAuth2Application extends BaseApplication {
             protected void configure() {
                 // this is used to talk to the DB via JPA entity manager
                 bindFactory(new JAXRSEntityManagerFactory(
-                    System.getProperty("JDBC_CONNECTION_STRING"),
-                    System.getProperty("JDBC_CONNECTION_USERNAME"),
-                    System.getProperty("JDBC_CONNECTION_PASSWORD"),
-                    "oauth-service",
-                    "db/master-changelog.xml",
-                    System.getProperty("DEBUG") != null,
-                    System.getProperty("LIQUIBASE_CONTEXT", "")
+                        System.getProperty("JDBC_CONNECTION_STRING"),
+                        System.getProperty("JDBC_CONNECTION_USERNAME"),
+                        System.getProperty("JDBC_CONNECTION_PASSWORD"),
+                        "oauth-service",
+                        "db/master-changelog.xml",
+                        System.getProperty("DEBUG") != null,
+                        false,
+                        System.getProperty("LIQUIBASE_CONTEXT", "prod"),
+                        null
                 )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
-
-                // get the port configuration
-                int port = 25;
-                if (System.getProperty("SMTP_PORT") != null) {
-                    try {
-                        port = Integer.parseInt(System.getProperty("SMTP_PORT"));
-                    } catch (NumberFormatException ignored) {
-                    }
-                }
 
                 // create the mailer that uses amazon
                 Mailer amazonMailer = new Mailer(
-                    System.getProperty("SMTP_HOST"),
-                    port,
-                    System.getProperty("SMTP_USERNAME"),
-                    System.getProperty("SMTP_PASSWORD"),
-                    TransportStrategy.SMTP_TLS
+                        System.getProperty("SMTP_HOST"),
+                        getMailPort(),
+                        System.getProperty("SMTP_USERNAME"),
+                        System.getProperty("SMTP_PASSWORD"),
+                        TransportStrategy.SMTP_TLS
                 );
 
                 Properties addtl = new Properties();
@@ -69,6 +63,19 @@ public class OAuth2Application extends BaseApplication {
                 bind(freemarkerConfiguration).to(Configuration.class);
             }
         });
+    }
+
+    private int getMailPort() {
+        // get the port configuration
+        int port = 25;
+        String portString = System.getProperty("SMTP_PORT");
+        if (portString != null) {
+            try {
+                port = Integer.parseInt(portString);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return port;
     }
 
     @Override

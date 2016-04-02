@@ -46,7 +46,7 @@ public class AuthorizeTest extends OAuth2Test {
     public void testAuthorizeEndpoint() {
         Response auth = target(OAuth2Application.OAUTH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
-            .queryParam("redirect_uri", "http://localhost:8080")
+            .queryParam("redirect_uri", "https://oauth2cloud.com")
             .queryParam("response_type", "token")
             .request()
             .get();
@@ -58,7 +58,7 @@ public class AuthorizeTest extends OAuth2Test {
 
         Element head = doc.select("head").first();
         String fi = head.select("link[rel=\"icon\"]").first().attr("href");
-        assert "https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-chain.ico".equals(fi);
+        assert "https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-chain.ico?v=2".equals(fi);
 
         Elements ss = head.select("link[rel=\"stylesheet\"]");
         // bootstrap stylesheet
@@ -72,7 +72,7 @@ public class AuthorizeTest extends OAuth2Test {
             .equals(ss.get(2).attr("href"));
 
         // page title
-        assert "OAuth2 Cloud Log In"
+        assert "OAuth2Cloud Log In"
             .equals(head.select("title").text());
 
     }

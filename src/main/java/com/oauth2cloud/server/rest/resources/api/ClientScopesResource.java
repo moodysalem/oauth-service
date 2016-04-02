@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.util.List;
+import java.util.UUID;
 
 @TokenFeature.ReadToken
 @Path(OAuth2Application.API + "/clientscopes")
@@ -27,7 +28,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENT_SCOPES);
         Client c = null;
-        if (clientScope.getClient() != null && clientScope.getClient().getId() > 0) {
+        if (clientScope.getClient() != null && clientScope.getClient().getId() != null) {
             c = em.find(Client.class, clientScope.getClient().getId());
         }
         return c != null && c.isActive() && c.getApplication().isActive() &&
@@ -64,10 +65,10 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
     }
 
     @QueryParam("clientId")
-    Long clientId;
+    UUID clientId;
 
     @QueryParam("scopeId")
-    Long scopeId;
+    UUID scopeId;
 
     @QueryParam("active")
     Boolean active;

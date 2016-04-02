@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.UUID;
 
 @TokenFeature.ReadToken
 @Path(OAuth2Application.API + "/users")
@@ -92,7 +93,7 @@ public class UsersResource extends BaseEntityResource<User> {
     String search;
 
     @QueryParam("applicationId")
-    Long applicationId;
+    UUID applicationId;
 
     @QueryParam("active")
     Boolean active;

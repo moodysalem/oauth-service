@@ -3,28 +3,23 @@ package com.oauth2cloud.server.rest.resources.api;
 import com.moodysalem.hibernate.model.BaseEntity;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.resources.EntityResource;
-import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.hibernate.model.Scope;
 import com.oauth2cloud.server.hibernate.model.Token;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.rest.filter.TokenFeature;
-import com.oauth2cloud.server.rest.models.PublicScope;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+
+@SuppressWarnings("WeakerAccess")
 public abstract class BaseEntityResource<T extends BaseEntity> extends EntityResource<T> {
     public static final String SORT = "sort";
     public static final String PIPE = "|";
@@ -79,7 +74,7 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
     }
 
     @Override
-    public String getFirstRecordQueryParameterName() {
+    public String getStartQueryParameterName() {
         return START;
     }
 
@@ -89,17 +84,12 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
     }
 
     @Override
-    public int getMaxPerPage() {
+    public Integer getMaxPerPage() {
         return 100;
     }
 
     @Override
-    public int getDefaultRecordsPerPage() {
-        return 20;
-    }
-
-    @Override
-    public String getFirstRecordHeader() {
+    public String getStartHeader() {
         return X_START;
     }
 
@@ -132,11 +122,6 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
     }
 
     @Override
-    protected int getMaxBatchDeleteSize() {
-        return getMaxPerPage();
-    }
-
-    @Override
     public boolean requiresLogin() {
         return true;
     }
@@ -149,7 +134,7 @@ public abstract class BaseEntityResource<T extends BaseEntity> extends EntityRes
     private Set<String> scopes;
 
     /**
-     * Boolean about whether user has a scope
+     * Determine whether a user has a scope
      *
      * @param scope
      * @return

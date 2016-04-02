@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.mockito.Matchers.any;
@@ -33,8 +34,11 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 public class OAuth2Test extends BaseTest {
-    public static final String AUTH_HEADER = "Authorization";
-    public static final String CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
+    protected static final String AUTH_HEADER = "Authorization";
+    protected static final String CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
+    protected static final UUID APPLICATION_ID = UUID.fromString("9966e7e3-ac4f-4d8e-9710-2971450cb504");
+
+    private static JAXRSEntityManagerFactory jrem;
 
     private final List<Email> sentEmails = new ArrayList<>();
 
@@ -61,21 +65,29 @@ public class OAuth2Test extends BaseTest {
         ba.register(new AbstractBinder() {
             @Override
             protected void configure() {
-                // this is used to talk to the DB via JPA entity manager
-                bindFactory(new JAXRSEntityManagerFactory(
-                    "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
-                    "sa",
-                    "sa",
-                    "oauth-service",
-                    "db/master-changelog.xml",
-                    true,
-                    "test"
-                )).to(EntityManager.class).in(RequestScoped.class).proxy(true);
+                if (jrem == null) {
+                    jrem = new JAXRSEntityManagerFactory(
+                            "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
+                            "sa", "sa",
+                            "oauth-service",
+                            "db/master-changelog.xml",
+                            // show sql
+                            true,
+                            false,
+                            // context
+                            "test",
+                            null
+                    );
+                }
 
+                // this is used to talk to the DB via JPA entity manager
+                bindFactory(jrem).to(EntityManager.class).in(RequestScoped.class).proxy(true);
+
+                // this is used to send e-mails
                 Mailer m = mock(Mailer.class);
                 doAnswer(invocationOnMock -> sentEmails.add((Email) invocationOnMock.getArguments()[0]))
-                    .when(m)
-                    .sendMail(any());
+                        .when(m)
+                        .sendMail(any());
                 bind(m).to(Mailer.class);
 
                 // this is used for generating e-mails from freemarker templates
@@ -99,17 +111,17 @@ public class OAuth2Test extends BaseTest {
 
         Form up = new Form();
         up.param("email", "moody.salem@gmail.com")
-            .param("password", "moody")
-            .param("action", "login");
+                .param("password", "moody")
+                .param("action", "login");
 
         Response loginScreen = target(OAuth2Application.OAUTH)
-            .property(ClientProperties.FOLLOW_REDIRECTS, false)
-            .path("authorize")
-            .queryParam("client_id", CLIENT_ID)
-            .queryParam("redirect_uri", "http://localhost:8080")
-            .queryParam("response_type", "token")
-            .request()
-            .post(Entity.form(up));
+                .property(ClientProperties.FOLLOW_REDIRECTS, false)
+                .path("authorize")
+                .queryParam("client_id", CLIENT_ID)
+                .queryParam("redirect_uri", "http://localhost:8080")
+                .queryParam("response_type", "token")
+                .request()
+                .post(Entity.form(up));
 
         assert loginScreen.getStatus() == 302;
 
@@ -126,8 +138,8 @@ public class OAuth2Test extends BaseTest {
                 String[] nv = pair.split(Pattern.quote("="));
                 if (nv.length == 2) {
                     values.putSingle(
-                        URLDecoder.decode(nv[0], "UTF-8"),
-                        URLDecoder.decode(nv[1], "UTF-8")
+                            URLDecoder.decode(nv[0], "UTF-8"),
+                            URLDecoder.decode(nv[1], "UTF-8")
                     );
                 }
             }

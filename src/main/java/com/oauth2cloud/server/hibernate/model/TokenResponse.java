@@ -3,6 +3,8 @@ package com.oauth2cloud.server.hibernate.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.UUID;
+
 /**
  * The OAauth2 spec for an token response
  */
@@ -52,7 +54,7 @@ public class TokenResponse {
     private UserDetails userDetails;
 
     @JsonProperty("application_id")
-    private Long applicationId;
+    private UUID applicationId;
 
     @JsonProperty("provider")
     private String providerName;
@@ -112,11 +114,11 @@ public class TokenResponse {
         this.userDetails = UserDetails.from(user);
     }
 
-    public Long getApplicationId() {
+    public UUID getApplicationId() {
         return applicationId;
     }
 
-    public void setApplicationId(Long applicationId) {
+    public void setApplicationId(UUID applicationId) {
         this.applicationId = applicationId;
     }
 

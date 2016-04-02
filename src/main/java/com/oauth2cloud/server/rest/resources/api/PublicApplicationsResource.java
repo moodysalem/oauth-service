@@ -19,6 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @TokenFeature.ReadToken
@@ -66,7 +67,7 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
 
         if (r.getStatus() == 200) {
             return Response.fromResponse(r).entity(
-                ((List<Application>) (r.getEntity())).stream().map(PublicApplication::new).collect(Collectors.toList())
+                    ((List<Application>) (r.getEntity())).stream().map(PublicApplication::new).collect(Collectors.toList())
             ).build();
         }
 
@@ -74,12 +75,12 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
     }
 
     @Override
-    public Response get(long id) {
+    public Response get(UUID id) {
         Response r = super.get(id);
 
         if (r.getStatus() == 200) {
             return Response.fromResponse(r).entity(
-                new PublicApplication((Application) r.getEntity())
+                    new PublicApplication((Application) r.getEntity())
             ).build();
         }
 
@@ -109,7 +110,7 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
      */
     @GET
     @Path("{id}/info")
-    public Response getRegistrationInfo(@PathParam("id") long applicationId) {
+    public Response getRegistrationInfo(@PathParam("id") UUID applicationId) {
         PublicApplication app = new PublicApplication(getApplication(applicationId));
 
         RegisterClientInfo rci = new RegisterClientInfo();
@@ -142,12 +143,12 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
      * @param applicationId id of applicatino
      * @return application if visible
      */
-    private Application getApplication(long applicationId) {
+    private Application getApplication(UUID applicationId) {
         Application app = em.find(Application.class, applicationId);
 
         if (app == null || !app.isPublicClientRegistration() || !app.isActive()) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND,
-                "A public application with the provided ID could not be found.");
+                    "A public application with the provided ID could not be found.");
         }
 
         return app;
@@ -159,15 +160,15 @@ public class PublicApplicationsResource extends BaseEntityResource<Application> 
      * @param applicationId the ID of the application to get the list of scopes for
      * @return a list of scopes
      */
-    private List<Scope> getScopes(long applicationId) {
+    private List<Scope> getScopes(UUID applicationId) {
         CriteriaQuery<Scope> scopes = cb.createQuery(Scope.class);
 
         Root<Scope> root = scopes.from(Scope.class);
 
         scopes.select(root).where(
-            cb.equal(root.join("application").get("id"), applicationId),
-            cb.equal(root.get("requestable"), true),
-            cb.equal(root.get("active"), true)
+                cb.equal(root.join("application").get("id"), applicationId),
+                cb.equal(root.get("requestable"), true),
+                cb.equal(root.get("active"), true)
         );
 
         return em.createQuery(scopes).getResultList();

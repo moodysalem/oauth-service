@@ -381,7 +381,7 @@ public class TokenResource extends OAuthResource {
      */
     @POST
     @Path("info")
-    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId, @FormParam("application_id") Long applicationId) {
+    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId, @FormParam("application_id") UUID applicationId) {
         if (token == null || (applicationId == null && clientId == null)) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST, "'token' and the 'application_id' or 'client_id' form parameters are required.");
         }
