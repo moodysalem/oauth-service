@@ -48,6 +48,8 @@ public class RegisterTest extends OAuth2Test {
         Response verify = client().target(uri).request().get();
         assert verify.getStatus() == 200;
         assert Jsoup.parse(verify.readEntity(String.class)).select(".alert.alert-success").size() > 0;
+
+        assert getToken("moody.salem+test@gmail.com", "moody").getAccessToken() != null;
     }
 
 }
