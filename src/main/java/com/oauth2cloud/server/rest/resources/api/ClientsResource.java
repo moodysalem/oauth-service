@@ -1,6 +1,8 @@
 package com.oauth2cloud.server.rest.resources.api;
 
+import com.oauth2cloud.server.hibernate.model.Application_;
 import com.oauth2cloud.server.hibernate.model.Client;
+import com.oauth2cloud.server.hibernate.model.Client_;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -79,19 +81,20 @@ public class ClientsResource extends BaseEntityResource<Client> {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENTS);
 
-        list.add(cb.equal(root.join("application").get("owner"), getUser()));
-        list.add(cb.equal(root.get("active"), true));
-        list.add(cb.equal(root.join("application").get("active"), true));
+        list.add(cb.equal(root.join(Client_.application).get(Application_.owner), getUser()));
+        list.add(cb.equal(root.get(Client_.active), true));
+        list.add(cb.equal(root.join(Client_.application).get(Application_.active), true));
 
         if (applicationId != null) {
-            list.add(cb.equal(root.join("application").get("id"), applicationId));
+            list.add(cb.equal(root.join(Client_.application).get(Application_.id), applicationId));
         }
 
         if (search != null) {
             Predicate toAdd = null;
             for (String s : search.split(" ")) {
                 if (s.trim().length() > 0) {
-                    Predicate sp = cb.like(cb.upper(root.get("name")), "%" + s.trim().toUpperCase() + "%");
+                    Predicate sp = cb.like(cb.upper(root.get(Client_.name)),
+                            "%" + s.trim().toUpperCase() + "%");
                     toAdd = toAdd == null ? sp : cb.and(sp, toAdd);
                 }
             }
@@ -101,7 +104,7 @@ public class ClientsResource extends BaseEntityResource<Client> {
         }
 
         if (active != null) {
-            list.add(cb.equal(root.get("active"), active));
+            list.add(cb.equal(root.get(Client_.active), active));
         }
     }
 

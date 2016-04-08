@@ -350,10 +350,10 @@ public class TokenResource extends OAuthResource {
 
     private User getUser(String username, Client client) {
         CriteriaQuery<User> uq = cb.createQuery(User.class);
-        Root<User> ur = uq.from(User.class);
-        uq.select(ur).where(
-                cb.equal(ur.get("email"), username),
-                cb.equal(ur.join("application"), client.getApplication())
+        Root<User> userRoot = uq.from(User.class);
+        uq.select(userRoot).where(
+                cb.equal(userRoot.get(User_.email), username),
+                cb.equal(userRoot.join(User_.application), client.getApplication())
         );
         List<User> users = em.createQuery(uq).getResultList();
         return users.size() == 1 ? users.get(0) : null;

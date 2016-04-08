@@ -1,6 +1,8 @@
 package com.oauth2cloud.server.rest.resources.api;
 
+import com.oauth2cloud.server.hibernate.model.Application_;
 import com.oauth2cloud.server.hibernate.model.Scope;
+import com.oauth2cloud.server.hibernate.model.Scope_;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 
@@ -71,14 +73,14 @@ public class ScopesResource extends BaseEntityResource<Scope> {
         mustBeLoggedIn();
         checkScope(MANAGE_SCOPES);
 
-        list.add(cb.equal(root.join("application").get("owner"), getUser()));
+        list.add(cb.equal(root.join(Scope_.application).get(Application_.owner), getUser()));
 
         if (applicationId != null) {
-            list.add(cb.equal(root.join("application").get("id"), applicationId));
+            list.add(cb.equal(root.join(Scope_.application).get(Application_.id), applicationId));
         }
 
         if (active != null) {
-            list.add(cb.equal(root.get("active"), true));
+            list.add(cb.equal(root.get(Scope_.active), true));
         }
     }
 

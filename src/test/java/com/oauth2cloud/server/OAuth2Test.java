@@ -4,11 +4,11 @@ import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.moodysalem.jaxrs.lib.test.BaseTest;
 import com.oauth2cloud.server.hibernate.model.TokenResponse;
+import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
-import org.codemonkey.simplejavamail.Email;
 import org.codemonkey.simplejavamail.Mailer;
+import org.codemonkey.simplejavamail.email.Email;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.process.internal.RequestScoped;
@@ -67,8 +67,8 @@ public class OAuth2Test extends BaseTest {
             protected void configure() {
                 if (jrem == null) {
                     jrem = JAXRSEntityManagerFactory.builder("main-em")
-                            .withUrl("jdbc:mysql://localhost:3306/oauthtest")
-//                            .withUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
+//                            .withUrl("jdbc:mysql://localhost:3306/oauthtest")
+                            .withUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
                             .withUser("root")
                             .withPersistenceUnit("oauth-service")
                             .withChangelogFile("db/master-changelog.xml")
@@ -80,18 +80,14 @@ public class OAuth2Test extends BaseTest {
                 // this is used to talk to the DB via JPA entity manager
                 bindFactory(jrem).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
-                // this is used to send e-mails
+                // this is used to send e-mails and record the email to our list of sent e-mails
                 Mailer m = mock(Mailer.class);
                 doAnswer(invocationOnMock -> sentEmails.add((Email) invocationOnMock.getArguments()[0]))
-                        .when(m)
-                        .sendMail(any());
+                    .when(m).sendMail(any(Email.class));
+
                 bind(m).to(Mailer.class);
 
-                // this is used for generating e-mails from freemarker templates
-                Configuration freemarkerConfiguration = new Configuration(Configuration.VERSION_2_3_23);
-                freemarkerConfiguration.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));
-                freemarkerConfiguration.setDefaultEncoding("UTF-8");
-                bind(freemarkerConfiguration).to(Configuration.class);
+                bind(new EmailTemplateFreemarkerConfiguration()).to(Configuration.class);
             }
         });
 
@@ -100,15 +96,22 @@ public class OAuth2Test extends BaseTest {
         return ba;
     }
 
+    public static final String ADMIN_USER = "moody.salem@gmail.com";
+    public static final String ADMIN_PASSWORD = "moody";
+
+    public TokenResponse getToken() {
+        return getToken(ADMIN_USER, ADMIN_PASSWORD);
+    }
+
     /**
      * This method returns a TokenResponse corresponding to a log in to the admin application
      * from the administrative user
      */
-    public TokenResponse getToken() {
+    public TokenResponse getToken(String email, String password) {
 
         Form up = new Form();
-        up.param("email", "moody.salem@gmail.com")
-                .param("password", "moody")
+        up.param("email", email)
+                .param("password", password)
                 .param("action", "login");
 
         Response loginScreen = target(OAuth2Application.OAUTH)

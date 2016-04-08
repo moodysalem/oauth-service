@@ -6,8 +6,8 @@ import com.oauth2cloud.server.rest.models.ErrorModel;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.codemonkey.simplejavamail.Email;
 import org.codemonkey.simplejavamail.Mailer;
+import org.codemonkey.simplejavamail.email.Email;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.annotation.PostConstruct;
@@ -74,24 +74,24 @@ public abstract class OAuthResource {
             return null;
         }
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        Root<Token> t = tq.from(Token.class);
+        Root<Token> tokenRoot = tq.from(Token.class);
 
         Predicate p = cb.and(
-                cb.equal(t.get("token"), token),
-                t.get("type").in(types),
-                cb.greaterThan(t.<Date>get("expires"), new Date()),
+                cb.equal(tokenRoot.get(Token_.token), token),
+                tokenRoot.get(Token_.type).in(types),
+                cb.greaterThan(tokenRoot.get(Token_.expires), new Date()),
                 cb.or(
-                        cb.equal(t.join("user").get("active"), true),
-                        cb.isNull(t.get("user"))
+                        cb.equal(tokenRoot.join(Token_.user).get(User_.active), true),
+                        cb.isNull(tokenRoot.get(Token_.user))
                 ),
-                cb.equal(t.join("client").get("active"), true),
-                cb.equal(t.join("client").join("application").get("active"), true)
+                cb.equal(tokenRoot.join(Token_.client).get(Client_.active), true),
+                cb.equal(tokenRoot.join(Token_.client).join(Client_.application).get(Application_.active), true)
         );
         if (client != null) {
-            p = cb.and(p, cb.equal(t.get("client"), client));
+            p = cb.and(p, cb.equal(tokenRoot.get(Token_.client), client));
         }
 
-        List<Token> tkns = em.createQuery(tq.select(t).where(p)).getResultList();
+        List<Token> tkns = em.createQuery(tq.select(tokenRoot).where(p)).getResultList();
         return tkns.size() == 1 ? tkns.get(0) : null;
     }
 
@@ -175,12 +175,12 @@ public abstract class OAuthResource {
         }
 
         CriteriaQuery<Client> cq = cb.createQuery(Client.class);
-        Root<Client> ct = cq.from(Client.class);
-        cq.select(ct);
+        Root<Client> clientRoot = cq.from(Client.class);
+        cq.select(clientRoot);
         cq.where(
-                cb.equal(ct.get("identifier"), clientId),
-                cb.equal(ct.get("active"), true),
-                cb.equal(ct.join("application").get("active"), true)
+                cb.equal(clientRoot.get(Client_.identifier), clientId),
+                cb.equal(clientRoot.get(Client_.active), true),
+                cb.equal(clientRoot.join(Client_.application).get(Application_.active), true)
         );
 
         List<Client> cts = em.createQuery(cq).getResultList();
@@ -224,8 +224,8 @@ public abstract class OAuthResource {
         CriteriaQuery<AcceptedScope> cas = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = cas.from(AcceptedScope.class);
         List<AcceptedScope> las = em.createQuery(cas.select(ras).where(cb.and(
-                cb.equal(ras.get("user"), user),
-                cb.equal(ras.get("clientScope"), clientScope)
+                cb.equal(ras.get(AcceptedScope_.user), user),
+                cb.equal(ras.get(AcceptedScope_.clientScope), clientScope)
         ))).getResultList();
         if (las.size() == 1) {
             return las.get(0);
@@ -271,12 +271,12 @@ public abstract class OAuthResource {
      */
     protected List<ClientScope> getScopes(Client client, List<String> scopes) {
         CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
-        Root<ClientScope> rcs = cq.from(ClientScope.class);
-        Predicate p = cb.and(cb.equal(rcs.get("client"), client), cb.equal(rcs.get("approved"), true));
+        Root<ClientScope> clientScopeRoot = cq.from(ClientScope.class);
+        Predicate p = cb.and(cb.equal(clientScopeRoot.get(ClientScope_.client), client), cb.equal(clientScopeRoot.get(ClientScope_.approved), true));
         if (scopes != null && scopes.size() > 0) {
-            p = cb.and(p, rcs.join("scope").get("name").in(scopes));
+            p = cb.and(p, clientScopeRoot.join(ClientScope_.scope).get(Scope_.name).in(scopes));
         }
-        return em.createQuery(cq.select(rcs).where(p)).getResultList();
+        return em.createQuery(cq.select(clientScopeRoot).where(p)).getResultList();
     }
 
 
@@ -346,13 +346,13 @@ public abstract class OAuthResource {
      */
     private LoginCookie getLoginCookie(String secret, Client client) {
         CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
-        Root<LoginCookie> rlc = lc.from(LoginCookie.class);
-        lc.select(rlc).where(
-                cb.equal(rlc.get("secret"), secret),
-                cb.greaterThan(rlc.<Date>get("expires"), new Date()),
-                cb.equal(rlc.join("user").get("application"), client.getApplication()),
-                cb.equal(rlc.join("user").get("active"), true),
-                cb.equal(rlc.join("user").join("application").get("active"), true)
+        Root<LoginCookie> loginCookieRoot = lc.from(LoginCookie.class);
+        lc.select(loginCookieRoot).where(
+                cb.equal(loginCookieRoot.get(LoginCookie_.secret), secret),
+                cb.greaterThan(loginCookieRoot.get(LoginCookie_.expires), new Date()),
+                cb.equal(loginCookieRoot.join(LoginCookie_.user).get(User_.application), client.getApplication()),
+                cb.equal(loginCookieRoot.join(LoginCookie_.user).get(User_.active), true),
+                cb.equal(loginCookieRoot.join(LoginCookie_.user).join(User_.application).get(Application_.active), true)
         );
         List<LoginCookie> lcL = em.createQuery(lc).getResultList();
         return (lcL.size() == 1) ? lcL.get(0) : null;
@@ -437,8 +437,8 @@ public abstract class OAuthResource {
         List<User> users = em.createQuery(
                 uq.select(u).where(
                         cb.and(
-                                cb.equal(u.get("application"), application),
-                                cb.equal(u.get("email"), email)
+                                cb.equal(u.get(User_.application), application),
+                                cb.equal(u.get(User_.email), email)
                         )
                 )
         ).getResultList();
@@ -508,21 +508,21 @@ public abstract class OAuthResource {
             return null;
         }
         CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
-        Root<UserCode> rp = pw.from(UserCode.class);
+        Root<UserCode> userCodeRoot = pw.from(UserCode.class);
         Predicate queryPredicate = cb.and(
-                cb.equal(rp.get("code"), code),
-                cb.greaterThan(rp.<Date>get("expires"), new Date()),
-                cb.equal(rp.get("type"), type)
+                cb.equal(userCodeRoot.get(UserCode_.code), code),
+                cb.greaterThan(userCodeRoot.get(UserCode_.expires), new Date()),
+                cb.equal(userCodeRoot.get(UserCode_.type), type)
         );
 
         if (!includeUsed) {
             queryPredicate = cb.and(
                     queryPredicate,
-                    cb.equal(rp.get("used"), false)
+                    cb.equal(userCodeRoot.get(UserCode_.used), false)
             );
         }
 
-        pw.select(rp).where(queryPredicate);
+        pw.select(userCodeRoot).where(queryPredicate);
         List<UserCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;
     }
@@ -584,8 +584,8 @@ public abstract class OAuthResource {
         CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
         Root<AcceptedScope> ras = as.from(AcceptedScope.class);
         return em.createQuery(as.select(ras).where(
-                cb.equal(ras.join("clientScope").get("client"), client),
-                cb.equal(ras.get("user"), user)
+                cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.client), client),
+                cb.equal(ras.get(AcceptedScope_.user), user)
         )).getResultList();
     }
 

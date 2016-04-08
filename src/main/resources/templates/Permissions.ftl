@@ -42,9 +42,9 @@
                             <#else>
                                 <div class="toggle-checkbox">
                                     <input type="checkbox" checked
-                                           id="SCOPE${cScope.scope.id?c}"
-                                           name="SCOPE${cScope.scope.id?c}"/>
-                                    <label for="SCOPE${cScope.scope.id?c}"></label>
+                                           id="SCOPE${cScope.scope.id}"
+                                           name="SCOPE${cScope.scope.id}"/>
+                                    <label for="SCOPE${cScope.scope.id}"></label>
                                 </div>
                             </#if>
                         </div>

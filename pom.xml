@@ -11,7 +11,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>2.1.0</jaxrs.lib.version>
+    <jaxrs.lib.version>2.1.1</jaxrs.lib.version>
+    <hibernate.version>5.1.0.Final</hibernate.version>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
 
@@ -48,7 +49,7 @@
     <dependency>
       <groupId>org.codemonkey.simplejavamail</groupId>
       <artifactId>simple-java-mail</artifactId>
-      <version>2.5.1</version>
+      <version>3.0.1</version>
     </dependency>
 
     <!-- commons lang for random utilities -->
@@ -108,6 +109,13 @@
       <artifactId>jsoup</artifactId>
       <version>1.8.3</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- the metamodel generator -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-jpamodelgen</artifactId>
+      <version>${hibernate.version}</version>
     </dependency>
   </dependencies>
 

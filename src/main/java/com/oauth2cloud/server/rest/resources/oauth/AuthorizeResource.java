@@ -57,7 +57,7 @@ public class AuthorizeResource extends OAuthResource {
     List<String> scopes;
 
     /**
-     * An extra query parameter that can be passed on to the GET request to log the user out
+     * An extra query parameter that can be passed on to the GET request to log the user out if they are already logged in
      */
     @QueryParam("logout")
     boolean logout;
@@ -320,6 +320,7 @@ public class AuthorizeResource extends OAuthResource {
                         nu.setEmail(email.trim());
                         nu.setFirstName(firstName.trim());
                         nu.setLastName(lastName.trim());
+                        nu.setActive(true);
                         try {
                             beginTransaction();
                             if (isNewUser) {
@@ -829,9 +830,9 @@ public class AuthorizeResource extends OAuthResource {
         CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         Root<Token> tk = tq.from(Token.class);
         List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
-                cb.equal(tk.get("token"), token),
-                cb.equal(tk.get("type"), Token.Type.PERMISSION),
-                cb.equal(tk.get("client"), client)
+                cb.equal(tk.get(Token_.token), token),
+                cb.equal(tk.get(Token_.type), Token.Type.PERMISSION),
+                cb.equal(tk.get(Token_.client), client)
         ))).getResultList();
         return tks.size() == 1 ? tks.get(0) : null;
     }
@@ -886,20 +887,20 @@ public class AuthorizeResource extends OAuthResource {
         List<Predicate> predicates = new ArrayList<>();
 
         // scopes for this client
-        predicates.add(cb.equal(rcs.get("client"), client));
+        predicates.add(cb.equal(rcs.get(ClientScope_.client), client));
 
         // only approved scopes should be asked for
-        predicates.add(cb.equal(rcs.get("approved"), true));
+        predicates.add(cb.equal(rcs.get(ClientScope_.approved), true));
 
         // since a client will always have these scopes, we don't show them
-        predicates.add(cb.notEqual(rcs.get("priority"), ClientScope.Priority.ALWAYS));
+        predicates.add(cb.notEqual(rcs.get(ClientScope_.priority), ClientScope.Priority.ALWAYS));
 
         // not already accepted by the user
         predicates.add(cb.not(rcs.in(acceptedScopes(user))));
 
         // scope names in this list
         if (scopes != null && scopes.size() > 0) {
-            predicates.add(rcs.join("scope").get("name").in(scopes));
+            predicates.add(rcs.join(ClientScope_.scope).get(Scope_.name).in(scopes));
         }
 
         Predicate[] pArray = new Predicate[predicates.size()];
@@ -922,11 +923,11 @@ public class AuthorizeResource extends OAuthResource {
         Subquery<ClientScope> sq = cb.createQuery().subquery(ClientScope.class);
 
         Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
-        sq.select(ras.get("clientScope")).where(
-                cb.equal(ras.get("user"), user),
-                cb.equal(ras.join("clientScope").get("approved"), true),
-                cb.equal(ras.join("clientScope").join("scope").get("active"), true),
-                cb.equal(ras.join("clientScope").join("client").get("active"), true)
+        sq.select(ras.get(AcceptedScope_.clientScope)).where(
+                cb.equal(ras.get(AcceptedScope_.user), user),
+                cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.approved), true),
+                cb.equal(ras.join(AcceptedScope_.clientScope).join(ClientScope_.scope).get(Scope_.active), true),
+                cb.equal(ras.join(AcceptedScope_.clientScope).join(ClientScope_.client).get(Client_.active), true)
         );
 
         return sq;

@@ -1,7 +1,10 @@
 package com.oauth2cloud.server.rest.resources.api;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.oauth2cloud.server.hibernate.model.Application;
+import com.oauth2cloud.server.hibernate.model.Application_;
 import com.oauth2cloud.server.hibernate.model.User;
+import com.oauth2cloud.server.hibernate.model.User_;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import org.mindrot.jbcrypt.BCrypt;
@@ -72,12 +75,12 @@ public class UsersResource extends BaseEntityResource<User> {
      * @param application application of user
      * @return User if exists
      */
-    private User getUser(String email, com.oauth2cloud.server.hibernate.model.Application application) {
+    private User getUser(String email, Application application) {
         CriteriaQuery<User> users = cb.createQuery(User.class);
         Root<User> u = users.from(User.class);
         List<User> list = em.createQuery(users.select(u).where(
-            cb.equal(u.get("email"), email),
-            cb.equal(u.get("application"), application)
+                cb.equal(u.get(User_.email), email),
+                cb.equal(u.get(User_.application), application)
         )).getResultList();
         return list.size() == 1 ? list.get(0) : null;
     }
@@ -103,23 +106,23 @@ public class UsersResource extends BaseEntityResource<User> {
         mustBeLoggedIn();
         checkScope(MANAGE_USERS);
 
-        list.add(cb.equal(root.join("application").get("owner"), getUser()));
+        list.add(cb.equal(root.join(User_.application).get(Application_.owner), getUser()));
 
         if (applicationId != null) {
-            list.add(cb.equal(root.join("application").get("id"), applicationId));
+            list.add(cb.equal(root.join(User_.application).get(Application_.id), applicationId));
         }
 
         if (search != null) {
             String toSearch = "%" + search.trim() + "%";
             list.add(cb.or(
-                cb.like(root.get("firstName"), toSearch),
-                cb.like(root.get("lastName"), toSearch),
-                cb.like(root.get("email"), toSearch)
+                    cb.like(root.get(User_.firstName), toSearch),
+                    cb.like(root.get(User_.lastName), toSearch),
+                    cb.like(root.get(User_.email), toSearch)
             ));
         }
 
         if (active != null) {
-            list.add(cb.equal(root.get("active"), true));
+            list.add(cb.equal(root.get(User_.active), true));
         }
     }
 

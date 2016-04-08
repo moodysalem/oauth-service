@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.rest.resources.api;
 
 import com.oauth2cloud.server.hibernate.model.Application;
+import com.oauth2cloud.server.hibernate.model.Application_;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import com.restfb.DefaultFacebookClient;
@@ -47,17 +48,17 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     protected void validateEntity(List<String> list, Application application) {
 
         if (application.getFacebookAppId() != null && application.getFacebookAppSecret() == null ||
-            application.getFacebookAppId() == null && application.getFacebookAppSecret() != null) {
+                application.getFacebookAppId() == null && application.getFacebookAppSecret() != null) {
             list.add("Both Facebook application ID and Facebook application secret must be specified together.");
         }
 
         if (application.getAmazonClientId() != null && application.getAmazonClientSecret() == null ||
-            application.getAmazonClientId() == null && application.getAmazonClientSecret() != null) {
+                application.getAmazonClientId() == null && application.getAmazonClientSecret() != null) {
             list.add("Both Amazon application ID and Amazon application secret must be specified together.");
         }
 
         if (application.getGoogleClientId() != null && application.getGoogleClientSecret() == null ||
-            application.getGoogleClientId() == null && application.getGoogleClientSecret() != null) {
+                application.getGoogleClientId() == null && application.getGoogleClientSecret() != null) {
             list.add("Both Google application ID and Google application secret must be specified together.");
         }
 
@@ -93,10 +94,10 @@ public class ApplicationsResource extends BaseEntityResource<Application> {
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Application> root) {
         checkScope(MANAGE_APPLICATIONS);
-        list.add(cb.equal(root.get("owner"), getUser()));
+        list.add(cb.equal(root.get(Application_.owner), getUser()));
 
         if (active != null) {
-            list.add(cb.equal(root.get("active"), active));
+            list.add(cb.equal(root.get(Application_.active), active));
         }
     }
 

@@ -61,11 +61,11 @@ public class GetLoginStatus extends OAuthResource {
                         validReferrer = true;
                         // remove the path
                         referrerOrigin = UriBuilder
-                            .fromUri(u2)
-                            .replacePath("")
-                            .replaceQuery("")
-                            .build()
-                            .toString();
+                                .fromUri(u2)
+                                .replacePath("")
+                                .replaceQuery("")
+                                .build()
+                                .toString();
                         break;
                     }
                 } catch (Exception ignored) {
@@ -94,19 +94,20 @@ public class GetLoginStatus extends OAuthResource {
             } else {
                 // generate a token
                 lsm.setTokenResponse(
-                    TokenResponse.from(
-                        generateToken(
-                            Token.Type.ACCESS,
-                            c,
-                            lc.getUser(),
-                            getExpires(c, Token.Type.ACCESS),
-                            referrer,
-                            getAcceptedScopes(c, lc.getUser()),
-                            null,
-                            null,
-                            null,
-                            null)
-                    )
+                        TokenResponse.from(
+                                generateToken(
+                                        Token.Type.ACCESS,
+                                        c,
+                                        lc.getUser(),
+                                        getExpires(c, Token.Type.ACCESS),
+                                        referrer,
+                                        getAcceptedScopes(c, lc.getUser()),
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                )
+                        )
                 );
             }
         }
@@ -119,10 +120,10 @@ public class GetLoginStatus extends OAuthResource {
         Root<Token> tkn = tq.from(Token.class);
 
         tq.select(tkn).where(
-            cb.equal(tkn.get("client"), client),
-            cb.equal(tkn.get("user"), user),
-            cb.equal(tkn.get("type"), Token.Type.ACCESS),
-            cb.greaterThan(tkn.get("expires"), new Date())
+                cb.equal(tkn.get(Token_.client), client),
+                cb.equal(tkn.get(Token_.user), user),
+                cb.equal(tkn.get(Token_.type), Token.Type.ACCESS),
+                cb.greaterThan(tkn.get(Token_.expires), new Date())
         );
 
         return em.createQuery(tq).getResultList();

@@ -19,7 +19,7 @@
                 scope: "${model.tokenResponse.scope?js_string}",
                 token_type: "${model.tokenResponse.tokenType?js_string}",
                 client_id: "${model.tokenResponse.clientId?js_string}",
-                application_id: ${model.tokenResponse.applicationId?c},
+                application_id: "${model.tokenResponse.applicationId}",
                 user_details: null
             };
 
@@ -28,7 +28,7 @@
                     email: "${model.tokenResponse.userDetails.email?js_string}",
                     first_name: "${model.tokenResponse.userDetails.firstName?js_string}",
                     last_name: "${model.tokenResponse.userDetails.lastName?js_string}",
-                    user_id: ${model.tokenResponse.userDetails.userId?c}
+                    user_id: "${model.tokenResponse.userDetails.userId}"
                 };
             </#if>
         </#if>

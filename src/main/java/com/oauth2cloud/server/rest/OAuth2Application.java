@@ -2,7 +2,6 @@ package com.oauth2cloud.server.rest;
 
 import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
-import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
 import org.codemonkey.simplejavamail.TransportStrategy;
@@ -20,7 +19,6 @@ public class OAuth2Application extends BaseApplication {
 
     public OAuth2Application() {
         super();
-
 
         packages("com.oauth2cloud.server.rest");
 
@@ -41,7 +39,7 @@ public class OAuth2Application extends BaseApplication {
                 ).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // create the mailer that uses amazon
-                Mailer amazonMailer = new Mailer(
+                Mailer sesMailer = new Mailer(
                         System.getProperty("SMTP_HOST"),
                         getMailPort(),
                         System.getProperty("SMTP_USERNAME"),
@@ -51,16 +49,13 @@ public class OAuth2Application extends BaseApplication {
 
                 Properties addtl = new Properties();
                 addtl.put("mail.smtp.starttls.required", "true");
-                amazonMailer.applyProperties(addtl);
+                sesMailer.applyProperties(addtl);
 
                 // this is used to send e-mails
-                bind(amazonMailer).to(Mailer.class);
+                bind(sesMailer).to(Mailer.class);
 
                 // this is used for generating e-mails from freemarker templates
-                Configuration freemarkerConfiguration = new Configuration(Configuration.VERSION_2_3_23);
-                freemarkerConfiguration.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/email"));
-                freemarkerConfiguration.setDefaultEncoding("UTF-8");
-                bind(freemarkerConfiguration).to(Configuration.class);
+                bind(new EmailTemplateFreemarkerConfiguration()).to(Configuration.class);
             }
         });
     }

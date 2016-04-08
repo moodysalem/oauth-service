@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="form-group">
-                    <a href="${model.baseUri?html}oauth/reset?applicationId=${model.client.application.id?c}&referrer=${model.requestUrl?url}">
+                    <a href="${model.baseUri?html}oauth/reset?applicationId=${model.client.application.id}&referrer=${model.requestUrl?url}">
                         Forgot Password?
                     </a>
                 </div>

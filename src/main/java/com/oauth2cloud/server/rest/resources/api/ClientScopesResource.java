@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.rest.resources.api;
 
-import com.oauth2cloud.server.hibernate.model.Client;
-import com.oauth2cloud.server.hibernate.model.ClientScope;
+import com.oauth2cloud.server.hibernate.model.*;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 
@@ -32,7 +31,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
             c = em.find(Client.class, clientScope.getClient().getId());
         }
         return c != null && c.isActive() && c.getApplication().isActive() &&
-            c.getApplication().getOwner().idMatch(getUser());
+                c.getApplication().getOwner().idMatch(getUser());
     }
 
     @Override
@@ -40,7 +39,7 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENT_SCOPES);
         return clientScope.getClient().isActive() && clientScope.getClient().getApplication().isActive() &&
-            clientScope.getClient().getApplication().getOwner().idMatch(getUser());
+                clientScope.getClient().getApplication().getOwner().idMatch(getUser());
     }
 
     @Override
@@ -78,18 +77,15 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         mustBeLoggedIn();
         checkScope(MANAGE_CLIENT_SCOPES);
 
-        list.add(cb.equal(root.join("scope").join("application").get("owner"), getUser()));
+        list.add(cb.equal(root.join(ClientScope_.scope)
+                .join(Scope_.application).get(Application_.owner), getUser()));
 
         if (clientId != null) {
-            list.add(cb.equal(root.join("client").get("id"), clientId));
+            list.add(cb.equal(root.join(ClientScope_.client).get(Client_.id), clientId));
         }
 
         if (scopeId != null) {
-            list.add(cb.equal(root.join("scope").get("id"), scopeId));
-        }
-
-        if (active != null) {
-            list.add(cb.equal(root.get("active"), active));
+            list.add(cb.equal(root.join(ClientScope_.scope).get(Scope_.id), scopeId));
         }
     }
 
