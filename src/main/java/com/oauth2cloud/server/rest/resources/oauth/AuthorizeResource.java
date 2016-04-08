@@ -3,6 +3,8 @@ package com.oauth2cloud.server.rest.resources.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.hibernate.model.*;
+import com.oauth2cloud.server.hibernate.model.Application;
+import com.oauth2cloud.server.hibernate.util.QueryHelper;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.LoginRegisterModel;
@@ -16,10 +18,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -28,6 +26,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @NoXFrameOptionsFeature.NoXFrame
 @Path(OAuth2Application.OAUTH + "/authorize")
@@ -72,14 +72,14 @@ public class AuthorizeResource extends OAuthResource {
             return error("'client_id' is a required query parameter to log out.");
         }
 
-        Client c = getClient(clientId);
-        if (c == null) {
+        Client client = QueryHelper.getClient(em, clientId);
+        if (client == null) {
             return error("Invalid client ID.");
         }
 
-        logCall(c);
+        QueryHelper.logCall(em, client, containerRequestContext);
 
-        LoginCookie loginCookie = getLoginCookie(c);
+        LoginCookie loginCookie = getLoginCookie(client);
         expireLoginCookie(loginCookie);
 
         return Response.noContent().build();
@@ -131,14 +131,14 @@ public class AuthorizeResource extends OAuthResource {
         }
 
         // first look up the Client by the client identifier
-        Client c = getClient(clientId);
-        if (c == null) {
+        Client client = QueryHelper.getClient(em, clientId);
+        if (client == null) {
             return error("Client ID not found.");
         }
 
         // verify the redirect uri is in the list of the client's allowed redirect uris
         boolean validRedirect = false;
-        for (String uri : c.getUris()) {
+        for (String uri : client.getUris()) {
             try {
                 URI cUri = new URI(uri);
                 // scheme, host, and port must match
@@ -155,19 +155,19 @@ public class AuthorizeResource extends OAuthResource {
         }
 
         if (TOKEN.equalsIgnoreCase(responseType)) {
-            if (!c.getFlows().contains(Client.GrantFlow.IMPLICIT)) {
+            if (!client.getFlows().contains(Client.GrantFlow.IMPLICIT)) {
                 return error("This client does not support the implicit grant flow.");
             }
         }
         if (CODE.equalsIgnoreCase(responseType)) {
-            if (!c.getFlows().contains(Client.GrantFlow.CODE)) {
+            if (!client.getFlows().contains(Client.GrantFlow.CODE)) {
                 return error("This client does not support the code grant flow.");
             }
         }
 
         // verify all the requested scopes are available to the client
         if (scopes != null && scopes.size() > 0) {
-            Set<String> scopeNames = c.getClientScopes().stream()
+            Set<String> scopeNames = client.getClientScopes().stream()
                     .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
             if (!scopeNames.containsAll(scopes)) {
                 String joinedScopes = scopes.stream().filter((s) -> !scopeNames.contains(s)).collect(Collectors.joining(", "));
@@ -193,8 +193,8 @@ public class AuthorizeResource extends OAuthResource {
             return error;
         }
 
-        Client client = getClient(clientId);
-        logCall(client);
+        Client client = QueryHelper.getClient(em, clientId);
+        QueryHelper.logCall(em, client, containerRequestContext);
 
         LoginCookie loginCookie = getLoginCookie(client);
         if (loginCookie != null) {
@@ -247,10 +247,10 @@ public class AuthorizeResource extends OAuthResource {
         lrm.setURLs(containerRequestContext);
         lrm.setState(state);
         lrm.setRedirectUri(redirectUri);
-        Client client = getClient(clientId);
+        Client client = QueryHelper.getClient(em, clientId);
         lrm.setClient(client);
 
-        logCall(client);
+        QueryHelper.logCall(em, client, containerRequestContext);
 
         // this resource is used for a few different actions which are represented as hidden inputs in the forms
         // this is done so that the query string can be preserved across all requests without any special handling
@@ -309,7 +309,7 @@ public class AuthorizeResource extends OAuthResource {
                 if (isEmpty(firstName) || isEmpty(lastName) || isEmpty(email) || isEmpty(password)) {
                     lrm.setRegisterError("First name, last name, e-mail address and password are all required fields.");
                 } else {
-                    User existingUser = getUser(email, client.getApplication());
+                    User existingUser = QueryHelper.getUser(em, email, client.getApplication());
                     if (existingUser != null && existingUser.isVerified()) {
                         lrm.setRegisterError("E-mail is already in use.");
                     } else {
@@ -348,7 +348,7 @@ public class AuthorizeResource extends OAuthResource {
 
                 // they just completed the second step of the login
                 if (loginToken != null) {
-                    Token t = getPermissionToken(loginToken, client);
+                    Token t = QueryHelper.getPermissionToken(em, loginToken, client);
                     if (t == null) {
                         lrm.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
                     } else {
@@ -356,15 +356,15 @@ public class AuthorizeResource extends OAuthResource {
                             lrm.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                         } else {
                             // first get all the client scopes we will try to approve or check if are approved
-                            List<ClientScope> clientScopes = getScopes(client, scopes);
+                            List<ClientScope> clientScopes = QueryHelper.getScopes(em, client, scopes);
                             // we'll populate this as we loop through the scopes
                             List<AcceptedScope> tokenScopes = new ArrayList<>();
                             // get all the scope ids that were explicitly granted
-                            Set<Long> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
+                            Set<UUID> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
                                 try {
                                     return s != null && s.startsWith("SCOPE") &&
                                             "on".equalsIgnoreCase(formParams.getFirst(s)) ?
-                                            Long.parseLong(s.substring("SCOPE".length())) : null;
+                                            UUID.fromString(s.substring("SCOPE".length())) : null;
                                 } catch (Exception e) {
                                     return null;
                                 }
@@ -374,7 +374,7 @@ public class AuthorizeResource extends OAuthResource {
                                 if (!cs.getPriority().equals(ClientScope.Priority.ASK) ||
                                         acceptedScopeIds.contains(cs.getScope().getId())) {
                                     // create/find the accepted scope for this client scope
-                                    tokenScopes.add(acceptScope(t.getUser(), cs));
+                                    tokenScopes.add(QueryHelper.acceptScope(em, t.getUser(), cs));
                                 }
                             }
                             Token.Type type = getTokenType(responseType);
@@ -393,7 +393,7 @@ public class AuthorizeResource extends OAuthResource {
     }
 
     private void sendVerificationEmail(User user) {
-        UserCode uc = makeCode(user, containerRequestContext.getUriInfo().getRequestUri().toString(),
+        UserCode uc = QueryHelper.makeUserCode(em, user, containerRequestContext.getUriInfo().getRequestUri().toString(),
                 UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
 
         UserCodeEmailModel ucem = new UserCodeEmailModel();
@@ -556,8 +556,8 @@ public class AuthorizeResource extends OAuthResource {
         return makeOrUpdateUser(application, email, firstName, lastName, null, true);
     }
 
-    private User makeOrUpdateUser(com.oauth2cloud.server.hibernate.model.Application app, String email, String firstName, String lastName, String rawPass, boolean verified) {
-        User u = getUser(email, app);
+    private User makeOrUpdateUser(Application app, String email, String firstName, String lastName, String rawPass, boolean verified) {
+        User u = QueryHelper.getUser(em, email, app);
 
         if (u == null) {
             u = new User();
@@ -625,7 +625,7 @@ public class AuthorizeResource extends OAuthResource {
     public User doEmailLogin(com.oauth2cloud.server.hibernate.model.Application app, MultivaluedMap<String, String> formParams) {
         String email = formParams.getFirst("email");
         String password = formParams.getFirst("password");
-        User userWithEmail = getUser(email, app);
+        User userWithEmail = QueryHelper.getUser(em, email, app);
         User toReturn = null;
 
         if (userWithEmail != null && userWithEmail.getPassword() != null && BCrypt.checkpw(password, userWithEmail.getPassword())) {
@@ -660,10 +660,10 @@ public class AuthorizeResource extends OAuthResource {
     private Response getSuccessfulLoginResponse(User user, Client client, List<String> scopes, String redirectUri,
                                                 String responseType, String state, boolean rememberMe, Provider provider, String providerAccessToken) {
         // successfully authenticated the user
-        List<ClientScope> toAsk = getScopesToRequest(client, user, scopes);
+        List<ClientScope> toAsk = QueryHelper.getScopesToRequest(em, client, user, scopes);
         if (toAsk.size() > 0) {
             // we need to generate a temporary token for them to get to the next step with
-            Token t = generatePermissionToken(user, client, redirectUri, provider, providerAccessToken);
+            Token t = QueryHelper.generatePermissionToken(em, user, client, redirectUri, provider, providerAccessToken);
             PermissionsModel pr = new PermissionsModel();
             pr.setClientScopes(toAsk);
             pr.setToken(t);
@@ -675,14 +675,14 @@ public class AuthorizeResource extends OAuthResource {
             return Response.ok(new Viewable("/templates/Permissions", pr)).build();
         } else {
             // accept all the always permissions
-            List<ClientScope> clientScopes = getScopes(client, scopes);
+            List<ClientScope> clientScopes = QueryHelper.getScopes(em, client, scopes);
             List<AcceptedScope> acceptedScopes = new ArrayList<>();
             for (ClientScope cs : clientScopes) {
-                acceptedScopes.add(acceptScope(user, cs));
+                acceptedScopes.add(QueryHelper.acceptScope(em, user, cs));
             }
             Token.Type type = getTokenType(responseType);
             // redirect with token since they've already asked for all the permissions
-            Token t = generateToken(type, client, user, getExpires(client, type),
+            Token t = QueryHelper.generateToken(em, type, client, user, getExpires(client, type),
                     redirectUri, acceptedScopes, null, null, provider, providerAccessToken);
             return getRedirectResponse(redirectUri, state, t, rememberMe);
         }
@@ -814,123 +814,9 @@ public class AuthorizeResource extends OAuthResource {
      * @return generated token
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
-        return generateToken(type, permissionToken.getClient(), permissionToken.getUser(),
+        return QueryHelper.generateToken(em, type, permissionToken.getClient(), permissionToken.getUser(),
                 getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null,
                 permissionToken.getProvider(), permissionToken.getProviderAccessToken());
-    }
-
-    /**
-     * Get the permission token associated with a token string
-     *
-     * @param token  token string
-     * @param client client the token was issued for
-     * @return the token representing the client or null if it doesn't exist
-     */
-    private Token getPermissionToken(String token, Client client) {
-        CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        Root<Token> tk = tq.from(Token.class);
-        List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
-                cb.equal(tk.get(Token_.token), token),
-                cb.equal(tk.get(Token_.type), Token.Type.PERMISSION),
-                cb.equal(tk.get(Token_.client), client)
-        ))).getResultList();
-        return tks.size() == 1 ? tks.get(0) : null;
-    }
-
-    /**
-     * Generate a temporary token to represent correct credentials, giving the user 5 minutes to accept the permissions
-     * before expiring
-     *
-     * @param user                the user to generate the token for
-     * @param client              the client to generate the token for
-     * @param provider
-     * @param providerAccessToken @return a temporary token for use on the permission form
-     */
-    private Token generatePermissionToken(User user, Client client, String redirectUri, Provider provider, String providerAccessToken) {
-        Token t = new Token();
-        Date expires = new Date();
-        expires.setTime(expires.getTime() + FIVE_MINUTES);
-        t.setExpires(expires);
-        t.setUser(user);
-        t.setClient(client);
-        t.setRandomToken(64);
-        t.setType(Token.Type.PERMISSION);
-        t.setRedirectUri(redirectUri);
-        t.setProvider(provider);
-        t.setProviderAccessToken(providerAccessToken);
-        try {
-            beginTransaction();
-            em.persist(t);
-            em.flush();
-            commit();
-        } catch (Exception e) {
-            rollback();
-            return null;
-        }
-        return t;
-    }
-
-    /**
-     * Get the scopes that we need to show or ask the user about
-     * ALWAYS permissions are not shown because the client always has those permissions when the user logs in
-     * REQUIRED permissions are shown but the user does not have an option if they wish to log in to the client
-     * ASK permissions are shown and the user has the option not to grant them to the service
-     *
-     * @param client client for which we're retrieving scopes
-     * @param user   user for which we're retrieving scopes
-     * @return list of scopes we should ask for
-     */
-    private List<ClientScope> getScopesToRequest(Client client, User user, List<String> scopes) {
-        CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
-        Root<ClientScope> rcs = cq.from(ClientScope.class);
-
-        List<Predicate> predicates = new ArrayList<>();
-
-        // scopes for this client
-        predicates.add(cb.equal(rcs.get(ClientScope_.client), client));
-
-        // only approved scopes should be asked for
-        predicates.add(cb.equal(rcs.get(ClientScope_.approved), true));
-
-        // since a client will always have these scopes, we don't show them
-        predicates.add(cb.notEqual(rcs.get(ClientScope_.priority), ClientScope.Priority.ALWAYS));
-
-        // not already accepted by the user
-        predicates.add(cb.not(rcs.in(acceptedScopes(user))));
-
-        // scope names in this list
-        if (scopes != null && scopes.size() > 0) {
-            predicates.add(rcs.join(ClientScope_.scope).get(Scope_.name).in(scopes));
-        }
-
-        Predicate[] pArray = new Predicate[predicates.size()];
-        predicates.toArray(pArray);
-
-        List<ClientScope> results = em.createQuery(cq.select(rcs).where(pArray)).getResultList();
-
-        results.sort(null);
-
-        return results;
-    }
-
-    /**
-     * Generates a subquery that returns all the scopes a user has accepted (must be approved by application)
-     *
-     * @param user for which the acceptedscopes are returned
-     * @return a subquery of all the clientscopes that have already been accepted by a user, across clients
-     */
-    private Subquery<ClientScope> acceptedScopes(User user) {
-        Subquery<ClientScope> sq = cb.createQuery().subquery(ClientScope.class);
-
-        Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
-        sq.select(ras.get(AcceptedScope_.clientScope)).where(
-                cb.equal(ras.get(AcceptedScope_.user), user),
-                cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.approved), true),
-                cb.equal(ras.join(AcceptedScope_.clientScope).join(ClientScope_.scope).get(Scope_.active), true),
-                cb.equal(ras.join(AcceptedScope_.clientScope).join(ClientScope_.client).get(Client_.active), true)
-        );
-
-        return sq;
     }
 
 }

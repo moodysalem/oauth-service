@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.oauth2cloud.server.hibernate.model.UserCode;
+import com.oauth2cloud.server.hibernate.util.QueryHelper;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.VerifyEmailModel;
@@ -28,11 +29,11 @@ public class VerifyEmailResource extends OAuthResource {
             return error(INVALID_VERIFICATION_LINK);
         }
 
-        UserCode uc = getCode(code, UserCode.Type.VERIFY, true);
+        UserCode uc = QueryHelper.getUserCode(em, code, UserCode.Type.VERIFY, true);
         if (uc == null) {
             return error(INVALID_VERIFICATION_LINK);
         }
-        logCall(uc.getUser().getApplication());
+        QueryHelper.logCall(em, uc.getUser().getApplication(), containerRequestContext);
 
         VerifyEmailModel vem = new VerifyEmailModel();
         vem.setUserCode(uc);

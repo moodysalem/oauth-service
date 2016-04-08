@@ -3,6 +3,7 @@ package com.oauth2cloud.server.rest.resources.oauth;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.hibernate.model.User;
 import com.oauth2cloud.server.hibernate.model.UserCode;
+import com.oauth2cloud.server.hibernate.util.QueryHelper;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.models.ResetPasswordModel;
@@ -57,7 +58,7 @@ public class PasswordResetResource extends OAuthResource {
         ResetPasswordModel rm = new ResetPasswordModel();
 
         if (code != null) {
-            UserCode pcode = getCode(code, UserCode.Type.RESET, false);
+            UserCode pcode = QueryHelper.getUserCode(em, code, UserCode.Type.RESET, false);
             if (pcode != null) {
                 rm.setUserCode(pcode);
                 return Response.ok(new Viewable("/templates/ChangePassword", rm)).build();
@@ -69,7 +70,7 @@ public class PasswordResetResource extends OAuthResource {
             if (application == null) {
                 return error(INVALID_RESET_PASSWORD_URL);
             }
-            logCall(application);
+            QueryHelper.logCall(em, application, containerRequestContext);
             rm.setApplication(application);
         }
 
@@ -84,7 +85,7 @@ public class PasswordResetResource extends OAuthResource {
         ResetPasswordModel rm = new ResetPasswordModel();
 
         if (code != null) {
-            UserCode pc = getCode(code, UserCode.Type.RESET, false);
+            UserCode pc = QueryHelper.getUserCode(em, code, UserCode.Type.RESET, false);
             if (pc == null) {
                 return error(INVALID_CODE_PLEASE_REQUEST_ANOTHER_RESET_PASSWORD_E_MAIL);
             }
@@ -112,13 +113,13 @@ public class PasswordResetResource extends OAuthResource {
         if (application == null) {
             return error(INVALID_RESET_PASSWORD_URL);
         }
-        logCall(application);
+        QueryHelper.logCall(em, application, containerRequestContext);
 
         rm.setApplication(application);
 
-        User u = getUser(email, application);
-        if (u != null) {
-            UserCode pc = makeCode(u, referrer, UserCode.Type.RESET, new Date(System.currentTimeMillis() + FIVE_MINUTES));
+        User user = QueryHelper.getUser(em, email, application);
+        if (user != null) {
+            UserCode pc = QueryHelper.makeUserCode(em, user, referrer, UserCode.Type.RESET, new Date(System.currentTimeMillis() + FIVE_MINUTES));
             // do the e-mail
             emailCode(pc);
         }

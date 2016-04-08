@@ -2,6 +2,7 @@ package com.oauth2cloud.server.rest.resources.oauth;
 
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.oauth2cloud.server.hibernate.model.*;
+import com.oauth2cloud.server.hibernate.util.QueryHelper;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import com.oauth2cloud.server.rest.models.LoginStatusModel;
@@ -38,13 +39,13 @@ public class GetLoginStatus extends OAuthResource {
             return error("'client_id' parameter is required to check login status.");
         }
 
-        Client c = getClient(clientId);
+        Client client = QueryHelper.getClient(em, clientId);
 
-        if (c == null) {
+        if (client == null) {
             return error("Invalid client ID.");
         }
 
-        logCall(c);
+        QueryHelper.logCall(em, client, containerRequestContext);
 
         if (referrer == null) {
             return error("This page must be accessed from inside an iframe.");
@@ -54,7 +55,7 @@ public class GetLoginStatus extends OAuthResource {
         String referrerOrigin = null;
         try {
             URI u = new URI(referrer);
-            for (String uri : c.getUris()) {
+            for (String uri : client.getUris()) {
                 try {
                     URI u2 = new URI(uri);
                     if (partialMatch(u2, u)) {
@@ -78,14 +79,14 @@ public class GetLoginStatus extends OAuthResource {
             return error("Invalid referrer.");
         }
 
-        LoginCookie lc = getLoginCookie(c);
+        LoginCookie lc = getLoginCookie(client);
 
         LoginStatusModel lsm = new LoginStatusModel();
         lsm.setTargetOrigin(referrerOrigin);
         lsm.setLoginCookie(lc);
 
         if (lc != null) {
-            List<Token> tokens = getUserTokens(c, lc.getUser());
+            List<Token> tokens = getUserTokens(client, lc.getUser());
 
             tokens.sort((a, b) -> b.getExpires().compareTo(a.getExpires()));
 
@@ -95,13 +96,14 @@ public class GetLoginStatus extends OAuthResource {
                 // generate a token
                 lsm.setTokenResponse(
                         TokenResponse.from(
-                                generateToken(
+                                QueryHelper.generateToken(
+                                        em,
                                         Token.Type.ACCESS,
-                                        c,
+                                        client,
                                         lc.getUser(),
-                                        getExpires(c, Token.Type.ACCESS),
+                                        getExpires(client, Token.Type.ACCESS),
                                         referrer,
-                                        getAcceptedScopes(c, lc.getUser()),
+                                        QueryHelper.getAcceptedScopes(em, client, lc.getUser()),
                                         null,
                                         null,
                                         null,
