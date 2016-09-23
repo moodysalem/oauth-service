@@ -1,8 +1,6 @@
 package com.oauth2cloud.server.hibernate.util;
 
 import com.oauth2cloud.server.model.db.*;
-import com.oauth2cloud.server.model.db.AcceptedScope_;
-import com.oauth2cloud.server.model.db.ClientScope_;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.persistence.EntityManager;
@@ -12,6 +10,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +28,7 @@ public abstract class OldQueryHelper {
     }
 
     /**
-     * Log an API call
+     * Log an API_PATH call
      *
      * @param client      client making the call
      * @param application application making the call
@@ -440,7 +439,7 @@ public abstract class OldQueryHelper {
      * @param user   user for which we're retrieving scopes
      * @return list of scopes we should ask for
      */
-    public static List<ClientScope> getScopesToRequest(EntityManager em, Client client, User user, List<String> scopes) {
+    public static Set<ClientScope> getScopesToRequest(final EntityManager em, final Client client, final User user, Set<String> scopes) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
         Root<ClientScope> rcs = cq.from(ClientScope.class);

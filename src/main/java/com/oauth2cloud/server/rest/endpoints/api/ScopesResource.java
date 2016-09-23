@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @AuthorizationHeaderTokenFeature.ReadToken
-@Path(OAuth2Application.API + "/scopes")
+@Path(OAuth2Application.API_PATH + "/scopes")
 public class ScopesResource extends BaseEntityResource<Scope> {
     public static final String MANAGE_SCOPES = "manage_scopes";
 

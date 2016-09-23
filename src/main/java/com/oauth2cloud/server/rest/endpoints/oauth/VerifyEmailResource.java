@@ -1,10 +1,10 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
-import com.oauth2cloud.server.model.db.UserCode;
 import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
+import com.oauth2cloud.server.model.data.VerifyEmailModel;
+import com.oauth2cloud.server.model.db.UserCode;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
-import com.oauth2cloud.server.model.data.VerifyEmailModel;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.ws.rs.GET;
@@ -14,14 +14,14 @@ import javax.ws.rs.core.Response;
 import java.util.logging.Level;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Application.OAUTH + "/verify")
+@Path(OAuth2Application.OAUTH_PATH + "/verify")
 public class VerifyEmailResource extends OAuthResource {
 
-    public static final String INVALID_VERIFICATION_LINK = "Invalid verification link.";
-    public static final String ALREADY_VERIFIED = "Your user is already verified.";
-    public static final String VERIFICATION_CODE_ALREADY_USED_NOT_VERIFIED = "This verification code is already used but your user is not verified. Please contact an administrator.";
-    public static final String YOUR_E_MAIL_HAS_BEEN_VERIFIED = "Your e-mail has been verified.";
-    public static final String FAILED_TO_VERIFY_UNKNOWN_REASON = "Failed to verify your e-mail address for an unknown reason. Please contact an administrator.";
+    private static final String INVALID_VERIFICATION_LINK = "Invalid verification link.",
+            ALREADY_VERIFIED = "Your user is already verified.",
+            VERIFICATION_CODE_ALREADY_USED_NOT_VERIFIED = "This verification code is already used but your user is not verified. Please contact an administrator.",
+            YOUR_E_MAIL_HAS_BEEN_VERIFIED = "Your e-mail has been verified.",
+            FAILED_TO_VERIFY_UNKNOWN_REASON = "Failed to verify your e-mail address for an unknown reason. Please contact an administrator.";
 
     @GET
     public Response verifyEmail(@QueryParam("code") String code) {

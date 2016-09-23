@@ -15,7 +15,7 @@ public class StatusResource {
 
     @GET
     public Response status() {
-        String OK = (String) em.createNativeQuery("SELECT 'OK' FROM DUAL").getSingleResult();
+        final String OK = (String) em.createNativeQuery("SELECT 'OK' FROM DUAL").getSingleResult();
 
         if (OK == null) {
             throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to select OK from database.");

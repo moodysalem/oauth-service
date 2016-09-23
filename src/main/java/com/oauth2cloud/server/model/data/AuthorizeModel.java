@@ -15,7 +15,6 @@ public abstract class AuthorizeModel implements HeadProperties {
     private String requestUrl, redirectUri, baseUri, state;
     private Client client;
 
-    private int loginButtonSize;
     private boolean googleLogin;
 
     public Client getClient() {
@@ -43,7 +42,7 @@ public abstract class AuthorizeModel implements HeadProperties {
         setBaseUri(ui.getBaseUri().toString());
     }
 
-    private String getFragment(ErrorResponse er) {
+    private String getFragment(final ErrorResponse er) {
         if (getState() == null || getState().length() == 0) {
             return er.toString();
         }
@@ -56,9 +55,7 @@ public abstract class AuthorizeModel implements HeadProperties {
     }
 
     public String getCancelUrl() {
-        final ErrorResponse er = new ErrorResponse();
-        er.setError(ErrorResponse.Type.access_denied);
-        er.setErrorDescription("User has cancelled the authorization");
+        final ErrorResponse er = new ErrorResponse(ErrorResponse.Type.access_denied, "User has cancelled the authorization", null);
         try {
             return UriBuilder.fromUri(new URI(getRedirectUri())).fragment(getFragment(er)).build().toString();
         } catch (Exception ignored) {
@@ -80,14 +77,6 @@ public abstract class AuthorizeModel implements HeadProperties {
 
     public void setState(String state) {
         this.state = state;
-    }
-
-    public int getLoginButtonSize() {
-        return loginButtonSize;
-    }
-
-    public void setLoginButtonSize(int loginButtonSize) {
-        this.loginButtonSize = loginButtonSize;
     }
 
     public boolean isGoogleLogin() {

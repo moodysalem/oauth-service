@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Application.OAUTH + "/token")
+@Path(OAuth2Application.OAUTH_PATH + "/token")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class TokenResource extends OAuthResource {

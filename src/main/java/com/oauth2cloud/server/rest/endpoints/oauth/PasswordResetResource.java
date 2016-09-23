@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Application.OAUTH + "/reset")
+@Path(OAuth2Application.OAUTH_PATH + "/reset")
 @Produces(MediaType.TEXT_HTML)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class PasswordResetResource extends OAuthResource {

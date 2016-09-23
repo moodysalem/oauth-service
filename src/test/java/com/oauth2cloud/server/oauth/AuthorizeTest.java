@@ -16,7 +16,7 @@ public class AuthorizeTest extends OAuth2Test {
     @Test
     public void testBadRequests() {
         // code is not allowed for this client
-        assert target(OAuth2Application.OAUTH).path("authorize")
+        assert target(OAuth2Application.OAUTH_PATH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
             .queryParam("redirect_uri", "http://localhost:8080")
             .queryParam("response_type", "code")
@@ -24,7 +24,7 @@ public class AuthorizeTest extends OAuth2Test {
             .get().getStatus() == 400;
 
         // invalid redirect URI
-        assert target(OAuth2Application.OAUTH).path("authorize")
+        assert target(OAuth2Application.OAUTH_PATH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
             .queryParam("redirect_uri", "http://localhost:8081")
             .queryParam("response_type", "token")
@@ -33,7 +33,7 @@ public class AuthorizeTest extends OAuth2Test {
 
 
         // invalid client id
-        assert target(OAuth2Application.OAUTH).path("authorize")
+        assert target(OAuth2Application.OAUTH_PATH).path("authorize")
             .queryParam("client_id", CLIENT_ID + "1")
             .queryParam("redirect_uri", "http://localhost:8080")
             .queryParam("response_type", "token")
@@ -44,7 +44,7 @@ public class AuthorizeTest extends OAuth2Test {
 
     @Test
     public void testAuthorizeEndpoint() {
-        Response auth = target(OAuth2Application.OAUTH).path("authorize")
+        Response auth = target(OAuth2Application.OAUTH_PATH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
             .queryParam("redirect_uri", "https://oauth2cloud.com")
             .queryParam("response_type", "token")

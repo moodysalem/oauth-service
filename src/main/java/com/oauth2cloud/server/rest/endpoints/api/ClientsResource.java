@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @AuthorizationHeaderTokenFeature.ReadToken
-@Path(OAuth2Application.API + "/clients")
+@Path(OAuth2Application.API_PATH + "/clients")
 public class ClientsResource extends BaseEntityResource<Client> {
     public static final String MANAGE_CLIENTS = "manage_clients";
 

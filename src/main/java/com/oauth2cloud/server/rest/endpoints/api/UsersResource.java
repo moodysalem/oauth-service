@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @AuthorizationHeaderTokenFeature.ReadToken
-@Path(OAuth2Application.API + "/users")
+@Path(OAuth2Application.API_PATH + "/users")
 public class UsersResource extends BaseEntityResource<User> {
     public static final String MANAGE_USERS = "manage_users";
 

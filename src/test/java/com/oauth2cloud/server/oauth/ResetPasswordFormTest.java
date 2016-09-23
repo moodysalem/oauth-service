@@ -15,7 +15,7 @@ public class ResetPasswordFormTest extends OAuth2Test {
 
     @Test
     public void testFormGet() {
-        Response r = target(OAuth2Application.OAUTH).path("reset")
+        Response r = target(OAuth2Application.OAUTH_PATH).path("reset")
                 .queryParam("applicationId", APPLICATION_ID)
                 .request().get();
 
@@ -33,7 +33,7 @@ public class ResetPasswordFormTest extends OAuth2Test {
 
     @Test
     public void testFormGetWithReferrer() {
-        Response r = target(OAuth2Application.OAUTH).path("reset")
+        Response r = target(OAuth2Application.OAUTH_PATH).path("reset")
                 .queryParam("applicationId", APPLICATION_ID)
                 .queryParam("referrer", "http://localhost:8080")
                 .request().get();
@@ -54,7 +54,7 @@ public class ResetPasswordFormTest extends OAuth2Test {
     public void testPost() {
         Form f = new Form();
         f.param("email", "moody.salem@gmail.com");
-        Response r = target(OAuth2Application.OAUTH).path("reset")
+        Response r = target(OAuth2Application.OAUTH_PATH).path("reset")
                 .queryParam("applicationId", APPLICATION_ID)
                 .queryParam("referrer", "http://localhost:8080")
                 .request()

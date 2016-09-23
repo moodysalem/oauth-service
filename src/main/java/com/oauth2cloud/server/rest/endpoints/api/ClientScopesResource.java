@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
-import com.oauth2cloud.server.model.db.Client;
-import com.oauth2cloud.server.model.db.ClientScope;
+import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @AuthorizationHeaderTokenFeature.ReadToken
-@Path(OAuth2Application.API + "/clientscopes")
+@Path(OAuth2Application.API_PATH + "/clientscopes")
 public class ClientScopesResource extends BaseEntityResource<ClientScope> {
 
     public static final String MANAGE_CLIENT_SCOPES = "manage_client_scopes";
@@ -59,19 +58,14 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         }
     }
 
-    @Override
-    public void beforeEdit(ClientScope clientScope, ClientScope newScope) {
-        beforeCreate(newScope);
-    }
-
     @QueryParam("clientId")
-    UUID clientId;
+    private UUID clientId;
 
     @QueryParam("scopeId")
-    UUID scopeId;
+    private UUID scopeId;
 
     @QueryParam("active")
-    Boolean active;
+    private Boolean active;
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<ClientScope> root) {
@@ -90,13 +84,4 @@ public class ClientScopesResource extends BaseEntityResource<ClientScope> {
         }
     }
 
-    @Override
-    public void afterCreate(ClientScope clientScope) {
-
-    }
-
-    @Override
-    public void beforeSend(ClientScope clientScope) {
-
-    }
 }

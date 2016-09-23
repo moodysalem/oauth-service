@@ -1,9 +1,9 @@
 package com.oauth2cloud.server.rest.filter;
 
-import com.oauth2cloud.server.model.Application_;
-import com.oauth2cloud.server.model.Client_;
-import com.oauth2cloud.server.model.Token_;
+import com.oauth2cloud.server.model.db.Application_;
+import com.oauth2cloud.server.model.db.Client_;
 import com.oauth2cloud.server.model.db.Token;
+import com.oauth2cloud.server.model.db.Token_;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;

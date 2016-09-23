@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 @Produces(MediaType.TEXT_HTML)
-@Path(OAuth2Application.OAUTH + "/loginstatus")
+@Path(OAuth2Application.OAUTH_PATH + "/loginstatus")
 public class GetLoginStatus extends OAuthResource {
 
     /**

@@ -16,7 +16,7 @@ public class ApplicationsTest extends OAuth2Test {
     public void testGet() {
         TokenResponse tr = getToken();
 
-        assert target(OAuth2Application.API).path("applications")
+        assert target(OAuth2Application.API_PATH).path("applications")
                 .request()
                 .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
                 .get().getStatus() == 200;
@@ -32,7 +32,7 @@ public class ApplicationsTest extends OAuth2Test {
         app.setId(id);
         app.setSupportEmail("moody.salem@gmail.com");
 
-        app = target(OAuth2Application.API).path("applications")
+        app = target(OAuth2Application.API_PATH).path("applications")
                 .request()
                 .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER + tr.getAccessToken())
                 .post(Entity.json(app), Application.class);
@@ -44,7 +44,7 @@ public class ApplicationsTest extends OAuth2Test {
         // test edit
         app.setFaviconUrl(faviconUrl);
         app.setName("Test App Editing");
-        app = target(OAuth2Application.API).path("applications").path(app.getId().toString())
+        app = target(OAuth2Application.API_PATH).path("applications").path(app.getId().toString())
                 .request()
                 .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER  + tr.getAccessToken())
                 .put(Entity.json(app), Application.class);
@@ -52,7 +52,7 @@ public class ApplicationsTest extends OAuth2Test {
         assert app.getName().equals("Test App Editing");
         assert app.getFaviconUrl().equals(faviconUrl);
 
-        assert target(OAuth2Application.API).path("applications").path(app.getId().toString())
+        assert target(OAuth2Application.API_PATH).path("applications").path(app.getId().toString())
                 .request()
                 .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER  + tr.getAccessToken())
                 .delete().getStatus() == 403;

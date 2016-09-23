@@ -114,7 +114,7 @@ public class OAuth2Test extends BaseTest {
                 .param("password", password)
                 .param("action", "login");
 
-        Response loginScreen = target(OAuth2Application.OAUTH)
+        Response loginScreen = target(OAuth2Application.OAUTH_PATH)
                 .property(ClientProperties.FOLLOW_REDIRECTS, false)
                 .path("authorize")
                 .queryParam("client_id", CLIENT_ID)

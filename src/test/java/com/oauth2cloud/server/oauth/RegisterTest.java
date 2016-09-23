@@ -26,7 +26,7 @@ public class RegisterTest extends OAuth2Test {
         up.param("registerPassword", "moody");
         up.param("action", "register");
 
-        Response register = target(OAuth2Application.OAUTH).path("authorize")
+        Response register = target(OAuth2Application.OAUTH_PATH).path("authorize")
                 .property(ClientProperties.FOLLOW_REDIRECTS, false)
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("redirect_uri", "https://oauth2cloud.com")

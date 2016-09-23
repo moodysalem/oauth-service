@@ -2,19 +2,16 @@ package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
-import com.oauth2cloud.server.model.api.TokenResponse;
-import com.oauth2cloud.server.model.db.*;
-import com.oauth2cloud.server.model.db.Application;
+import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
-import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
-import com.oauth2cloud.server.model.data.LoginRegisterModel;
+import com.oauth2cloud.server.model.api.TokenResponse;
+import com.oauth2cloud.server.model.data.LoginModel;
 import com.oauth2cloud.server.model.data.PermissionsModel;
 import com.oauth2cloud.server.model.data.UserCodeEmailModel;
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.Parameter;
-import com.restfb.Version;
+import com.oauth2cloud.server.model.db.*;
+import com.oauth2cloud.server.model.db.Application;
+import com.oauth2cloud.server.rest.OAuth2Application;
+import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.mindrot.jbcrypt.BCrypt;
@@ -28,44 +25,44 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Application.OAUTH + "/authorize")
 @Produces(MediaType.TEXT_HTML)
+@Path(OAuth2Application.OAUTH_PATH + "/authorize")
 public class AuthorizeResource extends OAuthResource {
-
-    public static final String TOKEN = "token";
-    public static final String CODE = "code";
-    public static final String INVALID_LOGIN_CREDENTIALS = "Invalid login credentials.";
-    public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.";
-    public static final String YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.";
-    public static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
-            "Invalid request. Please contact an administrator if this continues.";
-    public static final String AMAZON_API_URL = "https://api.amazon.com";
-    public static final String E_MAIL_NOT_YET_VERIFIED_MESSAGE = "Your e-mail is not yet verified. Register again to receive another verification e-mail.";
-    public static final String USER_NOT_ACTIVE_MESSAGE = "Your user is not active. Please contact %s to have your user re-activated.";
+    public static final String TOKEN = "token",
+            CODE = "code",
+            INVALID_LOGIN_CREDENTIALS = "Invalid login credentials.",
+            SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.",
+            YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.",
+            INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES = "Invalid request. Please contact an administrator if this continues.",
+            E_MAIL_NOT_YET_VERIFIED_MESSAGE = "Your e-mail is not yet verified. Register again to receive another verification e-mail.",
+            USER_NOT_ACTIVE_MESSAGE = "Your user is not active. Please contact %s to have your user re-activated.";
 
     @QueryParam("response_type")
-    String responseType;
+    private String responseType;
     @QueryParam("client_id")
-    String clientId;
+    private String clientId;
     @QueryParam("redirect_uri")
-    String redirectUri;
+    private String redirectUri;
     @QueryParam("state")
-    String state;
+    private String state;
     @QueryParam("scope")
-    List<String> scopes;
+    private Set<String> scopes;
 
     /**
      * An extra query parameter that can be passed on to the GET request to log the user out if they are already logged in
      */
     @QueryParam("logout")
-    boolean logout;
+    private boolean logout;
 
-    // so we don't rerun the getErrorResponse logic for a valid request, just store whether it's valid in this variable
-    private boolean valid = false;
-
+    /**
+     * Performing a GET on this path returns a 204 and logs the user out if the user is logged in
+     *
+     * @return 204 response
+     */
     @GET
     @Path("logout")
     public Response logout() {
@@ -73,31 +70,30 @@ public class AuthorizeResource extends OAuthResource {
             return error("'client_id' is a required query parameter to log out.");
         }
 
-        Client client = OldQueryHelper.getClient(em, clientId);
+        final Client client = OldQueryHelper.getClient(em, clientId);
         if (client == null) {
             return error("Invalid client ID.");
         }
 
         OldQueryHelper.logCall(em, client, containerRequestContext);
 
-        LoginCookie loginCookie = getLoginCookie(client);
+        final LoginCookie loginCookie = getLoginCookie(client);
         expireLoginCookie(loginCookie);
 
         return Response.noContent().build();
     }
 
-    private void expireLoginCookie(LoginCookie loginCookie) {
+    private void expireLoginCookie(final LoginCookie loginCookie) {
         if (loginCookie == null) {
             return;
         }
-        loginCookie.setExpires(new Date());
         try {
-            beginTransaction();
-            em.merge(loginCookie);
-            commit();
+            TXHelper.withinTransaction(em, () -> {
+                loginCookie.setExpires(new Date());
+                em.merge(loginCookie);
+            });
         } catch (Exception e) {
-            rollback();
-            LOG.log(Level.SEVERE, "Failed to log user out, LCID: " + loginCookie.getId(), e);
+            LOG.log(Level.SEVERE, "Failed to log user out, login cookie ID: " + loginCookie.getId(), e);
         }
     }
 
@@ -111,20 +107,18 @@ public class AuthorizeResource extends OAuthResource {
      * @param scopes       a list of scopes that the client is requesting
      * @return an error if anything is wrong with the aforementioned parameters, otherwise null
      */
-    private Response getErrorResponse(String responseType, String clientId, String redirectUri, List<String> scopes) {
-        if (valid) {
-            return null;
-        }
+    private Response validateRequest(final String responseType, final String clientId, final String redirectUri, final Set<String> scopes) {
         // verify all the query parameters are passed
-        if (clientId == null || redirectUri == null || responseType == null) {
-            return error("Client ID, redirect URI, and response type are all required for this endpoint.");
+        if (isBlank(clientId) || isBlank(redirectUri) || isBlank(responseType)) {
+            return error("Client ID, redirect URI, and response type are all required to log in.");
         }
+
         if (!TOKEN.equalsIgnoreCase(responseType) && !CODE.equalsIgnoreCase(responseType)) {
             return error("Invalid response type. Must be one of 'token' or 'code'");
         }
 
         // verify redirect URL is a proper redirect URL
-        URI toRedirect;
+        final URI toRedirect;
         try {
             toRedirect = new URI(redirectUri);
         } catch (Exception e) {
@@ -132,16 +126,16 @@ public class AuthorizeResource extends OAuthResource {
         }
 
         // first look up the Client by the client identifier
-        Client client = OldQueryHelper.getClient(em, clientId);
+        final Client client = OldQueryHelper.getClient(em, clientId);
         if (client == null) {
             return error("Client ID not found.");
         }
 
         // verify the redirect uri is in the list of the client's allowed redirect uris
         boolean validRedirect = false;
-        for (String uri : client.getUris()) {
+        for (final String uri : client.getUris()) {
             try {
-                URI cUri = new URI(uri);
+                final URI cUri = new URI(uri);
                 // scheme, host, and port must match
                 if (partialMatch(cUri, toRedirect)) {
                     validRedirect = true;
@@ -160,6 +154,7 @@ public class AuthorizeResource extends OAuthResource {
                 return error("This client does not support the implicit grant flow.");
             }
         }
+
         if (CODE.equalsIgnoreCase(responseType)) {
             if (!client.getFlows().contains(Client.GrantFlow.CODE)) {
                 return error("This client does not support the code grant flow.");
@@ -168,15 +163,19 @@ public class AuthorizeResource extends OAuthResource {
 
         // verify all the requested scopes are available to the client
         if (scopes != null && scopes.size() > 0) {
-            Set<String> scopeNames = client.getClientScopes().stream()
-                    .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
+            final Set<String> scopeNames = client.getClientScopes().stream()
+                    .map(ClientScope::getScope)
+                    .map(Scope::getName)
+                    .collect(Collectors.toSet());
+
             if (!scopeNames.containsAll(scopes)) {
-                String joinedScopes = scopes.stream().filter((s) -> !scopeNames.contains(s)).collect(Collectors.joining(", "));
-                return error("The following scopes are requested but not allowed for this client: " + joinedScopes);
+                final String joinedScopes = scopes.stream()
+                        .filter((s) -> !scopeNames.contains(s))
+                        .collect(Collectors.joining(", "));
+                return error(String.format("The following scopes are requested but not allowed for this client: %s", joinedScopes));
             }
         }
 
-        valid = true;
         return null;
     }
 
@@ -188,26 +187,32 @@ public class AuthorizeResource extends OAuthResource {
     @GET
     @CORSFilter.Skip
     public Response auth() {
-
-        Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
+        final Response error = validateRequest(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
         }
 
-        Client client = OldQueryHelper.getClient(em, clientId);
+        final Client client = OldQueryHelper.getClient(em, clientId);
         OldQueryHelper.logCall(em, client, containerRequestContext);
 
-        LoginCookie loginCookie = getLoginCookie(client);
+        final LoginCookie loginCookie = getLoginCookie(client);
         if (loginCookie != null) {
             if (logout) {
                 expireLoginCookie(loginCookie);
             } else {
-                return getSuccessfulLoginResponse(loginCookie.getUser(), client, scopes, redirectUri, responseType, state,
-                        loginCookie.isRememberMe(), null, null);
+                return getSuccessfulLoginResponse(
+                        loginCookie.getUser(),
+                        client,
+                        scopes,
+                        redirectUri,
+                        responseType,
+                        state,
+                        loginCookie.isRememberMe()
+                );
             }
         }
 
-        LoginRegisterModel lrm = new LoginRegisterModel();
+        final LoginModel lrm = new LoginModel();
         lrm.setClient(client);
         lrm.setRedirectUri(redirectUri);
         lrm.setState(state);
@@ -228,7 +233,7 @@ public class AuthorizeResource extends OAuthResource {
     @CORSFilter.Skip
     public Response login(MultivaluedMap<String, String> formParams) {
         // validate the client id stuff again
-        Response error = getErrorResponse(responseType, clientId, redirectUri, scopes);
+        final Response error = validateRequest(responseType, clientId, redirectUri, scopes);
         if (error != null) {
             return error;
         }
@@ -244,7 +249,7 @@ public class AuthorizeResource extends OAuthResource {
 
         boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
 
-        LoginRegisterModel lrm = new LoginRegisterModel();
+        LoginModel lrm = new LoginModel();
         lrm.setURLs(containerRequestContext);
         lrm.setState(state);
         lrm.setRedirectUri(redirectUri);
@@ -271,12 +276,6 @@ public class AuthorizeResource extends OAuthResource {
                             switch (p.provider) {
                                 case GOOGLE:
                                     user = doGoogleLogin(client.getApplication(), formParams);
-                                    break;
-                                case FACEBOOK:
-                                    user = doFacebookLogin(client.getApplication(), formParams);
-                                    break;
-                                case AMAZON:
-                                    user = doAmazonLogin(client.getApplication(), formParams);
                                     break;
                             }
                         } else {
@@ -316,12 +315,10 @@ public class AuthorizeResource extends OAuthResource {
                     } else {
                         boolean isNewUser = existingUser == null;
                         User nu = isNewUser ? new User() : existingUser;
-                        nu.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
                         nu.setApplication(client.getApplication());
                         nu.setEmail(email.trim());
                         nu.setFirstName(firstName.trim());
                         nu.setLastName(lastName.trim());
-                        nu.setActive(true);
                         try {
                             beginTransaction();
                             if (isNewUser) {
@@ -408,86 +405,7 @@ public class AuthorizeResource extends OAuthResource {
                 "VerifyEmail.ftl", ucem);
     }
 
-    private User doAmazonLogin(Application application, MultivaluedMap<String, String> formParams) {
-        if (application.getAmazonClientId() == null || application.getAmazonClientSecret() == null) {
-            throw new IllegalArgumentException("The application is not fully configured for Amazon Login.");
-        }
-
-        String token = formParams.getFirst("amazonToken");
-
-        Response info = ClientBuilder.newClient()
-                .target(AMAZON_API_URL).path("auth").path("o2").path("tokeninfo")
-                .queryParam("access_token", token).request().get();
-        if (info.getStatus() != 200) {
-            throw new IllegalArgumentException("Invalid Amazon login credentials.");
-        }
-
-        JsonNode tokenInfo = info.readEntity(JsonNode.class);
-
-        String audience = tokenInfo.get("aud") != null ? tokenInfo.get("aud").asText() : null;
-
-        if (!application.getAmazonClientId().equals(audience)) {
-            throw new IllegalArgumentException("Token is not associated with the correct client.");
-        }
-
-        Response userInfo = ClientBuilder.newClient()
-                .target(AMAZON_API_URL).path("user").path("profile")
-                .request().header("Authorization", "bearer " + token)
-                .get();
-
-        if (userInfo.getStatus() != 200) {
-            throw new IllegalArgumentException("Failed to get the user information.");
-        }
-
-        JsonNode user = userInfo.readEntity(JsonNode.class);
-
-        if (user.get("email") == null || user.get("name") == null) {
-            throw new IllegalArgumentException("Could not retrieve name or e-mail from user profile.");
-        }
-
-        String name = user.get("name").asText();
-        String[] namePcs = name.split(" ");
-
-        String firstName = namePcs[0];
-        StringBuilder lnb = new StringBuilder();
-        for (int i = 1; i < namePcs.length; i++) {
-            lnb.append(namePcs[i]);
-        }
-        String lastName = lnb.toString();
-
-        String email = user.get("email").asText();
-
-        return makeOrUpdateUser(application, email, firstName, lastName, null, true);
-    }
-
-    private User doFacebookLogin(Application application, MultivaluedMap<String, String> formParams) {
-        if (application.getFacebookAppId() == null || application.getFacebookAppSecret() == null) {
-            throw new IllegalArgumentException("The application is not fully configured for Facebook Login.");
-        }
-        String token = formParams.getFirst("facebookToken");
-
-        FacebookClient fbc = new DefaultFacebookClient(token, application.getFacebookAppSecret(), Version.VERSION_2_5);
-        FacebookClient.DebugTokenInfo dbt = fbc.debugToken(token);
-        if (!dbt.isValid()) {
-            return null;
-        }
-
-        // we need the e-mail to log in
-        if (!dbt.getScopes().contains("email")) {
-            throw new IllegalArgumentException("The e-mail scope is required to log in via Facebook.");
-        }
-        if (!dbt.getAppId().equals(application.getFacebookAppId().toString())) {
-            throw new IllegalArgumentException("The Facebook application ID does not match the audience of the token.");
-        }
-
-        com.restfb.types.User fbUser = fbc.fetchObject("me", com.restfb.types.User.class, Parameter.with("fields", "email,first_name,last_name"));
-        String email = fbUser.getEmail();
-        if (email == null) {
-            throw new NullPointerException("The e-mail could not be retrieved from Facebook.");
-        }
-
-        return makeOrUpdateUser(application, email, fbUser.getFirstName(), fbUser.getLastName(), null, true);
-    }
+    private User
 
     private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
         if (application.getGoogleClientId() == null || application.getGoogleClientSecret() == null) {
@@ -658,10 +576,10 @@ public class AuthorizeResource extends OAuthResource {
         return toReturn;
     }
 
-    private Response getSuccessfulLoginResponse(User user, Client client, List<String> scopes, String redirectUri,
-                                                String responseType, String state, boolean rememberMe, Provider provider, String providerAccessToken) {
+    private Response getSuccessfulLoginResponse(final User user, final Client client, final Set<String> scopes, final String redirectUri,
+                                                final String responseType, final String state, final boolean rememberMe) {
         // successfully authenticated the user
-        List<ClientScope> toAsk = OldQueryHelper.getScopesToRequest(em, client, user, scopes);
+        Set<ClientScope> toAsk = OldQueryHelper.getScopesToRequest(em, client, user, scopes);
         if (toAsk.size() > 0) {
             // we need to generate a temporary token for them to get to the next step with
             Token t = OldQueryHelper.generatePermissionToken(em, user, client, redirectUri, provider, providerAccessToken);

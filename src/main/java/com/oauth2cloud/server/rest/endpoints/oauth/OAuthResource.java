@@ -1,11 +1,11 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
+import com.oauth2cloud.server.model.data.ErrorModel;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
 import com.oauth2cloud.server.model.db.Token;
-import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
-import com.oauth2cloud.server.model.data.ErrorModel;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.codemonkey.simplejavamail.Mailer;
@@ -16,7 +16,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.mail.Message;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -33,14 +32,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class OAuthResource {
-    public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
+    protected Logger LOG = Logger.getLogger(OAuthResource.class.getName());
+
     public static final String COOKIE_NAME_PREFIX = "_AID_";
+    public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
     public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
     private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
 
     protected static final String FROM_EMAIL = System.getProperty("SEND_EMAILS_FROM", "admin@oauth2cloud.com");
-
-    protected Logger LOG = Logger.getLogger(OAuthResource.class.getName());
 
     @Context
     protected ContainerRequestContext containerRequestContext;
@@ -50,11 +49,9 @@ public abstract class OAuthResource {
 
     protected CriteriaBuilder cb;
 
-    private EntityTransaction etx;
-
     @PostConstruct
     public void init() {
-        cb = cb == null ? em.getCriteriaBuilder() : cb;
+        cb = em.getCriteriaBuilder();
     }
 
     /**
@@ -162,52 +159,14 @@ public abstract class OAuthResource {
 
 
     /**
-     * Begin a hibernate transaction
-     */
-    protected void beginTransaction() {
-        if (etx != null) {
-            throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Nested Transactions Opened");
-        }
-        LOG.info("Beginning transaction");
-        etx = em.getTransaction();
-        etx.begin();
-    }
-
-    /**
-     * Commit the in-process transaction
-     */
-    protected void commit() {
-        if (etx == null) {
-            throw new RequestProcessingException(Response.Status.INTERNAL_SERVER_ERROR, "Transaction committed while not open");
-        }
-        LOG.info("Committing transaction");
-        etx.commit();
-        etx = null;
-    }
-
-    /**
-     * Rollback a transaction if one exists
-     */
-    protected void rollback() {
-        if (etx != null) {
-            if (etx.isActive()) {
-                LOG.info("Rolling back transaction");
-                etx.rollback();
-            }
-            etx = null;
-        }
-    }
-
-    /**
      * Check that two URIs match enough per the OAuth2 spec
      *
      * @param one one uri to check
      * @param two uri to check against
      * @return true if the uris match well enough
      */
-    protected boolean partialMatch(URI one, URI two) {
-        boolean validParams = one != null && two != null;
-        return validParams &&
+    protected static boolean partialMatch(final URI one, final URI two) {
+        return one != null && two != null &&
                 one.getScheme().equalsIgnoreCase(two.getScheme()) &&
                 one.getHost().equalsIgnoreCase(two.getHost()) &&
                 one.getPort() == two.getPort();
@@ -220,7 +179,7 @@ public abstract class OAuthResource {
      * @return error page
      */
     protected Response error(String error) {
-        ErrorModel em = new ErrorModel();
+        final ErrorModel em = new ErrorModel();
         em.setError(error);
         return Response.status(400).entity(new Viewable("/templates/Error", em)).build();
     }
@@ -270,7 +229,7 @@ public abstract class OAuthResource {
      * @throws TemplateException
      */
     private String processTemplate(String template, Object model) throws IOException, TemplateException {
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         cfg.getTemplate(template).process(model, sw);
         return sw.toString();
     }

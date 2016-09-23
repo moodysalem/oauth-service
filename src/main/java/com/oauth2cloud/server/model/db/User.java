@@ -20,32 +20,8 @@ public class User extends VersionedEntity {
     @Column(name = "email", updatable = false)
     private String email;
 
-    @NotEmpty
-    @Column(name = "first_name")
-    private String firstName;
-
-    @NotEmpty
-    @Column(name = "last_name")
-    private String lastName;
-
     @Column(name = "verified")
     private boolean verified;
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 
     public Application getApplication() {
         return application;

@@ -23,16 +23,8 @@
                 </h2>
                 <div class="form-group">
                     <label class="control-label" for="email">E-mail Address</label>
-                    <input type="email" id="email" name="email" class="form-control"
-                           <#if model.lastEmail??>value="${model.lastEmail}"</#if>
-                           <#if !model.lastEmail??>autofocus</#if>
+                    <input type="email" id="email" name="email" class="form-control" autofocus
                            placeholder="E-mail address" required>
-                </div>
-                <div class="form-group">
-                    <label class="control-label" for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control"
-                           placeholder="Password" required
-                           <#if model.lastEmail??>autofocus</#if>>
                 </div>
 
                 <div class="checkbox">
@@ -86,14 +78,14 @@
                                                         $("#facebookToken").val(response.authResponse.accessToken)
                                                                 .closest("form").submit();
                                                     }
-                                                }, { scope: "public_profile,email" });
+                                                }, {scope: "public_profile,email"});
                                             }
                                         });
                                     });
                                 };
 
                                 (function (d, s, id) {
-                                    var js, fjs = d.getElementsByTagName(s)[ 0 ];
+                                    var js, fjs = d.getElementsByTagName(s)[0];
                                     if (d.getElementById(id)) {
                                         return;
                                     }
@@ -266,22 +258,6 @@
                     });
                 });
             </script>
-
-        <#if model.registerError??>
-            <div class="alert alert-danger">
-                <i class="fa fa-exclamation-triangle"></i>
-                <strong>Error</strong>
-            ${model.registerError}
-            </div>
-        </#if>
-        <#if model.registerSuccess>
-            <div class="alert alert-success">
-                <i class="fa fa-check"></i>
-                <strong>Success</strong>
-                You will receive a confirmation e-mail. You must confirm your e-mail before you can sign in.
-            </div>
-        </#if>
-
         </div>
     </div>
 </div>

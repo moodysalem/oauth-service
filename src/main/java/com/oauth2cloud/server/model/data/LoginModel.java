@@ -3,7 +3,7 @@ package com.oauth2cloud.server.model.data;
 /**
  * This is the model that gets passed to Authorize.ftl
  */
-public class LoginRegisterModel extends AuthorizeModel {
+public class LoginModel extends AuthorizeModel {
     private String loginError;
     private String registerError;
     private boolean registerSuccess;
@@ -12,6 +12,7 @@ public class LoginRegisterModel extends AuthorizeModel {
     public String getLoginError() {
         return loginError;
     }
+
     public void setLoginError(String loginError) {
         this.loginError = loginError;
     }

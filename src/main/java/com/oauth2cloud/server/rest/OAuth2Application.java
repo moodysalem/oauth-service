@@ -14,8 +14,13 @@ import java.util.Properties;
 
 @ApplicationPath("/")
 public class OAuth2Application extends BaseApplication {
-    public static final String API = "api";
-    public static final String OAUTH = "oauth";
+    public static final String API_PATH = "api";
+    public static final String OAUTH_PATH = "oauth";
+
+    private static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required";
+    private static final String PERSISTENCE_UNIT_NAME = "oauth-service";
+    private static final String DB_MASTER_CHANGELOG_XML_PATH = "db/master-changelog.xml";
+    private static final String ENTITY_MANAGER_FACTORY_NAME = "main-em";
 
     public OAuth2Application() {
         super();
@@ -27,28 +32,28 @@ public class OAuth2Application extends BaseApplication {
             protected void configure() {
                 // this is used to talk to the DB via JPA entity manager
                 bindFactory(
-                        JAXRSEntityManagerFactory.builder("main-em")
-                                .withUrl(System.getProperty("JDBC_CONNECTION_STRING"))
-                                .withUser(System.getProperty("JDBC_CONNECTION_USERNAME"))
-                                .withPassword(System.getProperty("JDBC_CONNECTION_PASSWORD"))
-                                .withPersistenceUnit("oauth-service")
-                                .withChangelogFile("db/master-changelog.xml")
-                                .withShowSql("true".equalsIgnoreCase(System.getProperty("SHOW_SQL")))
-                                .withContext(System.getProperty("LIQUIBASE_CONTEXT", "prod"))
+                        JAXRSEntityManagerFactory.builder(ENTITY_MANAGER_FACTORY_NAME)
+                                .withUrl(EnvironmentConfig.JDBC_CONNECTION_STRING)
+                                .withUser(EnvironmentConfig.JDBC_CONNECTION_USERNAME)
+                                .withPassword(EnvironmentConfig.JDBC_CONNECTION_PASSWORD)
+                                .withPersistenceUnit(PERSISTENCE_UNIT_NAME)
+                                .withChangelogFile(DB_MASTER_CHANGELOG_XML_PATH)
+                                .withShowSql(EnvironmentConfig.SHOW_HIBERNATE_SQL)
+                                .withContext(EnvironmentConfig.LIQUIBASE_CONTEXT)
                                 .build()
                 ).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // create the mailer that uses amazon
                 final Mailer sesMailer = new Mailer(
-                        System.getProperty("SMTP_HOST"),
-                        getMailPort(),
-                        System.getProperty("SMTP_USERNAME"),
-                        System.getProperty("SMTP_PASSWORD"),
+                        EnvironmentConfig.SMTP_HOST,
+                        EnvironmentConfig.SMTP_PORT,
+                        EnvironmentConfig.SMTP_USERNAME,
+                        EnvironmentConfig.SMTP_PASSWORD,
                         TransportStrategy.SMTP_TLS
                 );
 
                 final Properties addtl = new Properties();
-                addtl.put("mail.smtp.starttls.required", "true");
+                addtl.put(MAIL_SMTP_STARTTLS_REQUIRED, "true");
                 sesMailer.applyProperties(addtl);
 
                 // this is used to send e-mails
@@ -58,19 +63,6 @@ public class OAuth2Application extends BaseApplication {
                 bind(new EmailTemplateFreemarkerConfiguration()).to(Configuration.class);
             }
         });
-    }
-
-    private int getMailPort() {
-        // get the port configuration
-        int port = 25;
-        String portString = System.getProperty("SMTP_PORT");
-        if (portString != null) {
-            try {
-                port = Integer.parseInt(portString);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return port;
     }
 
     @Override
