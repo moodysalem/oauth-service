@@ -33,13 +33,13 @@ public class OAuth2Application extends BaseApplication {
                                 .withPassword(System.getProperty("JDBC_CONNECTION_PASSWORD"))
                                 .withPersistenceUnit("oauth-service")
                                 .withChangelogFile("db/master-changelog.xml")
-                                .withShowSql(System.getProperty("SHOW_SQL") != null)
+                                .withShowSql("true".equalsIgnoreCase(System.getProperty("SHOW_SQL")))
                                 .withContext(System.getProperty("LIQUIBASE_CONTEXT", "prod"))
                                 .build()
                 ).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // create the mailer that uses amazon
-                Mailer sesMailer = new Mailer(
+                final Mailer sesMailer = new Mailer(
                         System.getProperty("SMTP_HOST"),
                         getMailPort(),
                         System.getProperty("SMTP_USERNAME"),
@@ -47,7 +47,7 @@ public class OAuth2Application extends BaseApplication {
                         TransportStrategy.SMTP_TLS
                 );
 
-                Properties addtl = new Properties();
+                final Properties addtl = new Properties();
                 addtl.put("mail.smtp.starttls.required", "true");
                 sesMailer.applyProperties(addtl);
 
@@ -74,7 +74,7 @@ public class OAuth2Application extends BaseApplication {
     }
 
     @Override
-    public boolean forceHttps() {
+    public boolean forceLoadBalancerHTTPS() {
         return true;
     }
 

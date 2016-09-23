@@ -1,9 +1,9 @@
 package com.oauth2cloud.server.rest.filter;
 
-import com.oauth2cloud.server.hibernate.model.Application_;
-import com.oauth2cloud.server.hibernate.model.Client_;
-import com.oauth2cloud.server.hibernate.model.Token;
-import com.oauth2cloud.server.hibernate.model.Token_;
+import com.oauth2cloud.server.model.Application_;
+import com.oauth2cloud.server.model.Client_;
+import com.oauth2cloud.server.model.Token_;
+import com.oauth2cloud.server.model.db.Token;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -25,34 +25,39 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Provides the request with the token in the TOKEN key by reading any bearer tokens from the authorization header
+ */
 @Provider
 public class AuthorizationHeaderTokenFeature implements DynamicFeature {
-    public static final String BEARER = "bearer ";
     public static final String TOKEN = "TOKEN";
+
+    public static final String BEARER = "bearer ";
     public static final UUID APPLICATION_ID = UUID.fromString("9966e7e3-ac4f-4d8e-9710-2971450cb504");
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Priority(Priorities.AUTHENTICATION)
     public static class TokenFilter implements ContainerRequestFilter {
         @Inject
-        EntityManager em;
+        private EntityManager em;
 
         @Override
         public void filter(ContainerRequestContext containerRequestContext) throws IOException {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            String auth = containerRequestContext.getHeaderString(AUTHORIZATION_HEADER);
+            final CriteriaBuilder cb = em.getCriteriaBuilder();
+            final String auth = containerRequestContext.getHeaderString(AUTHORIZATION_HEADER);
             if (auth != null && auth.toLowerCase().startsWith(BEARER)) {
-                String token = auth.substring(BEARER.length());
+                final String token = auth.substring(BEARER.length());
                 if (token.length() > 0) {
-                    CriteriaQuery<Token> cq = cb.createQuery(Token.class);
-                    Root<Token> tokenRoot = cq.from(Token.class);
-                    List<Token> tks = em.createQuery(cq.select(tokenRoot).where(
+                    final CriteriaQuery<Token> cq = cb.createQuery(Token.class);
+                    final Root<Token> tokenRoot = cq.from(Token.class);
+                    final List<Token> tks = em.createQuery(cq.select(tokenRoot).where(
                             cb.equal(tokenRoot.get(Token_.token), token),
                             cb.greaterThan(tokenRoot.get(Token_.expires), new Date()),
                             cb.equal(tokenRoot.get(Token_.type), Token.Type.ACCESS),
                             cb.equal(tokenRoot.join(Token_.client).join(Client_.application)
                                     .get(Application_.id), APPLICATION_ID)
                     )).getResultList();
+
                     if (tks.size() == 1) {
                         containerRequestContext.setProperty(TOKEN, tks.get(0));
                     }

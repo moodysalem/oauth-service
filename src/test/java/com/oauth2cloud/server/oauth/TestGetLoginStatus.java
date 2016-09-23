@@ -2,7 +2,7 @@ package com.oauth2cloud.server.oauth;
 
 import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.resources.oauth.OAuthResource;
+import com.oauth2cloud.server.rest.endpoints.oauth.OAuthResource;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.WebTarget;

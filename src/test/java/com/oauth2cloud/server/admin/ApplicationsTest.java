@@ -1,8 +1,8 @@
 package com.oauth2cloud.server.admin;
 
 import com.oauth2cloud.server.OAuth2Test;
-import com.oauth2cloud.server.hibernate.model.Application;
-import com.oauth2cloud.server.hibernate.model.TokenResponse;
+import com.oauth2cloud.server.model.db.Application;
+import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import org.testng.annotations.Test;

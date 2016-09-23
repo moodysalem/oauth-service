@@ -3,7 +3,7 @@ package com.oauth2cloud.server;
 import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.moodysalem.jaxrs.lib.test.BaseTest;
-import com.oauth2cloud.server.hibernate.model.TokenResponse;
+import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import freemarker.template.Configuration;
@@ -50,8 +50,8 @@ public class OAuth2Test extends BaseTest {
     public ResourceConfig getResourceConfig() {
         BaseApplication ba = new BaseApplication() {
             @Override
-            public boolean forceHttps() {
-                return true;
+            public boolean forceLoadBalancerHTTPS() {
+                return false;
             }
 
             @Override
@@ -83,7 +83,7 @@ public class OAuth2Test extends BaseTest {
                 // this is used to send e-mails and record the email to our list of sent e-mails
                 Mailer m = mock(Mailer.class);
                 doAnswer(invocationOnMock -> sentEmails.add((Email) invocationOnMock.getArguments()[0]))
-                    .when(m).sendMail(any(Email.class));
+                        .when(m).sendMail(any(Email.class));
 
                 bind(m).to(Mailer.class);
 

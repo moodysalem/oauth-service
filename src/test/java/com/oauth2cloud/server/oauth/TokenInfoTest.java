@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.oauth;
 
 import com.oauth2cloud.server.OAuth2Test;
-import com.oauth2cloud.server.hibernate.model.TokenResponse;
+import com.oauth2cloud.server.model.api.TokenResponse;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.Entity;

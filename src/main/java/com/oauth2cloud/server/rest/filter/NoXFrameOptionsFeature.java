@@ -9,17 +9,19 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * Applies X-Frame-Options DENY header to any resource annotated with NoXFrame
+ */
 @Provider
 public class NoXFrameOptionsFeature implements DynamicFeature {
     @Priority(Priorities.HEADER_DECORATOR)
     public static class NoXFrameOptionsFilter implements ContainerResponseFilter {
-
         public static final String X_FRAME_OPTIONS = "X-Frame-Options";
         public static final String DENY = "DENY";
 
         @Override
         public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext containerResponseContext)
-            throws IOException {
+                throws IOException {
             containerResponseContext.getHeaders().putSingle(X_FRAME_OPTIONS, DENY);
         }
     }
@@ -31,7 +33,7 @@ public class NoXFrameOptionsFeature implements DynamicFeature {
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext featureContext) {
         if (resourceInfo.getResourceMethod().isAnnotationPresent(NoXFrame.class) ||
-            resourceInfo.getResourceClass().isAnnotationPresent(NoXFrame.class)) {
+                resourceInfo.getResourceClass().isAnnotationPresent(NoXFrame.class)) {
             featureContext.register(NoXFrameOptionsFilter.class);
         }
     }

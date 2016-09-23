@@ -11,24 +11,25 @@ import java.util.logging.Logger;
 
 /**
  * This class allows storing encrypted data in the database
+ * <p>
+ * Apply it to the fields that should be encrypted by the encryption secret passed in to the application via the
+ * ENCRYPTION_SECRET environment variable
  */
 @Converter
 public class EncryptedStringConverter implements AttributeConverter<String, String> {
 
+    private static final Logger LOG = Logger.getLogger(EncryptedStringConverter.class.getName());
+
     private static final String ENCRYPTION_SECRET = System.getProperty("ENCRYPTION_SECRET");
     private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
     private static final byte[] KEY_STRING = ENCRYPTION_SECRET.getBytes();
-
-    private static final Key KEY;
-    private static final Logger LOG = Logger.getLogger(EncryptedStringConverter.class.getName());
+    private static final Key KEY = new SecretKeySpec(KEY_STRING, "AES");
 
     private static final Cipher ENCRYPTION_CIPHER;
     private static final Cipher DECRYPTION_CIPHER;
     private static final String UTF_8 = "UTF-8";
 
     static {
-        KEY = new SecretKeySpec(KEY_STRING, "AES");
-
         Cipher x = null, y = null;
 
         try {
@@ -43,7 +44,6 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
         ENCRYPTION_CIPHER = x == null ? null : x;
         DECRYPTION_CIPHER = y == null ? null : y;
     }
-
 
     @Override
     public String convertToDatabaseColumn(String toEncrypt) {
