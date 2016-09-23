@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * Provides the request with the token in the TOKEN key by reading any bearer tokens from the authorization header
  */
 @Provider
-public class AuthorizationHeaderTokenFeature implements DynamicFeature {
+public class TokenFilter implements DynamicFeature {
     public static final String TOKEN = "TOKEN";
 
     public static final String BEARER = "bearer ";
@@ -37,7 +37,7 @@ public class AuthorizationHeaderTokenFeature implements DynamicFeature {
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Priority(Priorities.AUTHENTICATION)
-    public static class TokenFilter implements ContainerRequestFilter {
+    public static class ReadTokenFilter implements ContainerRequestFilter {
         @Inject
         private EntityManager em;
 
@@ -74,7 +74,7 @@ public class AuthorizationHeaderTokenFeature implements DynamicFeature {
     public void configure(ResourceInfo resourceInfo, FeatureContext featureContext) {
         if (resourceInfo.getResourceMethod().isAnnotationPresent(ReadToken.class) ||
                 resourceInfo.getResourceClass().isAnnotationPresent(ReadToken.class)) {
-            featureContext.register(TokenFilter.class);
+            featureContext.register(ReadTokenFilter.class);
         }
     }
 

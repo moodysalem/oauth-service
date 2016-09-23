@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.BaseEntity;
+import com.moodysalem.hibernate.model.VersionedEntity;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -12,7 +12,7 @@ import javax.persistence.ManyToOne;
 
 @Entity
 @Immutable
-public class User extends BaseEntity {
+public class User extends VersionedEntity {
     @ManyToOne
     @JoinColumn(name = "application_id", updatable = false)
     private Application application;

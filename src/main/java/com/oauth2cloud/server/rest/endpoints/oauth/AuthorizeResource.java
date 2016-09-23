@@ -405,8 +405,6 @@ public class AuthorizeResource extends OAuthResource {
                 "VerifyEmail.ftl", ucem);
     }
 
-    private User
-
     private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
         if (application.getGoogleClientId() == null || application.getGoogleClientSecret() == null) {
             throw new IllegalArgumentException(String.format("The application %s is not fully configured for Google Login.", application.getName()));

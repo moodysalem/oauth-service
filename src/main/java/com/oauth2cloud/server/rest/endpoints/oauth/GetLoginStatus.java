@@ -9,7 +9,7 @@ import com.oauth2cloud.server.model.db.LoginCookie;
 import com.oauth2cloud.server.model.db.Token;
 import com.oauth2cloud.server.model.db.User;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
+import com.oauth2cloud.server.rest.filter.TokenFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
 
@@ -37,7 +37,7 @@ public class GetLoginStatus extends OAuthResource {
      */
     @GET
     @CORSFilter.Skip
-    @AuthorizationHeaderTokenFeature.ReadToken
+    @TokenFilter.ReadToken
     public Response get(@QueryParam("client_id") String clientId,
                         @HeaderParam("Referer") String referrer) {
         if (StringUtils.isBlank(clientId)) {

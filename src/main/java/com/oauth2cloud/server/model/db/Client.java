@@ -4,6 +4,7 @@ import com.moodysalem.hibernate.model.VersionedEntity;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
@@ -29,11 +30,13 @@ public class Client extends VersionedEntity {
     @JoinColumn(name = "application_id")
     private Application application;
 
-    @Column(name = "identifier", updatable = false)
-    private String identifier;
-
-    @Column(name = "secret", updatable = false)
-    private String secret;
+    @Valid
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "id", column = @Column(name = "identifier", updatable = false)),
+            @AttributeOverride(name = "secret", column = @Column(name = "secret", updatable = false))
+    })
+    private ClientCredentials credentials;
 
     @ElementCollection
     @CollectionTable(name = "client_uris", joinColumns = @JoinColumn(name = "client_id"))
@@ -64,20 +67,12 @@ public class Client extends VersionedEntity {
     @Column(name = "active")
     private boolean active;
 
-    public String getIdentifier() {
-        return identifier;
+    public ClientCredentials getCredentials() {
+        return credentials;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public void setCredentials(ClientCredentials credentials) {
+        this.credentials = credentials;
     }
 
     public Application getApplication() {

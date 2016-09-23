@@ -9,10 +9,10 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+@Documented
 @Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 @Constraint(validatedBy = NoSpacesValidator.class)
-@Documented
 public @interface NoSpaces {
 
     String message() default "{com.oauth2cloud.server.hibernate.validate.NoSpaces.message}";
@@ -27,7 +27,7 @@ public @interface NoSpaces {
     @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER})
     @Retention(RUNTIME)
     @Documented
-    public @interface List {
+    @interface List {
         NoSpaces[] value();
     }
 

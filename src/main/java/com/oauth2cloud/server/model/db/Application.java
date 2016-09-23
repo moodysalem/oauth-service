@@ -2,12 +2,12 @@ package com.oauth2cloud.server.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.VersionedEntity;
-import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 
 @Entity
 public class Application extends VersionedEntity {
@@ -25,13 +25,13 @@ public class Application extends VersionedEntity {
     @Column(name = "support_email")
     private String supportEmail;
 
-    @Column(name = "google_client_id")
-    @Convert(converter = EncryptedStringConverter.class)
-    private String googleClientId;
-
-    @Column(name = "google_client_secret")
-    @Convert(converter = EncryptedStringConverter.class)
-    private String googleClientSecret;
+    @Valid
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "id", column = @Column(name = "google_client_id")),
+            @AttributeOverride(name = "secret", column = @Column(name = "google_client_secret"))
+    })
+    private ClientCredentials googleCredentials;
 
     @URL
     @Lob
@@ -63,20 +63,12 @@ public class Application extends VersionedEntity {
         this.name = name;
     }
 
-    public String getGoogleClientId() {
-        return googleClientId;
+    public ClientCredentials getGoogleCredentials() {
+        return googleCredentials;
     }
 
-    public void setGoogleClientId(String googleClientId) {
-        this.googleClientId = googleClientId;
-    }
-
-    public String getGoogleClientSecret() {
-        return googleClientSecret;
-    }
-
-    public void setGoogleClientSecret(String googleClientSecret) {
-        this.googleClientSecret = googleClientSecret;
+    public void setGoogleCredentials(ClientCredentials googleCredentials) {
+        this.googleCredentials = googleCredentials;
     }
 
     public String getSupportEmail() {

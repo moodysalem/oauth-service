@@ -1,122 +1,75 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
-import com.moodysalem.jaxrs.lib.resources.VersionedEntityResource;
-import com.oauth2cloud.server.model.Application_;
-import com.oauth2cloud.server.model.Client_;
 import com.oauth2cloud.server.model.db.Application;
+import com.oauth2cloud.server.model.db.Application_;
 import com.oauth2cloud.server.model.db.Client;
+import com.oauth2cloud.server.model.db.Client_;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
-import org.apache.commons.lang3.RandomStringUtils;
+import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
+import com.oauth2cloud.server.rest.filter.TokenFilter;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
-@AuthorizationHeaderTokenFeature.ReadToken
+@TokenFilter.ReadToken
 @Path(OAuth2Application.API_PATH + "/clients")
 public class ClientsResource extends VersionedEntityResource<Client> {
-    public static final String MANAGE_CLIENTS = "manage_clients";
-
     @Override
     public Class<Client> getEntityClass() {
         return Client.class;
     }
 
-
     @Override
-    public boolean canCreate(Client client) {
-        mustBeLoggedIn();
-        checkScope(MANAGE_CLIENTS);
-
-        if (client.getApplication() == null) {
+    public boolean canMerge(Client oldData, Client newData) {
+        if (newData.getApplication() == null) {
             return false;
         }
 
-        Application ap = em.find(Application.class, client.getApplication().getId());
-        return ap != null && ap.getOwner().idMatch(getUser());
+        final Application application = em.find(Application.class, newData.getApplication().getId());
+        return application != null &&
+                application.getOwner().idMatch(getUser());
     }
 
     @Override
-    public boolean canEdit(Client client) {
-        mustBeLoggedIn();
-        checkScope(MANAGE_CLIENTS);
-        return client.getApplication().getOwner().idMatch(getUser());
+    public void beforeMerge(Client oldData, Client newData) {
+
     }
+
+    @Override
+    public void afterMerge(Client entity) {
+
+    }
+
 
     @Override
     public boolean canDelete(Client client) {
-        return false;
+        return client.getApplication().getOwner().idMatch(getUser());
     }
-
-    @Override
-    protected void validateEntity(List<String> list, Client client) {
-
-    }
-
-    @Override
-    public void beforeCreate(Client client) {
-        client.setCreator(getUser());
-        client.setIdentifier(RandomStringUtils.randomAlphanumeric(64));
-        client.setSecret(RandomStringUtils.randomAlphanumeric(64));
-    }
-
-    @Override
-    public void beforeEdit(Client client, Client t1) {
-    }
-
-
-    @QueryParam("search")
-    String search;
 
     @QueryParam("applicationId")
-    UUID applicationId;
-
-    @QueryParam("active")
-    Boolean active;
+    private Set<UUID> applicationId;
 
     @Override
-    protected void getPredicatesFromRequest(List<Predicate> list, Root<Client> root) {
-        mustBeLoggedIn();
-        checkScope(MANAGE_CLIENTS);
-
+    public void getPredicatesFromRequest(List<Predicate> list, Root<Client> root) {
         list.add(cb.equal(root.join(Client_.application).get(Application_.owner), getUser()));
-        list.add(cb.equal(root.get(Client_.active), true));
-        list.add(cb.equal(root.join(Client_.application).get(Application_.active), true));
 
-        if (applicationId != null) {
-            list.add(cb.equal(root.join(Client_.application).get(Application_.id), applicationId));
-        }
-
-        if (search != null) {
-            Predicate toAdd = null;
-            for (String s : search.split(" ")) {
-                if (s.trim().length() > 0) {
-                    Predicate sp = cb.like(cb.upper(root.get(Client_.name)),
-                            "%" + s.trim().toUpperCase() + "%");
-                    toAdd = toAdd == null ? sp : cb.and(sp, toAdd);
-                }
-            }
-            if (toAdd != null) {
-                list.add(toAdd);
-            }
-        }
-
-        if (active != null) {
-            list.add(cb.equal(root.get(Client_.active), active));
+        if (applicationId != null && !applicationId.isEmpty()) {
+            list.add(root.join(Client_.application).get(Application_.id).in(applicationId));
         }
     }
 
     @Override
-    public void afterCreate(Client client) {
+    public void beforeSend(List<Client> entity) {
 
     }
 
     @Override
-    public void beforeSend(Client client) {
-
+    public boolean requiresLogin() {
+        return true;
     }
 }

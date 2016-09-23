@@ -4,7 +4,7 @@ import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.rest.OAuth2Application;
-import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
+import com.oauth2cloud.server.rest.filter.TokenFilter;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.Entity;
@@ -34,7 +34,7 @@ public class ApplicationsTest extends OAuth2Test {
 
         app = target(OAuth2Application.API_PATH).path("applications")
                 .request()
-                .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER + tr.getAccessToken())
+                .header(AUTH_HEADER, TokenFilter.BEARER + tr.getAccessToken())
                 .post(Entity.json(app), Application.class);
 
         assert id.equals(app.getId());
@@ -46,7 +46,7 @@ public class ApplicationsTest extends OAuth2Test {
         app.setName("Test App Editing");
         app = target(OAuth2Application.API_PATH).path("applications").path(app.getId().toString())
                 .request()
-                .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER  + tr.getAccessToken())
+                .header(AUTH_HEADER, TokenFilter.BEARER  + tr.getAccessToken())
                 .put(Entity.json(app), Application.class);
 
         assert app.getName().equals("Test App Editing");
@@ -54,7 +54,7 @@ public class ApplicationsTest extends OAuth2Test {
 
         assert target(OAuth2Application.API_PATH).path("applications").path(app.getId().toString())
                 .request()
-                .header(AUTH_HEADER, AuthorizationHeaderTokenFeature.BEARER  + tr.getAccessToken())
+                .header(AUTH_HEADER, TokenFilter.BEARER  + tr.getAccessToken())
                 .delete().getStatus() == 403;
 
     }
