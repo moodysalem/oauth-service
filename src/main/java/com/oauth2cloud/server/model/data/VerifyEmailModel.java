@@ -1,24 +1,22 @@
 package com.oauth2cloud.server.model.data;
 
-import com.oauth2cloud.server.model.db.UserCode;
-
 public class VerifyEmailModel implements HeadProperties {
     public enum AlertLevel {
         danger, warning, success
     }
 
-    public VerifyEmailModel(UserCode userCode, String message, AlertLevel alertLevel) {
-        this.userCode = userCode;
+    public VerifyEmailModel(VerificationCode verificationCode, String message, AlertLevel alertLevel) {
+        this.verificationCode = verificationCode;
         this.message = message;
         this.alertLevel = alertLevel;
     }
 
-    private final UserCode userCode;
+    private final VerificationCode verificationCode;
     private final String message;
     private final AlertLevel alertLevel;
 
-    public UserCode getUserCode() {
-        return userCode;
+    public VerificationCode getVerificationCode() {
+        return verificationCode;
     }
 
     public String getMessage() {
@@ -31,11 +29,11 @@ public class VerifyEmailModel implements HeadProperties {
 
     @Override
     public String getStylesheetUrl() {
-        return getUserCode() != null ? getUserCode().getUser().getApplication().getStylesheetUrl() : null;
+        return getVerificationCode() != null ? getVerificationCode().getUser().getApplication().getStylesheetUrl() : null;
     }
 
     @Override
     public String getFaviconUrl() {
-        return getUserCode() != null ? getUserCode().getUser().getApplication().getFaviconUrl() : null;
+        return getVerificationCode() != null ? getVerificationCode().getUser().getApplication().getFaviconUrl() : null;
     }
 }

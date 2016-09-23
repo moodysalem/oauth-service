@@ -5,7 +5,7 @@
 <script>
     (function () {
         "use strict";
-        var message;
+        var message = null;
     <#if model.loginCookie??>
         message = {
             status: "logged_in",
@@ -45,5 +45,4 @@
     })();
 </script>
 </body>
-
 </html>

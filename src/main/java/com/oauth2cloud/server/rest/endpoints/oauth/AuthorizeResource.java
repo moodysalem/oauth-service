@@ -391,8 +391,8 @@ public class AuthorizeResource extends OAuthResource {
     }
 
     private void sendVerificationEmail(User user) {
-        UserCode uc = OldQueryHelper.makeUserCode(em, user, containerRequestContext.getUriInfo().getRequestUri().toString(),
-                UserCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
+        VerificationCode uc = OldQueryHelper.makeUserCode(em, user, containerRequestContext.getUriInfo().getRequestUri().toString(),
+                VerificationCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
 
         UserCodeEmailModel ucem = new UserCodeEmailModel(userCode, url);
         ucem.setUserCode(uc);
@@ -706,21 +706,22 @@ public class AuthorizeResource extends OAuthResource {
     }
 
     private LoginCookie makeLoginCookie(User user, String secret, Date expires, boolean rememberMe) {
-        LoginCookie loginCookie = new LoginCookie();
+        final LoginCookie loginCookie = new LoginCookie();
         loginCookie.setUser(user);
         loginCookie.setSecret(secret);
         loginCookie.setExpires(expires);
         loginCookie.setRememberMe(rememberMe);
+
         try {
-            beginTransaction();
-            em.persist(loginCookie);
-            em.flush();
-            commit();
+            TXHelper.withinTransaction(em, () -> {
+                em.persist(loginCookie);
+                em.flush();
+            });
         } catch (Exception e) {
-            rollback();
             LOG.log(Level.SEVERE, "Failed to create a login cookie", e);
-            loginCookie = null;
+            return null;
         }
+
         return loginCookie;
     }
 
@@ -734,8 +735,7 @@ public class AuthorizeResource extends OAuthResource {
      */
     private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
         return OldQueryHelper.generateToken(em, type, permissionToken.getClient(), permissionToken.getUser(),
-                getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null,
-                permissionToken.getProvider(), permissionToken.getProviderAccessToken());
+                getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null);
     }
 
 }

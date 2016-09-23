@@ -85,16 +85,16 @@ public abstract class OldQueryHelper {
 
 
     /**
-     * Make a UserCode
+     * Make a VerificationCode
      *
      * @param user     user for which the code is created
      * @param referrer the referrer to which the user should be redirected after using the code
      * @param type     the type of code
      * @param expires  when it expires
-     * @return UserCode created
+     * @return VerificationCode created
      */
-    public static UserCode makeUserCode(EntityManager em, User user, String referrer, UserCode.Type type, Date expires) {
-        UserCode pw = new UserCode();
+    public static VerificationCode makeUserCode(EntityManager em, User user, String referrer, VerificationCode.Type type, Date expires) {
+        VerificationCode pw = new VerificationCode();
         pw.setExpires(expires);
         pw.setUser(user);
         pw.setCode(RandomStringUtils.randomAlphanumeric(64));
@@ -116,15 +116,15 @@ public abstract class OldQueryHelper {
 
 
     /**
-     * Get a UserCode based on the user code string
+     * Get a VerificationCode based on the user code string
      */
-    public static UserCode getUserCode(EntityManager em, String code, UserCode.Type type, boolean includeUsed) {
+    public static VerificationCode getUserCode(EntityManager em, String code, VerificationCode.Type type, boolean includeUsed) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         if (code == null) {
             return null;
         }
-        CriteriaQuery<UserCode> pw = cb.createQuery(UserCode.class);
-        Root<UserCode> userCodeRoot = pw.from(UserCode.class);
+        CriteriaQuery<VerificationCode> pw = cb.createQuery(VerificationCode.class);
+        Root<VerificationCode> userCodeRoot = pw.from(VerificationCode.class);
         Predicate queryPredicate = cb.and(
                 cb.equal(userCodeRoot.get(UserCode_.code), code),
                 cb.greaterThan(userCodeRoot.get(UserCode_.expires), new Date()),
@@ -139,7 +139,7 @@ public abstract class OldQueryHelper {
         }
 
         pw.select(userCodeRoot).where(queryPredicate);
-        List<UserCode> lp = em.createQuery(pw).getResultList();
+        List<VerificationCode> lp = em.createQuery(pw).getResultList();
         return lp.size() == 1 ? lp.get(0) : null;
     }
 

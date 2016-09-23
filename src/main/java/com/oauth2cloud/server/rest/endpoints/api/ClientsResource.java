@@ -1,9 +1,10 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
+import com.moodysalem.jaxrs.lib.resources.VersionedEntityResource;
 import com.oauth2cloud.server.model.Application_;
-import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.Client_;
 import com.oauth2cloud.server.model.db.Application;
+import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -17,7 +18,7 @@ import java.util.UUID;
 
 @AuthorizationHeaderTokenFeature.ReadToken
 @Path(OAuth2Application.API_PATH + "/clients")
-public class ClientsResource extends BaseEntityResource<Client> {
+public class ClientsResource extends VersionedEntityResource<Client> {
     public static final String MANAGE_CLIENTS = "manage_clients";
 
     @Override

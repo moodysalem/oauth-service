@@ -1,12 +1,12 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
+import com.oauth2cloud.server.model.api.ErrorResponse;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.*;
-import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
-import com.oauth2cloud.server.model.api.ErrorResponse;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.annotation.PostConstruct;
@@ -31,10 +31,10 @@ public class TokenResource extends OAuthResource {
     private static final int BASIC_LENGTH = BASIC.length();
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private static final String AUTHORIZATION_CODE = "authorization_code";
-    public static final String PASSWORD = "password";
-    public static final String CLIENT_CREDENTIALS = "client_credentials";
-    public static final String REFRESH_TOKEN = "refresh_token";
-    public static final String TEMPORARY_TOKEN = "temporary_token";
+    private static final String PASSWORD = "password",
+            CLIENT_CREDENTIALS = "client_credentials",
+            REFRESH_TOKEN = "refresh_token",
+            TEMPORARY_TOKEN = "temporary_token";
 
     @HeaderParam("Authorization")
     private String authorizationHeader;
@@ -62,12 +62,10 @@ public class TokenResource extends OAuthResource {
         }
     }
 
-    private Response error(int statusCode, ErrorResponse.Type type, String description, String uri) {
-        ErrorResponse er = new ErrorResponse();
-        er.setError(type);
-        er.setErrorDescription(description);
-        er.setErrorUri(uri);
-        return Response.status(statusCode).entity(er).build();
+    private Response error(final int statusCode, final ErrorResponse.Type type, final String description, final String uri) {
+        return Response.status(statusCode)
+                .entity(new ErrorResponse(type, description, uri))
+                .build();
     }
 
     private Response error(ErrorResponse.Type type, String description, String uri) {

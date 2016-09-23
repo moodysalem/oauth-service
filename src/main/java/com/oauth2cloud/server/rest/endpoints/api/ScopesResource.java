@@ -1,9 +1,9 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
 import com.oauth2cloud.server.model.Application_;
+import com.oauth2cloud.server.model.Scope_;
 import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.model.db.Scope;
-import com.oauth2cloud.server.model.Scope_;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.AuthorizationHeaderTokenFeature;
 
@@ -64,10 +64,10 @@ public class ScopesResource extends BaseEntityResource<Scope> {
     }
 
     @QueryParam("applicationId")
-    UUID applicationId;
+    private UUID applicationId;
 
     @QueryParam("active")
-    Boolean active;
+    private Boolean active;
 
     @Override
     protected void getPredicatesFromRequest(List<Predicate> list, Root<Scope> root) {
@@ -84,15 +84,4 @@ public class ScopesResource extends BaseEntityResource<Scope> {
             list.add(cb.equal(root.get(Scope_.active), true));
         }
     }
-
-    @Override
-    public void afterCreate(Scope scope) {
-
-    }
-
-    @Override
-    public void beforeSend(Scope scope) {
-
-    }
-
 }
