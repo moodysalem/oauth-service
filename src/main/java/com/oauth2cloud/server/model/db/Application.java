@@ -52,9 +52,6 @@ public class Application extends VersionedEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "active")
-    private boolean active;
-
     public String getName() {
         return name;
     }
@@ -117,13 +114,5 @@ public class Application extends VersionedEntity {
 
     public void setFaviconUrl(String faviconUrl) {
         this.faviconUrl = faviconUrl;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 }

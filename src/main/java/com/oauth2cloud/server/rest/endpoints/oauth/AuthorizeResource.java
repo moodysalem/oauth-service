@@ -249,11 +249,11 @@ public class AuthorizeResource extends OAuthResource {
 
         boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
 
-        LoginModel lrm = new LoginModel();
+        final LoginModel lrm = new LoginModel();
         lrm.setURLs(containerRequestContext);
         lrm.setState(state);
         lrm.setRedirectUri(redirectUri);
-        Client client = OldQueryHelper.getClient(em, clientId);
+        final Client client = OldQueryHelper.getClient(em, clientId);
         lrm.setClient(client);
 
         OldQueryHelper.logCall(em, client, containerRequestContext);
@@ -264,13 +264,9 @@ public class AuthorizeResource extends OAuthResource {
             // handle the login action
             case "login":
                 // get the provider information
-                ProviderInfo p = getProviderInfo(formParams);
-
-                // by default, the credentials are invalid
-                lrm.setLoginError(INVALID_LOGIN_CREDENTIALS);
 
                 if (p != null) {
-                    User user = null;
+                    final User user = null;
                     try {
                         if (p.provider != null) {
                             switch (p.provider) {
@@ -300,53 +296,13 @@ public class AuthorizeResource extends OAuthResource {
                 }
                 return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
 
-            // handle the registration action
-            case "register":
-                String firstName = formParams.getFirst("firstName");
-                String lastName = formParams.getFirst("lastName");
-                String email = formParams.getFirst("registerEmail");
-                String password = formParams.getFirst("registerPassword");
-                if (isEmpty(firstName) || isEmpty(lastName) || isEmpty(email) || isEmpty(password)) {
-                    lrm.setRegisterError("First name, last name, e-mail address and password are all required fields.");
-                } else {
-                    User existingUser = OldQueryHelper.getUser(em, email, client.getApplication());
-                    if (existingUser != null && existingUser.isVerified()) {
-                        lrm.setRegisterError("E-mail is already in use.");
-                    } else {
-                        boolean isNewUser = existingUser == null;
-                        User nu = isNewUser ? new User() : existingUser;
-                        nu.setApplication(client.getApplication());
-                        nu.setEmail(email.trim());
-                        nu.setFirstName(firstName.trim());
-                        nu.setLastName(lastName.trim());
-                        try {
-                            beginTransaction();
-                            if (isNewUser) {
-                                em.persist(nu);
-                            } else {
-                                em.merge(nu);
-                            }
-                            commit();
-
-                            sendVerificationEmail(nu);
-                            lrm.setRegisterSuccess(true);
-                        } catch (Exception e) {
-                            LOG.log(Level.SEVERE, "Failed to register new user", e);
-                            rollback();
-                            lrm.setRegisterError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-                        }
-                    }
-                }
-                return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
-
             // handle the permissions action
             case "permissions":
-                String loginToken = formParams.getFirst("login_token");
-
+                final String loginToken = formParams.getFirst("login_token");
 
                 // they just completed the second step of the login
                 if (loginToken != null) {
-                    Token t = OldQueryHelper.getPermissionToken(em, loginToken, client);
+                    final Token t = OldQueryHelper.getPermissionToken(em, loginToken, client);
                     if (t == null) {
                         lrm.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
                     } else {
@@ -354,11 +310,11 @@ public class AuthorizeResource extends OAuthResource {
                             lrm.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                         } else {
                             // first get all the client scopes we will try to approve or check if are approved
-                            List<ClientScope> clientScopes = OldQueryHelper.getScopes(em, client, scopes);
+                            final Set<ClientScope> clientScopes = OldQueryHelper.getScopes(em, client, scopes);
                             // we'll populate this as we loop through the scopes
-                            List<AcceptedScope> tokenScopes = new ArrayList<>();
+                            final Set<AcceptedScope> tokenScopes = new HashSet<>();
                             // get all the scope ids that were explicitly granted
-                            Set<UUID> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
+                            final Set<UUID> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
                                 try {
                                     return s != null && s.startsWith("SCOPE") &&
                                             "on".equalsIgnoreCase(formParams.getFirst(s)) ?
@@ -367,7 +323,8 @@ public class AuthorizeResource extends OAuthResource {
                                     return null;
                                 }
                             }).filter((i) -> i != null).collect(Collectors.toSet());
-                            for (ClientScope cs : clientScopes) {
+
+                            for (final ClientScope cs : clientScopes) {
                                 // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
                                 if (!cs.getPriority().equals(ClientScope.Priority.ASK) ||
                                         acceptedScopeIds.contains(cs.getScope().getId())) {
@@ -375,9 +332,10 @@ public class AuthorizeResource extends OAuthResource {
                                     tokenScopes.add(OldQueryHelper.acceptScope(em, t.getUser(), cs));
                                 }
                             }
-                            Token.Type type = getTokenType(responseType);
+
+                            final Token.Type type = getTokenType(responseType);
                             // now create the token we will be returning to the user
-                            Token token = generateToken(type, t, tokenScopes);
+                            final Token token = generateToken(type, t, tokenScopes);
                             return getRedirectResponse(redirectUri, state, token, rememberMe);
                         }
                     }
@@ -388,21 +346,6 @@ public class AuthorizeResource extends OAuthResource {
             default:
                 return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
-    }
-
-    private void sendVerificationEmail(User user) {
-        VerificationCode uc = OldQueryHelper.makeUserCode(em, user, containerRequestContext.getUriInfo().getRequestUri().toString(),
-                VerificationCode.Type.VERIFY, new Date(System.currentTimeMillis() + ONE_MONTH * 12L));
-
-        UserCodeEmailModel ucem = new UserCodeEmailModel(userCode, url);
-        ucem.setUserCode(uc);
-        ucem.setUrl(containerRequestContext.getUriInfo().getBaseUriBuilder()
-                .path("oauth").path("verify").replaceQuery("").queryParam("code", uc.getCode())
-                .build().toString());
-
-        sendEmail(user.getApplication().getSupportEmail(), user.getEmail(),
-                "Your confirmation e-mail for " + user.getApplication().getName(),
-                "VerifyEmail.ftl", ucem);
     }
 
     private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
@@ -511,32 +454,6 @@ public class AuthorizeResource extends OAuthResource {
         }
 
         return u;
-    }
-
-    private class ProviderInfo {
-        public ProviderInfo(Provider provider, String providerToken) {
-            this.provider = provider;
-            this.providerToken = providerToken;
-        }
-
-        public Provider provider;
-        public String providerToken;
-    }
-
-    public ProviderInfo getProviderInfo(MultivaluedMap<String, String> formParams) {
-        if (!isEmpty(formParams.getFirst("facebookToken"))) {
-            return new ProviderInfo(Provider.FACEBOOK, formParams.getFirst("facebookToken"));
-        }
-        if (!isEmpty(formParams.getFirst("googleToken"))) {
-            return new ProviderInfo(Provider.GOOGLE, formParams.getFirst("googleToken"));
-        }
-        if (!isEmpty(formParams.getFirst("amazonToken"))) {
-            return new ProviderInfo(Provider.AMAZON, formParams.getFirst("amazonToken"));
-        }
-        if (!isEmpty(formParams.getFirst("email")) && !isEmpty(formParams.getFirst("password"))) {
-            return new ProviderInfo(null, null);
-        }
-        return null;
     }
 
     public User doEmailLogin(Application app, MultivaluedMap<String, String> formParams) {
@@ -731,7 +648,7 @@ public class AuthorizeResource extends OAuthResource {
      * @param scopes          the list of scopes for the token
      * @return generated token
      */
-    private Token generateToken(Token.Type type, Token permissionToken, List<AcceptedScope> scopes) {
+    private Token generateToken(Token.Type type, Token permissionToken, Set<AcceptedScope> scopes) {
         return OldQueryHelper.generateToken(em, type, permissionToken.getClient(), permissionToken.getUser(),
                 getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null);
     }

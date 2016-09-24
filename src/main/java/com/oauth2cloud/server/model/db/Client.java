@@ -64,9 +64,6 @@ public class Client extends VersionedEntity {
     @JoinColumn(name = "creator_id", updatable = false)
     private User creator;
 
-    @Column(name = "active")
-    private boolean active;
-
     public ClientCredentials getCredentials() {
         return credentials;
     }
@@ -149,13 +146,5 @@ public class Client extends VersionedEntity {
 
     public String getCreatorEmail() {
         return creator != null ? creator.getEmail() : null;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 }

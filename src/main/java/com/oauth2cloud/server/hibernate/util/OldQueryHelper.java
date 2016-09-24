@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.hibernate.util;
 
+import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -7,10 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.*;
 import javax.ws.rs.container.ContainerRequestContext;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -310,20 +308,16 @@ public abstract class OldQueryHelper {
         if (token == null) {
             return null;
         }
-        CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        Root<Token> tokenRoot = tq.from(Token.class);
+        final CriteriaQuery<Token> tq = cb.createQuery(Token.class);
+        final Root<Token> tokenRoot = tq.from(Token.class);
 
-        Predicate p = cb.and(
+        final Predicate p = cb.and(
                 cb.equal(tokenRoot.get(Token_.token), token),
-                tokenRoot.get(Token_.type).in(types),
+                types != null && types.length > 0 ? tokenRoot.get(Token_.type).in(types) : cb.and(),
                 cb.greaterThan(tokenRoot.get(Token_.expires), new Date()),
-                cb.or(
-                        cb.equal(tokenRoot.join(Token_.user).get(User_.active), true),
-                        cb.isNull(tokenRoot.get(Token_.user))
-                ),
-                cb.equal(tokenRoot.join(Token_.client).get(Client_.active), true),
+                cb.isNull(tokenRoot.get(Token_.user)),
                 cb.equal(tokenRoot.join(Token_.client).join(Client_.application).get(Application_.active), true)
         );
         if (client != null) {
@@ -337,19 +331,16 @@ public abstract class OldQueryHelper {
     /**
      * Create and persist a token
      *
-     * @param type                the token's type
-     * @param client              the client for which the token is being created
-     * @param user                the to which the token is associated
-     * @param expires             when the token becomes invalid
-     * @param scopes              the scopes for which the token is valid
-     * @param provider            the provider that was used to get this token
-     * @param providerAccessToken the access token from the provider used to log in
+     * @param type    the token's type
+     * @param client  the client for which the token is being created
+     * @param user    the to which the token is associated
+     * @param expires when the token becomes invalid
+     * @param scopes  the scopes for which the token is valid
      * @return a Token with the aforementioned properties
      */
     public static Token generateToken(EntityManager em, Token.Type type, Client client, User user, Date expires, String redirectUri,
-                                      List<AcceptedScope> scopes, Token refreshToken, List<ClientScope> clientScopes,
-                                      Provider provider, String providerAccessToken) {
-        Token toReturn = new Token();
+                                      Set<AcceptedScope> scopes, Token refreshToken, Set<ClientScope> clientScopes) {
+        final Token toReturn = new Token();
         toReturn.setClient(client);
         toReturn.setExpires(expires);
         toReturn.setUser(user);
@@ -359,34 +350,25 @@ public abstract class OldQueryHelper {
         toReturn.setAcceptedScopes(scopes);
         toReturn.setRefreshToken(refreshToken);
         toReturn.setClientScopes(clientScopes);
-        toReturn.setProvider(provider);
-        toReturn.setProviderAccessToken(providerAccessToken);
-        EntityTransaction etx = em.getTransaction();
+
         try {
-            etx.begin();
-            em.persist(toReturn);
-            em.flush();
-            etx.commit();
+            return TXHelper.withinTransaction(em, () -> em.merge(toReturn));
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to create a token", e);
-            etx.rollback();
             return null;
         }
-        return toReturn;
     }
 
     /**
      * Generate a temporary token to represent correct credentials, giving the user 5 minutes to accept the permissions
      * before expiring
      *
-     * @param user                the user to generate the token for
-     * @param client              the client to generate the token for
-     * @param provider
-     * @param providerAccessToken @return a temporary token for use on the permission form
+     * @param user   the user to generate the token for
+     * @param client the client to generate the token for
      */
-    public static Token generatePermissionToken(EntityManager em, User user, Client client, String redirectUri, Provider provider, String providerAccessToken) {
-        Token t = new Token();
-        Date expires = new Date();
+    public static Token generatePermissionToken(EntityManager em, User user, Client client, String redirectUri) {
+        final Token t = new Token();
+        final Date expires = new Date();
         expires.setTime(expires.getTime() + FIVE_MINUTES);
         t.setExpires(expires);
         t.setUser(user);
@@ -394,19 +376,12 @@ public abstract class OldQueryHelper {
         t.setRandomToken(64);
         t.setType(Token.Type.PERMISSION);
         t.setRedirectUri(redirectUri);
-        t.setProvider(provider);
-        t.setProviderAccessToken(providerAccessToken);
-        EntityTransaction etx = em.getTransaction();
         try {
-            etx.begin();
-            em.persist(t);
-            em.flush();
-            etx.commit();
+            return TXHelper.withinTransaction(em, () -> em.merge(t));
         } catch (Exception e) {
-            etx.rollback();
+            LOG.log(Level.SEVERE, "Failed to generate permission token", e);
             return null;
         }
-        return t;
     }
 
 
@@ -418,10 +393,10 @@ public abstract class OldQueryHelper {
      * @return the token representing the client or null if it doesn't exist
      */
     public static Token getPermissionToken(EntityManager em, String token, Client client) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        Root<Token> tk = tq.from(Token.class);
-        List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<Token> tq = cb.createQuery(Token.class);
+        final Root<Token> tk = tq.from(Token.class);
+        final List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
                 cb.equal(tk.get(Token_.token), token),
                 cb.equal(tk.get(Token_.type), Token.Type.PERMISSION),
                 cb.equal(tk.get(Token_.client), client)
@@ -440,17 +415,11 @@ public abstract class OldQueryHelper {
      * @return list of scopes we should ask for
      */
     public static Set<ClientScope> getScopesToRequest(final EntityManager em, final Client client, final User user, Set<String> scopes) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
-        Root<ClientScope> rcs = cq.from(ClientScope.class);
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
+        final Root<ClientScope> rcs = cq.from(ClientScope.class);
 
-        List<Predicate> predicates = new ArrayList<>();
-
-        // scopes for this client
-        predicates.add(cb.equal(rcs.get(ClientScope_.client), client));
-
-        // only approved scopes should be asked for
-        predicates.add(cb.equal(rcs.get(ClientScope_.approved), true));
+        final List<Predicate> predicates = new LinkedList<>();
 
         // since a client will always have these scopes, we don't show them
         predicates.add(cb.notEqual(rcs.get(ClientScope_.priority), ClientScope.Priority.ALWAYS));
@@ -459,18 +428,13 @@ public abstract class OldQueryHelper {
         predicates.add(cb.not(rcs.in(acceptedScopes(em, user))));
 
         // scope names in this list
-        if (scopes != null && scopes.size() > 0) {
+        if (scopes != null && !scopes.isEmpty()) {
             predicates.add(rcs.join(ClientScope_.scope).get(Scope_.name).in(scopes));
         }
 
-        Predicate[] pArray = new Predicate[predicates.size()];
-        predicates.toArray(pArray);
-
-        List<ClientScope> results = em.createQuery(cq.select(rcs).where(pArray)).getResultList();
-
-        results.sort(null);
-
-        return results;
+        return new HashSet<>(
+                em.createQuery(cq.select(rcs).where(predicates.stream().toArray(Predicate[]::new))).getResultList()
+        );
     }
 
     /**
@@ -480,18 +444,14 @@ public abstract class OldQueryHelper {
      * @return a subquery of all the clientscopes that have already been accepted by a user, across clients
      */
     public static Subquery<ClientScope> acceptedScopes(EntityManager em, User user) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        Subquery<ClientScope> sq = cb.createQuery().subquery(ClientScope.class);
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final Subquery<ClientScope> sq = cb.createQuery().subquery(ClientScope.class);
 
-        Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
-        sq.select(ras.get(AcceptedScope_.clientScope)).where(
-                cb.equal(ras.get(AcceptedScope_.user), user),
-                cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.approved), true),
-                cb.equal(ras.join(AcceptedScope_.clientScope).join(ClientScope_.scope).get(Scope_.active), true),
-                cb.equal(ras.join(AcceptedScope_.clientScope).join(ClientScope_.client).get(Client_.active), true)
-        );
-
-        return sq;
+        final Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
+        return sq.select(ras.get(AcceptedScope_.clientScope))
+                .where(
+                        cb.equal(ras.get(AcceptedScope_.user), user)
+                );
     }
 
 
