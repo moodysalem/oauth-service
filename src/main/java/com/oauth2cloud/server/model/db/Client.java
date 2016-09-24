@@ -10,14 +10,6 @@ import java.util.Set;
 
 @Entity
 public class Client extends VersionedEntity {
-    public enum GrantFlow {
-        IMPLICIT,
-        CODE,
-        RESOURCE_OWNER_CREDENTIALS,
-        CLIENT_CREDENTIALS,
-        TEMPORARY_TOKEN
-    }
-
     @NotBlank
     @Column(name = "name")
     private String name;
@@ -43,17 +35,13 @@ public class Client extends VersionedEntity {
     @Column(name = "uri")
     private Set<String> uris;
 
+    @Column(name = "flow")
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "client_flows", joinColumns = @JoinColumn(name = "client_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "flow")
     private Set<GrantFlow> flows;
 
-    @Embedded
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "client_scopes", joinColumns = @JoinColumn(name = "client_id"))
-    private Set<ClientScope> clientScopes;
-
+    @NotNull
     @Column(name = "token_ttl")
     private Long tokenTtl;
 
@@ -102,14 +90,6 @@ public class Client extends VersionedEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<ClientScope> getClientScopes() {
-        return clientScopes;
-    }
-
-    public void setClientScopes(Set<ClientScope> clientScopes) {
-        this.clientScopes = clientScopes;
     }
 
     public Long getTokenTtl() {

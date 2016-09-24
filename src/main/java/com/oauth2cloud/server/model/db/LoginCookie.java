@@ -21,7 +21,7 @@ public class LoginCookie extends BaseEntity {
 
     @NotNull
     @Column(name = "expires")
-    private Date expires;
+    private Long expires;
 
     @NotNull
     @ManyToOne
@@ -40,11 +40,11 @@ public class LoginCookie extends BaseEntity {
     }
 
     public Date getExpires() {
-        return expires;
+        return expires == null ? null : new Date(expires);
     }
 
     public void setExpires(Date expires) {
-        this.expires = expires;
+        this.expires = expires == null ? null : expires.getTime();
     }
 
     public User getUser() {

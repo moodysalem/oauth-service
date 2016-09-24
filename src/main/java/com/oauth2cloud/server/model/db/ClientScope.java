@@ -1,25 +1,33 @@
 package com.oauth2cloud.server.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.BaseEntity;
 
 import javax.persistence.*;
-import java.util.Objects;
+import javax.validation.constraints.NotNull;
 
-@Embeddable
+@Entity
 public class ClientScope extends BaseEntity {
     public enum Priority {
-        // ALWAYS is the highest level, the user is not asked nor shown the permission when logging in
+        // ALWAYS is the highest level, the user is not asked for nor shown the permission when logging in
         ALWAYS,
-        // REQUIRE is the middle level, the user must accept this permission to utilize the client
+        // REQUIRE is the middle level, the user must accept this permission to log in
         REQUIRE,
         // ASK is the lowest level, the user has the option of accepting this permission or not
         ASK
     }
 
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "client_id", updatable = false)
+    private Client client;
+
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "scope_id", updatable = false)
     private Scope scope;
 
+    @NotNull
     @Column(name = "priority")
     @Enumerated(EnumType.STRING)
     private Priority priority;
@@ -52,18 +60,11 @@ public class ClientScope extends BaseEntity {
         this.reason = reason;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ClientScope that = (ClientScope) o;
-        return Objects.equals(getScope(), that.getScope()) &&
-                getPriority() == that.getPriority() &&
-                Objects.equals(getReason(), that.getReason());
+    public Client getClient() {
+        return client;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getScope(), getPriority(), getReason());
+    public void setClient(Client client) {
+        this.client = client;
     }
 }

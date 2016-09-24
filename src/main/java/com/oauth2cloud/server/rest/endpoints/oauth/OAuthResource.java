@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
-import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
-import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
+import com.oauth2cloud.server.hibernate.util.QueryUtil;
 import com.oauth2cloud.server.model.data.ErrorModel;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
@@ -152,7 +151,7 @@ public abstract class OAuthResource {
             return null;
         }
         String secret = c.getValue();
-        LoginCookie lc = OldQueryHelper.getLoginCookie(em, secret, client);
+        LoginCookie lc = QueryUtil.getLoginCookie(em, secret, client);
         loginCookieLookupMap.put(client, lc);
         return lc;
     }

@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
-import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
+import com.oauth2cloud.server.hibernate.util.QueryUtil;
 import com.oauth2cloud.server.model.api.ErrorResponse;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.*;
@@ -53,7 +53,7 @@ public class TokenResource extends OAuthResource {
                 if (pieces.length == 2) {
                     String clientId = pieces[0].trim();
                     String secret = pieces[1].trim();
-                    Client tempClient = OldQueryHelper.getClient(em, clientId);
+                    Client tempClient = QueryUtil.getClient(em, clientId);
                     if (tempClient != null && secret.equals(tempClient.getSecret())) {
                         client = tempClient;
                     }
@@ -117,18 +117,18 @@ public class TokenResource extends OAuthResource {
                     String.format("'%s' grant type requires the 'client_id' parameter", TEMPORARY_TOKEN));
         }
 
-        Client c = OldQueryHelper.getClient(em, clientId);
+        Client c = QueryUtil.getClient(em, clientId);
         if (c == null) {
             return error(ErrorResponse.Type.invalid_client, "Invalid 'client_id.'");
         }
-        OldQueryHelper.logCall(em, c, containerRequestContext);
+        QueryUtil.logCall(em, c, containerRequestContext);
 
-        if (!c.getFlows().contains(Client.GrantFlow.TEMPORARY_TOKEN)) {
+        if (!c.getFlows().contains(GrantFlow.TEMPORARY_TOKEN)) {
             return error(ErrorResponse.Type.unauthorized_client,
                     String.format("Client is not authorized for the '%s' grant flow.", TEMPORARY_TOKEN));
         }
 
-        Token accessToken = OldQueryHelper.getToken(em, token, c, Token.Type.ACCESS);
+        Token accessToken = QueryUtil.findToken(em, token, c, Token.Type.ACCESS);
         if (accessToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid or expired access token.");
         }
@@ -136,7 +136,7 @@ public class TokenResource extends OAuthResource {
         List<AcceptedScope> newAcceptedScopes = new ArrayList<>(accessToken.getAcceptedScopes());
         List<ClientScope> newClientScopes = new ArrayList<>(accessToken.getClientScopes());
 
-        Token tempToken = OldQueryHelper.generateToken(em, Token.Type.TEMPORARY, c, accessToken.getUser(), getExpires(c, Token.Type.TEMPORARY),
+        Token tempToken = QueryUtil.generateToken(em, Token.Type.TEMPORARY, c, accessToken.getUser(), getExpires(c, Token.Type.TEMPORARY),
                 accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes, accessToken.getProvider(), accessToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(tempToken))).build();
@@ -158,11 +158,11 @@ public class TokenResource extends OAuthResource {
             return error(ErrorResponse.Type.invalid_request, "'refresh_token' parameter is required.");
         }
 
-        Token refreshToken = OldQueryHelper.getToken(em, token, client, Token.Type.REFRESH);
+        Token refreshToken = QueryUtil.findToken(em, token, client, Token.Type.REFRESH);
         if (refreshToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid or expired refresh token.");
         }
-        OldQueryHelper.logCall(em, refreshToken.getClient(), containerRequestContext);
+        QueryUtil.logCall(em, refreshToken.getClient(), containerRequestContext);
 
         List<AcceptedScope> newTokenScopes = new ArrayList<>(refreshToken.getAcceptedScopes());
 
@@ -178,7 +178,7 @@ public class TokenResource extends OAuthResource {
             }
         }
 
-        Token accessToken = OldQueryHelper.generateToken(em, Token.Type.ACCESS, client, refreshToken.getUser(), getExpires(client, Token.Type.ACCESS),
+        Token accessToken = QueryUtil.generateToken(em, Token.Type.ACCESS, client, refreshToken.getUser(), getExpires(client, Token.Type.ACCESS),
                 refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null, refreshToken.getProvider(), refreshToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
@@ -190,9 +190,9 @@ public class TokenResource extends OAuthResource {
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Client authorization failed.");
         }
-        OldQueryHelper.logCall(em, client, containerRequestContext);
+        QueryUtil.logCall(em, client, containerRequestContext);
 
-        if (!client.getFlows().contains(Client.GrantFlow.CLIENT_CREDENTIALS)) {
+        if (!client.getFlows().contains(GrantFlow.CLIENT_CREDENTIALS)) {
             return error(ErrorResponse.Type.unauthorized_client,
                     String.format("Client is not authorized for the '%s' grant flow.", CLIENT_CREDENTIALS));
         }
@@ -204,13 +204,13 @@ public class TokenResource extends OAuthResource {
 
         List<String> scopes = scopeList(scope);
 
-        List<ClientScope> clientScopes = OldQueryHelper.getScopes(em, client, scopes);
+        List<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
         if (scopes.size() > 0 && clientScopes.size() != scopes.size()) {
             String invalidScopes = getMissingScopes(clientScopes, scopes);
             return error(ErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + invalidScopes);
         }
 
-        Token token = OldQueryHelper.generateToken(em, Token.Type.CLIENT, client, null, getExpires(client, Token.Type.CLIENT), null, null, null, clientScopes, null, null);
+        Token token = QueryUtil.generateToken(em, Token.Type.CLIENT, client, null, getExpires(client, Token.Type.CLIENT), null, null, null, clientScopes, null, null);
 
         return noCache(Response.ok(TokenResponse.from(token))).build();
     }
@@ -238,13 +238,13 @@ public class TokenResource extends OAuthResource {
                     "'code', 'redirect_uri', and 'client_id' are all required for the " + AUTHORIZATION_CODE + " grant flow.");
         }
 
-        Client client = OldQueryHelper.getClient(em, clientId);
+        Client client = QueryUtil.getClient(em, clientId);
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Invalid client ID.");
         }
-        OldQueryHelper.logCall(em, client, containerRequestContext);
+        QueryUtil.logCall(em, client, containerRequestContext);
 
-        if (!client.getFlows().contains(Client.GrantFlow.CODE)) {
+        if (!client.getFlows().contains(GrantFlow.CODE)) {
             return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + AUTHORIZATION_CODE + "' grant flow.");
         }
 
@@ -258,7 +258,7 @@ public class TokenResource extends OAuthResource {
                             AUTHORIZATION_CODE));
         }
 
-        Token codeToken = OldQueryHelper.getToken(em, code, client, Token.Type.CODE);
+        Token codeToken = QueryUtil.findToken(em, code, client, Token.Type.CODE);
         if (codeToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid token.");
         }
@@ -274,10 +274,10 @@ public class TokenResource extends OAuthResource {
         // we know the token is valid, so we should generate an access token now
         // only confidential clients may receive refresh tokens
         if (client.getRefreshTokenTtl() != null && client.getType().equals(Client.Type.CONFIDENTIAL)) {
-            refreshToken = OldQueryHelper.generateToken(em, Token.Type.REFRESH, client, codeToken.getUser(), getExpires(client, Token.Type.REFRESH), redirectUri,
+            refreshToken = QueryUtil.generateToken(em, Token.Type.REFRESH, client, codeToken.getUser(), getExpires(client, Token.Type.REFRESH), redirectUri,
                     new ArrayList<>(codeToken.getAcceptedScopes()), null, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
         }
-        Token accessToken = OldQueryHelper.generateToken(em, Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, Token.Type.ACCESS), redirectUri,
+        Token accessToken = QueryUtil.generateToken(em, Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, Token.Type.ACCESS), redirectUri,
                 new ArrayList<>(codeToken.getAcceptedScopes()), refreshToken, null, codeToken.getProvider(), codeToken.getProviderAccessToken());
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
@@ -295,13 +295,13 @@ public class TokenResource extends OAuthResource {
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Client authentication is ALWAYS required for the '" + PASSWORD + "' grant type.");
         }
-        OldQueryHelper.logCall(em, client, containerRequestContext);
+        QueryUtil.logCall(em, client, containerRequestContext);
 
         if (!client.getType().equals(Client.Type.CONFIDENTIAL)) {
             return error(ErrorResponse.Type.invalid_client, "Client must be CONFIDENTIAL to use this the '" + PASSWORD + "' grant type.");
         }
 
-        if (!client.getFlows().contains(Client.GrantFlow.RESOURCE_OWNER_CREDENTIALS)) {
+        if (!client.getFlows().contains(GrantFlow.RESOURCE_OWNER_CREDENTIALS)) {
             return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + PASSWORD + "' grant type.");
         }
 
@@ -317,7 +317,7 @@ public class TokenResource extends OAuthResource {
 
         List<String> scopes = scopeList(scope);
 
-        List<ClientScope> clientScopes = OldQueryHelper.getScopes(em, client, scopes);
+        List<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
 
         if (scopes.size() > 0 && clientScopes.size() < scopes.size()) {
             String invalidScopes = getMissingScopes(clientScopes, scopes);
@@ -327,15 +327,15 @@ public class TokenResource extends OAuthResource {
 
         List<AcceptedScope> acceptedScopes = new ArrayList<>();
         for (ClientScope cs : clientScopes) {
-            acceptedScopes.add(OldQueryHelper.acceptScope(em, user, cs));
+            acceptedScopes.add(QueryUtil.acceptScope(em, user, cs));
         }
 
         Token refreshToken = null;
         if (client.getRefreshTokenTtl() != null) {
-            refreshToken = OldQueryHelper.generateToken(em, Token.Type.REFRESH, client, user, getExpires(client, Token.Type.REFRESH), null,
+            refreshToken = QueryUtil.generateToken(em, Token.Type.REFRESH, client, user, getExpires(client, Token.Type.REFRESH), null,
                     new ArrayList<>(acceptedScopes), null, null, null, null);
         }
-        Token accessToken = OldQueryHelper.generateToken(em, Token.Type.ACCESS, client, user, getExpires(client, Token.Type.ACCESS), null,
+        Token accessToken = QueryUtil.generateToken(em, Token.Type.ACCESS, client, user, getExpires(client, Token.Type.ACCESS), null,
                 new ArrayList<>(acceptedScopes), refreshToken, null, null, null);
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
@@ -390,25 +390,25 @@ public class TokenResource extends OAuthResource {
 
         Client c = null;
         if (clientId != null) {
-            c = OldQueryHelper.getClient(em, clientId);
+            c = QueryUtil.getClient(em, clientId);
             if (c == null) {
                 throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client ID.");
             }
-            OldQueryHelper.logCall(em, c, containerRequestContext);
+            QueryUtil.logCall(em, c, containerRequestContext);
             applicationId = c.getApplication().getId();
         }
 
-        Token t = OldQueryHelper.getToken(em, token, c, Token.Type.ACCESS, Token.Type.REFRESH, Token.Type.TEMPORARY);
+        Token t = QueryUtil.findToken(em, token, c, Token.Type.ACCESS, Token.Type.REFRESH, Token.Type.TEMPORARY);
         if (t == null || !t.getClient().getApplication().getId().equals(applicationId)) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }
 
         // call made on behalf of a client
         if (clientId != null) {
-            OldQueryHelper.logCall(em, t.getClient(), containerRequestContext);
+            QueryUtil.logCall(em, t.getClient(), containerRequestContext);
         } else {
             // otherwise call made on behalf of the application
-            OldQueryHelper.logCall(em, t.getClient().getApplication(), containerRequestContext);
+            QueryUtil.logCall(em, t.getClient().getApplication(), containerRequestContext);
         }
 
         return noCache(Response.ok(TokenResponse.from(t))).build();

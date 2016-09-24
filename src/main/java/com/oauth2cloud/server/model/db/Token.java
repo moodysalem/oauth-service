@@ -5,6 +5,7 @@ import com.moodysalem.hibernate.model.VersionedEntity;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,8 +43,9 @@ public class Token extends VersionedEntity {
     @JoinColumn(name = "client_id", updatable = false)
     private Client client;
 
+    @NotNull
     @Column(name = "expires")
-    private Date expires;
+    private Long expires;
 
     @Column(name = "type", updatable = false)
     @Enumerated(EnumType.STRING)
@@ -100,7 +102,7 @@ public class Token extends VersionedEntity {
      * @return the number of seconds remaining on the token
      */
     public Long getExpiresIn() {
-        return (getExpires().getTime() - System.currentTimeMillis()) / 1000L;
+        return (expires - System.currentTimeMillis()) / 1000L;
     }
 
     public String getToken() {
@@ -124,11 +126,11 @@ public class Token extends VersionedEntity {
     }
 
     public Date getExpires() {
-        return expires;
+        return expires == null ? null : new Date(expires);
     }
 
     public void setExpires(Date expires) {
-        this.expires = expires;
+        this.expires = expires == null ? null : expires.getTime();
     }
 
     public Type getType() {

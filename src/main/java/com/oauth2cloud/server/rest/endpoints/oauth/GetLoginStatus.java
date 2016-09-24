@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
-import com.oauth2cloud.server.hibernate.util.OldQueryHelper;
+import com.oauth2cloud.server.hibernate.util.QueryUtil;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.data.LoginStatusModel;
 import com.oauth2cloud.server.model.db.Client;
@@ -44,13 +44,13 @@ public class GetLoginStatus extends OAuthResource {
             return error("'client_id' parameter is required to check login status.");
         }
 
-        final Client client = OldQueryHelper.getClient(em, clientId);
+        final Client client = QueryUtil.getClient(em, clientId);
 
         if (client == null) {
             return error("Invalid client ID.");
         }
 
-        OldQueryHelper.logCall(em, client, containerRequestContext);
+        QueryUtil.logCall(em, client, containerRequestContext);
 
         if (referrer == null) {
             return error("This page must be accessed from inside an iframe.");
@@ -101,14 +101,14 @@ public class GetLoginStatus extends OAuthResource {
                 // generate a token
                 lsm.setTokenResponse(
                         TokenResponse.from(
-                                OldQueryHelper.generateToken(
+                                QueryUtil.generateToken(
                                         em,
                                         Token.Type.ACCESS,
                                         client,
                                         lc.getUser(),
                                         getExpires(client, Token.Type.ACCESS),
                                         referrer,
-                                        OldQueryHelper.getAcceptedScopes(em, client, lc.getUser()),
+                                        QueryUtil.getAcceptedScopes(em, client, lc.getUser()),
                                         null,
                                         null,
                                         null,

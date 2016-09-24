@@ -2,18 +2,17 @@ package com.oauth2cloud.server.hibernate.util;
 
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.*;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class OldQueryHelper {
-    private static final Logger LOG = Logger.getLogger(OldQueryHelper.class.getName());
+public abstract class QueryUtil {
+    private static final Logger LOG = Logger.getLogger(QueryUtil.class.getName());
     private static final long FIVE_MINUTES = 1000 * 60 * 5;
 
 
@@ -51,17 +50,13 @@ public abstract class OldQueryHelper {
         }
         cl.setPath(request.getUriInfo().getPath());
         cl.setMethod(request.getMethod());
-        final EntityTransaction etx = em.getTransaction();
+
         try {
-            etx.begin();
-            em.persist(cl);
-            etx.commit();
+            return TXHelper.withinTransaction(em, () -> em.merge(cl));
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to log a call", e);
-            etx.rollback();
             return null;
         }
-        return cl;
     }
 
     /**
@@ -71,76 +66,18 @@ public abstract class OldQueryHelper {
      * @param user   user that has given permission for these scopes
      * @return a list of accepted scopes
      */
-    public static List<AcceptedScope> getAcceptedScopes(EntityManager em, Client client, User user) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
-        Root<AcceptedScope> ras = as.from(AcceptedScope.class);
-        return em.createQuery(as.select(ras).where(
-                cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.client), client),
-                cb.equal(ras.get(AcceptedScope_.user), user)
-        )).getResultList();
+    public static List<AcceptedScope> getAcceptedScopes(final EntityManager em, final Client client, final User user) {
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
+        final Root<AcceptedScope> ras = as.from(AcceptedScope.class);
+
+        return em.createQuery(
+                as.select(ras).where(
+                        cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.client), client),
+                        cb.equal(ras.get(AcceptedScope_.user), user)
+                )
+        ).getResultList();
     }
-
-
-    /**
-     * Make a VerificationCode
-     *
-     * @param user     user for which the code is created
-     * @param referrer the referrer to which the user should be redirected after using the code
-     * @param type     the type of code
-     * @param expires  when it expires
-     * @return VerificationCode created
-     */
-    public static VerificationCode makeUserCode(EntityManager em, User user, String referrer, VerificationCode.Type type, Date expires) {
-        VerificationCode pw = new VerificationCode();
-        pw.setExpires(expires);
-        pw.setUser(user);
-        pw.setCode(RandomStringUtils.randomAlphanumeric(64));
-        pw.setReferrer(referrer);
-        pw.setType(type);
-        pw.setExpires(expires);
-        EntityTransaction etx = em.getTransaction();
-        try {
-            etx.begin();
-            em.persist(pw);
-            etx.commit();
-        } catch (Exception e) {
-            etx.rollback();
-            pw = null;
-            LOG.log(Level.SEVERE, "Failed to create user code", e);
-        }
-        return pw;
-    }
-
-
-    /**
-     * Get a VerificationCode based on the user code string
-     */
-    public static VerificationCode getUserCode(EntityManager em, String code, VerificationCode.Type type, boolean includeUsed) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        if (code == null) {
-            return null;
-        }
-        CriteriaQuery<VerificationCode> pw = cb.createQuery(VerificationCode.class);
-        Root<VerificationCode> userCodeRoot = pw.from(VerificationCode.class);
-        Predicate queryPredicate = cb.and(
-                cb.equal(userCodeRoot.get(UserCode_.code), code),
-                cb.greaterThan(userCodeRoot.get(UserCode_.expires), new Date()),
-                cb.equal(userCodeRoot.get(UserCode_.type), type)
-        );
-
-        if (!includeUsed) {
-            queryPredicate = cb.and(
-                    queryPredicate,
-                    cb.equal(userCodeRoot.get(UserCode_.used), false)
-            );
-        }
-
-        pw.select(userCodeRoot).where(queryPredicate);
-        List<VerificationCode> lp = em.createQuery(pw).getResultList();
-        return lp.size() == 1 ? lp.get(0) : null;
-    }
-
 
     /**
      * Get the user associated with an e-mail and an application
@@ -149,12 +86,16 @@ public abstract class OldQueryHelper {
      * @param application the application for which we're searching the user base
      * @return the User record
      */
-    public static User getUser(EntityManager em, String email, Application application) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<User> uq = cb.createQuery(User.class);
-        Root<User> u = uq.from(User.class);
+    public static User getUser(final EntityManager em, final String email, final Application application) {
+        if (StringUtils.isBlank(email)) {
+            return null;
+        }
 
-        List<User> users = em.createQuery(
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<User> uq = cb.createQuery(User.class);
+        final Root<User> u = uq.from(User.class);
+
+        final List<User> users = em.createQuery(
                 uq.select(u).where(
                         cb.and(
                                 cb.equal(u.get(User_.application), application),
@@ -178,17 +119,15 @@ public abstract class OldQueryHelper {
      * @return LoginCookie for the secret and client
      */
     public static LoginCookie getLoginCookie(EntityManager em, String secret, Client client) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
-        Root<LoginCookie> loginCookieRoot = lc.from(LoginCookie.class);
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
+        final Root<LoginCookie> loginCookieRoot = lc.from(LoginCookie.class);
         lc.select(loginCookieRoot).where(
                 cb.equal(loginCookieRoot.get(LoginCookie_.secret), secret),
-                cb.greaterThan(loginCookieRoot.get(LoginCookie_.expires), new Date()),
-                cb.equal(loginCookieRoot.join(LoginCookie_.user).get(User_.application), client.getApplication()),
-                cb.equal(loginCookieRoot.join(LoginCookie_.user).get(User_.active), true),
-                cb.equal(loginCookieRoot.join(LoginCookie_.user).join(User_.application).get(Application_.active), true)
+                cb.greaterThan(loginCookieRoot.get(LoginCookie_.expires), System.currentTimeMillis()),
+                cb.equal(loginCookieRoot.join(LoginCookie_.user).get(User_.application), client.getApplication())
         );
-        List<LoginCookie> loginCookies = em.createQuery(lc).getResultList();
+        final List<LoginCookie> loginCookies = em.createQuery(lc).getResultList();
         return (loginCookies.size() == 1) ? loginCookies.get(0) : null;
     }
 
@@ -199,12 +138,14 @@ public abstract class OldQueryHelper {
      * @param scopes filter to scopes with these names (null if you want all scopes)
      * @return list of scopes filtered to scopes with the names passed
      */
-    public static List<ClientScope> getScopes(EntityManager em, Client client, List<String> scopes) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
-        Root<ClientScope> clientScopeRoot = cq.from(ClientScope.class);
-        Predicate p = cb.and(cb.equal(clientScopeRoot.get(ClientScope_.client), client), cb.equal(clientScopeRoot.get(ClientScope_.approved), true));
-        if (scopes != null && scopes.size() > 0) {
+    public static List<ClientScope> getScopes(final EntityManager em, final Client client, final Set<String> scopes) {
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
+        final Root<ClientScope> clientScopeRoot = cq.from(ClientScope.class);
+
+        Predicate p = cb.equal(clientScopeRoot.get(ClientScope_.client), client);
+
+        if (scopes != null && !scopes.isEmpty()) {
             p = cb.and(p, clientScopeRoot.join(ClientScope_.scope).get(Scope_.name).in(scopes));
         }
         return em.createQuery(cq.select(clientScopeRoot).where(p)).getResultList();
@@ -218,28 +159,21 @@ public abstract class OldQueryHelper {
      * @return the AcceptedScope that is created/found for the user/clientscope
      */
     public static AcceptedScope acceptScope(EntityManager em, User user, ClientScope clientScope) {
-        AcceptedScope as = findAcceptedScope(em, user, clientScope);
-        if (as != null) {
-            return as;
+        final AcceptedScope existing = findAcceptedScope(em, user, clientScope);
+        if (existing != null) {
+            return existing;
         }
-        as = new AcceptedScope();
-        as.setUser(user);
-        as.setClientScope(clientScope);
+        final AcceptedScope newAs = new AcceptedScope();
+        newAs.setUser(user);
+        newAs.setClientScope(clientScope);
 
-        EntityTransaction etx = em.getTransaction();
         try {
-            etx.begin();
-            em.persist(as);
-            em.flush();
-            etx.commit();
+            return TXHelper.withinTransaction(em, () -> em.merge(newAs));
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to accept a scope", e);
-            etx.rollback();
+            LOG.log(Level.SEVERE, "Failed to accept scope", e);
             return null;
         }
-        return as;
     }
-
 
     /**
      * Find the accepted scope or return null if it's not yet accepted
@@ -249,12 +183,12 @@ public abstract class OldQueryHelper {
      * @return AcceptedScope for the user/clientScope
      */
     public static AcceptedScope findAcceptedScope(EntityManager em, User user, ClientScope clientScope) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        CriteriaQuery<AcceptedScope> acceptedScopeCriteriaQuery = cb.createQuery(AcceptedScope.class);
-        Root<AcceptedScope> acceptedScopeRoot = acceptedScopeCriteriaQuery.from(AcceptedScope.class);
+        final CriteriaQuery<AcceptedScope> acceptedScopeCriteriaQuery = cb.createQuery(AcceptedScope.class);
+        final Root<AcceptedScope> acceptedScopeRoot = acceptedScopeCriteriaQuery.from(AcceptedScope.class);
 
-        List<AcceptedScope> acceptedScopes = em.createQuery(
+        final List<AcceptedScope> acceptedScopes = em.createQuery(
                 acceptedScopeCriteriaQuery.select(acceptedScopeRoot)
                         .where(
 
@@ -276,20 +210,17 @@ public abstract class OldQueryHelper {
      * @param clientId a client identifier
      * @return the Client corresponding to a client identifier
      */
-    public static Client getClient(EntityManager em, String clientId) {
+    public static Client getClient(final EntityManager em, final String clientId) {
         if (clientId == null) {
             return null;
         }
 
-        CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        CriteriaQuery<Client> clientCriteriaQuery = cb.createQuery(Client.class);
-        Root<Client> clientRoot = clientCriteriaQuery.from(Client.class);
-        clientCriteriaQuery.select(clientRoot);
-        clientCriteriaQuery.where(
-                cb.equal(clientRoot.get(Client_.identifier), clientId),
-                cb.equal(clientRoot.get(Client_.active), true),
-                cb.equal(clientRoot.join(Client_.application).get(Application_.active), true)
+        final CriteriaQuery<Client> clientCriteriaQuery = cb.createQuery(Client.class);
+        final Root<Client> clientRoot = clientCriteriaQuery.from(Client.class);
+        clientCriteriaQuery.select(clientRoot).where(
+                cb.equal(clientRoot.join(Client_.credentials).get(ClientCredentials_.id), clientId)
         );
 
         List<Client> clients = em.createQuery(clientCriteriaQuery).getResultList();
@@ -304,7 +235,7 @@ public abstract class OldQueryHelper {
      * @param client the client it was issued to
      * @return the token or null if it doesn't exist or has expired
      */
-    public static Token getToken(EntityManager em, String token, Client client, Token.Type... types) {
+    public static Token findToken(final EntityManager em, final String token, final Client client, final Collection<Token.Type> types) {
         if (token == null) {
             return null;
         }
@@ -313,18 +244,18 @@ public abstract class OldQueryHelper {
         final CriteriaQuery<Token> tq = cb.createQuery(Token.class);
         final Root<Token> tokenRoot = tq.from(Token.class);
 
-        final Predicate p = cb.and(
+        Predicate p = cb.and(
                 cb.equal(tokenRoot.get(Token_.token), token),
-                types != null && types.length > 0 ? tokenRoot.get(Token_.type).in(types) : cb.and(),
-                cb.greaterThan(tokenRoot.get(Token_.expires), new Date()),
-                cb.isNull(tokenRoot.get(Token_.user)),
-                cb.equal(tokenRoot.join(Token_.client).join(Client_.application).get(Application_.active), true)
+                types != null && !types.isEmpty() ? tokenRoot.get(Token_.type).in(types) : cb.and(),
+                cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
+                cb.isNull(tokenRoot.get(Token_.user))
         );
+
         if (client != null) {
             p = cb.and(p, cb.equal(tokenRoot.get(Token_.client), client));
         }
 
-        List<Token> tkns = em.createQuery(tq.select(tokenRoot).where(p)).getResultList();
+        final List<Token> tkns = em.createQuery(tq.select(tokenRoot).where(p)).getResultList();
         return tkns.size() == 1 ? tkns.get(0) : null;
     }
 

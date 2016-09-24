@@ -23,7 +23,7 @@ public class TokenResponse {
         }
         tr.setScope(accessToken.getScope());
         tr.setTokenType(BEARER);
-        tr.setClientId(accessToken.getClient().getIdentifier());
+        tr.setClientId(accessToken.getClient().getCredentials().getId());
         tr.setUser(accessToken.getUser());
         tr.setApplicationId(accessToken.getClient().getApplication().getId());
         return tr;
