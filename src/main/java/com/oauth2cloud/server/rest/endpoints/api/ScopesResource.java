@@ -29,7 +29,7 @@ public class ScopesResource extends VersionedEntityResource<Scope> {
         final Application ap = newData.getApplication() != null && newData.getApplication().getId() != null ?
                 em.find(Application.class, newData.getApplication().getId()) : null;
 
-        return ap != null && ap.isActive() && ap.getOwner().idMatch(getUser());
+        return ap != null && ap.getOwner().idMatch(getUser());
     }
 
     @Override

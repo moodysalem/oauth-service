@@ -7,21 +7,16 @@ import com.oauth2cloud.server.model.data.LoginStatusModel;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
 import com.oauth2cloud.server.model.db.Token;
-import com.oauth2cloud.server.model.db.User;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.util.Date;
-import java.util.List;
 
 @Produces(MediaType.TEXT_HTML)
 @Path(OAuth2Application.OAUTH_PATH + "/loginstatus")
@@ -84,56 +79,36 @@ public class GetLoginStatus extends OAuthResource {
             return error("Invalid referrer.");
         }
 
-        LoginCookie lc = getLoginCookie(client);
+        final LoginCookie loginCookie = getLoginCookie(client);
 
-        LoginStatusModel lsm = new LoginStatusModel();
-        lsm.setTargetOrigin(referrerOrigin);
-        lsm.setLoginCookie(lc);
+        TokenResponse tokenResponse = null;
+        if (loginCookie != null) {
+            final Token existing = QueryUtil.getNewestUserAccessToken(em, client, loginCookie.getUser());
 
-        if (lc != null) {
-            List<Token> tokens = getUserTokens(client, lc.getUser());
-
-            tokens.sort((a, b) -> b.getExpires().compareTo(a.getExpires()));
-
-            if (tokens.size() > 0) {
-                lsm.setTokenResponse(TokenResponse.from(tokens.get(0)));
+            if (existing != null) {
+                tokenResponse = TokenResponse.from(existing);
             } else {
                 // generate a token
-                lsm.setTokenResponse(
-                        TokenResponse.from(
-                                QueryUtil.generateToken(
-                                        em,
-                                        Token.Type.ACCESS,
-                                        client,
-                                        lc.getUser(),
-                                        getExpires(client, Token.Type.ACCESS),
-                                        referrer,
-                                        QueryUtil.getAcceptedScopes(em, client, lc.getUser()),
-                                        null,
-                                        null,
-                                        null,
-                                        null
-                                )
+                tokenResponse = TokenResponse.from(
+                        QueryUtil.generateToken(
+                                em,
+                                Token.Type.ACCESS,
+                                client,
+                                loginCookie.getUser(),
+                                getExpires(client, Token.Type.ACCESS),
+                                referrer,
+                                QueryUtil.getAcceptedScopes(em, client, loginCookie.getUser()),
+                                null,
+                                null
                         )
                 );
             }
         }
 
-        return Response.ok(new Viewable("/templates/LoginStatus", lsm)).build();
+        return Response.ok(
+                new Viewable("/templates/LoginStatus", new LoginStatusModel(loginCookie, referrerOrigin, tokenResponse))
+        ).build();
     }
 
-    List<Token> getUserTokens(Client client, User user) {
-        CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        Root<Token> tkn = tq.from(Token.class);
-
-        tq.select(tkn).where(
-                cb.equal(tkn.get(Token_.client), client),
-                cb.equal(tkn.get(Token_.user), user),
-                cb.equal(tkn.get(Token_.type), Token.Type.ACCESS),
-                cb.greaterThan(tkn.get(Token_.expires), new Date())
-        );
-
-        return em.createQuery(tq).getResultList();
-    }
 
 }

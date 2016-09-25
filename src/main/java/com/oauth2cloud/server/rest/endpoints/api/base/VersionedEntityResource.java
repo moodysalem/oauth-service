@@ -30,7 +30,6 @@ public abstract class VersionedEntityResource<T extends VersionedEntity> extends
         return getUser() != null;
     }
 
-
     public User getUser() {
         return TokenFilter.getUser(request);
     }

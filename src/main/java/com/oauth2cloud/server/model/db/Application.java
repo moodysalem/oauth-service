@@ -2,6 +2,7 @@ package com.oauth2cloud.server.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.VersionedEntity;
+import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.URL;
@@ -10,6 +11,8 @@ import javax.persistence.*;
 import javax.validation.Valid;
 
 @Entity
+@Audited
+@Table(name = "applications")
 public class Application extends VersionedEntity {
     @NotBlank
     @Column(name = "name")

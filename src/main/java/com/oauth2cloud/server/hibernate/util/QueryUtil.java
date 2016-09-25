@@ -66,17 +66,19 @@ public abstract class QueryUtil {
      * @param user   user that has given permission for these scopes
      * @return a list of accepted scopes
      */
-    public static List<AcceptedScope> getAcceptedScopes(final EntityManager em, final Client client, final User user) {
+    public static Set<AcceptedScope> getAcceptedScopes(final EntityManager em, final Client client, final User user) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
         final Root<AcceptedScope> ras = as.from(AcceptedScope.class);
 
-        return em.createQuery(
-                as.select(ras).where(
-                        cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.client), client),
-                        cb.equal(ras.get(AcceptedScope_.user), user)
-                )
-        ).getResultList();
+        return new HashSet<>(
+                em.createQuery(
+                        as.select(ras).where(
+                                cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.client), client),
+                                cb.equal(ras.get(AcceptedScope_.user), user)
+                        )
+                ).getResultList()
+        );
     }
 
     /**
@@ -138,7 +140,7 @@ public abstract class QueryUtil {
      * @param scopes filter to scopes with these names (null if you want all scopes)
      * @return list of scopes filtered to scopes with the names passed
      */
-    public static List<ClientScope> getScopes(final EntityManager em, final Client client, final Set<String> scopes) {
+    public static Set<ClientScope> getScopes(final EntityManager em, final Client client, final Set<String> scopes) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
         final Root<ClientScope> clientScopeRoot = cq.from(ClientScope.class);
@@ -148,7 +150,9 @@ public abstract class QueryUtil {
         if (scopes != null && !scopes.isEmpty()) {
             p = cb.and(p, clientScopeRoot.join(ClientScope_.scope).get(Scope_.name).in(scopes));
         }
-        return em.createQuery(cq.select(clientScopeRoot).where(p)).getResultList();
+        return new HashSet<>(
+                em.createQuery(cq.select(clientScopeRoot).where(p)).getResultList()
+        );
     }
 
     /**
@@ -269,8 +273,17 @@ public abstract class QueryUtil {
      * @param scopes  the scopes for which the token is valid
      * @return a Token with the aforementioned properties
      */
-    public static Token generateToken(EntityManager em, Token.Type type, Client client, User user, Date expires, String redirectUri,
-                                      Set<AcceptedScope> scopes, Token refreshToken, Set<ClientScope> clientScopes) {
+    public static Token generateToken(
+            final EntityManager em,
+            final Token.Type type,
+            final Client client,
+            final User user,
+            final Date expires,
+            final String redirectUri,
+            final Set<AcceptedScope> scopes,
+            final Token refreshToken,
+            final Set<ClientScope> clientScopes
+    ) {
         final Token toReturn = new Token();
         toReturn.setClient(client);
         toReturn.setExpires(expires);
@@ -385,5 +398,59 @@ public abstract class QueryUtil {
                 );
     }
 
+    /**
+     * Find or create a user for a particular application
+     *
+     * @param app   application to create user for
+     * @param email email address of user
+     * @return user object created/found
+     */
+    public static User findOrCreateUser(final EntityManager em, final Application app, final String email) {
+        final User existing = QueryUtil.getUser(em, email, app);
+
+        if (existing != null) {
+            return existing;
+        }
+
+        final User nu = new User();
+        nu.setApplication(app);
+        nu.setEmail(email);
+        try {
+            return TXHelper.withinTransaction(em, () -> em.merge(existing));
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to create user", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get all the access tokens for a user for a particular client that expire after today
+     *
+     * @param em
+     * @param client
+     * @param user
+     * @return
+     */
+    public static Token getNewestUserAccessToken(final EntityManager em, final Client client, final User user) {
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<Token> query = cb.createQuery(Token.class);
+        final Root<Token> tokenRoot = query.from(Token.class);
+
+        query.select(tokenRoot)
+                .where(
+                        cb.equal(tokenRoot.get(Token_.client), client),
+                        cb.equal(tokenRoot.get(Token_.user), user),
+                        cb.equal(tokenRoot.get(Token_.type), Token.Type.ACCESS),
+                        cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis())
+                )
+                .orderBy(cb.desc(tokenRoot.get(Token_.expires)));
+
+        final List<Token> results = em.createQuery(query).setMaxResults(1).getResultList();
+
+        if (!results.isEmpty()) {
+            return results.get(0);
+        }
+        return null;
+    }
 
 }

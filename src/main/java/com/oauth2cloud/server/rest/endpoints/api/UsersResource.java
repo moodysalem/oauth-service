@@ -32,7 +32,7 @@ public class UsersResource extends VersionedEntityResource<User> {
 
         final Application ap = em.find(Application.class, newData.getApplication().getId());
 
-        return ap != null && ap.isActive() && ap.getOwner().idMatch(getUser());
+        return ap != null && ap.getOwner().idMatch(getUser());
     }
 
     @Override
@@ -60,7 +60,6 @@ public class UsersResource extends VersionedEntityResource<User> {
         if (applicationId != null && !applicationId.isEmpty()) {
             list.add(root.join(User_.application).get(Application_.id).in(applicationId));
         }
-
     }
 
     @Override

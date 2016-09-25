@@ -15,8 +15,6 @@ public abstract class AuthorizeModel implements HeadProperties {
     private String requestUrl, redirectUri, baseUri, state;
     private Client client;
 
-    private boolean googleLogin;
-
     public Client getClient() {
         return client;
     }
@@ -77,14 +75,6 @@ public abstract class AuthorizeModel implements HeadProperties {
 
     public void setState(String state) {
         this.state = state;
-    }
-
-    public boolean isGoogleLogin() {
-        return googleLogin;
-    }
-
-    public void setGoogleLogin(boolean googleLogin) {
-        this.googleLogin = googleLogin;
     }
 
     public String getBaseUri() {

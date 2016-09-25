@@ -8,24 +8,25 @@ import javax.persistence.*;
 
 @Entity
 @Immutable
+@Table(name = "call_log")
 public class CallLog extends BaseEntity {
     @NotEmpty
     @Column(name = "ip", updatable = false)
     private String ip;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", updatable = false)
     private Client client;
 
     @ManyToOne
-    @JoinColumn(name = "application_id")
+    @JoinColumn(name = "application_id", updatable = false)
     private Application application;
 
     @Lob
-    @Column(name = "path")
+    @Column(name = "path", updatable = false)
     private String path;
 
-    @Column(name = "method")
+    @Column(name = "method", updatable = false)
     private String method;
 
     public String getIp() {

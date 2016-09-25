@@ -2,34 +2,32 @@ package com.oauth2cloud.server.model.db;
 
 import com.moodysalem.hibernate.model.BaseEntity;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-// we use this to represent a logged in user
 @Entity
-@Immutable
+@Audited
+@Table(name = "login_cookies")
 public class LoginCookie extends BaseEntity {
     @NotEmpty
-    @Column(name = "secret")
+    @Column(name = "secret", updatable = false)
     private String secret;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "user_id", updatable = false)
+    private User user;
+
+    @Column(name = "remember_me", updatable = false)
+    private boolean rememberMe;
 
     @NotNull
     @Column(name = "expires")
     private Long expires;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @Column(name = "remember_me")
-    private boolean rememberMe;
 
     public String getSecret() {
         return secret;

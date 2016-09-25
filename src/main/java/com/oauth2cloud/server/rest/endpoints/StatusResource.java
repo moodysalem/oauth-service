@@ -23,5 +23,4 @@ public class StatusResource {
 
         return Response.ok(OK).build();
     }
-
 }

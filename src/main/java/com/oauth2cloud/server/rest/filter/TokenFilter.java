@@ -52,7 +52,7 @@ public class TokenFilter implements DynamicFeature {
                     final Root<Token> tokenRoot = cq.from(Token.class);
                     final List<Token> tks = em.createQuery(cq.select(tokenRoot).where(
                             cb.equal(tokenRoot.get(Token_.token), token),
-                            cb.greaterThan(tokenRoot.get(Token_.expires), new Date()),
+                            cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
                             cb.equal(tokenRoot.get(Token_.type), Token.Type.ACCESS),
                             cb.equal(tokenRoot.join(Token_.client).join(Client_.application)
                                     .get(Application_.id), APPLICATION_ID)

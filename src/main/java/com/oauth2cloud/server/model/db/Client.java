@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.model.db;
 
 import com.moodysalem.hibernate.model.VersionedEntity;
+import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
@@ -9,6 +10,8 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Entity
+@Audited
+@Table(name = "clients")
 public class Client extends VersionedEntity {
     @NotBlank
     @Column(name = "name")
@@ -47,6 +50,9 @@ public class Client extends VersionedEntity {
 
     @Column(name = "refresh_token_ttl")
     private Long refreshTokenTtl;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "client")
+    private Set<ClientScope> scopes;
 
     @ManyToOne
     @JoinColumn(name = "creator_id", updatable = false)
@@ -126,5 +132,13 @@ public class Client extends VersionedEntity {
 
     public String getCreatorEmail() {
         return creator != null ? creator.getEmail() : null;
+    }
+
+    public Set<ClientScope> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(Set<ClientScope> scopes) {
+        this.scopes = scopes;
     }
 }

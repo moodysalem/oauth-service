@@ -3,6 +3,7 @@ package com.oauth2cloud.server.model.db;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.VersionedEntity;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -11,6 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
+@Audited
+@Table(name = "tokens")
 public class Token extends VersionedEntity {
     public enum Type {
         // the access token is used with resource servers to identify an authenticated user

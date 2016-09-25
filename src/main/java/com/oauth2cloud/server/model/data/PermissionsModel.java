@@ -9,7 +9,7 @@ import java.util.Set;
  * This is the model that gets passed to Permissions.ftl
  */
 public class PermissionsModel extends AuthorizeModel {
-    public PermissionsModel(Token token, Set<ClientScope> clientScopes, boolean rememberMe) {
+    public PermissionsModel(final Token token, final Set<ClientScope> clientScopes, final boolean rememberMe) {
         this.token = token;
         this.clientScopes = clientScopes;
         this.rememberMe = rememberMe;

@@ -13,11 +13,10 @@ import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
-import org.mindrot.jbcrypt.BCrypt;
 
 import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.*;
@@ -33,12 +32,13 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class AuthorizeResource extends OAuthResource {
     public static final String TOKEN = "token",
             CODE = "code",
-            INVALID_LOGIN_CREDENTIALS = "Invalid login credentials.",
             SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.",
             YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.",
-            INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES = "Invalid request. Please contact an administrator if this continues.",
-            E_MAIL_NOT_YET_VERIFIED_MESSAGE = "Your e-mail is not yet verified. Register again to receive another verification e-mail.",
-            USER_NOT_ACTIVE_MESSAGE = "Your user is not active. Please contact %s to have your user re-activated.";
+            INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES = "Invalid request. Please contact an administrator if this continues.";
+
+    public static final String EMAIL_LOGIN_ACTION = "email-login";
+    public static final String GOOGLE_LOGIN_ACTION = "google-login";
+    public static final String PERMISSIONS_ACTION = "permissions";
 
     @QueryParam("response_type")
     private String responseType;
@@ -162,7 +162,7 @@ public class AuthorizeResource extends OAuthResource {
 
         // verify all the requested scopes are available to the client
         if (scopes != null && scopes.size() > 0) {
-            final Set<String> scopeNames = client.getClientScopes().stream()
+            final Set<String> scopeNames = client.getScopes().stream()
                     .map(ClientScope::getScope)
                     .map(Scope::getName)
                     .collect(Collectors.toSet());
@@ -241,8 +241,8 @@ public class AuthorizeResource extends OAuthResource {
             return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
 
-        String action = formParams.getFirst("action");
-        if (action == null) {
+        final String action = formParams.getFirst("action");
+        if (isBlank(action)) {
             return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
 
@@ -258,54 +258,35 @@ public class AuthorizeResource extends OAuthResource {
         QueryUtil.logCall(em, client, containerRequestContext);
 
         // this resource is used for a few different actions which are represented as hidden inputs in the forms
-        // this is done so that the query string can be preserved across all requests without any special handling
+        // this is done so that the query string can be preserved across all requests without any special work
         switch (action) {
             // handle the login action
-            case "login":
-                // get the provider information
+            case EMAIL_LOGIN_ACTION:
+                final String email = formParams.getFirst("email");
 
-                if (p != null) {
-                    final User user = null;
-                    try {
-                        if (p.provider != null) {
-                            switch (p.provider) {
-                                case GOOGLE:
-                                    user = doGoogleLogin(client.getApplication(), formParams);
-                                    break;
-                            }
-                        } else {
-                            lrm.setLastEmail(formParams.getFirst("email"));
-                            user = doEmailLogin(client.getApplication(), formParams);
-                        }
-                    } catch (Exception e) {
-                        LOG.log(Level.WARNING, "login exception", e);
-                        // some exceptional case occurred while trying to log in
-                        lrm.setLoginError(e.getMessage());
-                    }
-                    if (user != null) {
-                        if (!user.isActive()) {
-                            lrm.setLoginError(String.format(USER_NOT_ACTIVE_MESSAGE,
-                                    user.getApplication().getSupportEmail()));
-                        } else if (!user.isVerified()) {
-                            lrm.setLoginError(E_MAIL_NOT_YET_VERIFIED_MESSAGE);
-                        } else {
-                            return getSuccessfulLoginResponse(user, client, scopes, redirectUri, responseType, state, rememberMe, p.provider, p.providerToken);
-                        }
-                    }
-                }
-                return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
+                return getSuccessfulLoginResponse(
+                        QueryUtil.findOrCreateUser(em, client.getApplication(), email),
+                        client, scopes, redirectUri, responseType, state, rememberMe
+                );
+
+            case GOOGLE_LOGIN_ACTION:
+                final String googleToken = formParams.getFirst("googleToken");
+                return getSuccessfulLoginResponse(
+                        doGoogleLogin(client.getApplication(), googleToken),
+                        client, scopes, redirectUri, responseType, state, rememberMe
+                );
 
             // handle the permissions action
-            case "permissions":
+            case PERMISSIONS_ACTION:
                 final String loginToken = formParams.getFirst("login_token");
 
                 // they just completed the second step of the login
                 if (loginToken != null) {
-                    final Token t = QueryUtil.getPermissionToken(em, loginToken, client);
-                    if (t == null) {
+                    final Token token = QueryUtil.getPermissionToken(em, loginToken, client);
+                    if (token == null) {
                         lrm.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
                     } else {
-                        if (t.getExpires().before(new Date())) {
+                        if (token.getExpires().before(new Date())) {
                             lrm.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                         } else {
                             // first get all the client scopes we will try to approve or check if are approved
@@ -323,19 +304,18 @@ public class AuthorizeResource extends OAuthResource {
                                 }
                             }).filter((i) -> i != null).collect(Collectors.toSet());
 
-                            for (final ClientScope cs : clientScopes) {
-                                // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
-                                if (!cs.getPriority().equals(ClientScope.Priority.ASK) ||
-                                        acceptedScopeIds.contains(cs.getScope().getId())) {
-                                    // create/find the accepted scope for this client scope
-                                    tokenScopes.add(QueryUtil.acceptScope(em, t.getUser(), cs));
-                                }
-                            }
+                            // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
+                            // create/find the accepted scope for this client scope
+                            tokenScopes.addAll(
+                                    clientScopes.stream()
+                                            .filter(cs -> !cs.getPriority().equals(ClientScope.Priority.ASK) || acceptedScopeIds.contains(cs.getScope().getId()))
+                                            .map(cs -> QueryUtil.acceptScope(em, token.getUser(), cs))
+                                            .collect(Collectors.toList())
+                            );
 
                             final Token.Type type = getTokenType(responseType);
                             // now create the token we will be returning to the user
-                            final Token token = generateToken(type, t, tokenScopes);
-                            return getRedirectResponse(redirectUri, state, token, rememberMe);
+                            return getRedirectResponse(redirectUri, state, generateToken(type, token, tokenScopes), rememberMe);
                         }
                     }
                 } else {
@@ -347,48 +327,45 @@ public class AuthorizeResource extends OAuthResource {
         }
     }
 
-    private User doGoogleLogin(Application application, MultivaluedMap<String, String> formParams) {
-        if (application.getGoogleClientId() == null || application.getGoogleClientSecret() == null) {
-            throw new IllegalArgumentException(String.format("The application %s is not fully configured for Google Login.", application.getName()));
+    private static final WebTarget GOOGLE_TOKEN_VALIDATE = ClientBuilder.newClient()
+            .target("https://www.googleapis.com/oauth2/v1/tokeninfo");
+
+    private User doGoogleLogin(final Application application, final String googleToken) {
+        if (application.getGoogleCredentials() == null) {
+            throw new IllegalArgumentException(
+                    String.format("The application %s is not fully configured for Google Login.", application.getName()));
         }
 
-        String googleToken = formParams.getFirst("googleToken");
-        if (isEmpty(googleToken)) {
+        if (isBlank(googleToken)) {
             throw new IllegalArgumentException("Invalid Google Token supplied.");
         }
 
-        Response tokenInfo = ClientBuilder.newClient().target("https://www.googleapis.com/oauth2/v1/tokeninfo")
-                .queryParam("access_token", googleToken).request(MediaType.APPLICATION_JSON).get();
+        final Response tokenInfo = GOOGLE_TOKEN_VALIDATE
+                .queryParam("access_token", googleToken)
+                .request(MediaType.APPLICATION_JSON).get();
 
         if (tokenInfo.getStatus() != 200) {
             throw new IllegalArgumentException("Invalid Google Token supplied.");
         }
-        JsonNode tokenInfoJson = tokenInfo.readEntity(JsonNode.class);
-        JsonNode aud = tokenInfoJson.get("audience");
-        if (aud == null || !aud.asText().equals(application.getGoogleClientId())) {
+        final JsonNode tokenInfoJson = tokenInfo.readEntity(JsonNode.class);
+
+        final JsonNode aud = tokenInfoJson.get("audience");
+        if (aud == null || !aud.asText().equals(application.getGoogleCredentials().getId())) {
             throw new IllegalArgumentException("Token supplied is not for the correct client.");
         }
 
-        JsonNode emailVerified = tokenInfoJson.get("verified_email");
+        final JsonNode emailVerified = tokenInfoJson.get("verified_email");
         if (emailVerified == null || !emailVerified.asBoolean()) {
-            throw new IllegalArgumentException("Google E-mail is not yet verified.");
+            throw new IllegalArgumentException("Google E-mail address is not yet verified.");
         }
 
-        JsonNode scopes = tokenInfoJson.get("scope");
-        String scope = scopes == null ? null : scopes.asText().trim();
+        final JsonNode scopes = tokenInfoJson.get("scope");
+        final String scope = scopes == null ? null : scopes.asText().trim();
         if (isEmpty(scope)) {
             throw new IllegalArgumentException("The profile and e-mail scopes are required to log in.");
         }
 
-//        Set<String> scopeSet = new HashSet<>();
-//        for (String s : scope.split(" ")) {
-//            scopeSet.add(s);
-//        }
-//        if (!scopeSet.contains("userinfo.profile") || !scopeSet.contains("userinfo.email")) {
-//            throw new IllegalArgumentException("Both profile and e-mail scopes are required to log in via Google.");
-//        }
-
-        Response userInfo = ClientBuilder.newClient().target("https://www.googleapis.com/plus/v1/people/me")
+        final Response userInfo = ClientBuilder.newClient().target("https://www.googleapis.com/plus/v1/people/me")
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + googleToken)
                 .get();
@@ -397,127 +374,42 @@ public class AuthorizeResource extends OAuthResource {
             throw new IllegalArgumentException("Failed to get user info.");
         }
 
-        JsonNode userData = userInfo.readEntity(JsonNode.class);
+        final JsonNode userData = userInfo.readEntity(JsonNode.class);
 
-        JsonNode emails = userData.get("emails");
+        final JsonNode emails = userData.get("emails");
         if (emails == null || !emails.isArray() || emails.size() != 1) {
             throw new IllegalArgumentException("Google account is not associated with an e-mail or has more than one e-mail.");
         }
-        String email = emails.get(0).get("value").asText();
+        final String email = emails.get(0).get("value").asText();
 
-        JsonNode name = userData.get("name");
-        if (name == null || !name.has("familyName") || !name.has("givenName")) {
-            throw new IllegalArgumentException("Could not fetch full name from Google.");
-        }
-        String lastName = name.get("familyName").asText();
-        String firstName = name.get("givenName").asText();
-
-        return makeOrUpdateUser(application, email, firstName, lastName, null, true);
-    }
-
-    private User makeOrUpdateUser(Application app, String email, String firstName, String lastName, String rawPass, boolean verified) {
-        User u = QueryUtil.getUser(em, email, app);
-
-        if (u == null) {
-            u = new User();
-            u.setEmail(email);
-            u.setApplication(app);
-            u.setFirstName(firstName);
-            u.setLastName(lastName);
-            if (rawPass != null) {
-                u.setPassword(BCrypt.hashpw(rawPass, BCrypt.gensalt()));
-            }
-            u.setVerified(verified);
-            try {
-                beginTransaction();
-                em.persist(u);
-                commit();
-            } catch (Exception e) {
-                rollback();
-                LOG.log(Level.SEVERE, "Failed to create user", e);
-                u = null;
-            }
-        } else {
-            u.setFirstName(firstName);
-            u.setLastName(lastName);
-            u.setVerified(verified);
-            try {
-                beginTransaction();
-                em.merge(u);
-                commit();
-            } catch (Exception e) {
-                rollback();
-                LOG.log(Level.SEVERE, "Failed to update user", e);
-                u = null;
-            }
-        }
-
-        return u;
-    }
-
-    public User doEmailLogin(Application app, MultivaluedMap<String, String> formParams) {
-        String email = formParams.getFirst("email");
-        String password = formParams.getFirst("password");
-        User userWithEmail = QueryUtil.getUser(em, email, app);
-        User toReturn = null;
-
-        if (userWithEmail != null && userWithEmail.getPassword() != null && BCrypt.checkpw(password, userWithEmail.getPassword())) {
-            toReturn = userWithEmail;
-        }
-
-        // check with the legacy url to see if the user is there and passing the correct password
-        if (userWithEmail == null && app.getLegacyUrl() != null && !app.getLegacyUrl().trim().isEmpty()) {
-            Form f = new Form();
-            f.param("email", email).param("password", password);
-            Response r = ClientBuilder.newClient().target(app.getLegacyUrl()).request(MediaType.APPLICATION_JSON_TYPE)
-                    .post(Entity.form(f));
-
-            if (r.getStatus() == 200) {
-                JsonNode ui = r.readEntity(JsonNode.class);
-                String fn, ln, newPassword;
-                fn = ui.get("firstName") != null ? ui.get("firstName").asText() : null;
-                ln = ui.get("lastName") != null ? ui.get("lastName").asText() : null;
-                newPassword = ui.get("newPassword") != null ? ui.get("newPassword").asText() : null;
-
-                if (fn == null || ln == null || newPassword == null) {
-                    throw new IllegalArgumentException("The legacy URL indicated that the user was properly logged in, but did not return the user's first name, last name, and a new password.");
-                }
-
-                toReturn = makeOrUpdateUser(app, email, fn, ln, newPassword, true);
-            }
-        }
-
-        return toReturn;
+        return QueryUtil.findOrCreateUser(em, application, email);
     }
 
     private Response getSuccessfulLoginResponse(final User user, final Client client, final Set<String> scopes, final String redirectUri,
                                                 final String responseType, final String state, final boolean rememberMe) {
         // successfully authenticated the user
-        Set<ClientScope> toAsk = QueryUtil.getScopesToRequest(em, client, user, scopes);
-        if (toAsk.size() > 0) {
+        final Set<ClientScope> toAsk = QueryUtil.getScopesToRequest(em, client, user, scopes);
+        if (!toAsk.isEmpty()) {
             // we need to generate a temporary token for them to get to the next step with
-            Token t = QueryUtil.generatePermissionToken(em, user, client, redirectUri, provider, providerAccessToken);
-            PermissionsModel pr = new PermissionsModel(token, clientScopes, rememberMe);
-            pr.setClientScopes(toAsk);
-            pr.setToken(t);
-            pr.setRememberMe(rememberMe);
-            pr.setClient(client);
-            pr.setURLs(containerRequestContext);
-            pr.setState(state);
-            pr.setRedirectUri(redirectUri);
-            return Response.ok(new Viewable("/templates/Permissions", pr)).build();
+            final Token token = QueryUtil.generatePermissionToken(em, user, client, redirectUri);
+            final PermissionsModel permissionsModel = new PermissionsModel(token, toAsk, rememberMe);
+            permissionsModel.setClient(client);
+            permissionsModel.setURLs(containerRequestContext);
+            permissionsModel.setState(state);
+            permissionsModel.setRedirectUri(redirectUri);
+            return Response.ok(new Viewable("/templates/Permissions", permissionsModel)).build();
         } else {
             // accept all the always permissions
-            List<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
-            List<AcceptedScope> acceptedScopes = new ArrayList<>();
-            for (ClientScope cs : clientScopes) {
-                acceptedScopes.add(QueryUtil.acceptScope(em, user, cs));
-            }
-            Token.Type type = getTokenType(responseType);
+            final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
+            final Set<AcceptedScope> acceptedScopes = clientScopes.stream()
+                    .map(clientScope -> QueryUtil.acceptScope(em, user, clientScope))
+                    .collect(Collectors.toSet());
+
+            final Token.Type type = getTokenType(responseType);
             // redirect with token since they've already asked for all the permissions
-            Token t = QueryUtil.generateToken(em, type, client, user, getExpires(client, type),
-                    redirectUri, acceptedScopes, null, null, provider, providerAccessToken);
-            return getRedirectResponse(redirectUri, state, t, rememberMe);
+            final Token token = QueryUtil.generateToken(em, type, client, user, getExpires(client, type),
+                    redirectUri, acceptedScopes, null, null);
+            return getRedirectResponse(redirectUri, state, token, rememberMe);
         }
     }
 
@@ -536,19 +428,24 @@ public class AuthorizeResource extends OAuthResource {
      *
      * @param redirectUri URI passed by the client to redirect to
      * @param state       state of the client upon sending to the authorize endpoint, returned in the redirect url
-     * @param tkn         access or code token that was generated, depending on the type
+     * @param token       access or code token that was generated, depending on the type
      */
-    private Response getRedirectResponse(String redirectUri, String state, Token tkn, boolean rememberMe) {
-        UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
+    private Response getRedirectResponse(
+            final String redirectUri,
+            final String state,
+            final Token token,
+            final boolean rememberMe
+    ) {
+        final UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
-        String scope = tkn.getAcceptedScopes().stream()
+        final String scope = token.getAcceptedScopes().stream()
                 .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
                 .collect(Collectors.joining(" "));
-        String expiresIn = Long.toString((tkn.getExpires().getTime() - System.currentTimeMillis()) / 1000L);
+        final String expiresIn = Long.toString((token.getExpires().getTime() - System.currentTimeMillis()) / 1000L);
 
-        if (tkn.getType().equals(Token.Type.ACCESS)) {
-            MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
-            params.putSingle("access_token", tkn.getToken());
+        if (token.getType().equals(Token.Type.ACCESS)) {
+            final MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
+            params.putSingle("access_token", token.getToken());
             params.putSingle("token_type", TokenResponse.BEARER);
             if (state != null) {
                 params.putSingle("state", state);
@@ -556,16 +453,11 @@ public class AuthorizeResource extends OAuthResource {
             params.putSingle("expires_in", expiresIn);
             params.putSingle("scope", scope);
 
-            if (tkn.getProvider() != null) {
-                params.putSingle("provider", tkn.getProvider().name());
-                params.putSingle("provider_access_token", tkn.getProviderAccessToken());
-            }
-
             toRedirect.fragment(mapToQueryString(params));
         }
 
-        if (tkn.getType().equals(Token.Type.CODE)) {
-            toRedirect.queryParam("code", tkn.getToken());
+        if (token.getType().equals(Token.Type.CODE)) {
+            toRedirect.queryParam("code", token.getToken());
             if (state != null) {
                 toRedirect.queryParam("state", state);
             }
@@ -573,7 +465,7 @@ public class AuthorizeResource extends OAuthResource {
 
         return Response.status(Response.Status.FOUND)
                 .location(toRedirect.build())
-                .cookie(getNewCookie(tkn, rememberMe))
+                .cookie(getNewCookie(token, rememberMe))
                 .build();
     }
 

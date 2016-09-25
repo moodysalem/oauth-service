@@ -11,10 +11,10 @@
             <h1 class="page-header text-center">${model.client.application.name?html}</h1>
         </div>
     </div>
-    <div class="row" id="form-row">
+    <div class="row">
         <div class="col-lg-4 col-lg-offset-2 col-sm-6">
             <form id="form-signin" method="POST">
-                <input type="hidden" name="action" value="login"/>
+                <input type="hidden" name="action" value="email-login"/>
 
                 <h2>
                     Sign In<br/>
@@ -44,59 +44,58 @@
                         Forgot Password?
                     </a>
                 </div>
-
-            <#-- open the alternative login button section -->
-            <#if model.googleLogin>
-                <div class="center-line text-center form-group">
-                    <div class="or-block bg-info">OR</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-xs-${model.loginButtonSize}">
-                        <input type="hidden" id="googleToken" name="googleToken"/>
-                        <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
-                            <i class="fa fa-google fa-lg"></i>
-                        </button>
-                        <script src="https://apis.google.com/js/platform.js"></script>
-                        <script>
-                            // define a function to be called when google loads
-                            if (gapi && typeof gapi.load === "function") {
-                                gapi.load('auth2', function () {
-                                    var auth2 = gapi.auth2.init({
-                                        client_id: "${model.client.application.googleClientId?js_string}",
-                                        fetch_basic_profile: true,
-                                        scope: 'profile email'
-                                    });
-                                    $(function () {
-                                        $("#googleLogin").click(function () {
-                                            // Sign the user in, and then retrieve their ID token for the server
-                                            // to validate
-                                            auth2.signIn().then(function () {
-                                                var token = auth2.currentUser.get().getAuthResponse().access_token;
-                                                if (token) {
-                                                    $("#googleToken").val(token).closest("form").submit();
-                                                }
-                                            });
-                                        });
-                                    });
-                                });
-                            }
-                        </script>
-                    </div>
-                </div>
-            </#if>
-            <#-- close the alternative login button section -->
-
             </form>
 
 
+        <#-- google login -->
+        <#if model.client.application.googleCredentials??>
+            <hr/>
+            <form>
+                <input type="hidden" name="action" value="google-login"/>
+                <input type="hidden" id="googleToken" name="googleToken"/>
+                <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
+                    <i class="fa fa-google fa-lg"></i>
+                </button>
+            </form>
+            <script src="https://apis.google.com/js/platform.js"></script>
             <script>
+                // define a function to be called when google loads
+                if (gapi && typeof gapi.load === "function") {
+                    gapi.load('auth2', function () {
+                        var auth2 = gapi.auth2.init({
+                            client_id: "${model.client.application.googleClientId?js_string}",
+                            fetch_basic_profile: true,
+                            scope: 'profile email'
+                        });
+                        $(function () {
+                            $("#googleLogin").click(function () {
+                                // Sign the user in, and then retrieve their ID token for the server
+                                // to validate
+                                auth2.signIn().then(function () {
+                                    var token = auth2.currentUser.get().getAuthResponse().access_token;
+                                    if (token) {
+                                        $("#googleToken").val(token).closest("form").submit();
+                                    }
+                                });
+                            });
+                        });
+                    });
+                }
+            </script>
+        </#if>
+        <#-- close the alternative login button section -->
+
+            <script>
+                function showLoadingIndicators() {
+                    $("#form-signin").find("input").prop("readOnly", true).end()
+                            .find("button").prop("disabled", true)
+                            .find("#submitLogin span").text("Signing in...").end()
+                            .find("i.fa-sign-in").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
+                }
+
                 $(function () {
                     $("#form-signin").submit(function () {
-                        $("#form-signin").find("input").prop("readOnly", true).end()
-                                .find("button").prop("disabled", true)
-                                .find("#submitLogin span").text("Signing in...").end()
-                                .find("i.fa-sign-in").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
+                        showLoadingIndicators();
                     });
                 });
             </script>
@@ -105,9 +104,7 @@
         <#-- something happened while logging in -->
         <#if model.loginError??>
             <div class="alert alert-danger">
-                <i class="fa fa-exclamation-triangle"></i>
-                <strong>Error</strong>
-            ${model.loginError?html}
+                <i class="fa fa-exclamation-triangle"></i> <strong>Error</strong> ${model.loginError?html}
             </div>
         </#if>
         </div>

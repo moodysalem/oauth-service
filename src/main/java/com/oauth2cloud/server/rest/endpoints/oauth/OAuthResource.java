@@ -177,10 +177,10 @@ public abstract class OAuthResource {
      * @param error indicates what the problem with the request is
      * @return error page
      */
-    protected Response error(String error) {
-        final ErrorModel em = new ErrorModel();
-        em.setError(error);
-        return Response.status(400).entity(new Viewable("/templates/Error", em)).build();
+    protected Response error(final String error) {
+        return Response.status(400)
+                .entity(new Viewable("/templates/Error", new ErrorModel(error)))
+                .build();
     }
 
     @Inject
