@@ -7,15 +7,15 @@
     <sql>ALTER DATABASE DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
-  <changeSet id="Application Table" author="moody.salem">
-    <createTable tableName="Application">
+  <changeSet id="applications table" author="moody.salem">
+    <createTable tableName="applications">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="LONG" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="LONG" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
@@ -27,65 +27,45 @@
       <column name="description" type="${TEXT}">
         <constraints nullable="true"/>
       </column>
-      <column name="supportEmail" type="VARCHAR(191)">
+      <column name="support_email" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="publicClientRegistration" type="${BOOLEAN}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="ownerId" type="${UUID_TYPE}"/>
-      <column name="facebookAppId" type="BIGINT">
+      <column name="owner_id" type="${UUID_TYPE}"/>
+      <column name="google_client_id" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
-      <column name="facebookAppSecret" type="VARCHAR(191)">
+      <column name="google_client_secret" type="VARCHAR(191)">
         <constraints nullable="true"/>
       </column>
-      <column name="googleClientId" type="VARCHAR(191)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="googleClientSecret" type="VARCHAR(191)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="amazonClientId" type="VARCHAR(191)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="amazonClientSecret" type="VARCHAR(191)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
-        <constraints nullable="false"/>
-      </column>
-      <column name="legacyUrl" type="${TEXT}"/>
-      <column name="stylesheetUrl" type="${TEXT}"/>
-      <column name="faviconUrl" type="${TEXT}"/>
-      <column name="logoUrl" type="${TEXT}"/>
+      <column name="stylesheet_url" type="${TEXT}"/>
+      <column name="favicon_url" type="${TEXT}"/>
+      <column name="logo_url" type="${TEXT}"/>
     </createTable>
-    <addUniqueConstraint tableName="Application" columnNames="facebookAppId,facebookAppSecret"/>
-    <addUniqueConstraint tableName="Application" columnNames="googleClientId,googleClientSecret"/>
-    <addUniqueConstraint tableName="Application" columnNames="amazonClientId,amazonClientSecret"/>
+    <addUniqueConstraint tableName="applications" columnNames="google_client_id,google_client_secret"
+                         constraintName="uk_app_google_cred"/>
   </changeSet>
 
-  <changeSet id="Scopes Table" author="moody.salem">
-    <createTable tableName="Scope">
+  <changeSet id="scopes table" author="moody.salem">
+    <createTable tableName="scopes">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="applicationId" type="${UUID_TYPE}">
+      <column name="application_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="name" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="displayName" type="VARCHAR(191)">
+      <column name="display_name" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
       <column name="thumbnail" type="${TEXT}">
@@ -94,83 +74,61 @@
       <column name="description" type="${TEXT}">
         <constraints nullable="true"/>
       </column>
-      <column name="requiresApprovalFromApplication" type="${BOOLEAN}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
-        <constraints nullable="false"/>
-      </column>
-      <column name="requestable" type="BOOLEAN" defaultValueBoolean="false">
-        <constraints nullable="false"/>
-      </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Scope" baseColumnNames="applicationId"
-                             constraintName="FK_Scope_Application"
-                             referencedTableName="Application"
+    <addForeignKeyConstraint baseTableName="scopes" baseColumnNames="application_id"
+                             constraintName="fk_scopes_applications"
+                             referencedTableName="applications"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="Scope" columnNames="applicationId,name"/>
+    <addUniqueConstraint tableName="scopes" columnNames="application_id,name" constraintName="uk_scopes_names"/>
   </changeSet>
 
-  <changeSet id="User Table" author="moody.salem">
-    <createTable tableName="User">
+  <changeSet id="users table" author="moody.salem">
+    <createTable tableName="users">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="applicationId" type="${UUID_TYPE}">
+      <column name="application_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="email" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="password" type="VARCHAR(191)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="firstName" type="VARCHAR(191)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="lastName" type="VARCHAR(191)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="verified" type="${BOOLEAN}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
-        <constraints nullable="false"/>
-      </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="User" baseColumnNames="applicationId" constraintName="FK_User_Application"
-                             referencedTableName="Application"
+    <addForeignKeyConstraint baseTableName="users" baseColumnNames="application_id"
+                             constraintName="fk_users_applications"
+                             referencedTableName="applications"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Application" baseColumnNames="ownerId" constraintName="FK_Application_Owner"
-                             referencedTableName="User"
+    <addForeignKeyConstraint baseTableName="applications" baseColumnNames="owner_id"
+                             constraintName="fk_applications_owner"
+                             referencedTableName="users"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="User" columnNames="applicationId,email"/>
+    <addUniqueConstraint tableName="user" columnNames="application_id,email" constraintName="uk_users_email"/>
   </changeSet>
 
-  <changeSet id="Client Table" author="moody.salem">
-    <createTable tableName="Client">
+  <changeSet id="client table" author="moody.salem">
+    <createTable tableName="clients">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="applicationId" type="${UUID_TYPE}">
+      <column name="application_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="name" type="VARCHAR(191)">
@@ -179,10 +137,10 @@
       <column name="type" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="tokenTtl" type="BIGINT">
+      <column name="token_ttl" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="refreshTokenTtl" type="BIGINT">
+      <column name="refresh_token_ttl" type="BIGINT">
         <constraints nullable="true"/>
       </column>
       <column name="identifier" type="VARCHAR(191)">
@@ -191,233 +149,224 @@
       <column name="secret" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
-      <column name="creatorId" type="${UUID_TYPE}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+      <column name="creator_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Client" baseColumnNames="applicationId"
-                             constraintName="FK_CLIENT_APPLICATION"
-                             referencedTableName="Application"
+    <addForeignKeyConstraint baseTableName="clients" baseColumnNames="application_id"
+                             constraintName="fk_clients_applications"
+                             referencedTableName="applications"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Client" baseColumnNames="creatorId"
-                             constraintName="FK_CLIENT_USER"
-                             referencedTableName="User"
+    <addForeignKeyConstraint baseTableName="clients" baseColumnNames="creator_id"
+                             constraintName="fk_clients_users"
+                             referencedTableName="users"
                              referencedColumnNames="id"/>
   </changeSet>
 
-  <changeSet id="Client Redirect URI table" author="moody.salem">
+  <changeSet id="client redirect uris table" author="moody.salem">
     <!-- the list of URIs that a client can redirect to -->
-    <createTable tableName="Client_URI">
-      <column name="clientId" type="${UUID_TYPE}">
+    <createTable tableName="client_uris">
+      <column name="client_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="uri" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Client_URI" baseColumnNames="clientId"
-                             constraintName="FK_Client_URI_Client"
-                             referencedTableName="Client"
+    <addForeignKeyConstraint baseTableName="client_uris" baseColumnNames="client_id"
+                             constraintName="fk_client_uris_client"
+                             referencedTableName="clients"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="Client_URI" columnNames="clientId,uri"/>
+    <addUniqueConstraint tableName="client_uris" columnNames="client_id,uri"/>
   </changeSet>
 
-  <changeSet id="Client Permitted Flows" author="moody.salem">
+  <changeSet id="client Permitted Flows" author="moody.salem">
     <!-- the list of flows a client is allowed to use -->
-    <createTable tableName="Client_Flow">
-      <column name="clientId" type="${UUID_TYPE}">
+    <createTable tableName="client_flows">
+      <column name="client_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="flow" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Client_Flow" baseColumnNames="clientId"
-                             constraintName="FK_Client_Flow_Client"
-                             referencedTableName="Client"
+    <addForeignKeyConstraint baseTableName="client_flows" baseColumnNames="client_id"
+                             constraintName="fk_client_flows_client"
+                             referencedTableName="clients"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="Client_Flow" columnNames="clientId,flow"/>
+    <addUniqueConstraint tableName="client_flows" columnNames="client_id,flow"/>
   </changeSet>
 
-  <changeSet id="Token Table" author="moody.salem">
-    <createTable tableName="Token">
+  <changeSet id="token table" author="moody.salem">
+    <createTable tableName="tokens">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="userId" type="${UUID_TYPE}">
+      <column name="user_id" type="${UUID_TYPE}">
         <constraints nullable="true"/>
       </column>
-      <column name="clientId" type="${UUID_TYPE}">
+      <column name="client_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="token" type="VARCHAR(191)">
         <constraints nullable="false" unique="true"/>
       </column>
-      <column name="refreshTokenId" type="${UUID_TYPE}">
+      <column name="refresh_token_id" type="${UUID_TYPE}">
         <constraints nullable="true"/>
       </column>
-      <column name="redirectUri" type="${TEXT}">
+      <column name="redirect_uri" type="${TEXT}">
         <constraints nullable="true"/>
       </column>
-      <column name="expires" type="TIMESTAMP">
+      <column name="expires" type="BIGINT">
         <constraints nullable="false"/>
       </column>
       <column name="type" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="provider" type="VARCHAR(20)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="providerAccessToken" type="${TEXT}">
-        <constraints nullable="true"/>
-      </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="userId" constraintName="FK_Token_User"
-                             referencedTableName="User"
+    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="user_id" constraintName="fk_tokens_users"
+                             referencedTableName="users"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="clientId" constraintName="FK_Token_Client"
-                             referencedTableName="Client"
+    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="client_id" constraintName="fk_tokens_clients"
+                             referencedTableName="clients"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Token" baseColumnNames="refreshTokenId"
-                             constraintName="FK_Token_Refresh_Token"
-                             referencedTableName="Token"
+    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="refresh_token_id"
+                             constraintName="fk_token_refresh_token"
+                             referencedTableName="tokens"
                              referencedColumnNames="id"/>
   </changeSet>
 
-  <changeSet author="moody.salem" id="ClientScope Table">
-    <createTable tableName="ClientScope">
+  <changeSet author="moody.salem" id="client_scopes Table">
+    <createTable tableName="client_scopes">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="clientId" type="${UUID_TYPE}">
+      <column name="client_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="scopeId" type="${UUID_TYPE}">
+      <column name="scope_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="priority" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
-      <column name="reason" type="${TEXT}"/>
       <column name="approved" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
+      <column name="reason" type="${TEXT}"/>
     </createTable>
-    <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="clientId"
-                             constraintName="FK_ClientScope_Client"
-                             referencedTableName="Client"
+    <addForeignKeyConstraint baseTableName="client_scopes" baseColumnNames="client_id"
+                             constraintName="fk_client_scopes_clients"
+                             referencedTableName="clients"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="ClientScope" baseColumnNames="scopeId"
-                             constraintName="FK_ClientScope_Scope"
-                             referencedTableName="Scope"
+    <addForeignKeyConstraint baseTableName="client_scopes" baseColumnNames="scope_id"
+                             constraintName="fk_client_scopes_scopes"
+                             referencedTableName="scopes"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="ClientScope" columnNames="clientId,scopeId"/>
+    <addUniqueConstraint tableName="client_scopes" columnNames="client_id,scope_id"/>
   </changeSet>
 
-  <changeSet id="Accepted Scopes Table" author="moody.salem">
-    <createTable tableName="AcceptedScope">
+  <changeSet id="accepted scopes table" author="moody.salem">
+    <createTable tableName="accepted_scopes">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
         <constraints nullable="false"/>
       </column>
-      <column name="userId" type="${UUID_TYPE}">
+      <column name="user_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="clientScopeId" type="${UUID_TYPE}">
+      <column name="client_scope_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="AcceptedScope" baseColumnNames="userId"
-                             constraintName="FK_AcceptedScope_User"
-                             referencedTableName="User"
+    <addForeignKeyConstraint baseTableName="accepted_scopes" baseColumnNames="user_id"
+                             constraintName="fk_accepted_scopes_users"
+                             referencedTableName="users"
                              referencedColumnNames="id"/>
     <!-- if you delete the client scope, it is unaccepted for all users -->
-    <addForeignKeyConstraint baseTableName="AcceptedScope" baseColumnNames="clientScopeId"
-                             constraintName="FK_AcceptedScope_ClientScope"
-                             referencedTableName="ClientScope"
+    <addForeignKeyConstraint baseTableName="accepted_scopes" baseColumnNames="client_scope_id"
+                             constraintName="fk_accepted_scopes_client_scopes"
+                             referencedTableName="client_scopes"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="AcceptedScope" columnNames="userId,clientScopeId"/>
+    <addUniqueConstraint tableName="accepted_scopes" columnNames="user_id,client_scope_id"/>
   </changeSet>
 
   <!-- this table lists all the user scopes that are granted with a token -->
-  <changeSet id="Token Accepted Scopes Join Table" author="moody.salem">
-    <createTable tableName="Token_AcceptedScope">
-      <column name="tokenId" type="${UUID_TYPE}">
+  <changeSet id="token accepted scopes join table" author="moody.salem">
+    <createTable tableName="token_accepted_scopes">
+      <column name="token_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="acceptedScopeId" type="${UUID_TYPE}">
+      <column name="accepted_scope_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="tokenId"
-                             constraintName="FK_Token_AcceptedScope_Token"
-                             referencedTableName="Token"
+    <addForeignKeyConstraint baseTableName="token_accepted_scopes" baseColumnNames="token_id"
+                             constraintName="fk_token_accepted_scopes_token"
+                             referencedTableName="tokens"
                              referencedColumnNames="id"/>
     <!-- if you delete the accepted scope, all the tokens drop the scope -->
-    <addForeignKeyConstraint baseTableName="Token_AcceptedScope" baseColumnNames="acceptedScopeId"
-                             constraintName="FK_Token_AcceptedScope_AcceptedScope"
-                             referencedTableName="AcceptedScope"
+    <addForeignKeyConstraint baseTableName="token_accepted_scopes" baseColumnNames="accepted_scope_id"
+                             constraintName="fk_token_accepted_scopes_scope"
+                             referencedTableName="accepted_scopes"
                              referencedColumnNames="id"/>
   </changeSet>
 
   <!-- this table lists all the client scopes that are granted with a token -->
-  <changeSet id="Token Client Scopes Join Table" author="moody.salem">
-    <createTable tableName="Token_ClientScope">
-      <column name="tokenId" type="${UUID_TYPE}">
+  <changeSet id="token client scopes join table" author="moody.salem">
+    <createTable tableName="token_client_scopes">
+      <column name="token_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="clientScopeId" type="${UUID_TYPE}">
+      <column name="client_scope_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="Token_ClientScope" baseColumnNames="tokenId"
-                             constraintName="FK_Token_ClientScope_Token"
-                             referencedTableName="Token"
+    <addForeignKeyConstraint baseTableName="token_client_scopes" baseColumnNames="token_id"
+                             constraintName="fk_token_client_scopes_tokens"
+                             referencedTableName="tokens"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="Token_ClientScope" baseColumnNames="clientScopeId"
-                             constraintName="FK_Token_ClientScope_ClientScope"
-                             referencedTableName="ClientScope"
+    <addForeignKeyConstraint baseTableName="token_client_scopes" baseColumnNames="client_scope_id"
+                             constraintName="fk_token_client_scopes_client_scopes"
+                             referencedTableName="client_scopes"
                              referencedColumnNames="id"/>
   </changeSet>
 
-  <changeSet id="LoginCookie Table" author="moody.salem">
-    <createTable tableName="LoginCookie">
+  <changeSet id="login_cookies table" author="moody.salem">
+    <createTable tableName="login_cookies">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
@@ -426,66 +375,31 @@
       <column name="secret" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="rememberMe" type="${BOOLEAN}">
+      <column name="remember_me" type="${BOOLEAN}">
         <constraints nullable="false"/>
       </column>
-      <column name="userId" type="${UUID_TYPE}">
+      <column name="user_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="expires" type="TIMESTAMP">
+      <column name="expires" type="BIGINT">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="LoginCookie" baseColumnNames="userId" constraintName="FK_LoginCookie_User"
-                             referencedTableName="User"
-                             referencedColumnNames="id"/>
-  </changeSet>
-
-  <changeSet id="UserCode Table" author="moody.salem">
-    <createTable tableName="UserCode">
-      <column name="id" type="${UUID_TYPE}">
-        <constraints nullable="false" primaryKey="true"/>
-      </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="version" type="BIGINT" defaultValue="0">
-        <constraints nullable="false"/>
-      </column>
-      <column name="userId" type="${UUID_TYPE}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="type" type="VARCHAR(50)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="code" type="VARCHAR(191)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="expires" type="TIMESTAMP">
-        <constraints nullable="false"/>
-      </column>
-      <column name="used" type="${BOOLEAN}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="referrer" type="${TEXT}"/>
-    </createTable>
-    <addForeignKeyConstraint baseTableName="UserCode" baseColumnNames="userId" constraintName="FK_UserCode_User"
-                             referencedTableName="User"
+    <addForeignKeyConstraint baseTableName="login_cookies" baseColumnNames="user_id"
+                             constraintName="fk_login_cookies_users"
+                             referencedTableName="users"
                              referencedColumnNames="id"/>
   </changeSet>
 
   <changeSet id="Call Log" author="moody.salem">
-    <createTable tableName="CallLog">
+    <createTable tableName="call_log">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="TIMESTAMP" defaultValue="${now}">
+      <column name="created" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
-      <column name="updated" type="TIMESTAMP" defaultValue="${now}">
+      <column name="updated" type="BIGINT" defaultValue="${now}">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValue="0">
@@ -494,10 +408,10 @@
       <column name="ip" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
-      <column name="clientId" type="${UUID_TYPE}">
+      <column name="client_id" type="${UUID_TYPE}">
         <constraints nullable="true"/>
       </column>
-      <column name="applicationId" type="${UUID_TYPE}">
+      <column name="application_id" type="${UUID_TYPE}">
         <constraints nullable="true"/>
       </column>
       <column name="path" type="${TEXT}">
@@ -507,11 +421,12 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Client"
-                             referencedTableName="Client"
+    <addForeignKeyConstraint baseTableName="call_log" baseColumnNames="client_id" constraintName="fk_call_log_client"
+                             referencedTableName="clients"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="CallLog" baseColumnNames="clientId" constraintName="FK_CallLog_Application"
-                             referencedTableName="Client"
+    <addForeignKeyConstraint baseTableName="call_log" baseColumnNames="client_id"
+                             constraintName="fk_call_log_applications"
+                             referencedTableName="clients"
                              referencedColumnNames="id"/>
   </changeSet>
 

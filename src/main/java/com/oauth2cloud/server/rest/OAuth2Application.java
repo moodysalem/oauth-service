@@ -19,7 +19,7 @@ public class OAuth2Application extends BaseApplication {
 
     private static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required";
     private static final String PERSISTENCE_UNIT_NAME = "oauth-service";
-    private static final String DB_MASTER_CHANGELOG_XML_PATH = "db/master-changelog.xml";
+    private static final String DB_MASTER_CHANGELOG_XML_PATH = "db/changesets/master-changelog.xml";
     private static final String ENTITY_MANAGER_FACTORY_NAME = "main-em";
 
     public OAuth2Application() {
@@ -44,7 +44,7 @@ public class OAuth2Application extends BaseApplication {
                 ).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // create the mailer that uses amazon
-                final Mailer sesMailer = new Mailer(
+                final Mailer mailer = new Mailer(
                         EnvironmentConfig.SMTP_HOST,
                         EnvironmentConfig.SMTP_PORT,
                         EnvironmentConfig.SMTP_USERNAME,
@@ -52,12 +52,12 @@ public class OAuth2Application extends BaseApplication {
                         TransportStrategy.SMTP_TLS
                 );
 
-                final Properties addtl = new Properties();
-                addtl.put(MAIL_SMTP_STARTTLS_REQUIRED, "true");
-                sesMailer.applyProperties(addtl);
+                final Properties mailerProperties = new Properties();
+                mailerProperties.put(MAIL_SMTP_STARTTLS_REQUIRED, "true");
+                mailer.applyProperties(mailerProperties);
 
                 // this is used to send e-mails
-                bind(sesMailer).to(Mailer.class);
+                bind(mailer).to(Mailer.class);
 
                 // this is used for generating e-mails from freemarker templates
                 bind(new EmailTemplateFreemarkerConfiguration()).to(Configuration.class);

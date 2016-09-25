@@ -71,7 +71,7 @@ public class OAuth2Test extends BaseTest {
                             .withUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
                             .withUser("root")
                             .withPersistenceUnit("oauth-service")
-                            .withChangelogFile("db/master-changelog.xml")
+                            .withChangelogFile("db/changesets/master-changelog.xml")
                             .withShowSql(true)
                             .withContext("test")
                             .build();

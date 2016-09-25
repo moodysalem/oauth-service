@@ -16,7 +16,7 @@
 
   <property name="UUID_TYPE" value="CHAR(36)"/>
 
-  <include file="changesets/1-0/schema.xml" relativeToChangelogFile="true"/>
-  <include file="changesets/1-0/data.xml" relativeToChangelogFile="true"/>
+  <include file="1-0/schema.xml" relativeToChangelogFile="true"/>
+  <include file="1-0/data.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
