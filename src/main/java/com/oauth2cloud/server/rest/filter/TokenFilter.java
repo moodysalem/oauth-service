@@ -20,7 +20,6 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -53,7 +52,7 @@ public class TokenFilter implements DynamicFeature {
                     final List<Token> tks = em.createQuery(cq.select(tokenRoot).where(
                             cb.equal(tokenRoot.get(Token_.token), token),
                             cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
-                            cb.equal(tokenRoot.get(Token_.type), Token.Type.ACCESS),
+                            cb.equal(tokenRoot.get(Token_.type), TokenType.ACCESS),
                             cb.equal(tokenRoot.join(Token_.client).join(Client_.application)
                                     .get(Application_.id), APPLICATION_ID)
                     )).getResultList();

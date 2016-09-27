@@ -9,8 +9,6 @@
   <property name="TEXT" dbms="mysql" value="LONGTEXT"/>
   <property name="TEXT" value="TEXT"/>
 
-  <property name="now" value="CURRENT_TIMESTAMP()"/>
-
   <property name="BOOLEAN" dbms="mysql" value="TINYINT(1)"/>
   <property name="BOOLEAN" value="BOOLEAN"/>
 

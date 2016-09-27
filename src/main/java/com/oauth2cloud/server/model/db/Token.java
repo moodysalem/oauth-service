@@ -2,7 +2,6 @@ package com.oauth2cloud.server.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.VersionedEntity;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
@@ -11,25 +10,12 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+
 @Entity
 @Audited
 @Table(name = "tokens")
 public class Token extends VersionedEntity {
-    public enum Type {
-        // the access token is used with resource servers to identify an authenticated user
-        ACCESS,
-        // these tokens are access tokens that last for a very short amount of time
-        TEMPORARY,
-        // the refresh token is shared only with confidential clients as a method of getting new tokens
-        REFRESH,
-        // the permission is an internal token used for when the user is authenticated but not authorized
-        PERMISSION,
-        // the code is used for the authorization code flow
-        CODE,
-        // a token given in response to client credentials
-        CLIENT
-    }
-
     @ManyToOne
     @JoinColumn(name = "refresh_token_id", updatable = false)
     private Token refreshToken;
@@ -52,7 +38,7 @@ public class Token extends VersionedEntity {
 
     @Column(name = "type", updatable = false)
     @Enumerated(EnumType.STRING)
-    private Type type;
+    private TokenType type;
 
     @Lob
     @Column(name = "redirect_uri", updatable = false)
@@ -80,7 +66,7 @@ public class Token extends VersionedEntity {
     public String getScope() {
         Set<ClientScope> clientScopeList = null;
 
-        if (getType().equals(Type.CLIENT)) {
+        if (getType().equals(TokenType.CLIENT)) {
             // client credential tokens only point to client scopes
             clientScopeList = getClientScopes().stream()
                     .collect(Collectors.toSet());
@@ -117,7 +103,7 @@ public class Token extends VersionedEntity {
     }
 
     public void setRandomToken(int length) {
-        setToken(RandomStringUtils.randomAlphanumeric(length));
+        setToken(randomAlphanumeric(length));
     }
 
     public User getUser() {
@@ -136,11 +122,11 @@ public class Token extends VersionedEntity {
         this.expires = expires == null ? null : expires.getTime();
     }
 
-    public Type getType() {
+    public TokenType getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(TokenType type) {
         this.type = type;
     }
 
@@ -182,5 +168,26 @@ public class Token extends VersionedEntity {
 
     public void setClientScopes(Set<ClientScope> clientScopes) {
         this.clientScopes = clientScopes;
+    }
+
+    /**
+     * Helper function to calculate when a token should expire based on the client's TTL
+     *
+     * @param client for which the token is being generated
+     * @return when the token should expire
+     */
+    public static Date getExpires(final Client client, final TokenType type) {
+        if (TokenType.REFRESH.equals(type)) {
+            if (client.getRefreshTokenTtl() == null) {
+                throw new IllegalArgumentException();
+            }
+            return new Date(client.getRefreshTokenTtl() * 1000L);
+        }
+
+        if (type.getFixedTtl() != null) {
+            return new Date(type.getFixedTtl() * 1000L);
+        }
+
+        return new Date(System.currentTimeMillis() + client.getTokenTtl());
     }
 }

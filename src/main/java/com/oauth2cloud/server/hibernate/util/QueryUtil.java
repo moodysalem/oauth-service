@@ -239,7 +239,7 @@ public abstract class QueryUtil {
      * @param client the client it was issued to
      * @return the token or null if it doesn't exist or has expired
      */
-    public static Token findToken(final EntityManager em, final String token, final Client client, final Collection<Token.Type> types) {
+    public static Token findToken(final EntityManager em, final String token, final Client client, final Collection<TokenType> types) {
         if (token == null) {
             return null;
         }
@@ -275,7 +275,7 @@ public abstract class QueryUtil {
      */
     public static Token generateToken(
             final EntityManager em,
-            final Token.Type type,
+            final TokenType type,
             final Client client,
             final User user,
             final Date expires,
@@ -318,7 +318,7 @@ public abstract class QueryUtil {
         t.setUser(user);
         t.setClient(client);
         t.setRandomToken(64);
-        t.setType(Token.Type.PERMISSION);
+        t.setType(TokenType.PERMISSION);
         t.setRedirectUri(redirectUri);
         try {
             return TXHelper.withinTransaction(em, () -> em.merge(t));
@@ -342,7 +342,7 @@ public abstract class QueryUtil {
         final Root<Token> tk = tq.from(Token.class);
         final List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
                 cb.equal(tk.get(Token_.token), token),
-                cb.equal(tk.get(Token_.type), Token.Type.PERMISSION),
+                cb.equal(tk.get(Token_.type), TokenType.PERMISSION),
                 cb.equal(tk.get(Token_.client), client)
         ))).getResultList();
         return tks.size() == 1 ? tks.get(0) : null;
@@ -440,7 +440,7 @@ public abstract class QueryUtil {
                 .where(
                         cb.equal(tokenRoot.get(Token_.client), client),
                         cb.equal(tokenRoot.get(Token_.user), user),
-                        cb.equal(tokenRoot.get(Token_.type), Token.Type.ACCESS),
+                        cb.equal(tokenRoot.get(Token_.type), TokenType.ACCESS),
                         cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis())
                 )
                 .orderBy(cb.desc(tokenRoot.get(Token_.expires)));

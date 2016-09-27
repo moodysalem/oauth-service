@@ -25,17 +25,17 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class OAuthResource {
     protected Logger LOG = Logger.getLogger(OAuthResource.class.getName());
 
     public static final String COOKIE_NAME_PREFIX = "_AID_";
     public static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
-    public static final Long FIVE_MINUTES = 1000L * 60L * 5L;
     private static final String FAILED_TO_SEND_E_MAIL_MESSAGE = "Failed to send e-mail message";
 
     protected static final String FROM_EMAIL = System.getProperty("SEND_EMAILS_FROM", "admin@oauth2cloud.com");
@@ -51,53 +51,6 @@ public abstract class OAuthResource {
     @PostConstruct
     public void init() {
         cb = em.getCriteriaBuilder();
-    }
-
-    /**
-     * Helper function to calculate when a token should expire based on the client's TTL
-     *
-     * @param client for which the token is being generated
-     * @return when the token should expire
-     */
-    protected Date getExpires(Client client, Token.Type type) {
-        Long milliseconds = client.getTokenTtl() * 1000L;
-
-        if (Token.Type.REFRESH.equals(type)) {
-            if (client.getRefreshTokenTtl() == null) {
-                throw new IllegalArgumentException();
-            }
-            milliseconds = client.getRefreshTokenTtl() * 1000L;
-        }
-
-        if (Token.Type.CODE.equals(type) || Token.Type.PERMISSION.equals(type) || Token.Type.TEMPORARY.equals(type)) {
-            milliseconds = FIVE_MINUTES;
-        }
-
-        return new Date(System.currentTimeMillis() + milliseconds);
-    }
-
-    /**
-     * Helper function that converts a map to its query string representation. This is used when setting the fragment
-     * in the response URI of a token grant flow
-     *
-     * @param map of parameters to generate the query string for
-     * @return a query string style representation of the map
-     */
-    protected String mapToQueryString(MultivaluedMap<String, String> map) {
-        StringBuilder sb = new StringBuilder();
-        for (String key : map.keySet()) {
-            for (String value : map.get(key)) {
-                if (sb.length() > 0) {
-                    sb.append('&');
-                }
-                try {
-                    sb.append(URLEncoder.encode(key, "UTF-8")).append('=').append(URLEncoder.encode(value, "UTF-8"));
-                } catch (Exception ignored) {
-                    LOG.log(Level.SEVERE, "Failed to encode map", ignored);
-                }
-            }
-        }
-        return sb.toString();
     }
 
     /**
@@ -156,20 +109,6 @@ public abstract class OAuthResource {
         return lc;
     }
 
-
-    /**
-     * Check that two URIs match enough per the OAuth2 spec
-     *
-     * @param one one uri to check
-     * @param two uri to check against
-     * @return true if the uris match well enough
-     */
-    protected static boolean partialMatch(final URI one, final URI two) {
-        return one != null && two != null &&
-                one.getScheme().equalsIgnoreCase(two.getScheme()) &&
-                one.getHost().equalsIgnoreCase(two.getHost()) &&
-                one.getPort() == two.getPort();
-    }
 
     /**
      * Helper function to generate an error template with a string error

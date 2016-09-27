@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.model.db;
 
 import com.moodysalem.hibernate.model.BaseEntity;
+import com.moodysalem.hibernate.model.VersionedEntity;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
@@ -9,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Audited
 @Table(name = "client_scope")
-public class ClientScope extends BaseEntity {
+public class ClientScope extends VersionedEntity {
     public enum Priority {
         // ALWAYS is the highest level, the user is not asked for nor shown the permission when logging in
         ALWAYS,

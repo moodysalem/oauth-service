@@ -127,7 +127,7 @@ public class TokenResource extends OAuthResource {
                     String.format("Client is not authorized for the '%s' grant flow.", TEMPORARY_TOKEN));
         }
 
-        final Token accessToken = QueryUtil.findToken(em, token, c, Collections.singleton(Token.Type.ACCESS));
+        final Token accessToken = QueryUtil.findToken(em, token, c, Collections.singleton(TokenType.ACCESS));
         if (accessToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid or expired access token.");
         }
@@ -135,15 +135,15 @@ public class TokenResource extends OAuthResource {
         final Set<AcceptedScope> newAcceptedScopes = new HashSet<>(accessToken.getAcceptedScopes());
         final Set<ClientScope> newClientScopes = new HashSet<>(accessToken.getClientScopes());
 
-        Token tempToken = QueryUtil.generateToken(em, Token.Type.TEMPORARY, c, accessToken.getUser(), getExpires(c, Token.Type.TEMPORARY),
+        Token tempToken = QueryUtil.generateToken(em, TokenType.TEMPORARY, c, accessToken.getUser(), getExpires(c, TokenType.TEMPORARY),
                 accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes);
 
         return noCache(Response.ok(TokenResponse.from(tempToken))).build();
     }
 
     private Response refreshTokenGrantType(MultivaluedMap<String, String> formParams) {
-        String token = formParams.getFirst("refresh_token");
-        String scope = formParams.getFirst("scope");
+        final String token = formParams.getFirst("refresh_token"),
+                scope = formParams.getFirst("scope");
 
         if (client == null) {
             return error(ErrorResponse.Type.invalid_grant, "Client authorization is required for the '" + REFRESH_TOKEN + "' grant type.");
@@ -157,7 +157,7 @@ public class TokenResource extends OAuthResource {
             return error(ErrorResponse.Type.invalid_request, "'refresh_token' parameter is required.");
         }
 
-        final Token refreshToken = QueryUtil.findToken(em, token, client, Collections.singleton(Token.Type.REFRESH));
+        final Token refreshToken = QueryUtil.findToken(em, token, client, Collections.singleton(TokenType.REFRESH));
         if (refreshToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid or expired refresh token.");
         }
@@ -177,7 +177,7 @@ public class TokenResource extends OAuthResource {
             }
         }
 
-        Token accessToken = QueryUtil.generateToken(em, Token.Type.ACCESS, client, refreshToken.getUser(), getExpires(client, Token.Type.ACCESS),
+        Token accessToken = QueryUtil.generateToken(em, TokenType.ACCESS, client, refreshToken.getUser(), getExpires(client, TokenType.ACCESS),
                 refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null);
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
@@ -212,8 +212,8 @@ public class TokenResource extends OAuthResource {
         }
 
         final Token clientToken = QueryUtil.generateToken(em,
-                Token.Type.CLIENT, client, null,
-                getExpires(client, Token.Type.CLIENT),
+                TokenType.CLIENT, client, null,
+                getExpires(client, TokenType.CLIENT),
                 null, null, null, clientScopes
         );
 
@@ -269,7 +269,7 @@ public class TokenResource extends OAuthResource {
                             AUTHORIZATION_CODE));
         }
 
-        final Token codeToken = QueryUtil.findToken(em, code, client, Collections.singleton(Token.Type.CODE));
+        final Token codeToken = QueryUtil.findToken(em, code, client, Collections.singleton(TokenType.CODE));
         if (codeToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid token.");
         }
@@ -285,10 +285,10 @@ public class TokenResource extends OAuthResource {
         // we know the token is valid, so we should generate an access token now
         // only confidential clients may receive refresh tokens
         if (client.getRefreshTokenTtl() != null && client.isConfidential()) {
-            refreshToken = QueryUtil.generateToken(em, Token.Type.REFRESH, client, codeToken.getUser(), getExpires(client, Token.Type.REFRESH), redirectUri,
+            refreshToken = QueryUtil.generateToken(em, TokenType.REFRESH, client, codeToken.getUser(), getExpires(client, TokenType.REFRESH), redirectUri,
                     new HashSet<>(codeToken.getAcceptedScopes()), null, null);
         }
-        final Token accessToken = QueryUtil.generateToken(em, Token.Type.ACCESS, client, codeToken.getUser(), getExpires(client, Token.Type.ACCESS), redirectUri,
+        final Token accessToken = QueryUtil.generateToken(em, TokenType.ACCESS, client, codeToken.getUser(), getExpires(client, TokenType.ACCESS), redirectUri,
                 new HashSet<>(codeToken.getAcceptedScopes()), refreshToken, null);
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
@@ -355,7 +355,7 @@ public class TokenResource extends OAuthResource {
             applicationId = c.getApplication().getId();
         }
 
-        final Token t = QueryUtil.findToken(em, token, c, Arrays.asList(Token.Type.ACCESS, Token.Type.REFRESH, Token.Type.TEMPORARY));
+        final Token t = QueryUtil.findToken(em, token, c, Arrays.asList(TokenType.ACCESS, TokenType.REFRESH, TokenType.TEMPORARY));
         if (t == null || !t.getClient().getApplication().getId().equals(applicationId)) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }

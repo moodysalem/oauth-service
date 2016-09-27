@@ -3,8 +3,12 @@ package com.oauth2cloud.server.model.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oauth2cloud.server.model.db.Token;
+import com.oauth2cloud.server.model.db.TokenType;
 import com.oauth2cloud.server.model.db.User;
+import com.oauth2cloud.server.rest.util.QS;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.UUID;
 
 /**
@@ -14,8 +18,13 @@ import java.util.UUID;
 public class TokenResponse {
     public static final String BEARER = "bearer";
 
-    public static TokenResponse from(Token accessToken) {
-        TokenResponse tr = new TokenResponse();
+    public static TokenResponse from(final Token accessToken) {
+        // this should be called with access tokens
+        if (!TokenType.ACCESS.equals(accessToken.getType())) {
+            throw new IllegalArgumentException();
+        }
+
+        final TokenResponse tr = new TokenResponse();
         tr.setAccessToken(accessToken.getToken());
         tr.setExpiresIn(accessToken.getExpiresIn());
         if (accessToken.getRefreshToken() != null) {
@@ -115,5 +124,19 @@ public class TokenResponse {
 
     public UserDetails getUserDetails() {
         return userDetails;
+    }
+
+    public String toFragment(final String state) {
+        final MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
+
+        params.putSingle("access_token", getAccessToken());
+        params.putSingle("token_type", TokenResponse.BEARER);
+        if (state != null) {
+            params.putSingle("state", state);
+        }
+        params.putSingle("expires_in", Long.toString(getExpiresIn()));
+        params.putSingle("scope", scope);
+
+        return QS.mapToQueryString(params);
     }
 }

@@ -81,7 +81,7 @@ public class OAuth2Test extends BaseTest {
                 bindFactory(jrem).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // this is used to send e-mails and record the email to our list of sent e-mails
-                Mailer m = mock(Mailer.class);
+                final Mailer m = mock(Mailer.class);
                 doAnswer(invocationOnMock -> sentEmails.add((Email) invocationOnMock.getArguments()[0]))
                         .when(m).sendMail(any(Email.class));
 
@@ -97,21 +97,18 @@ public class OAuth2Test extends BaseTest {
     }
 
     public static final String ADMIN_USER = "moody.salem@gmail.com";
-    public static final String ADMIN_PASSWORD = "moody";
 
     public TokenResponse getToken() {
-        return getToken(ADMIN_USER, ADMIN_PASSWORD);
+        return getToken(ADMIN_USER);
     }
 
     /**
      * This method returns a TokenResponse corresponding to a log in to the admin application
      * from the administrative user
      */
-    public TokenResponse getToken(String email, String password) {
-
-        Form up = new Form();
+    public TokenResponse getToken(final String email) {
+        final Form up = new Form();
         up.param("email", email)
-                .param("password", password)
                 .param("action", "login");
 
         Response loginScreen = target(OAuth2Application.OAUTH_PATH)

@@ -52,7 +52,7 @@
             <hr/>
             <form>
                 <input type="hidden" name="action" value="google-login"/>
-                <input type="hidden" id="googleToken" name="googleToken"/>
+                <input type="hidden" id="google-token" name="google_token"/>
                 <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
                     <i class="fa fa-google fa-lg"></i>
                 </button>
@@ -68,13 +68,13 @@
                             scope: 'profile email'
                         });
                         $(function () {
-                            $("#googleLogin").click(function () {
+                            $("#google-token").click(function () {
                                 // Sign the user in, and then retrieve their ID token for the server
                                 // to validate
                                 auth2.signIn().then(function () {
                                     var token = auth2.currentUser.get().getAuthResponse().access_token;
                                     if (token) {
-                                        $("#googleToken").val(token).closest("form").submit();
+                                        $("#google-token").val(token).closest("form").submit();
                                     }
                                 });
                             });

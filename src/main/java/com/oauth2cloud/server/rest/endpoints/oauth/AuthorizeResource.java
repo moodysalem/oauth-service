@@ -5,15 +5,17 @@ import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.hibernate.util.QueryUtil;
 import com.oauth2cloud.server.model.api.TokenResponse;
+import com.oauth2cloud.server.model.data.LoginEmailModel;
 import com.oauth2cloud.server.model.data.LoginModel;
 import com.oauth2cloud.server.model.data.PermissionsModel;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -22,7 +24,9 @@ import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -30,15 +34,21 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Produces(MediaType.TEXT_HTML)
 @Path(OAuth2Application.OAUTH_PATH + "/authorize")
 public class AuthorizeResource extends OAuthResource {
-    public static final String TOKEN = "token",
+    private static final String TOKEN = "token",
             CODE = "code",
             SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.",
             YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.",
             INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES = "Invalid request. Please contact an administrator if this continues.";
 
-    public static final String EMAIL_LOGIN_ACTION = "email-login";
-    public static final String GOOGLE_LOGIN_ACTION = "google-login";
-    public static final String PERMISSIONS_ACTION = "permissions";
+    private static final String EMAIL_LOGIN_ACTION = "email-login",
+            GOOGLE_LOGIN_ACTION = "google-login",
+            PERMISSIONS_ACTION = "permissions";
+
+    private static final String TEMPLATES_AUTHORIZE = "/templates/Authorize",
+            TEMPLATES_PERMISSIONS = "/templates/Permissions";
+
+    private static final String SCOPE_FORM_TOGGLE_NAME = "SCOPE",
+            CHECKBOX_CHECKED_VALUE = "on";
 
     @QueryParam("response_type")
     private String responseType;
@@ -49,7 +59,24 @@ public class AuthorizeResource extends OAuthResource {
     @QueryParam("state")
     private String state;
     @QueryParam("scope")
+    private String scope;
     private Set<String> scopes;
+
+    @PostConstruct
+    public void parseScope() {
+        if (isBlank(scope)) {
+            scopes = Collections.emptySet();
+        } else {
+            scopes = Stream.of(scope.split(" "))
+                    .filter(StringUtils::isNotBlank)
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+        }
+    }
+
+    // if the user is logging in via e-mail, this will be populated
+    @QueryParam("login_code")
+    private String loginCode;
 
     /**
      * An extra query parameter that can be passed on to the GET request to log the user out if they are already logged in
@@ -136,7 +163,7 @@ public class AuthorizeResource extends OAuthResource {
             try {
                 final URI cUri = new URI(uri);
                 // scheme, host, and port must match
-                if (partialMatch(cUri, toRedirect)) {
+                if (com.oauth2cloud.server.rest.util.URI.partialMatch(cUri, toRedirect)) {
                     validRedirect = true;
                     break;
                 }
@@ -217,7 +244,7 @@ public class AuthorizeResource extends OAuthResource {
         lrm.setState(state);
         lrm.setURLs(containerRequestContext);
 
-        return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
+        return Response.ok(new Viewable(TEMPLATES_AUTHORIZE, lrm)).build();
     }
 
 
@@ -246,14 +273,9 @@ public class AuthorizeResource extends OAuthResource {
             return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
 
-        boolean rememberMe = "on".equalsIgnoreCase(formParams.getFirst("rememberMe"));
+        boolean rememberMe = CHECKBOX_CHECKED_VALUE.equalsIgnoreCase(formParams.getFirst("rememberMe"));
 
-        final LoginModel lrm = new LoginModel();
-        lrm.setURLs(containerRequestContext);
-        lrm.setState(state);
-        lrm.setRedirectUri(redirectUri);
         final Client client = QueryUtil.getClient(em, clientId);
-        lrm.setClient(client);
 
         QueryUtil.logCall(em, client, containerRequestContext);
 
@@ -262,15 +284,12 @@ public class AuthorizeResource extends OAuthResource {
         switch (action) {
             // handle the login action
             case EMAIL_LOGIN_ACTION:
-                final String email = formParams.getFirst("email");
+                return handleEmailLogin(client, formParams);
 
-                return getSuccessfulLoginResponse(
-                        QueryUtil.findOrCreateUser(em, client.getApplication(), email),
-                        client, scopes, redirectUri, responseType, state, rememberMe
-                );
-
+            // handle a login via google token
             case GOOGLE_LOGIN_ACTION:
-                final String googleToken = formParams.getFirst("googleToken");
+                final String googleToken = formParams.getFirst("google_token");
+
                 return getSuccessfulLoginResponse(
                         doGoogleLogin(client.getApplication(), googleToken),
                         client, scopes, redirectUri, responseType, state, rememberMe
@@ -278,53 +297,121 @@ public class AuthorizeResource extends OAuthResource {
 
             // handle the permissions action
             case PERMISSIONS_ACTION:
-                final String loginToken = formParams.getFirst("login_token");
+                return handlePermissionsAction(client, rememberMe, formParams);
 
-                // they just completed the second step of the login
-                if (loginToken != null) {
-                    final Token token = QueryUtil.getPermissionToken(em, loginToken, client);
-                    if (token == null) {
-                        lrm.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-                    } else {
-                        if (token.getExpires().before(new Date())) {
-                            lrm.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
-                        } else {
-                            // first get all the client scopes we will try to approve or check if are approved
-                            final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
-                            // we'll populate this as we loop through the scopes
-                            final Set<AcceptedScope> tokenScopes = new HashSet<>();
-                            // get all the scope ids that were explicitly granted
-                            final Set<UUID> acceptedScopeIds = formParams.keySet().stream().map((s) -> {
-                                try {
-                                    return s != null && s.startsWith("SCOPE") &&
-                                            "on".equalsIgnoreCase(formParams.getFirst(s)) ?
-                                            UUID.fromString(s.substring("SCOPE".length())) : null;
-                                } catch (Exception e) {
-                                    return null;
-                                }
-                            }).filter((i) -> i != null).collect(Collectors.toSet());
-
-                            // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
-                            // create/find the accepted scope for this client scope
-                            tokenScopes.addAll(
-                                    clientScopes.stream()
-                                            .filter(cs -> !cs.getPriority().equals(ClientScope.Priority.ASK) || acceptedScopeIds.contains(cs.getScope().getId()))
-                                            .map(cs -> QueryUtil.acceptScope(em, token.getUser(), cs))
-                                            .collect(Collectors.toList())
-                            );
-
-                            final Token.Type type = getTokenType(responseType);
-                            // now create the token we will be returning to the user
-                            return getRedirectResponse(redirectUri, state, generateToken(type, token, tokenScopes), rememberMe);
-                        }
-                    }
-                } else {
-                    return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
-                }
-                return Response.ok(new Viewable("/templates/Authorize", lrm)).build();
             default:
                 return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
+    }
+
+    private Response handleEmailLogin(final Client client, final MultivaluedMap<String, String> formParams) {
+        final String email = formParams.getFirst("email");
+
+        final LoginModel loginModel = new LoginModel();
+        loginModel.setClient(client);
+        loginModel.setURLs(containerRequestContext);
+        loginModel.setState(state);
+
+        if (isBlank(email)) {
+            loginModel.setLoginError("Invalid e-mail address provided");
+        } else {
+            sendLoginEmail(client, email);
+            loginModel.setSentEmail(true);
+        }
+
+        return Response.ok(new Viewable(TEMPLATES_AUTHORIZE, loginModel)).build();
+    }
+
+    private Response handlePermissionsAction(final Client client,
+                                             final boolean rememberMe,
+                                             final MultivaluedMap<String, String> formParams) {
+        final String loginToken = formParams.getFirst("login_token");
+
+        final LoginModel loginModel = new LoginModel();
+        loginModel.setClient(client);
+        loginModel.setURLs(containerRequestContext);
+        loginModel.setState(state);
+
+        // they just completed the second step of the login
+        if (!isBlank(loginToken)) {
+            final Token token = QueryUtil.getPermissionToken(em, loginToken, client);
+            if (token == null) {
+                loginModel.setLoginError(SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+            } else {
+                if (token.getExpires().before(new Date())) {
+                    loginModel.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
+                } else {
+                    // first get all the client scopes we will try to approve or check if are approved
+                    final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
+                    // we'll populate this as we loop through the scopes
+                    final Set<AcceptedScope> tokenScopes = new HashSet<>();
+                    // get all the scope ids that were explicitly granted
+                    final Set<UUID> acceptedScopeIds = formParams.keySet().stream()
+                            .map((s) -> {
+                                try {
+                                    return (s != null && s.startsWith(SCOPE_FORM_TOGGLE_NAME) &&
+                                            CHECKBOX_CHECKED_VALUE.equalsIgnoreCase(formParams.getFirst(s))) ?
+                                            UUID.fromString(s.substring(SCOPE_FORM_TOGGLE_NAME.length())) :
+                                            null;
+                                } catch (Exception e) {
+                                    return null;
+                                }
+                            })
+                            .filter((id) -> id != null)
+                            .collect(Collectors.toSet());
+
+                    // if it's not ASK, or it's explicitly granted, we should create/find the AcceptedScope record
+                    // create/find the accepted scope for this client scope
+                    tokenScopes.addAll(
+                            clientScopes.stream()
+                                    .filter(cs -> !cs.getPriority().equals(ClientScope.Priority.ASK) || acceptedScopeIds.contains(cs.getScope().getId()))
+                                    .map(cs -> QueryUtil.acceptScope(em, token.getUser(), cs))
+                                    .collect(Collectors.toList())
+                    );
+
+                    final TokenType type = getTokenType(responseType);
+
+                    // now create the token we will be returning to the user
+                    return getRedirectResponse(redirectUri, state, fromPermissionToken(type, token, tokenScopes), rememberMe);
+                }
+            }
+        } else {
+            return error(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+        }
+
+        return Response.ok(new Viewable(TEMPLATES_AUTHORIZE, loginModel)).build();
+    }
+
+    private boolean sendLoginEmail(final Client client, final String email) {
+        final User user = QueryUtil.findOrCreateUser(em, client.getApplication(), email);
+        if (user == null) {
+            return false;
+        }
+
+        final LoginCode code = new LoginCode();
+        code.setClient(client);
+        code.setUser(user);
+        code.setExpires(new Date(System.currentTimeMillis() + (300L * 1000L)));
+        code.setResponseType(responseType);
+        code.setRedirectUri(redirectUri);
+        code.setCode(randomAlphanumeric(64));
+        code.setState(state);
+        code.setScopes(scopes);
+        try {
+            final LoginCode saved = TXHelper.withinTransaction(em, () -> em.merge(code));
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "failed to create login code", e);
+            return false;
+        }
+
+        sendEmail(
+                client.getApplication().getSupportEmail(), email,
+                String.format("Your login e-mail for %s - %s", client.getName(), client.getApplication().getName()),
+                "LoginEmail.ftl",
+                new LoginEmailModel(client, code)
+        );
+
+        return true;
     }
 
     private static final WebTarget GOOGLE_TOKEN_VALIDATE = ClientBuilder.newClient()
@@ -397,7 +484,7 @@ public class AuthorizeResource extends OAuthResource {
             permissionsModel.setURLs(containerRequestContext);
             permissionsModel.setState(state);
             permissionsModel.setRedirectUri(redirectUri);
-            return Response.ok(new Viewable("/templates/Permissions", permissionsModel)).build();
+            return Response.ok(new Viewable(TEMPLATES_PERMISSIONS, permissionsModel)).build();
         } else {
             // accept all the always permissions
             final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
@@ -405,9 +492,9 @@ public class AuthorizeResource extends OAuthResource {
                     .map(clientScope -> QueryUtil.acceptScope(em, user, clientScope))
                     .collect(Collectors.toSet());
 
-            final Token.Type type = getTokenType(responseType);
+            final TokenType type = getTokenType(responseType);
             // redirect with token since they've already asked for all the permissions
-            final Token token = QueryUtil.generateToken(em, type, client, user, getExpires(client, type),
+            final Token token = QueryUtil.generateToken(em, type, client, user, Token.getExpires(client, type),
                     redirectUri, acceptedScopes, null, null);
             return getRedirectResponse(redirectUri, state, token, rememberMe);
         }
@@ -417,10 +504,10 @@ public class AuthorizeResource extends OAuthResource {
      * Map the requested response type to the internal token type
      *
      * @param responseType response type, either code or token
-     * @return the Token.Type that should be generated by the flow
+     * @return the Token.TokenType that should be generated by the flow
      */
-    private Token.Type getTokenType(String responseType) {
-        return CODE.equalsIgnoreCase(responseType) ? Token.Type.CODE : Token.Type.ACCESS;
+    private TokenType getTokenType(String responseType) {
+        return CODE.equalsIgnoreCase(responseType) ? TokenType.CODE : TokenType.ACCESS;
     }
 
     /**
@@ -438,25 +525,11 @@ public class AuthorizeResource extends OAuthResource {
     ) {
         final UriBuilder toRedirect = UriBuilder.fromUri(redirectUri);
 
-        final String scope = token.getAcceptedScopes().stream()
-                .map(AcceptedScope::getClientScope).map(ClientScope::getScope).map(Scope::getName)
-                .collect(Collectors.joining(" "));
-        final String expiresIn = Long.toString((token.getExpires().getTime() - System.currentTimeMillis()) / 1000L);
-
-        if (token.getType().equals(Token.Type.ACCESS)) {
-            final MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
-            params.putSingle("access_token", token.getToken());
-            params.putSingle("token_type", TokenResponse.BEARER);
-            if (state != null) {
-                params.putSingle("state", state);
-            }
-            params.putSingle("expires_in", expiresIn);
-            params.putSingle("scope", scope);
-
-            toRedirect.fragment(mapToQueryString(params));
+        if (token.getType().equals(TokenType.ACCESS)) {
+            toRedirect.fragment(TokenResponse.from(token).toFragment(state));
         }
 
-        if (token.getType().equals(Token.Type.CODE)) {
+        if (token.getType().equals(TokenType.CODE)) {
             toRedirect.queryParam("code", token.getToken());
             if (state != null) {
                 toRedirect.queryParam("state", state);
@@ -476,9 +549,8 @@ public class AuthorizeResource extends OAuthResource {
     private static final String HTTPS = "HTTPS";
     private static final String OAUTH2_CLOUD_LOGIN_COOKIE = "OAuth2 Cloud Login Cookie";
 
-
-    private NewCookie getNewCookie(Token tkn, Boolean rememberMe) {
-        Date expires;
+    private NewCookie getNewCookie(final Token tkn, final Boolean rememberMe) {
+        final Date expires;
         LoginCookie loginCookie = getLoginCookie(tkn.getClient());
         if (loginCookie != null) {
             // we should re-use the same values
@@ -486,32 +558,32 @@ public class AuthorizeResource extends OAuthResource {
         } else {
             expires = new Date(System.currentTimeMillis() + ONE_MONTH);
             // we should issue a new cookie
-            loginCookie = makeLoginCookie(tkn.getUser(), RandomStringUtils.randomAlphanumeric(64), expires, rememberMe);
+            loginCookie = makeLoginCookie(tkn.getUser(), randomAlphanumeric(64), expires, rememberMe);
         }
 
-        int maxAge = rememberMe ? (new Long(ONE_MONTH / 1000L)).intValue() : NewCookie.DEFAULT_MAX_AGE;
-        Date expiry = rememberMe ? expires : null;
+        final int maxAge = rememberMe ? (new Long(ONE_MONTH / 1000L)).intValue() : NewCookie.DEFAULT_MAX_AGE;
+        final Date expiry = rememberMe ? expires : null;
 
-        boolean isHTTPS = HTTPS.equalsIgnoreCase(forwardedProto);
+        final boolean isHTTPS = HTTPS.equalsIgnoreCase(forwardedProto);
 
-        String domain = containerRequestContext.getUriInfo().getBaseUri().getHost();
-        if (domain != null) {
-            if (domain.matches(IPV4_ADDRESS_REGEX)) {
+        String cookieDomain = containerRequestContext.getUriInfo().getBaseUri().getHost();
+        if (cookieDomain != null) {
+            if (cookieDomain.matches(IPV4_ADDRESS_REGEX)) {
                 // don't put a domain on a cookie that is passed to an IP address
-                domain = null;
+                cookieDomain = null;
             } else {
                 // the domain should be the last two pieces of the domain name
-                String[] pieces = domain.split("\\.");
+                String[] pieces = cookieDomain.split("\\.");
                 List<String> pcs = Arrays.asList(pieces);
-                domain = pcs.subList(Math.max(0, pcs.size() - 2), pcs.size()).stream().collect(Collectors.joining("."));
+                cookieDomain = pcs.subList(Math.max(0, pcs.size() - 2), pcs.size()).stream().collect(Collectors.joining("."));
             }
         }
 
-        return new NewCookie(getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", domain, NewCookie.DEFAULT_VERSION,
+        return new NewCookie(getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", cookieDomain, NewCookie.DEFAULT_VERSION,
                 OAUTH2_CLOUD_LOGIN_COOKIE, maxAge, expiry, isHTTPS, true);
     }
 
-    private LoginCookie makeLoginCookie(User user, String secret, Date expires, boolean rememberMe) {
+    private LoginCookie makeLoginCookie(final User user, final String secret, final Date expires, final boolean rememberMe) {
         final LoginCookie loginCookie = new LoginCookie();
         loginCookie.setUser(user);
         loginCookie.setSecret(secret);
@@ -539,9 +611,12 @@ public class AuthorizeResource extends OAuthResource {
      * @param scopes          the list of scopes for the token
      * @return generated token
      */
-    private Token generateToken(Token.Type type, Token permissionToken, Set<AcceptedScope> scopes) {
-        return QueryUtil.generateToken(em, type, permissionToken.getClient(), permissionToken.getUser(),
-                getExpires(permissionToken.getClient(), type), permissionToken.getRedirectUri(), scopes, null, null);
+    private Token fromPermissionToken(final TokenType type, final Token permissionToken, final Set<AcceptedScope> scopes) {
+        return QueryUtil.generateToken(
+                em, type, permissionToken.getClient(), permissionToken.getUser(),
+                Token.getExpires(permissionToken.getClient(), type),
+                permissionToken.getRedirectUri(), scopes, null, null
+        );
     }
 
 }

@@ -7,6 +7,7 @@ import com.oauth2cloud.server.model.data.LoginStatusModel;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
 import com.oauth2cloud.server.model.db.Token;
+import com.oauth2cloud.server.model.db.TokenType;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +59,7 @@ public class GetLoginStatus extends OAuthResource {
             for (String uri : client.getUris()) {
                 try {
                     URI u2 = new URI(uri);
-                    if (partialMatch(u2, u)) {
+                    if (com.oauth2cloud.server.rest.util.URI.partialMatch(u2, u)) {
                         validReferrer = true;
                         // remove the path
                         referrerOrigin = UriBuilder
@@ -92,10 +93,10 @@ public class GetLoginStatus extends OAuthResource {
                 tokenResponse = TokenResponse.from(
                         QueryUtil.generateToken(
                                 em,
-                                Token.Type.ACCESS,
+                                TokenType.ACCESS,
                                 client,
                                 loginCookie.getUser(),
-                                getExpires(client, Token.Type.ACCESS),
+                                getExpires(client, TokenType.ACCESS),
                                 referrer,
                                 QueryUtil.getAcceptedScopes(em, client, loginCookie.getUser()),
                                 null,

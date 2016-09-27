@@ -9,6 +9,9 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class ClientCredentials {
+    public ClientCredentials() {
+    }
+
     public ClientCredentials(String id, String secret) {
         this.id = id;
         this.secret = secret;

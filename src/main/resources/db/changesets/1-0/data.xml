@@ -3,10 +3,14 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
+  <property name="CREATED_TIME" value="1474833009"/>
+
   <changeSet id="oauth2 data" author="moody.salem">
     <!-- this is the oauth administrative interface -->
     <insert tableName="applications">
       <column name="id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="name">OAuth2Cloud</column>
       <column name="description">OAuth2 as a service</column>
       <column name="support_email">moody@oauth2cloud.com</column>
@@ -21,6 +25,8 @@
     <!-- create the admin user of app -->
     <insert tableName="users">
       <column name="id">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="email">moody.salem@gmail.com</column>
     </insert>
@@ -28,10 +34,7 @@
     <!-- set the owner to app -->
     <update tableName="applications">
       <column name="owner_id">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
-      <where>id = ?</where>
-      <whereParams>
-        <param>9966e7e3-ac4f-4d8e-9710-2971450cb504</param>
-      </whereParams>
+      <where>id = '9966e7e3-ac4f-4d8e-9710-2971450cb504'</where>
     </update>
 
     <!-- complete schema by making sure applications cannot be without owners -->
@@ -40,8 +43,10 @@
     <!-- admin interface -->
     <insert tableName="clients">
       <column name="id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="name">Administration</column>
-      <column name="type">PUBLIC</column>
+      <column name="confidential" valueBoolean="FALSE"/>
       <column name="identifier">6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4</column>
       <column name="secret">0457a1fe452b7f32e4b84db9db139d9a572bad7599544ac368a079bbe8069714</column>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
@@ -64,6 +69,8 @@
     <!-- create scopes we use in the api -->
     <insert tableName="scopes">
       <column name="id">fcdafa69-6bd1-4afa-9dd9-3526e784b86d</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_applications</column>
       <column name="display_name">Manage applicationss</column>
@@ -71,9 +78,11 @@
         Permission to create, view, edit, and delete your applications and application settings.
       </column>
     </insert>
-    
+
     <insert tableName="scopes">
       <column name="id">3b00548d-80be-492e-81fe-dfee450dfc25</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_clients</column>
       <column name="display_name">Manage Clients</column>
@@ -83,6 +92,8 @@
     </insert>
     <insert tableName="scopes">
       <column name="id">b0e674d6-6d36-4bdd-9226-05496af8bef1</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_client_scopes</column>
       <column name="display_name">Manage Client scopess</column>
@@ -92,6 +103,8 @@
     </insert>
     <insert tableName="scopes">
       <column name="id">463057d0-9117-4104-83c2-f621b2bc623a</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_scopes</column>
       <column name="display_name">Manage scopess</column>
@@ -101,6 +114,8 @@
     </insert>
     <insert tableName="scopes">
       <column name="id">c6c42fce-323c-4682-94d0-885fbc13f0d4</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_users</column>
       <column name="display_name">Manage Users</column>
@@ -112,14 +127,17 @@
     <!-- give it all the scopes -->
     <insert tableName="client_scopes">
       <column name="id">455e6e2b-34f8-40ea-82a5-6902945c55c0</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">fcdafa69-6bd1-4afa-9dd9-3526e784b86d</column>
       <column name="priority">ALWAYS</column>
-      <column name="approved" valueBoolean="true"/>
     </insert>
 
     <insert tableName="client_scopes">
       <column name="id">f92e7d68-754c-45f5-85d4-a01a7f5f721d</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">3b00548d-80be-492e-81fe-dfee450dfc25</column>
       <column name="priority">ALWAYS</column>
@@ -127,6 +145,8 @@
 
     <insert tableName="client_scopes">
       <column name="id">e87648ae-45ff-4923-a066-3ee689712eb4</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">b0e674d6-6d36-4bdd-9226-05496af8bef1</column>
       <column name="priority">ALWAYS</column>
@@ -134,6 +154,8 @@
 
     <insert tableName="client_scopes">
       <column name="id">12b3072f-c64c-4c7a-98ff-b32dc7a6d402</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">463057d0-9117-4104-83c2-f621b2bc623a</column>
       <column name="priority">ALWAYS</column>
@@ -141,6 +163,8 @@
 
     <insert tableName="client_scopes">
       <column name="id">3c2329cd-47c8-4baa-8f76-14c8ff159638</column>
+      <column name="created" valueNumeric="${CREATED_TIME}"/>
+      <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">c6c42fce-323c-4682-94d0-885fbc13f0d4</column>
       <column name="priority">ALWAYS</column>
