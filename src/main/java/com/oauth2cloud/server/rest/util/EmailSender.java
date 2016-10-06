@@ -11,7 +11,7 @@ import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EmailSender {
+public abstract class EmailSender {
     private static final Logger LOG = Logger.getLogger(EmailSender.class.getName());
 
     /**

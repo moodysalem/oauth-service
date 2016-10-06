@@ -16,7 +16,6 @@ public class Environment {
     public static final int SMTP_PORT = getSmtpPort();
     public static final boolean SHOW_HIBERNATE_SQL = "true".equalsIgnoreCase(System.getProperty("SHOW_SQL"));
 
-
     private static int getSmtpPort() {
         // get the port configuration
         int port = 25;

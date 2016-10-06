@@ -14,7 +14,7 @@ public class ApplicationsTest extends OAuth2Test {
 
     @Test
     public void testGet() {
-        TokenResponse tr = getToken();
+        final TokenResponse tr = getToken();
 
         assert target(OAuth2Application.API_PATH).path("applications")
                 .request()
@@ -24,8 +24,8 @@ public class ApplicationsTest extends OAuth2Test {
 
     @Test
     public void testCreateAndEdit() {
-        TokenResponse tr = getToken();
-        String faviconUrl = "https://google.com/test.png";
+        final TokenResponse tr = getToken();
+        final String faviconUrl = "https://google.com/test.png";
         Application app = new Application();
         app.setName("Test App Creation");
         UUID id = UUID.randomUUID();

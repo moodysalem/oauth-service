@@ -1,9 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
-import com.oauth2cloud.server.hibernate.util.QueryUtil;
 import com.oauth2cloud.server.model.data.ErrorModel;
-import com.oauth2cloud.server.model.db.Client;
-import com.oauth2cloud.server.model.db.LoginCookie;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +9,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
 

@@ -57,7 +57,7 @@ public class TokenResponse {
     private String clientId;
 
     @JsonProperty("user")
-    private UserDetails user;
+    private UserInfo user;
 
     @JsonProperty("application_id")
     private UUID applicationId;
@@ -111,7 +111,7 @@ public class TokenResponse {
     }
 
     public void setUser(User user) {
-        this.user = UserDetails.from(user);
+        this.user = UserInfo.from(user);
     }
 
     public UUID getApplicationId() {
@@ -122,7 +122,7 @@ public class TokenResponse {
         this.applicationId = applicationId;
     }
 
-    public UserDetails getUser() {
+    public UserInfo getUser() {
         return user;
     }
 

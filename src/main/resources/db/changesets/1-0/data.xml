@@ -13,7 +13,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="name">OAuth2Cloud</column>
       <column name="description">OAuth2 as a service</column>
-      <column name="support_email">moody@oauth2cloud.com</column>
+      <column name="support_email">support@oauth2cloud.com</column>
       <column name="stylesheet_url">
         https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/cosmo/bootstrap.min.css
       </column>

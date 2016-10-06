@@ -9,9 +9,6 @@
   <property name="TEXT" dbms="mysql" value="LONGTEXT"/>
   <property name="TEXT" value="TEXT"/>
 
-  <property name="BOOLEAN" dbms="mysql" value="TINYINT(1)"/>
-  <property name="BOOLEAN" value="BOOLEAN"/>
-
   <property name="UUID_TYPE" value="CHAR(36)"/>
 
   <include file="1-0/schema.xml" relativeToChangelogFile="true"/>

@@ -372,7 +372,7 @@
       <column name="secret" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
-      <column name="remember_me" type="${BOOLEAN}">
+      <column name="remember_me" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
       <column name="user_id" type="${UUID_TYPE}">

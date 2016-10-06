@@ -16,8 +16,8 @@ import java.lang.annotation.RetentionPolicy;
 public class NoXFrameOptionsFeature implements DynamicFeature {
     @Priority(Priorities.HEADER_DECORATOR)
     public static class NoXFrameOptionsFilter implements ContainerResponseFilter {
-        public static final String X_FRAME_OPTIONS = "X-Frame-Options";
-        public static final String DENY = "DENY";
+        public static final String X_FRAME_OPTIONS = "X-Frame-Options",
+                DENY = "DENY";
 
         @Override
         public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext containerResponseContext)

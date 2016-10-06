@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.rest.util;
 
-import com.oauth2cloud.server.hibernate.util.QueryUtil;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
 
@@ -8,7 +7,7 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 
-public class CookieUtil {
+public abstract class CookieUtil {
     public static final String COOKIE_NAME_PREFIX = "_AID_";
 
     /**

@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.rest.util;
 
-public class UriUtil {
+public abstract class UriUtil {
     /**
      * Check that two URIs match enough per the OAuth2 spec
      *

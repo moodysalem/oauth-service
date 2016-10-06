@@ -1,4 +1,4 @@
-package com.oauth2cloud.server.hibernate.util;
+package com.oauth2cloud.server.rest.util;
 
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.*;

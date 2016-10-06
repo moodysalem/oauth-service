@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
-import com.oauth2cloud.server.hibernate.util.QueryUtil;
+import com.oauth2cloud.server.rest.util.QueryUtil;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.data.LoginStatusModel;
 import com.oauth2cloud.server.model.db.Client;

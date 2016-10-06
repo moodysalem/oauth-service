@@ -2,15 +2,10 @@ package com.oauth2cloud.server.model.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oauth2cloud.server.hibernate.util.QueryUtil;
 import com.oauth2cloud.server.rest.util.QueryString;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * The OAauth2 spec for an error response

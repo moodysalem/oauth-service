@@ -29,11 +29,11 @@ import java.util.stream.Stream;
  */
 @Provider
 public class TokenFilter implements DynamicFeature {
-    public static final String TOKEN = "TOKEN";
+    public static final String TOKEN = "TOKEN",
+            BEARER = "bearer ",
+            AUTHORIZATION_HEADER = "Authorization";
 
-    public static final String BEARER = "bearer ";
     public static final UUID APPLICATION_ID = UUID.fromString("9966e7e3-ac4f-4d8e-9710-2971450cb504");
-    public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Priority(Priorities.AUTHENTICATION)
     public static class ReadTokenFilter implements ContainerRequestFilter {
@@ -92,7 +92,8 @@ public class TokenFilter implements DynamicFeature {
      *
      * @param scope to check
      */
-    public static void checkScope(final ContainerRequestContext req, final String scope) {
+    public static void requireScope(final ContainerRequestContext req, final String scope) {
+        requireLoggedIn(req);
         if (!hasScope(req, scope)) {
             throw new RequestProcessingException(Response.Status.FORBIDDEN, String.format("'%s' scope is required for this resource.", scope));
         }
@@ -119,7 +120,7 @@ public class TokenFilter implements DynamicFeature {
         return getUser(req) != null;
     }
 
-    public static void mustBeLoggedIn(final ContainerRequestContext req) {
+    public static void requireLoggedIn(final ContainerRequestContext req) {
         if (!isLoggedIn(req)) {
             throw new RequestProcessingException(Response.Status.UNAUTHORIZED, "You must be logged in to access this resource.");
         }

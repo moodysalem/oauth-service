@@ -9,32 +9,26 @@ import java.util.UUID;
 /**
  * We only share and store e-mails and user ids
  */
-public class UserDetails {
-    public static UserDetails from(@NotNull User u) {
-        final UserDetails ud = new UserDetails();
-        ud.setEmail(u.getEmail());
-        ud.setUserId(u.getId());
-        return ud;
+public class UserInfo {
+    public UserInfo(@NotNull final UUID userId, @NotNull final String email) {
+        this.email = email;
+        this.userId = userId;
+    }
+
+    public static UserInfo from(@NotNull User u) {
+        return new UserInfo(u.getId(), u.getEmail());
     }
 
     @JsonProperty("email")
-    private String email;
+    private final String email;
     @JsonProperty("user_id")
-    private UUID userId;
+    private final UUID userId;
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public UUID getUserId() {
         return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
     }
 }

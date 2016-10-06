@@ -17,10 +17,10 @@ public class OAuth2Application extends BaseApplication {
     public static final String API_PATH = "api";
     public static final String OAUTH_PATH = "oauth";
 
-    private static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required";
-    private static final String PERSISTENCE_UNIT_NAME = "oauth-service";
-    private static final String DB_MASTER_CHANGELOG_XML_PATH = "db/changesets/master-changelog.xml";
-    private static final String ENTITY_MANAGER_FACTORY_NAME = "main-em";
+    private static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required",
+            PERSISTENCE_UNIT_NAME = "oauth-service",
+            DB_MASTER_CHANGELOG_XML_PATH = "db/changesets/master-changelog.xml",
+            ENTITY_MANAGER_FACTORY_NAME = "main-em";
 
     public OAuth2Application() {
         super();
