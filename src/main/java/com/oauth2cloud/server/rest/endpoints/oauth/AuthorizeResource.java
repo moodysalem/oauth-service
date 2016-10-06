@@ -12,10 +12,14 @@ import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
+import com.oauth2cloud.server.rest.util.CookieUtil;
+import com.oauth2cloud.server.rest.util.EmailSender;
+import com.oauth2cloud.server.rest.util.UriUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.codemonkey.simplejavamail.Mailer;
 import org.glassfish.jersey.server.mvc.Viewable;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -34,8 +38,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Produces(MediaType.TEXT_HTML)
 @Path(OAuth2Application.OAUTH_PATH + "/authorize")
 public class AuthorizeResource extends OAuthResource {
-    private static final String TOKEN = "token",
-            CODE = "code",
+    private static final String RESPONSE_TYPE_TOKEN = "token",
+            RESPONSE_TYPE_CODE = "code",
             SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Something went wrong. Please try again.",
             YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN = "Your login attempt has expired. Please try again.",
             INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES = "Invalid request. Please contact an administrator if this continues.";
@@ -50,69 +54,46 @@ public class AuthorizeResource extends OAuthResource {
     private static final String SCOPE_FORM_TOGGLE_NAME = "SCOPE",
             CHECKBOX_CHECKED_VALUE = "on";
 
+    // the type of response, token or code
     @QueryParam("response_type")
     private String responseType;
+    // the id of the client logging in
     @QueryParam("client_id")
     private String clientId;
+    // the uri to redirect to
     @QueryParam("redirect_uri")
     private String redirectUri;
+    // passed back to the client as a security measure at the end of authorize flows
     @QueryParam("state")
     private String state;
+    // space delimited string of scope names that are requested by the client-if omitted, all client scopes are requested
     @QueryParam("scope")
     private String scope;
-    private Set<String> scopes;
 
-    @PostConstruct
-    public void parseScope() {
+    // if the user is logging in via e-mail, this will be populated as a query parameter
+    @QueryParam("login_code")
+    private String loginCode;
+
+    // An extra query parameter that can be passed on to the GET request to log the user out if they are already logged in
+    @QueryParam("logout")
+    private boolean logout;
+
+    private Set<String> getScopes() {
         if (isBlank(scope)) {
-            scopes = Collections.emptySet();
+            return Collections.emptySet();
         } else {
-            scopes = Stream.of(scope.split(" "))
+            return Stream.of(scope.split(" "))
                     .filter(StringUtils::isNotBlank)
-                    .map(String::trim)
                     .collect(Collectors.toSet());
         }
     }
 
-    // if the user is logging in via e-mail, this will be populated
-    @QueryParam("login_code")
-    private String loginCode;
-
     /**
-     * An extra query parameter that can be passed on to the GET request to log the user out if they are already logged in
-     */
-    @QueryParam("logout")
-    private boolean logout;
-
-    /**
-     * Performing a GET on this path returns a 204 and logs the user out if the user is logged in
+     * Helper method that takes a LoginCookie and expires it
      *
-     * @return 204 response
+     * @param loginCookie to expire
      */
-    @GET
-    @Path("logout")
-    public Response logout() {
-        if (clientId == null) {
-            return error("'client_id' is a required query parameter to log out.");
-        }
-
-        final Client client = QueryUtil.getClient(em, clientId);
-        if (client == null) {
-            return error("Invalid client ID.");
-        }
-
-        QueryUtil.logCall(em, client, containerRequestContext);
-
-        final LoginCookie loginCookie = getLoginCookie(client);
-        expireLoginCookie(loginCookie);
-
-        return Response.noContent().build();
-    }
-
     private void expireLoginCookie(final LoginCookie loginCookie) {
-        if (loginCookie == null) {
-            return;
-        }
         try {
             TXHelper.withinTransaction(em, () -> {
                 loginCookie.setExpires(new Date());
@@ -129,17 +110,18 @@ public class AuthorizeResource extends OAuthResource {
      *
      * @param responseType either code or token
      * @param clientId     valid id of a client
-     * @param redirectUri  a URI that the client is allowed to redirect to
-     * @param scopes       a list of scopes that the client is requesting
+     * @param redirectUri  a uri that the client is allowed to redirect to
+     * @param scope        a string set of scopes
      * @return an error if anything is wrong with the aforementioned parameters, otherwise null
      */
-    private Response validateRequest(final String responseType, final String clientId, final String redirectUri, final Set<String> scopes) {
+    private Response validateRequest(final String responseType, final String clientId, final String redirectUri, final String scope) {
         // verify all the query parameters are passed
         if (isBlank(clientId) || isBlank(redirectUri) || isBlank(responseType)) {
             return error("Client ID, redirect URI, and response type are all required to log in.");
         }
 
-        if (!TOKEN.equalsIgnoreCase(responseType) && !CODE.equalsIgnoreCase(responseType)) {
+        if (!RESPONSE_TYPE_TOKEN.equalsIgnoreCase(responseType) &&
+                !RESPONSE_TYPE_CODE.equalsIgnoreCase(responseType)) {
             return error("Invalid response type. Must be one of 'token' or 'code'");
         }
 
@@ -163,7 +145,7 @@ public class AuthorizeResource extends OAuthResource {
             try {
                 final URI cUri = new URI(uri);
                 // scheme, host, and port must match
-                if (com.oauth2cloud.server.rest.util.URI.partialMatch(cUri, toRedirect)) {
+                if (UriUtil.partialMatch(cUri, toRedirect)) {
                     validRedirect = true;
                     break;
                 }
@@ -175,20 +157,22 @@ public class AuthorizeResource extends OAuthResource {
             return error("The redirect URI " + toRedirect.toString() + " is not allowed for this client.");
         }
 
-        if (TOKEN.equalsIgnoreCase(responseType)) {
+        if (RESPONSE_TYPE_TOKEN.equalsIgnoreCase(responseType)) {
             if (!client.getFlows().contains(GrantFlow.IMPLICIT)) {
                 return error("This client does not support the implicit grant flow.");
             }
         }
 
-        if (CODE.equalsIgnoreCase(responseType)) {
+        if (RESPONSE_TYPE_CODE.equalsIgnoreCase(responseType)) {
             if (!client.getFlows().contains(GrantFlow.CODE)) {
                 return error("This client does not support the code grant flow.");
             }
         }
 
+        final Set<String> scopes = getScopes();
+
         // verify all the requested scopes are available to the client
-        if (scopes != null && scopes.size() > 0) {
+        if (scopes != null && !scopes.isEmpty()) {
             final Set<String> scopeNames = client.getScopes().stream()
                     .map(ClientScope::getScope)
                     .map(Scope::getName)
@@ -213,23 +197,26 @@ public class AuthorizeResource extends OAuthResource {
     @GET
     @CORSFilter.Skip
     public Response auth() {
-        final Response error = validateRequest(responseType, clientId, redirectUri, scopes);
+        final Response error = validateRequest(responseType, clientId, redirectUri, scope);
         if (error != null) {
             return error;
         }
 
         final Client client = QueryUtil.getClient(em, clientId);
-        QueryUtil.logCall(em, client, containerRequestContext);
+        QueryUtil.logCall(em, client, req);
 
-        final LoginCookie loginCookie = getLoginCookie(client);
+        final LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, client);
+        // if we remember the user
         if (loginCookie != null) {
             if (logout) {
+                // forcing a log out, so expire the login cookie
                 expireLoginCookie(loginCookie);
             } else {
+                // return the handler for a succesful login
                 return getSuccessfulLoginResponse(
                         loginCookie.getUser(),
                         client,
-                        scopes,
+                        getScopes(),
                         redirectUri,
                         responseType,
                         state,
@@ -242,7 +229,7 @@ public class AuthorizeResource extends OAuthResource {
         lrm.setClient(client);
         lrm.setRedirectUri(redirectUri);
         lrm.setState(state);
-        lrm.setURLs(containerRequestContext);
+        lrm.setURLs(req);
 
         return Response.ok(new Viewable(TEMPLATES_AUTHORIZE, lrm)).build();
     }
@@ -259,7 +246,7 @@ public class AuthorizeResource extends OAuthResource {
     @CORSFilter.Skip
     public Response login(MultivaluedMap<String, String> formParams) {
         // validate the client id stuff again
-        final Response error = validateRequest(responseType, clientId, redirectUri, scopes);
+        final Response error = validateRequest(responseType, clientId, redirectUri, scope);
         if (error != null) {
             return error;
         }
@@ -277,7 +264,7 @@ public class AuthorizeResource extends OAuthResource {
 
         final Client client = QueryUtil.getClient(em, clientId);
 
-        QueryUtil.logCall(em, client, containerRequestContext);
+        QueryUtil.logCall(em, client, req);
 
         // this resource is used for a few different actions which are represented as hidden inputs in the forms
         // this is done so that the query string can be preserved across all requests without any special work
@@ -292,7 +279,7 @@ public class AuthorizeResource extends OAuthResource {
 
                 return getSuccessfulLoginResponse(
                         doGoogleLogin(client.getApplication(), googleToken),
-                        client, scopes, redirectUri, responseType, state, rememberMe
+                        client, getScopes(), redirectUri, responseType, state, rememberMe
                 );
 
             // handle the permissions action
@@ -309,7 +296,7 @@ public class AuthorizeResource extends OAuthResource {
 
         final LoginModel loginModel = new LoginModel();
         loginModel.setClient(client);
-        loginModel.setURLs(containerRequestContext);
+        loginModel.setURLs(req);
         loginModel.setState(state);
 
         if (isBlank(email)) {
@@ -329,7 +316,7 @@ public class AuthorizeResource extends OAuthResource {
 
         final LoginModel loginModel = new LoginModel();
         loginModel.setClient(client);
-        loginModel.setURLs(containerRequestContext);
+        loginModel.setURLs(req);
         loginModel.setState(state);
 
         // they just completed the second step of the login
@@ -342,7 +329,7 @@ public class AuthorizeResource extends OAuthResource {
                     loginModel.setLoginError(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
                 } else {
                     // first get all the client scopes we will try to approve or check if are approved
-                    final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
+                    final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, getScopes());
                     // we'll populate this as we loop through the scopes
                     final Set<AcceptedScope> tokenScopes = new HashSet<>();
                     // get all the scope ids that were explicitly granted
@@ -382,33 +369,40 @@ public class AuthorizeResource extends OAuthResource {
         return Response.ok(new Viewable(TEMPLATES_AUTHORIZE, loginModel)).build();
     }
 
+    @Inject
+    private Mailer mailer;
+    @Inject
+    private freemarker.template.Configuration cfg;
+
     private boolean sendLoginEmail(final Client client, final String email) {
         final User user = QueryUtil.findOrCreateUser(em, client.getApplication(), email);
         if (user == null) {
             return false;
         }
 
-        final LoginCode code = new LoginCode();
-        code.setClient(client);
-        code.setUser(user);
-        code.setExpires(new Date(System.currentTimeMillis() + (300L * 1000L)));
-        code.setResponseType(responseType);
-        code.setRedirectUri(redirectUri);
-        code.setCode(randomAlphanumeric(64));
-        code.setState(state);
-        code.setScopes(scopes);
-        try {
-            final LoginCode saved = TXHelper.withinTransaction(em, () -> em.merge(code));
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "failed to create login code", e);
-            return false;
+        final LoginCode saved;
+
+        {
+            final LoginCode code = new LoginCode();
+            code.setClient(client);
+            code.setUser(user);
+            code.setExpires(new Date(System.currentTimeMillis() + (300L * 1000L)));
+            code.setCode(randomAlphanumeric(64));
+
+            try {
+                saved = TXHelper.withinTransaction(em, () -> em.merge(code));
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "failed to create login code", e);
+                return false;
+            }
         }
 
-        sendEmail(
+        EmailSender.sendTemplateEmail(
+                mailer, cfg,
                 client.getApplication().getSupportEmail(), email,
                 String.format("Your login e-mail for %s - %s", client.getName(), client.getApplication().getName()),
                 "LoginEmail.ftl",
-                new LoginEmailModel(client, code)
+                new LoginEmailModel(client, saved, responseType, redirectUri, state, scope)
         );
 
         return true;
@@ -417,6 +411,13 @@ public class AuthorizeResource extends OAuthResource {
     private static final WebTarget GOOGLE_TOKEN_VALIDATE = ClientBuilder.newClient()
             .target("https://www.googleapis.com/oauth2/v1/tokeninfo");
 
+    /**
+     * Use a google token to log in as a google user
+     *
+     * @param application application to log in
+     * @param googleToken token from google
+     * @return User if successfully logged in
+     */
     private User doGoogleLogin(final Application application, final String googleToken) {
         if (application.getGoogleCredentials() == null) {
             throw new IllegalArgumentException(
@@ -481,7 +482,7 @@ public class AuthorizeResource extends OAuthResource {
             final Token token = QueryUtil.generatePermissionToken(em, user, client, redirectUri);
             final PermissionsModel permissionsModel = new PermissionsModel(token, toAsk, rememberMe);
             permissionsModel.setClient(client);
-            permissionsModel.setURLs(containerRequestContext);
+            permissionsModel.setURLs(req);
             permissionsModel.setState(state);
             permissionsModel.setRedirectUri(redirectUri);
             return Response.ok(new Viewable(TEMPLATES_PERMISSIONS, permissionsModel)).build();
@@ -507,13 +508,13 @@ public class AuthorizeResource extends OAuthResource {
      * @return the Token.TokenType that should be generated by the flow
      */
     private TokenType getTokenType(String responseType) {
-        return CODE.equalsIgnoreCase(responseType) ? TokenType.CODE : TokenType.ACCESS;
+        return RESPONSE_TYPE_CODE.equalsIgnoreCase(responseType) ? TokenType.CODE : TokenType.ACCESS;
     }
 
     /**
-     * Does the appropriate redirect based on the passed redirect URI and the token, always appending the state
+     * Does the appropriate redirect based on the passed redirect uri and the token, always appending the state
      *
-     * @param redirectUri URI passed by the client to redirect to
+     * @param redirectUri uri passed by the client to redirect to
      * @param state       state of the client upon sending to the authorize endpoint, returned in the redirect url
      * @param token       access or code token that was generated, depending on the type
      */
@@ -545,13 +546,13 @@ public class AuthorizeResource extends OAuthResource {
     @HeaderParam("X-Forwarded-Proto")
     private String forwardedProto;
 
-    private static final String IPV4_ADDRESS_REGEX = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$";
-    private static final String HTTPS = "HTTPS";
-    private static final String OAUTH2_CLOUD_LOGIN_COOKIE = "OAuth2 Cloud Login Cookie";
+    private static final String IPV4_ADDRESS_REGEX = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
+            HTTPS = "HTTPS",
+            OAUTH2_CLOUD_LOGIN_COOKIE = "OAuth2 Cloud Login Cookie";
 
     private NewCookie getNewCookie(final Token tkn, final Boolean rememberMe) {
         final Date expires;
-        LoginCookie loginCookie = getLoginCookie(tkn.getClient());
+        LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, tkn.getClient());
         if (loginCookie != null) {
             // we should re-use the same values
             expires = loginCookie.getExpires();
@@ -566,20 +567,21 @@ public class AuthorizeResource extends OAuthResource {
 
         final boolean isHTTPS = HTTPS.equalsIgnoreCase(forwardedProto);
 
-        String cookieDomain = containerRequestContext.getUriInfo().getBaseUri().getHost();
+        String cookieDomain = req.getUriInfo().getBaseUri().getHost();
         if (cookieDomain != null) {
             if (cookieDomain.matches(IPV4_ADDRESS_REGEX)) {
                 // don't put a domain on a cookie that is passed to an IP address
                 cookieDomain = null;
             } else {
                 // the domain should be the last two pieces of the domain name
-                String[] pieces = cookieDomain.split("\\.");
-                List<String> pcs = Arrays.asList(pieces);
-                cookieDomain = pcs.subList(Math.max(0, pcs.size() - 2), pcs.size()).stream().collect(Collectors.joining("."));
+                final List<String> pcs = Arrays.asList(cookieDomain.split("\\."));
+                cookieDomain = pcs.subList(Math.max(0, pcs.size() - 2), pcs.size())
+                        .stream()
+                        .collect(Collectors.joining("."));
             }
         }
 
-        return new NewCookie(getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", cookieDomain, NewCookie.DEFAULT_VERSION,
+        return new NewCookie(CookieUtil.getCookieName(tkn.getClient()), loginCookie.getSecret(), "/", cookieDomain, NewCookie.DEFAULT_VERSION,
                 OAUTH2_CLOUD_LOGIN_COOKIE, maxAge, expiry, isHTTPS, true);
     }
 

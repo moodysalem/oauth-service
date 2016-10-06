@@ -28,8 +28,8 @@ public class TokenInfoTest extends OAuth2Test {
         assert ti.getApplicationId().equals(APPLICATION_ID);
         assert ti.getClientId().equals(CLIENT_ID);
         assert ti.getTokenType().equalsIgnoreCase("bearer");
-        assert ti.getUserDetails() != null;
-        assert ti.getUserDetails().getEmail().equals("moody.salem@gmail.com");
+        assert ti.getUser() != null;
+        assert ti.getUser().getEmail().equals("moody.salem@gmail.com");
     }
 
 }

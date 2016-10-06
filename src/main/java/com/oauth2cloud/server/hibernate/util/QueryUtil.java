@@ -15,13 +15,20 @@ public abstract class QueryUtil {
     private static final Logger LOG = Logger.getLogger(QueryUtil.class.getName());
     private static final long FIVE_MINUTES = 1000 * 60 * 5;
 
-
-    public static CallLog logCall(final EntityManager em, final Client client, final ContainerRequestContext request) {
-        return logCall(em, client, null, request);
+    public static ClientCallLog logCall(final EntityManager em, final Client client, final ContainerRequestContext request) {
+        final CallLog cl = logCall(em, client, null, request);
+        if (cl instanceof ClientCallLog) {
+            return (ClientCallLog) cl;
+        }
+        return null;
     }
 
-    public static CallLog logCall(final EntityManager em, final Application application, final ContainerRequestContext request) {
-        return logCall(em, null, application, request);
+    public static ApplicationCallLog logCall(final EntityManager em, final Application application, final ContainerRequestContext request) {
+        final CallLog cl = logCall(em, null, application, request);
+        if (cl instanceof ApplicationCallLog) {
+            return (ApplicationCallLog) cl;
+        }
+        return null;
     }
 
     /**
@@ -35,24 +42,30 @@ public abstract class QueryUtil {
         if (client == null && application == null) {
             throw new NullPointerException();
         }
-        final CallLog cl = new CallLog();
+
+        final CallLog callLog;
+
         if (client != null) {
-            cl.setClient(client);
-            cl.setApplication(client.getApplication());
+            final ClientCallLog clientCallLog = new ClientCallLog();
+            clientCallLog.setClient(client);
+            callLog = clientCallLog;
         } else {
-            cl.setApplication(application);
+            final ApplicationCallLog applicationCallLog = new ApplicationCallLog();
+            applicationCallLog.setApplication(application);
+            callLog = applicationCallLog;
         }
+
         final String forwardedIp = request.getHeaderString("X-Forwaded-For");
         if (forwardedIp != null) {
-            cl.setIp(forwardedIp);
+            callLog.setIp(forwardedIp);
         } else {
-            cl.setIp("unknown");
+            callLog.setIp("unknown");
         }
-        cl.setPath(request.getUriInfo().getPath());
-        cl.setMethod(request.getMethod());
+        callLog.setPath(request.getUriInfo().getPath());
+        callLog.setMethod(request.getMethod());
 
         try {
-            return TXHelper.withinTransaction(em, () -> em.merge(cl));
+            return TXHelper.withinTransaction(em, () -> em.merge(callLog));
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to log a call", e);
             return null;

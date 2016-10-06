@@ -17,17 +17,16 @@ import java.util.logging.Logger;
  */
 @Converter
 public class EncryptedStringConverter implements AttributeConverter<String, String> {
-
     private static final Logger LOG = Logger.getLogger(EncryptedStringConverter.class.getName());
 
-    private static final String ENCRYPTION_SECRET = System.getProperty("ENCRYPTION_SECRET");
-    private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
+    private static final String ENCRYPTION_SECRET = System.getProperty("ENCRYPTION_SECRET"),
+            ALGORITHM = "AES/ECB/PKCS5Padding",
+            UTF_8 = "UTF-8";
+
     private static final byte[] KEY_STRING = ENCRYPTION_SECRET.getBytes();
     private static final Key KEY = new SecretKeySpec(KEY_STRING, "AES");
 
-    private static final Cipher ENCRYPTION_CIPHER;
-    private static final Cipher DECRYPTION_CIPHER;
-    private static final String UTF_8 = "UTF-8";
+    private static final Cipher ENCRYPTION_CIPHER, DECRYPTION_CIPHER;
 
     static {
         Cipher x = null, y = null;
@@ -53,7 +52,11 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
 
         try {
             return Base64.getEncoder()
-                    .encodeToString(ENCRYPTION_CIPHER.doFinal(toEncrypt.getBytes(UTF_8)));
+                    .encodeToString(
+                            ENCRYPTION_CIPHER.doFinal(
+                                    toEncrypt.getBytes(UTF_8)
+                            )
+                    );
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to encrypt database column", e);
             return null;
@@ -68,7 +71,10 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
 
         try {
             return new String(
-                    DECRYPTION_CIPHER.doFinal(Base64.getDecoder().decode(toDecrypt)),
+                    DECRYPTION_CIPHER.doFinal(
+                            Base64.getDecoder()
+                                    .decode(toDecrypt)
+                    ),
                     UTF_8
             );
         } catch (Exception e) {

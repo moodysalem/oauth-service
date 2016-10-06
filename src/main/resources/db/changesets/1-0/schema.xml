@@ -405,12 +405,6 @@
       <column name="ip" type="VARCHAR(50)">
         <constraints nullable="false"/>
       </column>
-      <column name="client_id" type="${UUID_TYPE}">
-        <constraints nullable="true"/>
-      </column>
-      <column name="application_id" type="${UUID_TYPE}">
-        <constraints nullable="true"/>
-      </column>
       <column name="path" type="${TEXT}">
         <constraints nullable="false"/>
       </column>
@@ -418,12 +412,47 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="call_log" baseColumnNames="client_id" constraintName="fk_call_log_client"
+  </changeSet>
+
+  <changeSet id="Client Call Log" author="moody.slaem">
+    <createTable tableName="client_call_log">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="client_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="client_call_log" baseColumnNames="id"
+                             constraintName="fk_client_call_log_cl"
+                             referencedTableName="call_log"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseTableName="client_call_log" baseColumnNames="client_id"
+                             constraintName="fk_client_call_log_client"
                              referencedTableName="clients"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="call_log" baseColumnNames="client_id"
-                             constraintName="fk_call_log_applications"
-                             referencedTableName="clients"
+  </changeSet>
+
+  <changeSet id="Application Call Log" author="moody.salem">
+    <createTable tableName="application_call_log">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="application_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="application_call_log" baseColumnNames="id"
+                             constraintName="fk_application_call_log_cl"
+                             referencedTableName="call_log"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseTableName="application_call_log" baseColumnNames="application_id"
+                             constraintName="fk_application_call_log_applications"
+                             referencedTableName="applications"
                              referencedColumnNames="id"/>
   </changeSet>
 

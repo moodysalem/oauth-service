@@ -2,7 +2,12 @@ package com.oauth2cloud.server.model.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oauth2cloud.server.hibernate.util.QueryUtil;
+import com.oauth2cloud.server.rest.util.QueryString;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,16 +48,18 @@ public class ErrorResponse {
 
     @Override
     public String toString() {
-        final Map<String, String> toConcatenate = new HashMap<>();
+        final MultivaluedMap<String, String> toConcatenate = new MultivaluedHashMap<>();
+
         if (getError() != null) {
-            toConcatenate.put("error", getError().name());
+            toConcatenate.putSingle("error", getError().name());
         }
         if (getErrorDescription() != null) {
-            toConcatenate.put("error_description", getErrorDescription());
+            toConcatenate.putSingle("error_description", getErrorDescription());
         }
         if (getErrorUri() != null) {
-            toConcatenate.put("error_uri", getErrorUri());
+            toConcatenate.putSingle("error_uri", getErrorUri());
         }
-        return toConcatenate.keySet().stream().map((k) -> k + "=" + toConcatenate.get(k)).collect(Collectors.joining("&"));
+
+        return QueryString.mapToQueryString(toConcatenate);
     }
 }

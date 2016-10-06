@@ -33,22 +33,22 @@ public class OAuth2Application extends BaseApplication {
                 // this is used to talk to the DB via JPA entity manager
                 bindFactory(
                         JAXRSEntityManagerFactory.builder(ENTITY_MANAGER_FACTORY_NAME)
-                                .withUrl(EnvironmentConfig.JDBC_CONNECTION_STRING)
-                                .withUser(EnvironmentConfig.JDBC_CONNECTION_USERNAME)
-                                .withPassword(EnvironmentConfig.JDBC_CONNECTION_PASSWORD)
+                                .withUrl(Environment.JDBC_CONNECTION_STRING)
+                                .withUser(Environment.JDBC_CONNECTION_USERNAME)
+                                .withPassword(Environment.JDBC_CONNECTION_PASSWORD)
                                 .withPersistenceUnit(PERSISTENCE_UNIT_NAME)
                                 .withChangelogFile(DB_MASTER_CHANGELOG_XML_PATH)
-                                .withShowSql(EnvironmentConfig.SHOW_HIBERNATE_SQL)
-                                .withContext(EnvironmentConfig.LIQUIBASE_CONTEXT)
+                                .withShowSql(Environment.SHOW_HIBERNATE_SQL)
+                                .withContext(Environment.LIQUIBASE_CONTEXT)
                                 .build()
                 ).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // create the mailer that uses amazon
                 final Mailer mailer = new Mailer(
-                        EnvironmentConfig.SMTP_HOST,
-                        EnvironmentConfig.SMTP_PORT,
-                        EnvironmentConfig.SMTP_USERNAME,
-                        EnvironmentConfig.SMTP_PASSWORD,
+                        Environment.SMTP_HOST,
+                        Environment.SMTP_PORT,
+                        Environment.SMTP_USERNAME,
+                        Environment.SMTP_PASSWORD,
                         TransportStrategy.SMTP_TLS
                 );
 

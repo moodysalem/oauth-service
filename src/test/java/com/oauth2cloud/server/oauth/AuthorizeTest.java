@@ -23,7 +23,7 @@ public class AuthorizeTest extends OAuth2Test {
             .request()
             .get().getStatus() == 400;
 
-        // invalid redirect URI
+        // invalid redirect uri
         assert target(OAuth2Application.OAUTH_PATH).path("authorize")
             .queryParam("client_id", CLIENT_ID)
             .queryParam("redirect_uri", "http://localhost:8081")

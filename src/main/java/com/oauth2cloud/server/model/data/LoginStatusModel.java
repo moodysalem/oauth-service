@@ -4,7 +4,7 @@ import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.LoginCookie;
 
 public class LoginStatusModel {
-    public LoginStatusModel(LoginCookie loginCookie, String targetOrigin, TokenResponse tokenResponse) {
+    public LoginStatusModel(final LoginCookie loginCookie, final String targetOrigin, final TokenResponse tokenResponse) {
         this.loginCookie = loginCookie;
         this.targetOrigin = targetOrigin;
         this.tokenResponse = tokenResponse;

@@ -3,6 +3,7 @@ package com.oauth2cloud.server.oauth;
 import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.endpoints.oauth.OAuthResource;
+import com.oauth2cloud.server.rest.util.CookieUtil;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.WebTarget;
@@ -26,7 +27,7 @@ public class TestGetLoginStatus extends OAuth2Test {
 
         assert wtCid.request()
             .header("Referer", "https://oauth2cloud.com")
-            .header("Cookie", OAuthResource.COOKIE_NAME_PREFIX + APPLICATION_ID + "=abc").get().getStatus() == 200;
+            .header("Cookie", CookieUtil.COOKIE_NAME_PREFIX + APPLICATION_ID + "=abc").get().getStatus() == 200;
     }
 
 

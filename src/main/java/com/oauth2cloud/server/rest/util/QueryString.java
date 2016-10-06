@@ -7,10 +7,10 @@ import java.util.logging.Logger;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public abstract class QS {
+public abstract class QueryString {
     /**
      * Helper function that converts a map to its query string representation. This is used when setting the fragment
-     * in the response URI of a token grant flow
+     * in the response uri of a token grant flow
      *
      * @param map of parameters to generate the query string for
      * @return a query string style representation of the map

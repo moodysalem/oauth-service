@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oauth2cloud.server.model.db.Token;
 import com.oauth2cloud.server.model.db.TokenType;
 import com.oauth2cloud.server.model.db.User;
-import com.oauth2cloud.server.rest.util.QS;
+import com.oauth2cloud.server.rest.util.QueryString;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -56,8 +56,8 @@ public class TokenResponse {
     @JsonProperty("client_id")
     private String clientId;
 
-    @JsonProperty("user_details")
-    private UserDetails userDetails;
+    @JsonProperty("user")
+    private UserDetails user;
 
     @JsonProperty("application_id")
     private UUID applicationId;
@@ -111,7 +111,7 @@ public class TokenResponse {
     }
 
     public void setUser(User user) {
-        this.userDetails = UserDetails.from(user);
+        this.user = UserDetails.from(user);
     }
 
     public UUID getApplicationId() {
@@ -122,8 +122,8 @@ public class TokenResponse {
         this.applicationId = applicationId;
     }
 
-    public UserDetails getUserDetails() {
-        return userDetails;
+    public UserDetails getUser() {
+        return user;
     }
 
     public String toFragment(final String state) {
@@ -137,6 +137,6 @@ public class TokenResponse {
         params.putSingle("expires_in", Long.toString(getExpiresIn()));
         params.putSingle("scope", scope);
 
-        return QS.mapToQueryString(params);
+        return QueryString.mapToQueryString(params);
     }
 }

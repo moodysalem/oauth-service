@@ -10,6 +10,8 @@ import com.oauth2cloud.server.model.db.Token;
 import com.oauth2cloud.server.model.db.TokenType;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
+import com.oauth2cloud.server.rest.util.CookieUtil;
+import com.oauth2cloud.server.rest.util.UriUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
 
@@ -18,6 +20,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+
+import static com.oauth2cloud.server.model.db.Token.getExpires;
 
 @Produces(MediaType.TEXT_HTML)
 @Path(OAuth2Application.OAUTH_PATH + "/loginstatus")
@@ -46,7 +50,7 @@ public class GetLoginStatus extends OAuthResource {
             return error("Invalid client ID.");
         }
 
-        QueryUtil.logCall(em, client, containerRequestContext);
+        QueryUtil.logCall(em, client, req);
 
         if (referrer == null) {
             return error("This page must be accessed from inside an iframe.");
@@ -55,11 +59,11 @@ public class GetLoginStatus extends OAuthResource {
         boolean validReferrer = false;
         String referrerOrigin = null;
         try {
-            URI u = new URI(referrer);
-            for (String uri : client.getUris()) {
+            final URI u = new URI(referrer);
+            for (final String uri : client.getUris()) {
                 try {
-                    URI u2 = new URI(uri);
-                    if (com.oauth2cloud.server.rest.util.URI.partialMatch(u2, u)) {
+                    final URI u2 = new URI(uri);
+                    if (UriUtil.partialMatch(u2, u)) {
                         validReferrer = true;
                         // remove the path
                         referrerOrigin = UriBuilder
@@ -80,7 +84,7 @@ public class GetLoginStatus extends OAuthResource {
             return error("Invalid referrer.");
         }
 
-        final LoginCookie loginCookie = getLoginCookie(client);
+        final LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, client);
 
         TokenResponse tokenResponse = null;
         if (loginCookie != null) {
