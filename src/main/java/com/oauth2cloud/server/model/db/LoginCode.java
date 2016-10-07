@@ -33,8 +33,9 @@ public class LoginCode extends BaseEntity {
     @Column(name = "code", updatable = false)
     private String code;
 
+    @NotNull
     @Column(name = "remember_me", updatable = false)
-    private boolean rememberMe;
+    private Boolean rememberMe;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -54,7 +55,7 @@ public class LoginCode extends BaseEntity {
     private String state;
 
     @Column(name = "used")
-    private boolean used;
+    private Boolean used;
 
     public Client getClient() {
         return client;
@@ -120,19 +121,19 @@ public class LoginCode extends BaseEntity {
         this.scope = scope;
     }
 
-    public boolean isRememberMe() {
+    public Boolean getRememberMe() {
         return rememberMe;
     }
 
-    public void setRememberMe(boolean rememberMe) {
+    public void setRememberMe(Boolean rememberMe) {
         this.rememberMe = rememberMe;
     }
 
-    public boolean isUsed() {
+    public Boolean getUsed() {
         return used;
     }
 
-    public void setUsed(boolean used) {
+    public void setUsed(Boolean used) {
         this.used = used;
     }
 }

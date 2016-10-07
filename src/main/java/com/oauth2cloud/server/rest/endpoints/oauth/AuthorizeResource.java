@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import static com.oauth2cloud.server.rest.util.EmailSender.sendTemplateEmail;
 import static com.oauth2cloud.server.rest.util.OAuthUtil.badRequest;
 import static com.oauth2cloud.server.rest.util.OAuthUtil.validateRequest;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -276,9 +277,13 @@ public class AuthorizeResource extends BaseResource {
         return QueryUtil.findOrCreateUser(em, application, email);
     }
 
-    private LoginCode makeCode(final EntityManager em,
-                               final User user, final Client client, final String scope, final String redirectUri,
-                               final String responseType, final String state, final boolean rememberMe) {
+    private static final long FIVE_MINUTES = 1000L * 60L * 5L;
+
+    private LoginCode makeCode(
+            final EntityManager em,
+            final User user, final Client client, final String scope, final String redirectUri,
+            final String responseType, final String state, final boolean rememberMe
+    ) {
         final LoginCode loginCode = new LoginCode();
 
         loginCode.setUser(user);
@@ -288,6 +293,10 @@ public class AuthorizeResource extends BaseResource {
         loginCode.setResponseType(ResponseType.valueOf(responseType));
         loginCode.setState(state);
         loginCode.setRememberMe(rememberMe);
+
+        loginCode.setCode(randomAlphanumeric(128));
+        loginCode.setExpires(new Date(System.currentTimeMillis() + FIVE_MINUTES));
+        loginCode.setUsed(false);
 
         try {
             return TXHelper.withinTransaction(em, () -> em.merge(loginCode));
