@@ -3,8 +3,10 @@ package com.oauth2cloud.server;
 import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.moodysalem.jaxrs.lib.test.BaseTest;
+import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
+import com.oauth2cloud.server.rest.Environment;
 import com.oauth2cloud.server.rest.OAuth2Application;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
@@ -60,6 +62,7 @@ public class OAuth2Test extends BaseTest {
             }
         };
 
+        EncryptedStringConverter.init("xTUf4mP2SI6nfeLO");
         ba.packages("com.oauth2cloud.server.rest");
 
         ba.register(new AbstractBinder() {
@@ -91,8 +94,6 @@ public class OAuth2Test extends BaseTest {
             }
         });
 
-        System.setProperty("ENCRYPTION_SECRET", "xTUf4mP2SI6nfeLO");
-
         return ba;
     }
 
@@ -111,7 +112,7 @@ public class OAuth2Test extends BaseTest {
         up.param("email", email)
                 .param("action", "login");
 
-        Response loginScreen = target(OAuth2Application.OAUTH_PATH)
+        final Response loginScreen = target(OAuth2Application.OAUTH_PATH)
                 .property(ClientProperties.FOLLOW_REDIRECTS, false)
                 .path("authorize")
                 .queryParam("client_id", CLIENT_ID)
@@ -122,17 +123,17 @@ public class OAuth2Test extends BaseTest {
 
         assert loginScreen.getStatus() == 302;
 
-        String loc = loginScreen.getHeaderString("Location");
+        final String location = loginScreen.getHeaderString("Location");
 
         try {
-            URI u = new URI(loc);
+            final URI u = new URI(location);
 
-            MultivaluedMap<String, String> values = new MultivaluedHashMap<>();
-            TokenResponse tr = new TokenResponse();
-            String frag = u.getFragment();
-            String[] pcs = frag.split(Pattern.quote("&"));
-            for (String pair : pcs) {
-                String[] nv = pair.split(Pattern.quote("="));
+            final MultivaluedMap<String, String> values = new MultivaluedHashMap<>();
+            final TokenResponse tr = new TokenResponse();
+            final String frag = u.getFragment();
+            final String[] pcs = frag.split(Pattern.quote("&"));
+            for (final String pair : pcs) {
+                final String[] nv = pair.split(Pattern.quote("="));
                 if (nv.length == 2) {
                     values.putSingle(
                             URLDecoder.decode(nv[0], "UTF-8"),

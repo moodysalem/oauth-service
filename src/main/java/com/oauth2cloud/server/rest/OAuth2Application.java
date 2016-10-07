@@ -2,6 +2,7 @@ package com.oauth2cloud.server.rest;
 
 import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
+import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
 import org.codemonkey.simplejavamail.TransportStrategy;
@@ -14,8 +15,7 @@ import java.util.Properties;
 
 @ApplicationPath("/")
 public class OAuth2Application extends BaseApplication {
-    public static final String API_PATH = "api";
-    public static final String OAUTH_PATH = "oauth";
+    public static final String API_PATH = "api", OAUTH_PATH = "oauth";
 
     private static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required",
             PERSISTENCE_UNIT_NAME = "oauth-service",
@@ -25,11 +25,14 @@ public class OAuth2Application extends BaseApplication {
     public OAuth2Application() {
         super();
 
+
         packages("com.oauth2cloud.server.rest");
 
         register(new AbstractBinder() {
             @Override
             protected void configure() {
+                EncryptedStringConverter.init(Environment.ENCRYPTION_SECRET);
+
                 // this is used to talk to the DB via JPA entity manager
                 bindFactory(
                         JAXRSEntityManagerFactory.builder(ENTITY_MANAGER_FACTORY_NAME)

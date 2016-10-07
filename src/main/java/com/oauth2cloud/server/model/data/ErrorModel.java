@@ -1,5 +1,8 @@
 package com.oauth2cloud.server.model.data;
 
+/**
+ * This model is used in the Error.ftl template
+ */
 public class ErrorModel implements HeadProperties {
     @Override
     public String getStylesheetUrl() {

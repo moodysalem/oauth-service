@@ -2,19 +2,13 @@ package com.oauth2cloud.server.hibernate.converter;
 
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter.*;
+import static org.testng.Assert.assertEquals;
 
 public class EncryptedStringConverterTest {
-
-    private final EncryptedStringConverter ecs = new EncryptedStringConverter();
-
     @Test
-    public void testConvertToDatabaseColumn() throws Exception {
+    public void testEncryption() throws Exception {
+        init("xTUf4mP2SI6nfeLO");
+        assertEquals(decrypt(encrypt("hello")), "hello");
     }
-
-    @Test
-    public void testConvertToEntityAttribute() throws Exception {
-
-    }
-
 }

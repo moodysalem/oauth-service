@@ -13,7 +13,13 @@ import javax.ws.rs.core.MultivaluedMap;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
     public enum Type {
-        invalid_request, invalid_client, invalid_grant, unauthorized_client, unsupported_grant_type, invalid_scope, access_denied
+        invalid_request,
+        invalid_client,
+        invalid_grant,
+        unauthorized_client,
+        unsupported_grant_type,
+        invalid_scope,
+        access_denied
     }
 
     @JsonProperty("error")
@@ -23,7 +29,7 @@ public class ErrorResponse {
     @JsonProperty("error_uri")
     private final String errorUri;
 
-    public ErrorResponse(Type error, String errorDescription, String errorUri) {
+    public ErrorResponse(final Type error, final String errorDescription, final String errorUri) {
         this.error = error;
         this.errorDescription = errorDescription;
         this.errorUri = errorUri;
@@ -41,8 +47,7 @@ public class ErrorResponse {
         return error;
     }
 
-    @Override
-    public String toString() {
+    public String toFragment() {
         final MultivaluedMap<String, String> toConcatenate = new MultivaluedHashMap<>();
 
         if (getError() != null) {

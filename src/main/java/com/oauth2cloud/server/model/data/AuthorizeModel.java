@@ -42,13 +42,13 @@ public abstract class AuthorizeModel implements HeadProperties {
 
     private String getFragment(final ErrorResponse er) {
         if (getState() == null || getState().length() == 0) {
-            return er.toString();
+            return er.toFragment();
         }
 
         if (er == null) {
             return "state=" + getState();
         } else {
-            return er.toString() + "&state=" + getState();
+            return er.toFragment() + "&state=" + getState();
         }
     }
 

@@ -25,7 +25,7 @@ import static com.oauth2cloud.server.model.db.Token.getExpires;
 
 @Produces(MediaType.TEXT_HTML)
 @Path(OAuth2Application.OAUTH_PATH + "/loginstatus")
-public class GetLoginStatus extends OAuthResource {
+public class GetLoginStatus extends BaseResource {
 
     /**
      * This endpoint returns a page that uses HTML5 window.postMessage to send information to the

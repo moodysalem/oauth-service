@@ -11,7 +11,8 @@ public class Environment {
             SMTP_USERNAME = System.getProperty("SMTP_USERNAME"),
             SMTP_PASSWORD = System.getProperty("SMTP_PASSWORD"),
             LIQUIBASE_CONTEXT = System.getProperty("LIQUIBASE_CONTEXT", "prod"),
-            SEND_EMAILS_FROM = System.getProperty("SEND_EMAILS_FROM", "admin@oauth2cloud.com");
+            SEND_EMAILS_FROM = System.getProperty("SEND_EMAILS_FROM", "admin@oauth2cloud.com"),
+            ENCRYPTION_SECRET = System.getProperty("ENCRYPTION_SECRET");
 
     public static final int SMTP_PORT = getSmtpPort();
     public static final boolean SHOW_HIBERNATE_SQL = "true".equalsIgnoreCase(System.getProperty("SHOW_SQL"));

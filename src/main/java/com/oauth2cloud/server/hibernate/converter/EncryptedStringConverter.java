@@ -18,34 +18,22 @@ import java.util.logging.Logger;
 @Converter
 public class EncryptedStringConverter implements AttributeConverter<String, String> {
     private static final Logger LOG = Logger.getLogger(EncryptedStringConverter.class.getName());
+    private static final String ALGORITHM = "AES/ECB/PKCS5Padding", UTF_8 = "UTF-8";
+    private static Cipher ENCRYPTION_CIPHER, DECRYPTION_CIPHER;
 
-    private static final String ENCRYPTION_SECRET = System.getProperty("ENCRYPTION_SECRET"),
-            ALGORITHM = "AES/ECB/PKCS5Padding",
-            UTF_8 = "UTF-8";
-
-    private static final byte[] KEY_STRING = ENCRYPTION_SECRET.getBytes();
-    private static final Key KEY = new SecretKeySpec(KEY_STRING, "AES");
-
-    private static final Cipher ENCRYPTION_CIPHER, DECRYPTION_CIPHER;
-
-    static {
-        Cipher x = null, y = null;
-
+    public synchronized static void init(final String secret) {
+        final Key secretKey = new SecretKeySpec(secret.getBytes(), "AES");
         try {
-            x = Cipher.getInstance(ALGORITHM);
-            x.init(Cipher.ENCRYPT_MODE, KEY);
-            y = Cipher.getInstance(ALGORITHM);
-            y.init(Cipher.DECRYPT_MODE, KEY);
+            ENCRYPTION_CIPHER = Cipher.getInstance(ALGORITHM);
+            ENCRYPTION_CIPHER.init(Cipher.ENCRYPT_MODE, secretKey);
+            DECRYPTION_CIPHER = Cipher.getInstance(ALGORITHM);
+            DECRYPTION_CIPHER.init(Cipher.DECRYPT_MODE, secretKey);
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to get algorithm", e);
+            throw new RuntimeException(e);
         }
-
-        ENCRYPTION_CIPHER = x == null ? null : x;
-        DECRYPTION_CIPHER = y == null ? null : y;
     }
 
-    @Override
-    public String convertToDatabaseColumn(String toEncrypt) {
+    public static String encrypt(final String toEncrypt) {
         if (toEncrypt == null) {
             return null;
         }
@@ -59,12 +47,11 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
                     );
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to encrypt database column", e);
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public String convertToEntityAttribute(String toDecrypt) {
+    public static String decrypt(final String toDecrypt) {
         if (toDecrypt == null) {
             return null;
         }
@@ -79,8 +66,18 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
             );
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to decrypt database column", e);
-            return null;
+            throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String convertToDatabaseColumn(final String toEncrypt) {
+        return encrypt(toEncrypt);
+    }
+
+    @Override
+    public String convertToEntityAttribute(final String toDecrypt) {
+        return decrypt(toDecrypt);
     }
 }
 

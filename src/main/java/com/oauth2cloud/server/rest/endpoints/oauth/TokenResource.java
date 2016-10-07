@@ -29,13 +29,13 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Path(OAuth2Application.OAUTH_PATH + "/token")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-public class TokenResource extends OAuthResource {
+public class TokenResource extends BaseResource {
 
     private static final String BASIC = "Basic ";
     private static final int BASIC_LENGTH = BASIC.length();
     private static final Charset UTF8 = Charset.forName("UTF-8");
-    private static final String AUTHORIZATION_CODE = "authorization_code";
-    private static final String PASSWORD = "password",
+    private static final String AUTHORIZATION_CODE = "authorization_code",
+            PASSWORD = "password",
             CLIENT_CREDENTIALS = "client_credentials",
             REFRESH_TOKEN = "refresh_token",
             TEMPORARY_TOKEN = "temporary_token";
@@ -51,13 +51,13 @@ public class TokenResource extends OAuthResource {
         super.init();
         if (authorizationHeader != null) {
             if (authorizationHeader.startsWith(BASIC)) {
-                String credentials = authorizationHeader.substring(BASIC_LENGTH);
-                String decoded = new String(Base64.getDecoder().decode(credentials.getBytes(UTF8)), UTF8);
-                String[] pieces = decoded.split(":");
+                final String credentials = authorizationHeader.substring(BASIC_LENGTH);
+                final String decoded = new String(Base64.getDecoder().decode(credentials.getBytes(UTF8)), UTF8);
+                final String[] pieces = decoded.split(":");
                 if (pieces.length == 2) {
-                    String clientId = pieces[0].trim();
-                    String secret = pieces[1].trim();
-                    Client tempClient = QueryUtil.getClient(em, clientId);
+                    final String clientId = pieces[0].trim();
+                    final String secret = pieces[1].trim();
+                    final Client tempClient = QueryUtil.getClient(em, clientId);
                     if (tempClient != null && secret.equals(tempClient.getCredentials().getSecret())) {
                         client = tempClient;
                     }
