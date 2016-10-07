@@ -22,6 +22,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 import static com.oauth2cloud.server.model.db.Token.getExpires;
+import static com.oauth2cloud.server.rest.util.OAuthUtil.badRequest;
 
 @Produces(MediaType.TEXT_HTML)
 @Path(OAuth2Application.OAUTH_PATH + "/loginstatus")
@@ -41,19 +42,19 @@ public class GetLoginStatus extends BaseResource {
     public Response get(@QueryParam("client_id") String clientId,
                         @HeaderParam("Referer") String referrer) {
         if (StringUtils.isBlank(clientId)) {
-            return error("'client_id' parameter is required to check login status.");
+            return badRequest("'client_id' parameter is required to check login status.");
         }
 
         final Client client = QueryUtil.getClient(em, clientId);
 
         if (client == null) {
-            return error("Invalid client ID.");
+            return badRequest("Invalid client ID.");
         }
 
         QueryUtil.logCall(em, client, req);
 
         if (referrer == null) {
-            return error("This page must be accessed from inside an iframe.");
+            return badRequest("This page must be accessed from inside an iframe.");
         }
 
         boolean validReferrer = false;
@@ -81,7 +82,7 @@ public class GetLoginStatus extends BaseResource {
         }
 
         if (!validReferrer) {
-            return error("Invalid referrer.");
+            return badRequest("Invalid referrer.");
         }
 
         final LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, client);
