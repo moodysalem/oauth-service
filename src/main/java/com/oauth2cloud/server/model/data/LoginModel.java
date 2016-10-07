@@ -5,7 +5,6 @@ package com.oauth2cloud.server.model.data;
  */
 public class LoginModel extends AuthorizeModel {
     private boolean sentEmail;
-    private String loginError;
 
     public boolean isSentEmail() {
         return sentEmail;
@@ -13,14 +12,6 @@ public class LoginModel extends AuthorizeModel {
 
     public void setSentEmail(boolean sentEmail) {
         this.sentEmail = sentEmail;
-    }
-
-    public String getLoginError() {
-        return loginError;
-    }
-
-    public void setLoginError(String loginError) {
-        this.loginError = loginError;
     }
 
     @Override

@@ -14,11 +14,11 @@ import org.codemonkey.simplejavamail.Mailer;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.logging.Level;
@@ -86,6 +86,7 @@ public class AuthorizeResource extends BaseResource {
             } else {
                 // return the handler for a succesful login
                 final LoginCode loginCode = makeCode(
+                        em,
                         loginCookie.getUser(), client, scope, redirectUri,
                         responseType, state, loginCookie.isRememberMe()
                 );
@@ -93,13 +94,13 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        final LoginModel lrm = new LoginModel();
-        lrm.setClient(client);
-        lrm.setRedirectUri(redirectUri);
-        lrm.setState(state);
-        lrm.setURLs(req);
+        final LoginModel loginModel = new LoginModel();
+        loginModel.setClient(client);
+        loginModel.setRedirectUri(redirectUri);
+        loginModel.setState(state);
+        loginModel.setURLs(req);
 
-        return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, lrm)).build();
+        return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, loginModel)).build();
     }
 
     private Response loginCodeRedirect(final LoginCode loginCode) {
@@ -139,38 +140,57 @@ public class AuthorizeResource extends BaseResource {
         final Client client = QueryUtil.getClient(em, clientId);
         QueryUtil.logCall(em, client, req);
 
+        final boolean remember = "on".equals(rememberMe);
+
         // this resource is used for a few different actions which are represented as hidden inputs in the forms
         // this is done so that the query string can be preserved across all requests without any special work
         switch (action) {
             // handle the login action
-            case EMAIL_LOGIN_ACTION:
-                return handleEmailLogin(client, email);
+            case "email-login": {
+                if (isBlank(email)) {
+                    return badRequest("Invalid e-mail address");
+                }
 
-            // handle a login via google token
-            case GOOGLE_LOGIN_ACTION:
-                return makeCode(doGoogleLogin(client.getApplication(), googleToken));
+                final User user = QueryUtil.findOrCreateUser(em, client.getApplication(), email);
+                if (user == null) {
+                    return badRequest("Failed to find or create user with provided e-mail address");
+                }
 
+                sendLoginCode(
+                        makeCode(
+                                em,
+                                user, client, scope, redirectUri,
+                                responseType, state, remember
+                        )
+                );
+
+
+                final LoginModel loginModel = new LoginModel();
+                loginModel.setClient(client);
+                loginModel.setRedirectUri(redirectUri);
+                loginModel.setState(state);
+                loginModel.setURLs(req);
+                loginModel.setSentEmail(true);
+
+                return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, loginModel)).build();
+            }
+
+            case "google-login": {
+                final User user = doGoogleLogin(client.getApplication(), googleToken);
+                if (user == null) {
+                    return badRequest("Invalid google token");
+                }
+
+                final LoginCode loginCode = makeCode(
+                        em,
+                        user, client, scope, redirectUri,
+                        responseType, state, remember
+                );
+                return loginCodeRedirect(loginCode);
+            }
             default:
                 return badRequest(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
-    }
-
-    private Response handleEmailLogin(final Client client, final MultivaluedMap<String, String> formParams) {
-        final String email = formParams.getFirst("email");
-
-        final LoginModel loginModel = new LoginModel();
-        loginModel.setClient(client);
-        loginModel.setURLs(req);
-        loginModel.setState(state);
-
-        if (isBlank(email)) {
-            loginModel.setLoginbadRequest("Invalid e-mail address provided");
-        } else {
-            sendLoginCode(client, email);
-            loginModel.setSentEmail(true);
-        }
-
-        return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, loginModel)).build();
     }
 
 
@@ -256,8 +276,24 @@ public class AuthorizeResource extends BaseResource {
         return QueryUtil.findOrCreateUser(em, application, email);
     }
 
-    private LoginCode makeCode(final User user, final Client client, final String scope, final String redirectUri,
+    private LoginCode makeCode(final EntityManager em,
+                               final User user, final Client client, final String scope, final String redirectUri,
                                final String responseType, final String state, final boolean rememberMe) {
-        throw new UnsupportedOperationException();
+        final LoginCode loginCode = new LoginCode();
+
+        loginCode.setUser(user);
+        loginCode.setClient(client);
+        loginCode.setScope(scope);
+        loginCode.setRedirectUri(redirectUri);
+        loginCode.setResponseType(ResponseType.valueOf(responseType));
+        loginCode.setState(state);
+        loginCode.setRememberMe(rememberMe);
+
+        try {
+            return TXHelper.withinTransaction(em, () -> em.merge(loginCode));
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "failed to create login code", e);
+            return null;
+        }
     }
 }
