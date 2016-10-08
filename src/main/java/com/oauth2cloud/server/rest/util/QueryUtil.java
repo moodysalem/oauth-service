@@ -231,10 +231,12 @@ public abstract class QueryUtil {
             return null;
         }
 
+        final List<Client> all = QueryHelper.query(em,Client.class, (client) -> null);
+
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        final List<Client> clients = QueryHelper.query(em, Client.class, (root) ->
-                cb.equal(root.join(Client_.credentials).get(ClientCredentials_.id), clientId));
+        final List<Client> clients = QueryHelper.query(em, Client.class, (client) ->
+                cb.equal(client.join(Client_.credentials).get(ClientCredentials_.id), clientId));
         return (clients.size() != 1) ? null : clients.get(0);
     }
 

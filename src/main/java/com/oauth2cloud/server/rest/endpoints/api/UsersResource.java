@@ -4,7 +4,6 @@ import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.model.db.Application_;
 import com.oauth2cloud.server.model.db.User;
 import com.oauth2cloud.server.model.db.User_;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 

@@ -47,8 +47,8 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="name">Administration</column>
       <column name="confidential" valueBoolean="FALSE"/>
-      <column name="identifier">6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4</column>
-      <column name="secret">0457a1fe452b7f32e4b84db9db139d9a572bad7599544ac368a079bbe8069714</column>
+      <column name="identifier" valueComputed="''"/>
+      <column name="secret" valueComputed="''"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="token_ttl">86400</column>
       <column name="creator_id">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>

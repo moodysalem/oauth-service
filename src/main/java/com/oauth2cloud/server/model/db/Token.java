@@ -2,6 +2,7 @@ package com.oauth2cloud.server.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.VersionedEntity;
+import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
@@ -21,6 +22,7 @@ public class Token extends VersionedEntity {
     private Token refreshToken;
 
     @Column(name = "token", updatable = false)
+    @Convert(converter = EncryptedStringConverter.class)
     private String token;
 
     @ManyToOne

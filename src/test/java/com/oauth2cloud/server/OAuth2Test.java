@@ -5,6 +5,7 @@ import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.moodysalem.jaxrs.lib.test.BaseTest;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import com.oauth2cloud.server.model.api.TokenResponse;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
@@ -69,7 +70,7 @@ public class OAuth2Test extends BaseTest {
                 if (jrem == null) {
                     jrem = JAXRSEntityManagerFactory.builder("main-em")
                             .withUrl(System.getProperty("localdb") != null ?
-                                    String.format("jdbc:mysql://localhost:3306/scratch", System.getProperty("localdb")) :
+                                    String.format("jdbc:mysql://localhost:3306/%s", System.getProperty("localdb")) :
                                     "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
                             )
                             .withUser("root")
@@ -79,6 +80,8 @@ public class OAuth2Test extends BaseTest {
                             .withContext("test")
                             .build();
                 }
+
+                OAuth2Application.initializeDefaultClientCredentials(jrem);
 
                 // this is used to talk to the DB via JPA entity manager
                 bindFactory(jrem).to(EntityManager.class).in(RequestScoped.class).proxy(true);

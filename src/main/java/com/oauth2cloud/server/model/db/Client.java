@@ -28,8 +28,8 @@ public class Client extends VersionedEntity {
     @Valid
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "id", column = @Column(name = "identifier", updatable = false)),
-            @AttributeOverride(name = "secret", column = @Column(name = "secret", updatable = false))
+            @AttributeOverride(name = "id", column = @Column(name = "identifier")),
+            @AttributeOverride(name = "secret", column = @Column(name = "secret"))
     })
     private ClientCredentials credentials;
 

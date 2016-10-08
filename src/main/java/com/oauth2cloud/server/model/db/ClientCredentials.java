@@ -6,9 +6,16 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.Size;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Embeddable
 public class ClientCredentials {
+    public static ClientCredentials random(final int length) {
+        return new ClientCredentials(randomAlphanumeric(length), randomAlphanumeric(length));
+    }
+
     public ClientCredentials() {
     }
 

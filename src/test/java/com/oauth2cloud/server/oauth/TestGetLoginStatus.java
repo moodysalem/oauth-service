@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.oauth;
 
 import com.oauth2cloud.server.OAuth2Test;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import org.testng.annotations.Test;
 

@@ -207,7 +207,8 @@ public class AuthorizeResource extends BaseResource {
         sendTemplateEmail(
                 mailer, cfg,
                 loginCode.getClient().getApplication().getSupportEmail(), loginCode.getUser().getEmail(),
-                String.format("Log In to %s - %s", loginCode.getClient().getName(), loginCode.getClient().getApplication().getName()),
+                String.format("Log In to %s - %s",
+                        loginCode.getClient().getName(), loginCode.getClient().getApplication().getName()),
                 "LoginEmail.ftl",
                 new LoginEmailModel(loginCode)
         );

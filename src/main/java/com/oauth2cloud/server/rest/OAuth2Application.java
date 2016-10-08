@@ -2,7 +2,10 @@ package com.oauth2cloud.server.rest;
 
 import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
+import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
+import com.oauth2cloud.server.model.db.Client;
+import com.oauth2cloud.server.model.db.ClientCredentials;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
 import org.codemonkey.simplejavamail.TransportStrategy;
@@ -12,6 +15,9 @@ import org.glassfish.jersey.process.internal.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.ws.rs.ApplicationPath;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ApplicationPath("/")
 public class OAuth2Application extends BaseApplication {
@@ -22,8 +28,6 @@ public class OAuth2Application extends BaseApplication {
 
     public OAuth2Application() {
         super();
-
-
         packages("com.oauth2cloud.server.rest");
 
         register(new AbstractBinder() {
@@ -31,18 +35,20 @@ public class OAuth2Application extends BaseApplication {
             protected void configure() {
                 EncryptedStringConverter.init(Environment.ENCRYPTION_SECRET);
 
+                final JAXRSEntityManagerFactory jrem = JAXRSEntityManagerFactory.builder(ENTITY_MANAGER_FACTORY_NAME)
+                        .withUrl(Environment.JDBC_CONNECTION_STRING)
+                        .withUser(Environment.JDBC_CONNECTION_USERNAME)
+                        .withPassword(Environment.JDBC_CONNECTION_PASSWORD)
+                        .withPersistenceUnit(PERSISTENCE_UNIT_NAME)
+                        .withChangelogFile(DB_MASTER_CHANGELOG_XML_PATH)
+                        .withShowSql(Environment.SHOW_HIBERNATE_SQL)
+                        .withContext(Environment.LIQUIBASE_CONTEXT)
+                        .build();
+
+                initializeDefaultClientCredentials(jrem);
+
                 // this is used to talk to the DB via JPA entity manager
-                bindFactory(
-                        JAXRSEntityManagerFactory.builder(ENTITY_MANAGER_FACTORY_NAME)
-                                .withUrl(Environment.JDBC_CONNECTION_STRING)
-                                .withUser(Environment.JDBC_CONNECTION_USERNAME)
-                                .withPassword(Environment.JDBC_CONNECTION_PASSWORD)
-                                .withPersistenceUnit(PERSISTENCE_UNIT_NAME)
-                                .withChangelogFile(DB_MASTER_CHANGELOG_XML_PATH)
-                                .withShowSql(Environment.SHOW_HIBERNATE_SQL)
-                                .withContext(Environment.LIQUIBASE_CONTEXT)
-                                .build()
-                ).to(EntityManager.class).in(RequestScoped.class).proxy(true);
+                bindFactory(jrem).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // create the mailer that uses amazon
                 final Mailer mailer = new Mailer(
@@ -74,5 +80,27 @@ public class OAuth2Application extends BaseApplication {
     @Override
     public boolean allowCORS() {
         return true;
+    }
+
+    public static void initializeDefaultClientCredentials(final JAXRSEntityManagerFactory jrem) {
+        final EntityManager em = jrem.provide();
+
+        try {
+            TXHelper.withinTransaction(em, () -> {
+                final Client client = em.find(Client.class, UUID.fromString("1489a6d1-5933-4d46-98d0-7e62f37ffc5e"));
+                client.setCredentials(
+                        new ClientCredentials(
+                                "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4",
+                                "0457a1fe452b7f32e4b84db9db139d9a572bad7599544ac368a079bbe8069714"
+                        )
+                );
+                em.merge(client);
+            });
+        } catch (Exception e) {
+            Logger.getAnonymousLogger().log(Level.SEVERE, "Failed to initialize client", e);
+        } finally {
+            em.close();
+        }
+
     }
 }

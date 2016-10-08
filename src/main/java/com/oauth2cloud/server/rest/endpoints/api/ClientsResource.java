@@ -1,10 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
-import com.oauth2cloud.server.model.db.Application;
-import com.oauth2cloud.server.model.db.Application_;
-import com.oauth2cloud.server.model.db.Client;
-import com.oauth2cloud.server.model.db.Client_;
-import com.oauth2cloud.server.rest.OAuth2Application;
+import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 
@@ -37,7 +33,9 @@ public class ClientsResource extends VersionedEntityResource<Client> {
 
     @Override
     public void beforeMerge(Client oldData, Client newData) {
-
+        if (oldData == null) {
+            newData.setCredentials(ClientCredentials.random(128));
+        }
     }
 
     @Override
