@@ -3,7 +3,6 @@ package com.oauth2cloud.server.model.db;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.VersionedEntity;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
-import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Entity
-@Audited
 @Table(name = "tokens")
 public class Token extends VersionedEntity {
     @ManyToOne

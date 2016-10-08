@@ -4,6 +4,7 @@ import com.oauth2cloud.server.rest.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.codemonkey.simplejavamail.Mailer;
+import org.codemonkey.simplejavamail.email.Email;
 
 import javax.mail.Message;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public abstract class EmailSender {
             final String template, final Object model
     ) {
         try {
-            final org.codemonkey.simplejavamail.email.Email email = new org.codemonkey.simplejavamail.email.Email();
+            final Email email = new Email();
             email.setFromAddress("OAuth2Cloud Admin", Environment.SEND_EMAILS_FROM);
             email.setSubject(subject);
             email.addRecipient(to, to, Message.RecipientType.TO);

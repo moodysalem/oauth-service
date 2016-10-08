@@ -19,63 +19,6 @@ public abstract class QueryUtil {
     private static final Logger LOG = Logger.getLogger(QueryUtil.class.getName());
     private static final long FIVE_MINUTES = 1000 * 60 * 5;
 
-    public static ClientCallLog logCall(final EntityManager em, final Client client, final ContainerRequestContext request) {
-        final CallLog cl = logCall(em, client, null, request);
-        if (cl instanceof ClientCallLog) {
-            return (ClientCallLog) cl;
-        }
-        return null;
-    }
-
-    public static ApplicationCallLog logCall(final EntityManager em, final Application application, final ContainerRequestContext request) {
-        final CallLog cl = logCall(em, null, application, request);
-        if (cl instanceof ApplicationCallLog) {
-            return (ApplicationCallLog) cl;
-        }
-        return null;
-    }
-
-    /**
-     * Log an API_PATH call
-     *
-     * @param client      client making the call
-     * @param application application making the call
-     * @return CallLog object that is created
-     */
-    private static CallLog logCall(final EntityManager em, final Client client, final Application application, final ContainerRequestContext request) {
-        if (client == null && application == null) {
-            throw new NullPointerException();
-        }
-
-        final CallLog callLog;
-
-        if (client != null) {
-            final ClientCallLog clientCallLog = new ClientCallLog();
-            clientCallLog.setClient(client);
-            callLog = clientCallLog;
-        } else {
-            final ApplicationCallLog applicationCallLog = new ApplicationCallLog();
-            applicationCallLog.setApplication(application);
-            callLog = applicationCallLog;
-        }
-
-        final String forwardedIp = request.getHeaderString("X-Forwaded-For");
-        if (forwardedIp != null) {
-            callLog.setIp(forwardedIp);
-        } else {
-            callLog.setIp("unknown");
-        }
-        callLog.setPath(request.getUriInfo().getPath());
-        callLog.setMethod(request.getMethod());
-
-        try {
-            return TXHelper.withinTransaction(em, () -> em.merge(callLog));
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to log a call", e);
-            return null;
-        }
-    }
-
     /**
      * Get the scopes that a user has given a client permission to use
      *

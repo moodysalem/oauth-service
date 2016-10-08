@@ -7,7 +7,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Audited
 @Table(name = "client_scopes")
 public class ClientScope extends VersionedEntity {
     public enum Priority {

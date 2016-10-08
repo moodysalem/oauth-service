@@ -7,6 +7,17 @@
     <sql>ALTER DATABASE DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
   </changeSet>
 
+  <changeSet id="create rev_info table" author="moody.salem">
+    <createTable tableName="rev_info">
+      <column name="REV" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="REVTSTMP" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
   <changeSet id="applications table" author="moody.salem">
     <createTable tableName="applications">
       <column name="id" type="${UUID_TYPE}">
@@ -454,6 +465,61 @@
                              constraintName="fk_application_call_log_applications"
                              referencedTableName="applications"
                              referencedColumnNames="id"/>
+  </changeSet>
+
+  <changeSet id="login_code table" author="moody.salem">
+    <createTable tableName="login_codes">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expires" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="code" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="remember_me" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="response_type" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="host" type="VARCHAR(2048)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="redirect_uri" type="VARCHAR(2048)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="scope" type="VARCHAR(2048)"/>
+      <column name="state" type="VARCHAR(2048)"/>
+      <column name="used" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="client_id"
+                             constraintName="fk_login_codes_clients"
+                             referencedTableName="clients"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="user_id" constraintName="fk_login_codes_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="login_codes" columnNames="code" constraintName="uk_login_codes_code"/>
   </changeSet>
 
 

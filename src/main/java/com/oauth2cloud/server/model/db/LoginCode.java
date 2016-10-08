@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.BaseEntity;
-import org.hibernate.annotations.Immutable;
+import com.moodysalem.hibernate.model.VersionedEntity;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
@@ -12,9 +12,8 @@ import java.util.Date;
  * A login code is created when a user attempts to log in and an e-mail is sent
  */
 @Entity
-@Immutable
-@Table(name = "login_code")
-public class LoginCode extends BaseEntity {
+@Table(name = "login_codes")
+public class LoginCode extends VersionedEntity {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "client_id", updatable = false)
@@ -41,6 +40,10 @@ public class LoginCode extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "response_type", updatable = false)
     private ResponseType responseType;
+
+    @NotEmpty
+    @Column(name = "host", updatable = false)
+    private String host;
 
     @URL
     @Lob
@@ -135,5 +138,13 @@ public class LoginCode extends BaseEntity {
 
     public void setUsed(Boolean used) {
         this.used = used;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 }

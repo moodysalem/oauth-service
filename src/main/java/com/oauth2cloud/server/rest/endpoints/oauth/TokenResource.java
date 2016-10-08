@@ -6,6 +6,7 @@ import com.oauth2cloud.server.model.api.ErrorResponse;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
+import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
 
 import javax.annotation.PostConstruct;
@@ -120,7 +121,7 @@ public class TokenResource extends BaseResource {
         if (c == null) {
             return error(ErrorResponse.Type.invalid_client, "Invalid 'client_id.'");
         }
-        QueryUtil.logCall(em, c, req);
+        CallLogUtil.logCall(em, c, req);
 
         if (!c.getFlows().contains(GrantFlow.TEMPORARY_TOKEN)) {
             return error(ErrorResponse.Type.unauthorized_client,
@@ -161,7 +162,7 @@ public class TokenResource extends BaseResource {
         if (refreshToken == null) {
             return error(ErrorResponse.Type.invalid_grant, "Invalid or expired refresh token.");
         }
-        QueryUtil.logCall(em, refreshToken.getClient(), req);
+        CallLogUtil.logCall(em, refreshToken.getClient(), req);
 
         final Set<AcceptedScope> newTokenScopes = new HashSet<>(refreshToken.getAcceptedScopes());
 
@@ -189,7 +190,7 @@ public class TokenResource extends BaseResource {
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Client authorization failed.");
         }
-        QueryUtil.logCall(em, client, req);
+        CallLogUtil.logCall(em, client, req);
 
         if (!client.getFlows().contains(GrantFlow.CLIENT_CREDENTIALS)) {
             return error(ErrorResponse.Type.unauthorized_client,
@@ -253,7 +254,7 @@ public class TokenResource extends BaseResource {
         if (client == null) {
             return error(ErrorResponse.Type.invalid_client, "Invalid client ID.");
         }
-        QueryUtil.logCall(em, client, req);
+        CallLogUtil.logCall(em, client, req);
 
         if (!client.getFlows().contains(GrantFlow.CODE)) {
             return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + AUTHORIZATION_CODE + "' grant flow.");
@@ -351,7 +352,7 @@ public class TokenResource extends BaseResource {
             if (c == null) {
                 throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client ID.");
             }
-            QueryUtil.logCall(em, c, req);
+            CallLogUtil.logCall(em, c, req);
             applicationId = c.getApplication().getId();
         }
 
@@ -362,10 +363,10 @@ public class TokenResource extends BaseResource {
 
         // call made on behalf of a client
         if (clientId != null) {
-            QueryUtil.logCall(em, t.getClient(), req);
+            CallLogUtil.logCall(em, t.getClient(), req);
         } else {
             // otherwise call made on behalf of the application
-            QueryUtil.logCall(em, t.getClient().getApplication(), req);
+            CallLogUtil.logCall(em, t.getClient().getApplication(), req);
         }
 
         return noCache(Response.ok(TokenResponse.from(t))).build();

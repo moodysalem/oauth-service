@@ -11,7 +11,6 @@ import javax.persistence.*;
 import javax.validation.Valid;
 
 @Entity
-@Audited
 @Table(name = "applications")
 public class Application extends VersionedEntity {
     @NotBlank

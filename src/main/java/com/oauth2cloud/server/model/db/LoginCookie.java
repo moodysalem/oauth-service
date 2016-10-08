@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Entity
-@Audited
 @Table(name = "login_cookies")
 public class LoginCookie extends BaseEntity {
     @NotEmpty

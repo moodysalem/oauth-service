@@ -8,6 +8,7 @@ import com.oauth2cloud.server.model.db.LoginCookie;
 import com.oauth2cloud.server.model.db.Token;
 import com.oauth2cloud.server.model.db.TokenType;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
+import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
 import com.oauth2cloud.server.rest.util.UriUtil;
@@ -50,7 +51,7 @@ public class GetLoginStatus extends BaseResource {
             return badRequest("Invalid client ID.");
         }
 
-        QueryUtil.logCall(em, client, req);
+        CallLogUtil.logCall(em, client, req);
 
         if (referrer == null) {
             return badRequest("This page must be accessed from inside an iframe.");

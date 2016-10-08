@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.NotBlank;
 import javax.persistence.*;
 
 @Entity
-@Audited
 @Table(name = "scopes")
 public class Scope extends VersionedEntity {
     @ManyToOne

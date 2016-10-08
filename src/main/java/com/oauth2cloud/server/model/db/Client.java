@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Entity
-@Audited
 @Table(name = "clients")
 public class Client extends VersionedEntity {
     @NotBlank

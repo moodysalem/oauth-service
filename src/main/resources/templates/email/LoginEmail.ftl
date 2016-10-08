@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Login to ${model.client.name}</title>
+    <title>Login to ${loginCode.client.name}</title>
     <style>
         /* -------------------------------------
             GLOBAL RESETS
@@ -347,7 +347,7 @@
             <div class="content">
 
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader">Your log in link for ${model.client.name} - ${model.client.application.name}</span>
+                <span class="preheader">Your log in link for ${loginCode.client.name} - ${loginCode.client.application.name}</span>
                 <table class="main">
 
                     <!-- START MAIN CONTENT AREA -->

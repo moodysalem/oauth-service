@@ -5,8 +5,8 @@ import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.moodysalem.jaxrs.lib.test.BaseTest;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import com.oauth2cloud.server.model.api.TokenResponse;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
+import com.oauth2cloud.server.rest.OAuth2Application;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
 import org.codemonkey.simplejavamail.email.Email;
@@ -49,7 +49,7 @@ public class OAuth2Test extends BaseTest {
 
     @Override
     public ResourceConfig getResourceConfig() {
-        BaseApplication ba = new BaseApplication() {
+        final BaseApplication app = new BaseApplication() {
             @Override
             public boolean forceLoadBalancerHTTPS() {
                 return false;
@@ -62,9 +62,9 @@ public class OAuth2Test extends BaseTest {
         };
 
         EncryptedStringConverter.init("xTUf4mP2SI6nfeLO");
-        ba.packages("com.oauth2cloud.server.rest");
+        app.packages("com.oauth2cloud.server.rest");
 
-        ba.register(new AbstractBinder() {
+        app.register(new AbstractBinder() {
             @Override
             protected void configure() {
                 if (jrem == null) {
@@ -78,6 +78,7 @@ public class OAuth2Test extends BaseTest {
                             .withChangelogFile("db/changesets/master-changelog.xml")
                             .withShowSql(true)
                             .withContext("test")
+                            .withAdditionalProperties(OAuth2Application.ENTITY_MANAGER_FACTORY_CONFIG)
                             .build();
                 }
 
@@ -87,17 +88,20 @@ public class OAuth2Test extends BaseTest {
                 bindFactory(jrem).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 // this is used to send e-mails and record the email to our list of sent e-mails
-                final Mailer m = mock(Mailer.class);
-                doAnswer(invocationOnMock -> sentEmails.add((Email) invocationOnMock.getArguments()[0]))
-                        .when(m).sendMail(any(Email.class));
+                final Mailer mailerMock = mock(Mailer.class);
+                doAnswer(invocationOnMock -> {
+                    final Email email = (Email) invocationOnMock.getArguments()[0];
+                    sentEmails.add(email);
+                    return null;
+                }).when(mailerMock).sendMail(any(Email.class));
 
-                bind(m).to(Mailer.class);
+                bind(mailerMock).to(Mailer.class);
 
                 bind(new EmailTemplateFreemarkerConfiguration()).to(Configuration.class);
             }
         });
 
-        return ba;
+        return app;
     }
 
     public static final String ADMIN_USER = "moody.salem@gmail.com";

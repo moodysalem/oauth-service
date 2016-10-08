@@ -16,8 +16,6 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.ApplicationPath;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @ApplicationPath("/")
 public class OAuth2Application extends BaseApplication {
@@ -25,6 +23,14 @@ public class OAuth2Application extends BaseApplication {
             PERSISTENCE_UNIT_NAME = "oauth-service",
             DB_MASTER_CHANGELOG_XML_PATH = "db/changesets/master-changelog.xml",
             ENTITY_MANAGER_FACTORY_NAME = "main-em";
+
+    public static Properties ENTITY_MANAGER_FACTORY_CONFIG = new Properties();
+
+    static {
+        ENTITY_MANAGER_FACTORY_CONFIG.put("org.hibernate.envers.audit_table_suffix", "aud");
+        ENTITY_MANAGER_FACTORY_CONFIG.put("org.hibernate.envers.revision_field_name", "rev");
+        ENTITY_MANAGER_FACTORY_CONFIG.put("org.hibernate.envers.revision_type_field_name", "rev_info");
+    }
 
     public OAuth2Application() {
         super();
@@ -43,6 +49,7 @@ public class OAuth2Application extends BaseApplication {
                         .withChangelogFile(DB_MASTER_CHANGELOG_XML_PATH)
                         .withShowSql(Environment.SHOW_HIBERNATE_SQL)
                         .withContext(Environment.LIQUIBASE_CONTEXT)
+                        .withAdditionalProperties(ENTITY_MANAGER_FACTORY_CONFIG)
                         .build();
 
                 initializeDefaultClientCredentials(jrem);
@@ -97,7 +104,7 @@ public class OAuth2Application extends BaseApplication {
                 em.merge(client);
             });
         } catch (Exception e) {
-            Logger.getAnonymousLogger().log(Level.SEVERE, "Failed to initialize client", e);
+            throw new RuntimeException("Failed to initialize client");
         } finally {
             em.close();
         }

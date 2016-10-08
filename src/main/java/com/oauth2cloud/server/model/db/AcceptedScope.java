@@ -9,7 +9,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Audited
 @Table(name = "accepted_scopes")
 public class AcceptedScope extends BaseEntity {
     @ManyToOne

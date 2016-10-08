@@ -7,6 +7,7 @@ import com.oauth2cloud.server.model.data.LoginEmailModel;
 import com.oauth2cloud.server.model.data.LoginModel;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
+import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
 import org.codemonkey.simplejavamail.Mailer;
@@ -75,7 +76,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         final Client client = QueryUtil.getClient(em, clientId);
-        QueryUtil.logCall(em, client, req);
+        CallLogUtil.logCall(em, client, req);
 
         final LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, client);
         // if the user is already logged in
@@ -85,7 +86,7 @@ public class AuthorizeResource extends BaseResource {
                 expireLoginCookie(loginCookie);
             } else {
                 // return the handler for a successful login
-                final LoginCode loginCode = makeCode(
+                final LoginCode loginCode = makeLoginCode(
                         em,
                         loginCookie.getUser(), client, scope, redirectUri,
                         responseType, state, loginCookie.isRememberMe()
@@ -142,7 +143,7 @@ public class AuthorizeResource extends BaseResource {
         }
 
         final Client client = QueryUtil.getClient(em, clientId);
-        QueryUtil.logCall(em, client, req);
+        CallLogUtil.logCall(em, client, req);
 
         final boolean remember = "on".equals(rememberMe);
 
@@ -161,7 +162,7 @@ public class AuthorizeResource extends BaseResource {
                 }
 
                 sendLoginCode(
-                        makeCode(
+                        makeLoginCode(
                                 em,
                                 user, client, scope, redirectUri,
                                 responseType, state, remember
@@ -185,7 +186,7 @@ public class AuthorizeResource extends BaseResource {
                     return badRequest("Invalid google token");
                 }
 
-                final LoginCode loginCode = makeCode(
+                final LoginCode loginCode = makeLoginCode(
                         em,
                         user, client, scope, redirectUri,
                         responseType, state, remember
@@ -200,13 +201,15 @@ public class AuthorizeResource extends BaseResource {
 
     @Inject
     private Mailer mailer;
+
     @Inject
-    private freemarker.template.Configuration cfg;
+    private freemarker.template.Configuration configuration;
 
     private boolean sendLoginCode(final LoginCode loginCode) {
         sendTemplateEmail(
-                mailer, cfg,
-                loginCode.getClient().getApplication().getSupportEmail(), loginCode.getUser().getEmail(),
+                mailer, configuration,
+                loginCode.getClient().getApplication().getSupportEmail(),
+                loginCode.getUser().getEmail(),
                 String.format("Log In to %s - %s",
                         loginCode.getClient().getName(), loginCode.getClient().getApplication().getName()),
                 "LoginEmail.ftl",
@@ -283,7 +286,8 @@ public class AuthorizeResource extends BaseResource {
 
     private static final long FIVE_MINUTES = 1000L * 60L * 5L;
 
-    private LoginCode makeCode(
+
+    private LoginCode makeLoginCode(
             final EntityManager em,
             final User user, final Client client, final String scope, final String redirectUri,
             final String responseType, final String state, final boolean rememberMe
@@ -297,6 +301,7 @@ public class AuthorizeResource extends BaseResource {
         loginCode.setResponseType(ResponseType.valueOf(responseType));
         loginCode.setState(state);
         loginCode.setRememberMe(rememberMe);
+        loginCode.setHost(req.getUriInfo().getAbsolutePath().getHost());
 
         loginCode.setCode(randomAlphanumeric(128));
         loginCode.setExpires(new Date(System.currentTimeMillis() + FIVE_MINUTES));
