@@ -15,8 +15,6 @@ import java.util.Properties;
 
 @ApplicationPath("/")
 public class OAuth2Application extends BaseApplication {
-    public static final String API_PATH = "api", OAUTH_PATH = "oauth";
-
     private static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required",
             PERSISTENCE_UNIT_NAME = "oauth-service",
             DB_MASTER_CHANGELOG_XML_PATH = "db/changesets/master-changelog.xml",

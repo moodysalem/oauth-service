@@ -3,7 +3,6 @@ package com.oauth2cloud.server.rest.endpoints.api;
 import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.model.db.Application_;
 import com.oauth2cloud.server.model.db.User;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 
@@ -12,8 +11,8 @@ import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import java.util.List;
 
+@Path("applications")
 @TokenFilter.ReadToken
-@Path(OAuth2Application.API_PATH + "/applications")
 public class ApplicationsResource extends VersionedEntityResource<Application> {
     @Override
     public Class<Application> getEntityClass() {

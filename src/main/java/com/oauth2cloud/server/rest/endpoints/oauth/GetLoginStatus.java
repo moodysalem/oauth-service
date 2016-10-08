@@ -1,16 +1,15 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
-import com.oauth2cloud.server.rest.util.QueryUtil;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.data.LoginStatusModel;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
 import com.oauth2cloud.server.model.db.Token;
 import com.oauth2cloud.server.model.db.TokenType;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 import com.oauth2cloud.server.rest.util.CookieUtil;
+import com.oauth2cloud.server.rest.util.QueryUtil;
 import com.oauth2cloud.server.rest.util.UriUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -25,7 +24,7 @@ import static com.oauth2cloud.server.model.db.Token.getExpires;
 import static com.oauth2cloud.server.rest.util.OAuthUtil.badRequest;
 
 @Produces(MediaType.TEXT_HTML)
-@Path(OAuth2Application.OAUTH_PATH + "/loginstatus")
+@Path("login-status")
 public class GetLoginStatus extends BaseResource {
 
     /**

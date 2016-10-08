@@ -6,7 +6,6 @@ import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.data.LoginEmailModel;
 import com.oauth2cloud.server.model.data.LoginModel;
 import com.oauth2cloud.server.model.db.*;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
@@ -33,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @CORSFilter.Skip
 @NoXFrameOptionsFeature.NoXFrame
 @Produces(MediaType.TEXT_HTML)
-@Path(OAuth2Application.OAUTH_PATH + "/authorize")
+@Path("authorize")
 public class AuthorizeResource extends BaseResource {
     private static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
             "Invalid request. Please contact an administrator if this continues.";
@@ -70,22 +69,22 @@ public class AuthorizeResource extends BaseResource {
             @QueryParam("scope") final String scope,
             @QueryParam("logout") final boolean logout
     ) {
-        final Response badRequest = validateRequest(em, responseType, clientId, redirectUri, scope);
-        if (badRequest != null) {
-            return badRequest;
+        final Response error = validateRequest(em, responseType, clientId, redirectUri, scope);
+        if (error != null) {
+            return error;
         }
 
         final Client client = QueryUtil.getClient(em, clientId);
         QueryUtil.logCall(em, client, req);
 
         final LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, client);
-        // if we remember the user
+        // if the user is already logged in
         if (loginCookie != null) {
             if (logout) {
                 // forcing a log out, so expire the login cookie
                 expireLoginCookie(loginCookie);
             } else {
-                // return the handler for a succesful login
+                // return the handler for a successful login
                 final LoginCode loginCode = makeCode(
                         em,
                         loginCookie.getUser(), client, scope, redirectUri,
@@ -105,7 +104,11 @@ public class AuthorizeResource extends BaseResource {
     }
 
     private Response loginCodeRedirect(final LoginCode loginCode) {
-        return null;
+        return Response.temporaryRedirect(
+                req.getUriInfo().getBaseUriBuilder()
+                        .path("login").path(loginCode.getCode())
+                        .build()
+        ).build();
     }
 
     /**
@@ -147,7 +150,7 @@ public class AuthorizeResource extends BaseResource {
         // this is done so that the query string can be preserved across all requests without any special work
         switch (action) {
             // handle the login action
-            case "email-login": {
+            case "email": {
                 if (isBlank(email)) {
                     return badRequest("Invalid e-mail address");
                 }
@@ -176,7 +179,7 @@ public class AuthorizeResource extends BaseResource {
                 return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, loginModel)).build();
             }
 
-            case "google-login": {
+            case "google": {
                 final User user = doGoogleLogin(client.getApplication(), googleToken);
                 if (user == null) {
                     return badRequest("Invalid google token");
@@ -204,7 +207,7 @@ public class AuthorizeResource extends BaseResource {
         sendTemplateEmail(
                 mailer, cfg,
                 loginCode.getClient().getApplication().getSupportEmail(), loginCode.getUser().getEmail(),
-                String.format("Your login e-mail for %s - %s", loginCode.getClient().getName(), loginCode.getClient().getApplication().getName()),
+                String.format("Log In to %s - %s", loginCode.getClient().getName(), loginCode.getClient().getApplication().getName()),
                 "LoginEmail.ftl",
                 new LoginEmailModel(loginCode)
         );
@@ -301,7 +304,7 @@ public class AuthorizeResource extends BaseResource {
         try {
             return TXHelper.withinTransaction(em, () -> em.merge(loginCode));
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "failed to create login code", e);
+            LOG.log(Level.SEVERE, "Failed to create login code", e);
             return null;
         }
     }

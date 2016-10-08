@@ -14,7 +14,7 @@
     <div class="row">
         <div class="col-lg-4 col-lg-offset-2 col-sm-6">
             <form id="form-signin" method="POST">
-                <input type="hidden" name="action" value="email-login"/>
+                <input type="hidden" name="action" value="email"/>
 
                 <h2>
                     Sign In<br/>
@@ -22,27 +22,21 @@
                 </h2>
                 <div class="form-group">
                     <label class="control-label" for="email">E-mail Address</label>
-                    <input type="email" id="email" name="email" class="form-control" autofocus
-                           placeholder="E-mail address" required>
+                    <input type="email" id="email" name="email" class="form-control"
+                           autofocus placeholder="E-mail address" required>
                 </div>
 
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="rememberMe" checked> Remember me
+                        <input type="checkbox" name="remember_me" checked> Remember me
                     </label>
                 </div>
 
                 <div class="form-group">
-                    <button class="btn btn-primary btn-block" id="submitLogin" type="submit">
+                    <button class="btn btn-primary btn-block" id="submit-login" type="submit">
                         <i class="fa fa-sign-in"></i>
-                        <span>Sign In</span>
+                        <span>Submit</span>
                     </button>
-                </div>
-
-                <div class="form-group">
-                    <a href="${model.baseUri?html}oauth/reset?applicationId=${model.client.application.id}&referrer=${model.requestUrl?url}">
-                        Forgot Password?
-                    </a>
                 </div>
             </form>
 
@@ -51,7 +45,7 @@
         <#if model.client.application.googleCredentials??>
             <hr/>
             <form>
-                <input type="hidden" name="action" value="google-login"/>
+                <input type="hidden" name="action" value="google"/>
                 <input type="hidden" id="google-token" name="google_token"/>
                 <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
                     <i class="fa fa-google fa-lg"></i>
@@ -89,24 +83,14 @@
                 function showLoadingIndicators() {
                     $("#form-signin").find("input").prop("readOnly", true).end()
                             .find("button").prop("disabled", true)
-                            .find("#submitLogin span").text("Signing in...").end()
+                            .find("#submit-login span").text("Signing in...").end()
                             .find("i.fa-sign-in").removeClass("fa-sign-in").addClass("fa-pulse fa-spinner");
                 }
 
                 $(function () {
-                    $("#form-signin").submit(function () {
-                        showLoadingIndicators();
-                    });
+                    $("#form-signin").submit(showLoadingIndicators);
                 });
             </script>
-
-
-        <#-- something happened while logging in -->
-        <#if model.loginError??>
-            <div class="alert alert-danger">
-                <i class="fa fa-exclamation-triangle"></i> <strong>Error</strong> ${model.loginError?html}
-            </div>
-        </#if>
         </div>
     </div>
 </div>

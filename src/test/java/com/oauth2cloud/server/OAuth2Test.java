@@ -6,8 +6,6 @@ import com.moodysalem.jaxrs.lib.test.BaseTest;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
-import com.oauth2cloud.server.rest.Environment;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
 import org.codemonkey.simplejavamail.email.Email;
@@ -70,8 +68,10 @@ public class OAuth2Test extends BaseTest {
             protected void configure() {
                 if (jrem == null) {
                     jrem = JAXRSEntityManagerFactory.builder("main-em")
-//                            .withUrl("jdbc:mysql://localhost:3306/oauthtest")
-                            .withUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
+                            .withUrl(System.getProperty("localdb") != null ?
+                                    String.format("jdbc:mysql://localhost:3306/scratch", System.getProperty("localdb")) :
+                                    "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+                            )
                             .withUser("root")
                             .withPersistenceUnit("oauth-service")
                             .withChangelogFile("db/changesets/master-changelog.xml")
@@ -109,12 +109,10 @@ public class OAuth2Test extends BaseTest {
      */
     public TokenResponse getToken(final String email) {
         final Form up = new Form();
-        up.param("email", email)
-                .param("action", "login");
+        up.param("email", email).param("action", "email");
 
-        final Response loginScreen = target(OAuth2Application.OAUTH_PATH)
+        final Response loginScreen = target("authorize")
                 .property(ClientProperties.FOLLOW_REDIRECTS, false)
-                .path("authorize")
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("redirect_uri", "https://oauth2cloud.com")
                 .queryParam("response_type", "token")

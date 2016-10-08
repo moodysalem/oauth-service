@@ -15,7 +15,7 @@ public class TestGetLoginStatus extends OAuth2Test {
      */
     @Test
     public void testLoginStatus() {
-        WebTarget wt = target(OAuth2Application.OAUTH_PATH).path("loginstatus");
+        WebTarget wt = target("login-status");
         assert wt.request().get().getStatus() == 400;
 
         WebTarget wtCid = wt.queryParam("client_id", CLIENT_ID);

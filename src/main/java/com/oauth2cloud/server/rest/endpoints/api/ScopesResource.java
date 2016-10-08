@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Path("scopes")
 @TokenFilter.ReadToken
-@Path(OAuth2Application.API_PATH + "/scopes")
 public class ScopesResource extends VersionedEntityResource<Scope> {
     @Override
     public Class<Scope> getEntityClass() {

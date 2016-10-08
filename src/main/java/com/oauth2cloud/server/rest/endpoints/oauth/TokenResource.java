@@ -2,12 +2,11 @@ package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
-import com.oauth2cloud.server.rest.util.QueryUtil;
 import com.oauth2cloud.server.model.api.ErrorResponse;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.*;
-import com.oauth2cloud.server.rest.OAuth2Application;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
+import com.oauth2cloud.server.rest.util.QueryUtil;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaQuery;
@@ -26,19 +25,19 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @NoXFrameOptionsFeature.NoXFrame
-@Path(OAuth2Application.OAUTH_PATH + "/token")
+@Path("token")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class TokenResource extends BaseResource {
 
-    private static final String BASIC = "Basic ";
-    private static final int BASIC_LENGTH = BASIC.length();
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private static final String AUTHORIZATION_CODE = "authorization_code",
+            BASIC = "Basic ",
             PASSWORD = "password",
             CLIENT_CREDENTIALS = "client_credentials",
             REFRESH_TOKEN = "refresh_token",
             TEMPORARY_TOKEN = "temporary_token";
+    private static final int BASIC_LENGTH = BASIC.length();
 
     @HeaderParam("Authorization")
     private String authorizationHeader;

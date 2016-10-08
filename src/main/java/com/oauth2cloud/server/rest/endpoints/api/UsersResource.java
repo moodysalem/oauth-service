@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Path("users")
 @TokenFilter.ReadToken
-@Path(OAuth2Application.API_PATH + "/users")
 public class UsersResource extends VersionedEntityResource<User> {
     @Override
     public Class<User> getEntityClass() {

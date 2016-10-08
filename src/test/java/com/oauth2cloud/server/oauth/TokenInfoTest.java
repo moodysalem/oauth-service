@@ -11,9 +11,9 @@ public class TokenInfoTest extends OAuth2Test {
 
     @Test
     public void testToken() {
-        TokenResponse tr = getToken();
+        final TokenResponse tr = getToken();
 
-        TokenResponse ti = target("oauth/token")
+        final TokenResponse ti = target("token")
             .path("info")
             .request()
             .post(

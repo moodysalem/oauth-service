@@ -1,23 +1,5 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
-import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
-import com.oauth2cloud.server.model.data.PermissionsModel;
-import com.oauth2cloud.server.model.db.*;
-import com.oauth2cloud.server.rest.util.CookieUtil;
-import com.oauth2cloud.server.rest.util.QueryUtil;
-import org.glassfish.jersey.server.mvc.Viewable;
-
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-
 public class PermissionsResource {
 //
 //
@@ -147,10 +129,6 @@ public class PermissionsResource {
 //                redirectUri, acceptedScopes, null, null);
 //        return getRedirectResponse(redirectUri, state, token, rememberMe);
 //    }
-
-
-
-
 
 
 //    private static final String IPV4_ADDRESS_REGEX = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",

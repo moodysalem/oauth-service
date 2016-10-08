@@ -1,11 +1,15 @@
 package com.oauth2cloud.server.rest.util;
 
+import com.moodysalem.jaxrs.lib.resources.util.QueryHelper;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.*;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.ws.rs.container.ContainerRequestContext;
 import java.util.*;
 import java.util.logging.Level;
@@ -81,16 +85,15 @@ public abstract class QueryUtil {
      */
     public static Set<AcceptedScope> getAcceptedScopes(final EntityManager em, final Client client, final User user) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<AcceptedScope> as = cb.createQuery(AcceptedScope.class);
-        final Root<AcceptedScope> ras = as.from(AcceptedScope.class);
-
         return new HashSet<>(
-                em.createQuery(
-                        as.select(ras).where(
-                                cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.client), client),
-                                cb.equal(ras.get(AcceptedScope_.user), user)
-                        )
-                ).getResultList()
+                QueryHelper.query(
+                        em, AcceptedScope.class,
+                        (ras) ->
+                                cb.and(
+                                        cb.equal(ras.join(AcceptedScope_.clientScope).get(ClientScope_.client), client),
+                                        cb.equal(ras.get(AcceptedScope_.user), user)
+                                )
+                )
         );
     }
 
@@ -105,19 +108,14 @@ public abstract class QueryUtil {
         if (StringUtils.isBlank(email)) {
             return null;
         }
-
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<User> uq = cb.createQuery(User.class);
-        final Root<User> u = uq.from(User.class);
 
-        final List<User> users = em.createQuery(
-                uq.select(u).where(
-                        cb.and(
-                                cb.equal(u.get(User_.application), application),
-                                cb.equal(u.get(User_.email), email)
-                        )
+        final List<User> users = QueryHelper.query(em, User.class, (u) ->
+                cb.and(
+                        cb.equal(u.get(User_.application), application),
+                        cb.equal(u.get(User_.email), email)
                 )
-        ).getResultList();
+        );
 
         if (users.size() != 1) {
             return null;
@@ -135,14 +133,15 @@ public abstract class QueryUtil {
      */
     public static LoginCookie getLoginCookie(EntityManager em, String secret, Client client) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<LoginCookie> lc = cb.createQuery(LoginCookie.class);
-        final Root<LoginCookie> loginCookieRoot = lc.from(LoginCookie.class);
-        lc.select(loginCookieRoot).where(
-                cb.equal(loginCookieRoot.get(LoginCookie_.secret), secret),
-                cb.greaterThan(loginCookieRoot.get(LoginCookie_.expires), System.currentTimeMillis()),
-                cb.equal(loginCookieRoot.join(LoginCookie_.user).get(User_.application), client.getApplication())
+
+        final List<LoginCookie> loginCookies = QueryHelper.query(em, LoginCookie.class, (root) ->
+                cb.and(
+                        cb.equal(root.get(LoginCookie_.secret), secret),
+                        cb.greaterThan(root.get(LoginCookie_.expires), System.currentTimeMillis()),
+                        cb.equal(root.join(LoginCookie_.user).get(User_.application), client.getApplication())
+                )
         );
-        final List<LoginCookie> loginCookies = em.createQuery(lc).getResultList();
+
         return (loginCookies.size() == 1) ? loginCookies.get(0) : null;
     }
 
@@ -155,16 +154,17 @@ public abstract class QueryUtil {
      */
     public static Set<ClientScope> getScopes(final EntityManager em, final Client client, final Set<String> scopes) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
-        final Root<ClientScope> clientScopeRoot = cq.from(ClientScope.class);
 
-        Predicate p = cb.equal(clientScopeRoot.get(ClientScope_.client), client);
-
-        if (scopes != null && !scopes.isEmpty()) {
-            p = cb.and(p, clientScopeRoot.join(ClientScope_.scope).get(Scope_.name).in(scopes));
-        }
         return new HashSet<>(
-                em.createQuery(cq.select(clientScopeRoot).where(p)).getResultList()
+                QueryHelper.query(
+                        em, ClientScope.class,
+                        (clientScopeRoot) -> cb.and(
+                                cb.equal(clientScopeRoot.get(ClientScope_.client), client),
+                                (scopes != null && !scopes.isEmpty()) ?
+                                        clientScopeRoot.join(ClientScope_.scope).get(Scope_.name).in(scopes) :
+                                        cb.and()
+                        )
+                )
         );
     }
 
@@ -199,20 +199,19 @@ public abstract class QueryUtil {
      * @param clientScope to look for
      * @return AcceptedScope for the user/clientScope
      */
-    public static AcceptedScope findAcceptedScope(EntityManager em, User user, ClientScope clientScope) {
+    public static AcceptedScope findAcceptedScope(
+            final EntityManager em,
+            final User user,
+            final ClientScope clientScope
+    ) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        final CriteriaQuery<AcceptedScope> acceptedScopeCriteriaQuery = cb.createQuery(AcceptedScope.class);
-        final Root<AcceptedScope> acceptedScopeRoot = acceptedScopeCriteriaQuery.from(AcceptedScope.class);
-
-        final List<AcceptedScope> acceptedScopes = em.createQuery(
-                acceptedScopeCriteriaQuery.select(acceptedScopeRoot)
-                        .where(
-
-                                cb.equal(acceptedScopeRoot.get(AcceptedScope_.user), user),
-                                cb.equal(acceptedScopeRoot.get(AcceptedScope_.clientScope), clientScope)
-                        )
-        ).getResultList();
+        final List<AcceptedScope> acceptedScopes = QueryHelper.query(em, AcceptedScope.class, (root) ->
+                cb.and(
+                        cb.equal(root.get(AcceptedScope_.user), user),
+                        cb.equal(root.get(AcceptedScope_.clientScope), clientScope)
+                )
+        );
 
         if (acceptedScopes.size() == 1) {
             return acceptedScopes.get(0);
@@ -234,13 +233,8 @@ public abstract class QueryUtil {
 
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        final CriteriaQuery<Client> clientCriteriaQuery = cb.createQuery(Client.class);
-        final Root<Client> clientRoot = clientCriteriaQuery.from(Client.class);
-        clientCriteriaQuery.select(clientRoot).where(
-                cb.equal(clientRoot.join(Client_.credentials).get(ClientCredentials_.id), clientId)
-        );
-
-        List<Client> clients = em.createQuery(clientCriteriaQuery).getResultList();
+        final List<Client> clients = QueryHelper.query(em, Client.class, (root) ->
+                cb.equal(root.join(Client_.credentials).get(ClientCredentials_.id), clientId));
         return (clients.size() != 1) ? null : clients.get(0);
     }
 
@@ -258,22 +252,17 @@ public abstract class QueryUtil {
         }
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        final CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        final Root<Token> tokenRoot = tq.from(Token.class);
-
-        Predicate p = cb.and(
-                cb.equal(tokenRoot.get(Token_.token), token),
-                types != null && !types.isEmpty() ? tokenRoot.get(Token_.type).in(types) : cb.and(),
-                cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
-                cb.isNull(tokenRoot.get(Token_.user))
+        final List<Token> tokens = QueryHelper.query(em, Token.class, tokenRoot ->
+                cb.and(
+                        cb.equal(tokenRoot.get(Token_.token), token),
+                        types != null && !types.isEmpty() ? tokenRoot.get(Token_.type).in(types) : cb.and(),
+                        cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
+                        cb.isNull(tokenRoot.get(Token_.user)),
+                        client != null ? cb.equal(tokenRoot.get(Token_.client), client) : cb.and()
+                )
         );
 
-        if (client != null) {
-            p = cb.and(p, cb.equal(tokenRoot.get(Token_.client), client));
-        }
-
-        final List<Token> tkns = em.createQuery(tq.select(tokenRoot).where(p)).getResultList();
-        return tkns.size() == 1 ? tkns.get(0) : null;
+        return tokens.size() == 1 ? tokens.get(0) : null;
     }
 
     /**
@@ -341,26 +330,6 @@ public abstract class QueryUtil {
         }
     }
 
-
-    /**
-     * Get the permission token associated with a token string
-     *
-     * @param token  token string
-     * @param client client the token was issued for
-     * @return the token representing the client or null if it doesn't exist
-     */
-    public static Token getPermissionToken(EntityManager em, String token, Client client) {
-        final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<Token> tq = cb.createQuery(Token.class);
-        final Root<Token> tk = tq.from(Token.class);
-        final List<Token> tks = em.createQuery(tq.select(tk).where(cb.and(
-                cb.equal(tk.get(Token_.token), token),
-                cb.equal(tk.get(Token_.type), TokenType.PERMISSION),
-                cb.equal(tk.get(Token_.client), client)
-        ))).getResultList();
-        return tks.size() == 1 ? tks.get(0) : null;
-    }
-
     /**
      * Get the scopes that we need to show or ask the user about
      * ALWAYS permissions are not shown because the client always has those permissions when the user logs in
@@ -373,24 +342,20 @@ public abstract class QueryUtil {
      */
     public static Set<ClientScope> getScopesToRequest(final EntityManager em, final Client client, final User user, Set<String> scopes) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<ClientScope> cq = cb.createQuery(ClientScope.class);
-        final Root<ClientScope> rcs = cq.from(ClientScope.class);
-
-        final List<Predicate> predicates = new LinkedList<>();
-
-        // since a client will always have these scopes, we don't show them
-        predicates.add(cb.notEqual(rcs.get(ClientScope_.priority), ClientScope.Priority.ALWAYS));
-
-        // not already accepted by the user
-        predicates.add(cb.not(rcs.in(acceptedScopes(em, user))));
-
-        // scope names in this list
-        if (scopes != null && !scopes.isEmpty()) {
-            predicates.add(rcs.join(ClientScope_.scope).get(Scope_.name).in(scopes));
-        }
 
         return new HashSet<>(
-                em.createQuery(cq.select(rcs).where(predicates.stream().toArray(Predicate[]::new))).getResultList()
+                QueryHelper.query(em, ClientScope.class, (rcs) ->
+                        cb.and(
+                                // since a client will always have these scopes, we don't show them
+                                cb.notEqual(rcs.get(ClientScope_.priority), ClientScope.Priority.ALWAYS),
+                                // not already accepted by the user
+                                cb.not(rcs.in(acceptedScopes(cb, user))),
+                                // scope names in this list
+                                (scopes != null && !scopes.isEmpty()) ?
+                                        rcs.join(ClientScope_.scope).get(Scope_.name).in(scopes) :
+                                        cb.and()
+                        )
+                )
         );
     }
 
@@ -400,14 +365,13 @@ public abstract class QueryUtil {
      * @param user for which the acceptedscopes are returned
      * @return a subquery of all the clientscopes that have already been accepted by a user, across clients
      */
-    public static Subquery<ClientScope> acceptedScopes(EntityManager em, User user) {
-        final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final Subquery<ClientScope> sq = cb.createQuery().subquery(ClientScope.class);
+    public static Subquery<ClientScope> acceptedScopes(final CriteriaBuilder cb, User user) {
+        final Subquery<ClientScope> subquery = cb.createQuery().subquery(ClientScope.class);
 
-        final Root<AcceptedScope> ras = sq.from(AcceptedScope.class);
-        return sq.select(ras.get(AcceptedScope_.clientScope))
+        final Root<AcceptedScope> root = subquery.from(AcceptedScope.class);
+        return subquery.select(root.get(AcceptedScope_.clientScope))
                 .where(
-                        cb.equal(ras.get(AcceptedScope_.user), user)
+                        cb.equal(root.get(AcceptedScope_.user), user)
                 );
     }
 
@@ -429,7 +393,7 @@ public abstract class QueryUtil {
         nu.setApplication(app);
         nu.setEmail(email);
         try {
-            return TXHelper.withinTransaction(em, () -> em.merge(existing));
+            return TXHelper.withinTransaction(em, () -> em.merge(nu));
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to create user", e);
             return null;

@@ -11,7 +11,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jaxrs.lib.version>3.0.1</jaxrs.lib.version>
+    <jaxrs.lib.version>3.0.2</jaxrs.lib.version>
     <hibernate.version>5.2.2.Final</hibernate.version>
 
     <!--skip deploying to the repositories -->
@@ -108,7 +108,7 @@
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
-      <version>1.8.3</version>
+      <version>1.9.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
