@@ -3,6 +3,7 @@ package com.oauth2cloud.server.rest.endpoints.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
+import com.oauth2cloud.server.model.api.LoginErrorCode;
 import com.oauth2cloud.server.model.data.LoginEmailModel;
 import com.oauth2cloud.server.model.data.LoginModel;
 import com.oauth2cloud.server.model.db.*;
@@ -68,6 +69,7 @@ public class AuthorizeResource extends BaseResource {
             @QueryParam("redirect_uri") final String redirectUri,
             @QueryParam("state") final String state,
             @QueryParam("scope") final String scope,
+            @QueryParam("error_code") final String errorCode,
             @QueryParam("logout") final boolean logout
     ) {
         final Response error = validateRequest(em, responseType, clientId, redirectUri, scope);
@@ -95,13 +97,21 @@ public class AuthorizeResource extends BaseResource {
             }
         }
 
-        final LoginModel loginModel = new LoginModel();
-        loginModel.setClient(client);
-        loginModel.setRedirectUri(redirectUri);
-        loginModel.setState(state);
-        loginModel.setURLs(req);
+        final LoginModel loginModel = new LoginModel(client, fromString(errorCode), false);
 
         return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, loginModel)).build();
+    }
+
+    private static LoginErrorCode fromString(String errorCode) {
+        if (isBlank(errorCode)) {
+            return null;
+        }
+        try {
+            return LoginErrorCode.valueOf(errorCode);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to parse error code", e);
+            return null;
+        }
     }
 
     private Response loginCodeRedirect(final LoginCode loginCode) {
@@ -170,12 +180,7 @@ public class AuthorizeResource extends BaseResource {
                 );
 
 
-                final LoginModel loginModel = new LoginModel();
-                loginModel.setClient(client);
-                loginModel.setRedirectUri(redirectUri);
-                loginModel.setState(state);
-                loginModel.setURLs(req);
-                loginModel.setSentEmail(true);
+                final LoginModel loginModel = new LoginModel(client, null, true);
 
                 return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, loginModel)).build();
             }
@@ -301,7 +306,7 @@ public class AuthorizeResource extends BaseResource {
         loginCode.setResponseType(ResponseType.valueOf(responseType));
         loginCode.setState(state);
         loginCode.setRememberMe(rememberMe);
-        loginCode.setHost(req.getUriInfo().getAbsolutePath().getHost());
+        loginCode.setBaseUri(req.getUriInfo().getBaseUri().toString());
 
         loginCode.setCode(randomAlphanumeric(128));
         loginCode.setExpires(new Date(System.currentTimeMillis() + FIVE_MINUTES));

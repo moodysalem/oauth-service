@@ -10,7 +10,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import javax.ws.rs.container.ContainerRequestContext;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,10 +59,7 @@ public abstract class QueryUtil {
                 )
         );
 
-        if (users.size() != 1) {
-            return null;
-        }
-        return users.get(0);
+        return expectOne(users);
     }
 
 
@@ -85,7 +81,7 @@ public abstract class QueryUtil {
                 )
         );
 
-        return (loginCookies.size() == 1) ? loginCookies.get(0) : null;
+        return expectOne(loginCookies);
     }
 
     /**
@@ -156,12 +152,14 @@ public abstract class QueryUtil {
                 )
         );
 
-        if (acceptedScopes.size() == 1) {
-            return acceptedScopes.get(0);
-        }
-        return null;
+        return expectOne(acceptedScopes);
     }
 
+
+    public static LoginCode findLoginCode(final EntityManager em, final String code) {
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        return expectOne(QueryHelper.query(em, LoginCode.class, lc -> cb.equal(lc.get(LoginCode_.code), code)));
+    }
 
     /**
      * Get the client with a specific client ID
@@ -174,13 +172,12 @@ public abstract class QueryUtil {
             return null;
         }
 
-        final List<Client> all = QueryHelper.query(em,Client.class, (client) -> null);
-
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
         final List<Client> clients = QueryHelper.query(em, Client.class, (client) ->
-                cb.equal(client.join(Client_.credentials).get(ClientCredentials_.id), clientId));
-        return (clients.size() != 1) ? null : clients.get(0);
+                cb.equal(client.join(Client_.credentials).get(ClientCredentials_.id), clientId)
+        );
+        return expectOne(clients);
     }
 
 
@@ -207,7 +204,7 @@ public abstract class QueryUtil {
                 )
         );
 
-        return tokens.size() == 1 ? tokens.get(0) : null;
+        return expectOne(tokens);
     }
 
     /**
@@ -246,31 +243,6 @@ public abstract class QueryUtil {
             return TXHelper.withinTransaction(em, () -> em.merge(toReturn));
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to create a token", e);
-            return null;
-        }
-    }
-
-    /**
-     * Generate a temporary token to represent correct credentials, giving the user 5 minutes to accept the permissions
-     * before expiring
-     *
-     * @param user   the user to generate the token for
-     * @param client the client to generate the token for
-     */
-    public static Token generatePermissionToken(EntityManager em, User user, Client client, String redirectUri) {
-        final Token t = new Token();
-        final Date expires = new Date();
-        expires.setTime(expires.getTime() + FIVE_MINUTES);
-        t.setExpires(expires);
-        t.setUser(user);
-        t.setClient(client);
-        t.setRandomToken(64);
-        t.setType(TokenType.PERMISSION);
-        t.setRedirectUri(redirectUri);
-        try {
-            return TXHelper.withinTransaction(em, () -> em.merge(t));
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to generate permission token", e);
             return null;
         }
     }
@@ -369,10 +341,14 @@ public abstract class QueryUtil {
 
         final List<Token> results = em.createQuery(query).setMaxResults(1).getResultList();
 
-        if (!results.isEmpty()) {
-            return results.get(0);
+        return expectOne(results);
+    }
+
+    private static <T> T expectOne(List<T> list) {
+        if (list == null || list.size() != 1) {
+            return null;
         }
-        return null;
+        return list.get(0);
     }
 
 }

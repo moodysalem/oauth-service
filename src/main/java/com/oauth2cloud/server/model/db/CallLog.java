@@ -5,16 +5,17 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 
+@Entity
 @Table(name = "call_log")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class CallLog extends BaseEntity {
     @NotEmpty
-    @Column(name = "ip", updatable = false)
-    private String ip;
-
-    @Lob
     @Column(name = "path", updatable = false)
     private String path;
+
+    @NotEmpty
+    @Column(name = "ip", updatable = false)
+    private String ip;
 
     @NotEmpty
     @Column(name = "method", updatable = false)

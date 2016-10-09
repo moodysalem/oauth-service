@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.model.data;
 
+import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.ClientScope;
 import com.oauth2cloud.server.model.db.Token;
 
@@ -8,16 +9,20 @@ import java.util.Set;
 /**
  * This is the model that gets passed to Permissions.ftl
  */
-public class PermissionsModel extends AuthorizeModel {
-    public PermissionsModel(final Token token, final Set<ClientScope> clientScopes, final boolean rememberMe) {
+public class PermissionsModel implements HeadProperties {
+    public PermissionsModel(final Client client, final Token token, final Set<ClientScope> clientScopes) {
+        this.client = client;
         this.token = token;
         this.clientScopes = clientScopes;
-        this.rememberMe = rememberMe;
     }
 
     private final Token token;
     private final Set<ClientScope> clientScopes;
-    private final boolean rememberMe;
+    private final Client client;
+
+    public Client getClient() {
+        return client;
+    }
 
     public Set<ClientScope> getClientScopes() {
         return clientScopes;
@@ -25,10 +30,6 @@ public class PermissionsModel extends AuthorizeModel {
 
     public Token getToken() {
         return token;
-    }
-
-    public boolean isRememberMe() {
-        return rememberMe;
     }
 
     @Override

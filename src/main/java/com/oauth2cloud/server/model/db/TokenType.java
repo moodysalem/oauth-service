@@ -10,9 +10,7 @@ public enum TokenType {
     // a token given in response to client credentials
     CLIENT(null),
     // these tokens are access tokens that last for a very short amount of time
-    TEMPORARY(300L),
-    // the permission is an internal token used for when the user is authenticated but not authorized for all scopes
-    PERMISSION(300L);
+    TEMPORARY(300L);
 
     private final Long fixedTtl;
 

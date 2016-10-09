@@ -49,7 +49,8 @@ public class CallLogUtil {
         callLog.setMethod(containerRequestContext.getMethod());
 
         try {
-            return TXHelper.withinTransaction(em, () -> em.merge(callLog));
+            TXHelper.withinTransaction(em, () -> em.persist(callLog));
+            return null;
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to log a call", e);
             return null;
@@ -58,16 +59,16 @@ public class CallLogUtil {
 
     public static ClientCallLog logCall(final EntityManager em, final Client client, final ContainerRequestContext request) {
         final CallLog cl = logCall(em, client, null, request);
-        if (cl instanceof ClientCallLog) {
+        if (cl != null && cl instanceof ClientCallLog) {
             return (ClientCallLog) cl;
         }
         return null;
     }
 
     public static ApplicationCallLog logCall(final EntityManager em, final Application application, final ContainerRequestContext request) {
-        final CallLog cl = logCall(em, null, application, request);
-        if (cl instanceof ApplicationCallLog) {
-            return (ApplicationCallLog) cl;
+        final CallLog al = logCall(em, null, application, request);
+        if (al != null && al instanceof ApplicationCallLog) {
+            return (ApplicationCallLog) al;
         }
         return null;
     }

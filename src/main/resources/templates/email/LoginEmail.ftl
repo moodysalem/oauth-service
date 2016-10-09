@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Login to ${loginCode.client.name}</title>
+    <title>Log In to ${loginCode.client.name?html}</title>
     <style>
         /* -------------------------------------
             GLOBAL RESETS
@@ -347,7 +347,7 @@
             <div class="content">
 
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader">Your log in link for ${loginCode.client.name} - ${loginCode.client.application.name}</span>
+                <span class="preheader">Your log in link for ${loginCode.client.name?html} - ${loginCode.client.application.name?html}</span>
                 <table class="main">
 
                     <!-- START MAIN CONTENT AREA -->
@@ -358,7 +358,10 @@
                                     <td>
                                         <p>Click the link below to log in:</p>
                                         <p>
-                                            <a href=""></a>
+                                            <a id="login-link"
+                                               href="${loginCode.baseUri}login/${loginCode.code?url('UTF-8')}">
+                                                Log In
+                                            </a>
                                         </p>
                                     </td>
                                 </tr>
@@ -372,7 +375,7 @@
                 <!-- START FOOTER -->
                 <div class="footer">
                     <table border="0" cellpadding="0" cellspacing="0">
-                        <#--<tr>-->
+                    <#--<tr>-->
                             <#--<td class="content-block">-->
                                 <#--<span class="apple-link">Company Inc, 3 Abbey Road, San Francisco CA 94102</span>-->
                                 <#--<br> Don't like these emails? <a href="http://i.imgur.com/CScmqnj.gif">Unsubscribe</a>.-->

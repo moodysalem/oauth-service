@@ -41,12 +41,12 @@ public class LoginCode extends VersionedEntity {
     @Column(name = "response_type", updatable = false)
     private ResponseType responseType;
 
+    @URL
     @NotEmpty
-    @Column(name = "host", updatable = false)
-    private String host;
+    @Column(name = "base_uri", updatable = false)
+    private String baseUri;
 
     @URL
-    @Lob
     @NotNull
     @Column(name = "redirect_uri", updatable = false)
     private String redirectUri;
@@ -140,11 +140,11 @@ public class LoginCode extends VersionedEntity {
         this.used = used;
     }
 
-    public String getHost() {
-        return host;
+    public String getBaseUri() {
+        return baseUri;
     }
 
-    public void setHost(String host) {
-        this.host = host;
+    public void setBaseUri(String baseUri) {
+        this.baseUri = baseUri;
     }
 }

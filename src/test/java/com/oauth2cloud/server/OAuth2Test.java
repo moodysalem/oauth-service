@@ -14,6 +14,8 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.client.Entity;
@@ -35,8 +37,9 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 public class OAuth2Test extends BaseTest {
-    protected static final String AUTH_HEADER = "Authorization";
-    protected static final String CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
+    protected static final String AUTH_HEADER = "Authorization",
+            CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
+
     protected static final UUID APPLICATION_ID = UUID.fromString("9966e7e3-ac4f-4d8e-9710-2971450cb504");
 
     private static JAXRSEntityManagerFactory jrem;
@@ -126,38 +129,44 @@ public class OAuth2Test extends BaseTest {
                 .request()
                 .post(Entity.form(up));
 
-        assert loginScreen.getStatus() == 302;
+        assert loginScreen.getStatus() == 200;
 
-        final String location = loginScreen.getHeaderString("Location");
+        // extract the login code link from the e-mail
+        final Email e = getLastEmail();
+        final Document d = Jsoup.parse(e.getTextHTML());
+        final String loginLink = d.select("#login-link").attr("href");
 
-        try {
-            final URI u = new URI(location);
+        final Response login = client().target(loginLink).request().get();
 
-            final MultivaluedMap<String, String> values = new MultivaluedHashMap<>();
-            final TokenResponse tr = new TokenResponse();
-            final String frag = u.getFragment();
-            final String[] pcs = frag.split(Pattern.quote("&"));
-            for (final String pair : pcs) {
-                final String[] nv = pair.split(Pattern.quote("="));
-                if (nv.length == 2) {
-                    values.putSingle(
-                            URLDecoder.decode(nv[0], "UTF-8"),
-                            URLDecoder.decode(nv[1], "UTF-8")
-                    );
-                }
-            }
-            tr.setAccessToken(values.getFirst("access_token"));
-            tr.setScope(values.getFirst("scope"));
-            tr.setTokenType(values.getFirst("token_type"));
-            tr.setExpiresIn(Long.parseLong(values.getFirst("expires_in")));
-            return tr;
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return null;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return null;
+//        try {
+//            final URI u = new URI(loginL);
+//
+//            final MultivaluedMap<String, String> values = new MultivaluedHashMap<>();
+//            final TokenResponse tr = new TokenResponse();
+//            final String frag = u.getFragment();
+//            final String[] pcs = frag.split(Pattern.quote("&"));
+//            for (final String pair : pcs) {
+//                final String[] nv = pair.split(Pattern.quote("="));
+//                if (nv.length == 2) {
+//                    values.putSingle(
+//                            URLDecoder.decode(nv[0], "UTF-8"),
+//                            URLDecoder.decode(nv[1], "UTF-8")
+//                    );
+//                }
+//            }
+//            tr.setAccessToken(values.getFirst("access_token"));
+//            tr.setScope(values.getFirst("scope"));
+//            tr.setTokenType(values.getFirst("token_type"));
+//            tr.setExpiresIn(Long.parseLong(values.getFirst("expires_in")));
+//            return tr;
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//            return null;
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
 
     }
 }

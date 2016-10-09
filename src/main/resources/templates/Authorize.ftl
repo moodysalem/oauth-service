@@ -40,6 +40,17 @@
                 </div>
             </form>
 
+            <#if model.sentEmail>
+                <div class="alert alert-info" id="sent-email-alert">
+                    Your log in e-mail has been sent.
+                </div>
+            </#if>
+            <#if model.errorCode??>
+                <div class="alert alert-danger" id="error-code-alert">
+                    ${model.errorCode.message?html}
+                </div>
+            </#if>
+
 
         <#-- google login -->
         <#if model.client.application.googleCredentials??>

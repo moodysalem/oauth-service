@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.rest.util;
 
-import com.oauth2cloud.server.model.data.ErrorModel;
+import com.oauth2cloud.server.model.data.ClientErrorModel;
 import com.oauth2cloud.server.model.db.*;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -49,9 +49,15 @@ public class OAuthUtil {
             return badRequest("Client ID, redirect URI, and response type are all required to log in.");
         }
 
+        // first look up the Client by the client identifier
+        final Client client = QueryUtil.getClient(em, clientId);
+        if (client == null) {
+            return badRequest("Client ID not found.");
+        }
+
         if (!ResponseType.code.name().equals(responseType) &&
                 !ResponseType.token.name().equals(responseType)) {
-            return badRequest("Invalid response type. Must be one of 'token' or 'code'");
+            return badRequest(client, "Invalid response type. Must be one of 'token' or 'code'");
         }
 
         // verify redirect URL is a proper redirect URL
@@ -59,42 +65,36 @@ public class OAuthUtil {
         try {
             toRedirect = new URI(redirectUri);
         } catch (Exception e) {
-            return badRequest("Invalid redirect URL: " + e.getMessage());
-        }
-
-        // first look up the Client by the client identifier
-        final Client client = QueryUtil.getClient(em, clientId);
-        if (client == null) {
-            return badRequest("Client ID not found.");
+            return badRequest(client, "Invalid redirect URL: " + e.getMessage());
         }
 
         // verify the redirect uri is in the list of the client's allowed redirect uris
         boolean validRedirect = false;
         for (final String uri : client.getUris()) {
             try {
-                final URI cUri = new URI(uri);
+                final URI clientUri = new URI(uri);
                 // scheme, host, and port must match
-                if (UriUtil.partialMatch(cUri, toRedirect)) {
+                if (UriUtil.partialMatch(clientUri, toRedirect)) {
                     validRedirect = true;
                     break;
                 }
             } catch (Exception e) {
-                return badRequest("The client has an invalid redirect URI registered: " + uri + "; " + e.getMessage());
+                return badRequest(client, "The client has an invalid redirect URI registered: " + uri + "; " + e.getMessage());
             }
         }
         if (!validRedirect) {
-            return badRequest("The redirect URI " + toRedirect.toString() + " is not allowed for this client.");
+            return badRequest(client, "The redirect URI " + toRedirect.toString() + " is not allowed for this client.");
         }
 
         if (ResponseType.token.name().equals(responseType)) {
             if (!client.getFlows().contains(GrantFlow.IMPLICIT)) {
-                return badRequest("This client does not support the implicit grant flow.");
+                return badRequest(client, "This client does not support the implicit grant flow.");
             }
         }
 
         if (ResponseType.code.name().equals(responseType)) {
             if (!client.getFlows().contains(GrantFlow.CODE)) {
-                return badRequest("This client does not support the code grant flow.");
+                return badRequest(client, "This client does not support the code grant flow.");
             }
         }
 
@@ -118,16 +118,19 @@ public class OAuthUtil {
         return null;
     }
 
-
     /**
      * Helper function to generate an error template with a string error
      *
      * @param issue indicates what the problem with the request is
      * @return error page
      */
-    public static Response badRequest(final String issue) {
+    public static Response badRequest(final Client client, final String issue) {
         return Response.status(Response.Status.BAD_REQUEST)
-                .entity(new Viewable("/templates/Error", new ErrorModel(issue)))
+                .entity(new Viewable("/templates/ClientError", new ClientErrorModel(client, issue)))
                 .build();
+    }
+
+    public static Response badRequest(final String issue) {
+        return badRequest(null, issue);
     }
 }
