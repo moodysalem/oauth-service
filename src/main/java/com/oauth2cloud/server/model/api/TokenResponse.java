@@ -130,12 +130,12 @@ public class TokenResponse {
         final MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
 
         params.putSingle("access_token", getAccessToken());
-        params.putSingle("token_type", TokenResponse.BEARER);
+        params.putSingle("token_type", BEARER);
         if (state != null) {
             params.putSingle("state", state);
         }
         params.putSingle("expires_in", Long.toString(getExpiresIn()));
-        params.putSingle("scope", scope);
+        params.putSingle("scope", getScope());
 
         return QueryString.mapToQueryString(params);
     }
