@@ -289,9 +289,6 @@ public class AuthorizeResource extends BaseResource {
         return QueryUtil.findOrCreateUser(em, application, email);
     }
 
-    private static final long FIVE_MINUTES = 1000L * 60L * 5L;
-
-
     private LoginCode makeLoginCode(
             final EntityManager em,
             final User user, final Client client, final String scope, final String redirectUri,
@@ -308,7 +305,7 @@ public class AuthorizeResource extends BaseResource {
         loginCode.setRememberMe(rememberMe);
         loginCode.setBaseUri(req.getUriInfo().getBaseUri().toString());
 
-        loginCode.setCode(randomAlphanumeric(96));
+        loginCode.setCode(randomAlphanumeric(128));
         loginCode.setExpires(
                 client.getLoginCodeTtl() != null ?
                         new Date(System.currentTimeMillis() + (client.getLoginCodeTtl() * 1000L)) :
