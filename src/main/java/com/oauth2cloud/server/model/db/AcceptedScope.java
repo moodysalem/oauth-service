@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.BaseEntity;
-import org.hibernate.envers.Audited;
+import com.moodysalem.hibernate.model.VersionedEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -10,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "accepted_scopes")
-public class AcceptedScope extends BaseEntity {
+public class AcceptedScope extends VersionedEntity {
     @ManyToOne
     @JoinColumn(name = "client_scope_id", updatable = false)
     private ClientScope clientScope;

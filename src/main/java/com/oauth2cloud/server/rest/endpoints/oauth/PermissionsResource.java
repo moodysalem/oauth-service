@@ -23,7 +23,7 @@ public class PermissionsResource {
 //                    loginModel.setLoginbadRequest(YOUR_LOGIN_ATTEMPT_HAS_EXPIRED_PLEASE_TRY_AGAIN);
 //                } else {
 //                    // first get all the client scopes we will try to approve or check if are approved
-//                    final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, getScopes());
+//                    final Set<ClientScope> clientScopes = QueryUtil.parseScope(em, client, parseScope());
 //                    // we'll populate this as we loop through the scopes
 //                    final Set<AcceptedScope> tokenScopes = new HashSet<>();
 //                    // get all the scope ids that were explicitly granted
@@ -64,25 +64,6 @@ public class PermissionsResource {
 //    }
 
 //
-//    private LoginCookie makeLoginCookie(final User user, final String secret, final Date expires, final boolean rememberMe) {
-//        final LoginCookie loginCookie = new LoginCookie();
-//        loginCookie.setUser(user);
-//        loginCookie.setSecret(secret);
-//        loginCookie.setExpires(expires);
-//        loginCookie.setRememberMe(rememberMe);
-//
-//        try {
-//            TXHelper.withinTransaction(em, () -> {
-//                em.persist(loginCookie);
-//                em.flush();
-//            });
-//        } catch (Exception e) {
-//            LOG.log(Level.SEVERE, "Failed to create a login cookie", e);
-//            return null;
-//        }
-//
-//        return loginCookie;
-//    }
 //
 //    /**
 //     * Helper function to generate a token from a permission token
@@ -93,7 +74,7 @@ public class PermissionsResource {
 //     * @return generated token
 //     */
 //    private Token fromPermissionToken(final TokenType type, final Token permissionToken, final Set<AcceptedScope> scopes) {
-//        return QueryUtil.generateToken(
+//        return QueryUtil.createToken(
 //                em, type, permissionToken.getClient(), permissionToken.getUser(),
 //                Token.getExpires(permissionToken.getClient(), type),
 //                permissionToken.getRedirectUri(), scopes, null, null
@@ -106,7 +87,7 @@ public class PermissionsResource {
 //
 //
 //    // successfully authenticated the user
-//    final Set<ClientScope> toAsk = QueryUtil.getScopesToRequest(em, client, user, scopes);
+//    final Set<ClientScope> toAsk = QueryUtil.getUserClientScopes(em, client, user, scopes);
 //        if (!toAsk.isEmpty()) {
 //        // we need to generate a temporary token for them to get to the next step with
 //        final Token token = QueryUtil.generatePermissionToken(em, user, client, redirectUri);
@@ -118,14 +99,14 @@ public class PermissionsResource {
 //        return Response.ok(new Viewable(TEMPLATES_PERMISSIONS, permissionsModel)).build();
 //    } else {
 //        // accept all the always permissions
-//        final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
+//        final Set<ClientScope> clientScopes = QueryUtil.parseScope(em, client, scopes);
 //        final Set<AcceptedScope> acceptedScopes = clientScopes.stream()
 //                .map(clientScope -> QueryUtil.acceptScope(em, user, clientScope))
 //                .collect(Collectors.toSet());
 //
 //        final TokenType type = getTokenType(responseType);
 //        // redirect with token since they've already asked for all the permissions
-//        final Token token = QueryUtil.generateToken(em, type, client, user, Token.getExpires(client, type),
+//        final Token token = QueryUtil.createToken(em, type, client, user, Token.getExpires(client, type),
 //                redirectUri, acceptedScopes, null, null);
 //        return getRedirectResponse(redirectUri, state, token, rememberMe);
 //    }

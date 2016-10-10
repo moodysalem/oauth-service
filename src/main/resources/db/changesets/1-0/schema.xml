@@ -163,6 +163,9 @@
       <column name="creator_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
+      <column name="show_prompt_no_scopes" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="clients" baseColumnNames="application_id"
                              constraintName="fk_clients_applications"
@@ -381,9 +384,6 @@
         <constraints nullable="false"/>
       </column>
       <column name="secret" type="VARCHAR(191)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="remember_me" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
       <column name="user_id" type="${UUID_TYPE}">

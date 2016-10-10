@@ -22,7 +22,7 @@ public class OAuthUtil {
      * @param scope space delimited scope string
      * @return set of scopes
      */
-    public static Set<String> getScopes(final String scope) {
+    public static Set<String> parseScope(final String scope) {
         if (isBlank(scope)) {
             return Collections.emptySet();
         } else {
@@ -98,7 +98,7 @@ public class OAuthUtil {
             }
         }
 
-        final Set<String> scopes = getScopes(scope);
+        final Set<String> scopes = parseScope(scope);
 
         // verify all the requested scopes are available to the client
         if (scopes != null && !scopes.isEmpty()) {

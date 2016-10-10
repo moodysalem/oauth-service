@@ -17,10 +17,11 @@ public abstract class QueryString {
      */
     public static String mapToQueryString(final MultivaluedMap<String, String> map) {
         final StringBuilder sb = new StringBuilder();
+
         if (map != null) {
             for (final String key : map.keySet()) {
                 for (final String value : map.get(key)) {
-                    if (!isBlank(value)) {
+                    if (!isBlank(value) && sb.length() > 0) {
                         sb.append('&');
                     }
                     try {
@@ -31,6 +32,7 @@ public abstract class QueryString {
                 }
             }
         }
+
         return sb.toString();
     }
 }

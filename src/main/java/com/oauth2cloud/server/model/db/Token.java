@@ -177,17 +177,19 @@ public class Token extends VersionedEntity {
      * @return when the token should expire
      */
     public static Date getExpires(final Client client, final TokenType type) {
+        final long duration;
+
         if (TokenType.REFRESH.equals(type)) {
             if (client.getRefreshTokenTtl() == null) {
                 throw new IllegalArgumentException();
             }
-            return new Date(client.getRefreshTokenTtl() * 1000L);
+            duration = client.getRefreshTokenTtl() * 1000L;
+        } else if (type.getFixedTtl() != null) {
+            duration = type.getFixedTtl() * 1000L;
+        } else {
+            duration = client.getTokenTtl() * 1000L;
         }
 
-        if (type.getFixedTtl() != null) {
-            return new Date(type.getFixedTtl() * 1000L);
-        }
-
-        return new Date(System.currentTimeMillis() + client.getTokenTtl());
+        return new Date(System.currentTimeMillis() + duration);
     }
 }

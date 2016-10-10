@@ -10,10 +10,10 @@ import javax.validation.constraints.NotNull;
 @Table(name = "client_scopes")
 public class ClientScope extends VersionedEntity {
     public enum Priority {
-        // ALWAYS is the highest level, the user is not asked for nor shown the permission when logging in
-        ALWAYS,
-        // REQUIRE is the middle level, the user must accept this permission to log in
-        REQUIRE,
+        // REQUIRED_HIDDEN is the highest level, the user is not asked for nor shown the permission when logging in
+        REQUIRED_HIDDEN,
+        // REQUIRED is the middle level, the user must accept this permission to log in
+        REQUIRED,
         // ASK is the lowest level, the user has the option of accepting this permission or not
         ASK
     }

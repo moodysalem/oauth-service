@@ -1,8 +1,6 @@
 package com.oauth2cloud.server.model.data;
 
-import com.oauth2cloud.server.model.db.Client;
-import com.oauth2cloud.server.model.db.ClientScope;
-import com.oauth2cloud.server.model.db.Token;
+import com.oauth2cloud.server.model.db.LoginCode;
 
 import java.util.Set;
 
@@ -10,35 +8,29 @@ import java.util.Set;
  * This is the model that gets passed to Permissions.ftl
  */
 public class PermissionsModel implements HeadProperties {
-    public PermissionsModel(final Client client, final Token token, final Set<ClientScope> clientScopes) {
-        this.client = client;
-        this.token = token;
-        this.clientScopes = clientScopes;
+    public PermissionsModel(final LoginCode loginCode, final Set<UserClientScope> userClientScopes) {
+        this.loginCode = loginCode;
+        this.userClientScopes = userClientScopes;
     }
 
-    private final Token token;
-    private final Set<ClientScope> clientScopes;
-    private final Client client;
+    private final LoginCode loginCode;
+    private final Set<UserClientScope> userClientScopes;
 
-    public Client getClient() {
-        return client;
+    public Set<UserClientScope> getUserClientScopes() {
+        return userClientScopes;
     }
 
-    public Set<ClientScope> getClientScopes() {
-        return clientScopes;
-    }
-
-    public Token getToken() {
-        return token;
+    public LoginCode getLoginCode() {
+        return loginCode;
     }
 
     @Override
     public String getStylesheetUrl() {
-        return getClient().getApplication().getStylesheetUrl();
+        return getLoginCode().getClient().getApplication().getStylesheetUrl();
     }
 
     @Override
     public String getFaviconUrl() {
-        return getClient().getApplication().getFaviconUrl();
+        return getLoginCode().getClient().getApplication().getFaviconUrl();
     }
 }

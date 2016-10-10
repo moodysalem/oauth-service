@@ -28,7 +28,7 @@
 
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="remember_me" checked> Remember me
+                        <input type="checkbox" name="remember_me" checked> Remember me for 1 month
                     </label>
                 </div>
 
@@ -40,16 +40,15 @@
                 </div>
             </form>
 
-            <#if model.sentEmail>
-                <div class="alert alert-info" id="sent-email-alert">
-                    Your log in e-mail has been sent.
-                </div>
-            </#if>
-            <#if model.errorCode??>
-                <div class="alert alert-danger" id="error-code-alert">
-                    ${model.errorCode.message?html}
-                </div>
-            </#if>
+        <#if model.sentEmail>
+            <div class="alert alert-info" id="sent-email-alert">
+                Your log in e-mail has been sent.
+            </div>
+        <#elseif model.errorCode??>
+            <div class="alert alert-danger" id="error-code-alert">
+            ${model.errorCode.message?html}
+            </div>
+        </#if>
 
 
         <#-- google login -->

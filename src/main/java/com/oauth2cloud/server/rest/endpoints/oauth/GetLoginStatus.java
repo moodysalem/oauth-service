@@ -96,7 +96,7 @@ public class GetLoginStatus extends BaseResource {
             } else {
                 // generate a token
                 tokenResponse = TokenResponse.from(
-                        QueryUtil.generateToken(
+                        QueryUtil.createToken(
                                 em,
                                 TokenType.ACCESS,
                                 client,

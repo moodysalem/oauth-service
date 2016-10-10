@@ -52,6 +52,7 @@
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="token_ttl">86400</column>
       <column name="creator_id">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
+      <column name="show_prompt_no_scopes" valueBoolean="false"/>
     </insert>
 
     <!-- only allow implicit flow -->
@@ -131,7 +132,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">fcdafa69-6bd1-4afa-9dd9-3526e784b86d</column>
-      <column name="priority">ALWAYS</column>
+      <column name="priority">REQUIRED_HIDDEN</column>
     </insert>
 
     <insert tableName="client_scopes">
@@ -140,7 +141,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">3b00548d-80be-492e-81fe-dfee450dfc25</column>
-      <column name="priority">ALWAYS</column>
+      <column name="priority">REQUIRED_HIDDEN</column>
     </insert>
 
     <insert tableName="client_scopes">
@@ -149,7 +150,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">b0e674d6-6d36-4bdd-9226-05496af8bef1</column>
-      <column name="priority">ALWAYS</column>
+      <column name="priority">REQUIRED_HIDDEN</column>
     </insert>
 
     <insert tableName="client_scopes">
@@ -158,7 +159,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">463057d0-9117-4104-83c2-f621b2bc623a</column>
-      <column name="priority">ALWAYS</column>
+      <column name="priority">REQUIRED_HIDDEN</column>
     </insert>
 
     <insert tableName="client_scopes">
@@ -167,7 +168,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="client_id">1489a6d1-5933-4d46-98d0-7e62f37ffc5e</column>
       <column name="scope_id">c6c42fce-323c-4682-94d0-885fbc13f0d4</column>
-      <column name="priority">ALWAYS</column>
+      <column name="priority">REQUIRED_HIDDEN</column>
     </insert>
   </changeSet>
 

@@ -1,8 +1,6 @@
 package com.oauth2cloud.server.model.db;
 
 import com.moodysalem.hibernate.model.BaseEntity;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -20,9 +18,6 @@ public class LoginCookie extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", updatable = false)
     private User user;
-
-    @Column(name = "remember_me", updatable = false)
-    private boolean rememberMe;
 
     @NotNull
     @Column(name = "expires")
@@ -50,13 +45,5 @@ public class LoginCookie extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public boolean isRememberMe() {
-        return rememberMe;
-    }
-
-    public void setRememberMe(boolean rememberMe) {
-        this.rememberMe = rememberMe;
     }
 }

@@ -136,7 +136,7 @@ public class TokenResource extends BaseResource {
         final Set<AcceptedScope> newAcceptedScopes = new HashSet<>(accessToken.getAcceptedScopes());
         final Set<ClientScope> newClientScopes = new HashSet<>(accessToken.getClientScopes());
 
-        Token tempToken = QueryUtil.generateToken(em, TokenType.TEMPORARY, c, accessToken.getUser(), getExpires(c, TokenType.TEMPORARY),
+        Token tempToken = QueryUtil.createToken(em, TokenType.TEMPORARY, c, accessToken.getUser(), getExpires(c, TokenType.TEMPORARY),
                 accessToken.getRedirectUri(), newAcceptedScopes, null, newClientScopes);
 
         return noCache(Response.ok(TokenResponse.from(tempToken))).build();
@@ -178,7 +178,7 @@ public class TokenResource extends BaseResource {
             }
         }
 
-        Token accessToken = QueryUtil.generateToken(em, TokenType.ACCESS, client, refreshToken.getUser(), getExpires(client, TokenType.ACCESS),
+        Token accessToken = QueryUtil.createToken(em, TokenType.ACCESS, client, refreshToken.getUser(), getExpires(client, TokenType.ACCESS),
                 refreshToken.getRedirectUri(), newTokenScopes, refreshToken, null);
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
@@ -212,7 +212,7 @@ public class TokenResource extends BaseResource {
             return error(ErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + missingScopes.stream().collect(Collectors.joining("; ")));
         }
 
-        final Token clientToken = QueryUtil.generateToken(em,
+        final Token clientToken = QueryUtil.createToken(em,
                 TokenType.CLIENT, client, null,
                 getExpires(client, TokenType.CLIENT),
                 null, null, null, clientScopes
@@ -286,10 +286,10 @@ public class TokenResource extends BaseResource {
         // we know the token is valid, so we should generate an access token now
         // only confidential clients may receive refresh tokens
         if (client.getRefreshTokenTtl() != null && client.isConfidential()) {
-            refreshToken = QueryUtil.generateToken(em, TokenType.REFRESH, client, codeToken.getUser(), getExpires(client, TokenType.REFRESH), redirectUri,
+            refreshToken = QueryUtil.createToken(em, TokenType.REFRESH, client, codeToken.getUser(), getExpires(client, TokenType.REFRESH), redirectUri,
                     new HashSet<>(codeToken.getAcceptedScopes()), null, null);
         }
-        final Token accessToken = QueryUtil.generateToken(em, TokenType.ACCESS, client, codeToken.getUser(), getExpires(client, TokenType.ACCESS), redirectUri,
+        final Token accessToken = QueryUtil.createToken(em, TokenType.ACCESS, client, codeToken.getUser(), getExpires(client, TokenType.ACCESS), redirectUri,
                 new HashSet<>(codeToken.getAcceptedScopes()), refreshToken, null);
 
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();

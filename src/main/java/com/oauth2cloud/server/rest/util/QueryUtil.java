@@ -2,6 +2,7 @@ package com.oauth2cloud.server.rest.util;
 
 import com.moodysalem.jaxrs.lib.resources.util.QueryHelper;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
+import com.oauth2cloud.server.model.data.UserClientScope;
 import com.oauth2cloud.server.model.db.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,12 +12,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public abstract class QueryUtil {
     private static final Logger LOG = Logger.getLogger(QueryUtil.class.getName());
-    private static final long FIVE_MINUTES = 1000 * 60 * 5;
 
     /**
      * Get the scopes that a user has given a client permission to use
@@ -64,27 +66,6 @@ public abstract class QueryUtil {
 
 
     /**
-     * Look up a login cookie by the cookie value and the client (joined to application)
-     *
-     * @param secret secret of the cookie
-     * @param client requesting client
-     * @return LoginCookie for the secret and client
-     */
-    public static LoginCookie getLoginCookie(EntityManager em, String secret, Client client) {
-        final CriteriaBuilder cb = em.getCriteriaBuilder();
-
-        final List<LoginCookie> loginCookies = QueryHelper.query(em, LoginCookie.class, (root) ->
-                cb.and(
-                        cb.equal(root.get(LoginCookie_.secret), secret),
-                        cb.greaterThan(root.get(LoginCookie_.expires), System.currentTimeMillis()),
-                        cb.equal(root.join(LoginCookie_.user).get(User_.application), client.getApplication())
-                )
-        );
-
-        return expectOne(loginCookies);
-    }
-
-    /**
      * Get a list of client scopes limited to scopes with names in the scopes list
      *
      * @param client client to get the scopes for
@@ -97,7 +78,7 @@ public abstract class QueryUtil {
         return new HashSet<>(
                 QueryHelper.query(
                         em, ClientScope.class,
-                        (clientScopeRoot) -> cb.and(
+                        clientScopeRoot -> cb.and(
                                 cb.equal(clientScopeRoot.get(ClientScope_.client), client),
                                 (scopes != null && !scopes.isEmpty()) ?
                                         clientScopeRoot.join(ClientScope_.scope).get(Scope_.name).in(scopes) :
@@ -106,55 +87,6 @@ public abstract class QueryUtil {
                 )
         );
     }
-
-    /**
-     * Accept a scope for a user
-     *
-     * @param user        accepting the scope
-     * @param clientScope that is being accepted
-     * @return the AcceptedScope that is created/found for the user/clientscope
-     */
-    public static AcceptedScope acceptScope(EntityManager em, User user, ClientScope clientScope) {
-        final AcceptedScope existing = findAcceptedScope(em, user, clientScope);
-        if (existing != null) {
-            return existing;
-        }
-        final AcceptedScope newAs = new AcceptedScope();
-        newAs.setUser(user);
-        newAs.setClientScope(clientScope);
-
-        try {
-            return TXHelper.withinTransaction(em, () -> em.merge(newAs));
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to accept scope", e);
-            return null;
-        }
-    }
-
-    /**
-     * Find the accepted scope or return null if it's not yet accepted
-     *
-     * @param user        that has accepted the scope
-     * @param clientScope to look for
-     * @return AcceptedScope for the user/clientScope
-     */
-    public static AcceptedScope findAcceptedScope(
-            final EntityManager em,
-            final User user,
-            final ClientScope clientScope
-    ) {
-        final CriteriaBuilder cb = em.getCriteriaBuilder();
-
-        final List<AcceptedScope> acceptedScopes = QueryHelper.query(em, AcceptedScope.class, (root) ->
-                cb.and(
-                        cb.equal(root.get(AcceptedScope_.user), user),
-                        cb.equal(root.get(AcceptedScope_.clientScope), clientScope)
-                )
-        );
-
-        return expectOne(acceptedScopes);
-    }
-
 
     public static LoginCode findLoginCode(final EntityManager em, final String code) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -217,7 +149,7 @@ public abstract class QueryUtil {
      * @param scopes  the scopes for which the token is valid
      * @return a Token with the aforementioned properties
      */
-    public static Token generateToken(
+    public static Token createToken(
             final EntityManager em,
             final TokenType type,
             final Client client,
@@ -248,41 +180,12 @@ public abstract class QueryUtil {
     }
 
     /**
-     * Get the scopes that we need to show or ask the user about
-     * ALWAYS permissions are not shown because the client always has those permissions when the user logs in
-     * REQUIRED permissions are shown but the user does not have an option if they wish to log in to the client
-     * ASK permissions are shown and the user has the option not to grant them to the service
-     *
-     * @param client client for which we're retrieving scopes
-     * @param user   user for which we're retrieving scopes
-     * @return list of scopes we should ask for
-     */
-    public static Set<ClientScope> getScopesToRequest(final EntityManager em, final Client client, final User user, Set<String> scopes) {
-        final CriteriaBuilder cb = em.getCriteriaBuilder();
-
-        return new HashSet<>(
-                QueryHelper.query(em, ClientScope.class, (rcs) ->
-                        cb.and(
-                                // since a client will always have these scopes, we don't show them
-                                cb.notEqual(rcs.get(ClientScope_.priority), ClientScope.Priority.ALWAYS),
-                                // not already accepted by the user
-                                cb.not(rcs.in(acceptedScopes(cb, user))),
-                                // scope names in this list
-                                (scopes != null && !scopes.isEmpty()) ?
-                                        rcs.join(ClientScope_.scope).get(Scope_.name).in(scopes) :
-                                        cb.and()
-                        )
-                )
-        );
-    }
-
-    /**
      * Generates a subquery that returns all the scopes a user has accepted (must be approved by application)
      *
      * @param user for which the acceptedscopes are returned
      * @return a subquery of all the clientscopes that have already been accepted by a user, across clients
      */
-    public static Subquery<ClientScope> acceptedScopes(final CriteriaBuilder cb, User user) {
+    public static Subquery<ClientScope> acceptedScopes(final CriteriaBuilder cb, final User user) {
         final Subquery<ClientScope> subquery = cb.createQuery().subquery(ClientScope.class);
 
         final Root<AcceptedScope> root = subquery.from(AcceptedScope.class);
@@ -344,7 +247,14 @@ public abstract class QueryUtil {
         return expectOne(results);
     }
 
-    private static <T> T expectOne(List<T> list) {
+    /**
+     * Return the one element in a list
+     *
+     * @param list list of elements
+     * @param <T>  type of element
+     * @return one element
+     */
+    public static <T> T expectOne(List<T> list) {
         if (list == null || list.size() != 1) {
             return null;
         }

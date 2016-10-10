@@ -91,7 +91,7 @@ public class AuthorizeResource extends BaseResource {
                 final LoginCode loginCode = makeLoginCode(
                         em,
                         loginCookie.getUser(), client, scope, redirectUri,
-                        responseType, state, loginCookie.isRememberMe()
+                        responseType, state, false
                 );
                 return loginCodeRedirect(loginCode);
             }
@@ -115,7 +115,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     private Response loginCodeRedirect(final LoginCode loginCode) {
-        return Response.temporaryRedirect(
+        return Response.status(Response.Status.FOUND).location(
                 req.getUriInfo().getBaseUriBuilder()
                         .path("login").path(loginCode.getCode())
                         .build()

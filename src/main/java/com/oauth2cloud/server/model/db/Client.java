@@ -57,6 +57,9 @@ public class Client extends VersionedEntity {
     @JoinColumn(name = "creator_id", updatable = false)
     private User creator;
 
+    @Column(name = "show_prompt_no_scopes")
+    private boolean showPromptNoScopes;
+
     public ClientCredentials getCredentials() {
         return credentials;
     }
@@ -139,5 +142,13 @@ public class Client extends VersionedEntity {
 
     public void setScopes(Set<ClientScope> scopes) {
         this.scopes = scopes;
+    }
+
+    public boolean isShowPromptNoScopes() {
+        return showPromptNoScopes;
+    }
+
+    public void setShowPromptNoScopes(boolean showPromptNoScopes) {
+        this.showPromptNoScopes = showPromptNoScopes;
     }
 }

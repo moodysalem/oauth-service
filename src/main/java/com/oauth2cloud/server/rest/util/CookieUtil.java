@@ -1,11 +1,16 @@
 package com.oauth2cloud.server.rest.util;
 
+import com.moodysalem.jaxrs.lib.resources.util.QueryHelper;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
+import com.oauth2cloud.server.model.db.LoginCookie_;
+import com.oauth2cloud.server.model.db.User_;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
+import java.util.List;
 
 public abstract class CookieUtil {
     public static final String COOKIE_NAME_PREFIX = "_AID_";
@@ -53,6 +58,27 @@ public abstract class CookieUtil {
         }
         // the cookie value is the login cookie secret
         final String secret = cookie.getValue();
-        return QueryUtil.getLoginCookie(em, secret, client);
+        return getLoginCookie(em, secret, client);
+    }
+
+    /**
+     * Look up a login cookie by the cookie value and the client (joined to application)
+     *
+     * @param secret secret of the cookie
+     * @param client requesting client
+     * @return LoginCookie for the secret and client
+     */
+    public static LoginCookie getLoginCookie(final EntityManager em, final String secret, final Client client) {
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+
+        final List<LoginCookie> loginCookies = QueryHelper.query(em, LoginCookie.class, (root) ->
+                cb.and(
+                        cb.equal(root.get(LoginCookie_.secret), secret),
+                        cb.greaterThan(root.get(LoginCookie_.expires), System.currentTimeMillis()),
+                        cb.equal(root.join(LoginCookie_.user).get(User_.application), client.getApplication())
+                )
+        );
+
+        return QueryUtil.expectOne(loginCookies);
     }
 }
