@@ -58,7 +58,7 @@ public class LoginResource extends BaseResource {
             return new Validation(backToLogin(loginCode, LoginErrorCode.login_code_used), loginCode);
         }
 
-        if (loginCode.getExpires().before(new Date())) {
+        if (loginCode.getExpires() != null && loginCode.getExpires().before(new Date())) {
             return new Validation(backToLogin(loginCode, LoginErrorCode.login_code_expired), loginCode);
         }
 
@@ -66,7 +66,7 @@ public class LoginResource extends BaseResource {
     }
 
     @GET
-    public Response login(@PathParam("code") final String code) {
+    public Response doLogin(@PathParam("code") final String code) {
         final Validation v = commonValidation(code);
         if (v.getError() != null) {
             return v.getError();

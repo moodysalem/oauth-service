@@ -53,6 +53,7 @@
       <column name="token_ttl">86400</column>
       <column name="creator_id">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
       <column name="show_prompt_no_scopes" valueBoolean="false"/>
+      <!--<column name="login_code_ttl" valueNumeric="300"/>-->
     </insert>
 
     <!-- only allow implicit flow -->

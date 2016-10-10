@@ -1,6 +1,7 @@
 package com.oauth2cloud.server.model.db;
 
 import com.moodysalem.hibernate.model.VersionedEntity;
+import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.URL;
 
@@ -24,11 +25,11 @@ public class LoginCode extends VersionedEntity {
     @JoinColumn(name = "user_id", updatable = false)
     private User user;
 
-    @NotNull
     @Column(name = "expires", updatable = false)
     private Long expires;
 
     @NotNull
+    @Convert(converter = EncryptedStringConverter.class)
     @Column(name = "code", updatable = false)
     private String code;
 

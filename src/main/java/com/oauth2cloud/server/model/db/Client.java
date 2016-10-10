@@ -1,11 +1,11 @@
 package com.oauth2cloud.server.model.db;
 
 import com.moodysalem.hibernate.model.VersionedEntity;
-import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
@@ -56,6 +56,10 @@ public class Client extends VersionedEntity {
     @ManyToOne
     @JoinColumn(name = "creator_id", updatable = false)
     private User creator;
+
+    @Min(60)
+    @Column(name = "login_code_ttl")
+    private Integer loginCodeTtl;
 
     @Column(name = "show_prompt_no_scopes")
     private boolean showPromptNoScopes;
@@ -150,5 +154,13 @@ public class Client extends VersionedEntity {
 
     public void setShowPromptNoScopes(boolean showPromptNoScopes) {
         this.showPromptNoScopes = showPromptNoScopes;
+    }
+
+    public Integer getLoginCodeTtl() {
+        return loginCodeTtl;
+    }
+
+    public void setLoginCodeTtl(Integer loginCodeTtl) {
+        this.loginCodeTtl = loginCodeTtl;
     }
 }

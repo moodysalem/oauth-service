@@ -129,7 +129,7 @@ public class AuthorizeResource extends BaseResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response login(
+    public Response doAuthorize(
             @QueryParam("response_type") final String responseType,
             @QueryParam("client_id") final String clientId,
             @QueryParam("redirect_uri") final String redirectUri,
@@ -308,8 +308,12 @@ public class AuthorizeResource extends BaseResource {
         loginCode.setRememberMe(rememberMe);
         loginCode.setBaseUri(req.getUriInfo().getBaseUri().toString());
 
-        loginCode.setCode(randomAlphanumeric(128));
-        loginCode.setExpires(new Date(System.currentTimeMillis() + FIVE_MINUTES));
+        loginCode.setCode(randomAlphanumeric(96));
+        loginCode.setExpires(
+                client.getLoginCodeTtl() != null ?
+                        new Date(System.currentTimeMillis() + (client.getLoginCodeTtl() * 1000L)) :
+                        null
+        );
         loginCode.setUsed(false);
 
         try {

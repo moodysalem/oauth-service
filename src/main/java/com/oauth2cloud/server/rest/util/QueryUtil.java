@@ -166,7 +166,7 @@ public abstract class QueryUtil {
         toReturn.setUser(user);
         toReturn.setType(type);
         toReturn.setRedirectUri(redirectUri);
-        toReturn.setRandomToken(64);
+        toReturn.setRandomToken(96);
         toReturn.setAcceptedScopes(scopes);
         toReturn.setRefreshToken(refreshToken);
         toReturn.setClientScopes(clientScopes);

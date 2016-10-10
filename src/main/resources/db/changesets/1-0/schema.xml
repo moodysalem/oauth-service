@@ -166,6 +166,7 @@
       <column name="show_prompt_no_scopes" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
+      <column name="login_code_ttl" type="INT"/>
     </createTable>
     <addForeignKeyConstraint baseTableName="clients" baseColumnNames="application_id"
                              constraintName="fk_clients_applications"
@@ -458,7 +459,7 @@
                              referencedColumnNames="id"/>
   </changeSet>
 
-  <changeSet id="login_code table" author="moody.salem">
+  <changeSet id="login_codes table" author="moody.salem">
     <createTable tableName="login_codes">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
@@ -478,9 +479,7 @@
       <column name="user_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="expires" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
+      <column name="expires" type="BIGINT"/>
       <column name="code" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
