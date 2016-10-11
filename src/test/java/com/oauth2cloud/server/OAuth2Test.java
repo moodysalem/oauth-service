@@ -132,41 +132,40 @@ public class OAuth2Test extends BaseTest {
         assert loginScreen.getStatus() == 200;
 
         // extract the login code link from the e-mail
-        final Email e = getLastEmail();
-        final Document d = Jsoup.parse(e.getTextHTML());
-        final String loginLink = d.select("#login-link").attr("href");
+        final Email lastEmail = getLastEmail();
+        final Document emailContent = Jsoup.parse(lastEmail.getTextHTML());
+        final String loginLink = emailContent.select("#login-link").attr("href");
 
         final Response login = client().target(loginLink).request().get();
+        final String redirect = login.getHeaderString("Location");
 
-        return null;
-//        try {
-//            final URI u = new URI(loginL);
-//
-//            final MultivaluedMap<String, String> values = new MultivaluedHashMap<>();
-//            final TokenResponse tr = new TokenResponse();
-//            final String frag = u.getFragment();
-//            final String[] pcs = frag.split(Pattern.quote("&"));
-//            for (final String pair : pcs) {
-//                final String[] nv = pair.split(Pattern.quote("="));
-//                if (nv.length == 2) {
-//                    values.putSingle(
-//                            URLDecoder.decode(nv[0], "UTF-8"),
-//                            URLDecoder.decode(nv[1], "UTF-8")
-//                    );
-//                }
-//            }
-//            tr.setAccessToken(values.getFirst("access_token"));
-//            tr.setScope(values.getFirst("scope"));
-//            tr.setTokenType(values.getFirst("token_type"));
-//            tr.setExpiresIn(Long.parseLong(values.getFirst("expires_in")));
-//            return tr;
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//            return null;
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
+        try {
+            final URI u = new URI(redirect);
 
+            final MultivaluedMap<String, String> values = new MultivaluedHashMap<>();
+            final TokenResponse tokenResponse = new TokenResponse();
+            final String frag = u.getFragment();
+            final String[] pcs = frag.split(Pattern.quote("&"));
+            for (final String pair : pcs) {
+                final String[] nv = pair.split(Pattern.quote("="));
+                if (nv.length == 2) {
+                    values.putSingle(
+                            URLDecoder.decode(nv[0], "UTF-8"),
+                            URLDecoder.decode(nv[1], "UTF-8")
+                    );
+                }
+            }
+            tokenResponse.setAccessToken(values.getFirst("access_token"));
+            tokenResponse.setScope(values.getFirst("scope"));
+            tokenResponse.setTokenType(values.getFirst("token_type"));
+            tokenResponse.setExpiresIn(Long.parseLong(values.getFirst("expires_in")));
+            return tokenResponse;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

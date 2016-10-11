@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.model.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oauth2cloud.server.model.db.User;
 
@@ -10,7 +11,10 @@ import java.util.UUID;
  * We only share and store e-mails and user ids
  */
 public class UserInfo {
-    public UserInfo(@NotNull final UUID userId, @NotNull final String email) {
+    public UserInfo(
+            @JsonProperty("user_id") final UUID userId,
+            @JsonProperty("email") final String email
+    ) {
         this.email = email;
         this.userId = userId;
     }

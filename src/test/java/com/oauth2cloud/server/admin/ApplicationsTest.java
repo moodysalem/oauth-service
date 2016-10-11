@@ -7,7 +7,9 @@ import com.oauth2cloud.server.rest.filter.TokenFilter;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class ApplicationsTest extends OAuth2Test {
@@ -18,7 +20,7 @@ public class ApplicationsTest extends OAuth2Test {
 
         assert target("applications")
                 .request()
-                .header(AUTH_HEADER, "bearer " + tr.getAccessToken())
+                .header(AUTH_HEADER, TokenFilter.BEARER + tr.getAccessToken())
                 .get().getStatus() == 200;
     }
 
@@ -35,7 +37,8 @@ public class ApplicationsTest extends OAuth2Test {
         app = target("applications")
                 .request()
                 .header(AUTH_HEADER, TokenFilter.BEARER + tr.getAccessToken())
-                .post(Entity.json(Collections.singletonList(app)), Application.class);
+                .post(Entity.json(Collections.singletonList(app)), new GenericType<List<Application>>() {
+                }).get(0);
 
         assert id.equals(app.getId());
         assert app.getName().equals("Test App Creation");
@@ -44,10 +47,11 @@ public class ApplicationsTest extends OAuth2Test {
         // test edit
         app.setFaviconUrl(faviconUrl);
         app.setName("Test App Editing");
-        app = target("applications").path(app.getId().toString())
+        app = target("applications")
                 .request()
                 .header(AUTH_HEADER, TokenFilter.BEARER + tr.getAccessToken())
-                .put(Entity.json(app), Application.class);
+                .post(Entity.json(Collections.singletonList(app)), new GenericType<List<Application>>() {
+                }).get(0);
 
         assert app.getName().equals("Test App Editing");
         assert app.getFaviconUrl().equals(faviconUrl);
@@ -55,8 +59,7 @@ public class ApplicationsTest extends OAuth2Test {
         assert target("applications").path(app.getId().toString())
                 .request()
                 .header(AUTH_HEADER, TokenFilter.BEARER + tr.getAccessToken())
-                .delete().getStatus() == 403;
-
+                .delete().getStatus() == 204;
     }
 
 }

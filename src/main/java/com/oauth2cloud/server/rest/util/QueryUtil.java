@@ -2,9 +2,7 @@ package com.oauth2cloud.server.rest.util;
 
 import com.moodysalem.jaxrs.lib.resources.util.QueryHelper;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
-import com.oauth2cloud.server.model.data.UserClientScope;
 import com.oauth2cloud.server.model.db.*;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -12,10 +10,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.*;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class QueryUtil {
     private static final Logger LOG = Logger.getLogger(QueryUtil.class.getName());
@@ -49,7 +47,7 @@ public abstract class QueryUtil {
      * @return the User record
      */
     public static User getUser(final EntityManager em, final String email, final Application application) {
-        if (StringUtils.isBlank(email)) {
+        if (isBlank(email)) {
             return null;
         }
         final CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -120,18 +118,23 @@ public abstract class QueryUtil {
      * @param client the client it was issued to
      * @return the token or null if it doesn't exist or has expired
      */
-    public static Token findToken(final EntityManager em, final String token, final Client client, final Collection<TokenType> types) {
-        if (token == null) {
+    public static Token findToken(
+            final EntityManager em,
+            final String token,
+            final Client client,
+            final Collection<TokenType> types
+    ) {
+        if (isBlank(token)) {
             return null;
         }
+
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
         final List<Token> tokens = QueryHelper.query(em, Token.class, tokenRoot ->
                 cb.and(
+                        cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
                         cb.equal(tokenRoot.get(Token_.token), token),
                         types != null && !types.isEmpty() ? tokenRoot.get(Token_.type).in(types) : cb.and(),
-                        cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
-                        cb.isNull(tokenRoot.get(Token_.user)),
                         client != null ? cb.equal(tokenRoot.get(Token_.client), client) : cb.and()
                 )
         );

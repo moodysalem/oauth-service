@@ -212,6 +212,59 @@
     <addUniqueConstraint tableName="client_flows" columnNames="client_id,flow"/>
   </changeSet>
 
+  <changeSet id="login_codes table" author="moody.salem">
+    <createTable tableName="login_codes">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expires" type="BIGINT"/>
+      <column name="code" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="remember_me" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="response_type" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="base_uri" type="VARCHAR(2048)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="redirect_uri" type="VARCHAR(2048)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="scope" type="VARCHAR(2048)"/>
+      <column name="state" type="VARCHAR(2048)"/>
+      <column name="used" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="client_id"
+                             constraintName="fk_login_codes_clients"
+                             referencedTableName="clients"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="user_id" constraintName="fk_login_codes_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="login_codes" columnNames="code" constraintName="uk_login_codes_code"/>
+  </changeSet>
+
   <changeSet id="token table" author="moody.salem">
     <createTable tableName="tokens">
       <column name="id" type="${UUID_TYPE}">
@@ -247,6 +300,7 @@
       <column name="type" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="login_code_id" type="${UUID_TYPE}"/>
     </createTable>
     <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="user_id" constraintName="fk_tokens_users"
                              referencedTableName="users"
@@ -258,6 +312,12 @@
                              constraintName="fk_token_refresh_token"
                              referencedTableName="tokens"
                              referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="login_code_id"
+                             constraintName="fk_tokens_login_code"
+                             referencedTableName="login_codes"
+                             referencedColumnNames="id"/>
+
+    <addUniqueConstraint tableName="tokens" columnNames="token"/>
   </changeSet>
 
   <changeSet author="moody.salem" id="client_scopes Table">
@@ -457,59 +517,6 @@
                              constraintName="fk_application_call_log_applications"
                              referencedTableName="applications"
                              referencedColumnNames="id"/>
-  </changeSet>
-
-  <changeSet id="login_codes table" author="moody.salem">
-    <createTable tableName="login_codes">
-      <column name="id" type="${UUID_TYPE}">
-        <constraints nullable="false" primaryKey="true"/>
-      </column>
-      <column name="created" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="updated" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="version" type="BIGINT" defaultValue="0">
-        <constraints nullable="false"/>
-      </column>
-      <column name="client_id" type="${UUID_TYPE}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="user_id" type="${UUID_TYPE}">
-        <constraints nullable="false"/>
-      </column>
-      <column name="expires" type="BIGINT"/>
-      <column name="code" type="VARCHAR(191)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="remember_me" type="BOOLEAN">
-        <constraints nullable="false"/>
-      </column>
-      <column name="response_type" type="VARCHAR(20)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="base_uri" type="VARCHAR(2048)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="redirect_uri" type="VARCHAR(2048)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="scope" type="VARCHAR(2048)"/>
-      <column name="state" type="VARCHAR(2048)"/>
-      <column name="used" type="BOOLEAN">
-        <constraints nullable="false"/>
-      </column>
-    </createTable>
-
-    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="client_id"
-                             constraintName="fk_login_codes_clients"
-                             referencedTableName="clients"
-                             referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="user_id" constraintName="fk_login_codes_users"
-                             referencedTableName="users"
-                             referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="login_codes" columnNames="code" constraintName="uk_login_codes_code"/>
   </changeSet>
 
 

@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static com.oauth2cloud.server.rest.util.CookieUtil.getNewCookie;
 import static com.oauth2cloud.server.rest.util.QueryUtil.expectOne;
 
 @Path("login/{code}")
@@ -51,7 +52,7 @@ public class LoginResource extends BaseResource {
         final LoginCode loginCode = QueryUtil.findLoginCode(em, code);
 
         if (loginCode == null) {
-            return new Validation(OAuthUtil.badRequest("Invalid login code!"), loginCode);
+            return new Validation(OAuthUtil.badRequest("Invalid login code!"), null);
         }
 
         if (loginCode.getUsed()) {
@@ -165,67 +166,12 @@ public class LoginResource extends BaseResource {
                 .location(toRedirect.build());
 
         if (loginCode.getRememberMe()) {
-//            builder.cookie(getNewCookie(token));
+            builder.cookie(getNewCookie(em, token.getUser(), token.getClient(),
+                    req.getUriInfo().getRequestUri().getHost()));
         }
 
         return builder.build();
     }
-
-//    private static final long ONE_MONTH = 1000L * 60L * 60L * 24L * 30L;
-//
-//    private NewCookie getNewCookie(final Token token, final Boolean rememberMe) {
-//        final Date expires;
-//        LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, token.getClient());
-//        if (loginCookie != null) {
-//            // we should re-use the same values
-//            expires = loginCookie.getExpires();
-//        } else {
-//            // we should issue a new cookie
-//            loginCookie = generateLoginCookie(token.getUser());
-//        }
-//
-//        final int maxAge = rememberMe ? (new Long(ONE_MONTH / 1000L)).intValue() : NewCookie.DEFAULT_MAX_AGE;
-//        final Date expiry = rememberMe ? expires : null;
-//
-//        final boolean isHTTPS = "https".equalsIgnoreCase(forwardedProto);
-//
-//        String cookieDomain = req.getUriInfo().getBaseUri().getHost();
-//        if (cookieDomain != null) {
-//            if (cookieDomain.matches(IPV4_ADDRESS_REGEX)) {
-//                // don't put a domain on a cookie that is passed to an IP address
-//                cookieDomain = null;
-//            } else {
-//                // the domain should be the last two pieces of the domain name
-//                String[] pieces = cookieDomain.split("\\.");
-//                List<String> pcs = Arrays.asList(pieces);
-//                cookieDomain = pcs.subList(Math.max(0, pcs.size() - 2), pcs.size()).stream().collect(Collectors.joining("."));
-//            }
-//        }
-//
-//        return new NewCookie(
-//                getCookieName(token.getClient()), loginCookie.getSecret(), "/", cookieDomain, NewCookie.DEFAULT_VERSION,
-//                OAUTH2_CLOUD_LOGIN_COOKIE, maxAge, expiry, isHTTPS, true
-//        );
-//    }
-//
-//    private LoginCookie generateLoginCookie(final User user) {
-//        final LoginCookie loginCookie = new LoginCookie();
-//        loginCookie.setUser(user);
-//        loginCookie.setExpires(new Date(System.currentTimeMillis() + ONE_MONTH));
-//        loginCookie.setSecret(randomAlphanumeric(128));
-//
-//        try {
-//            TXHelper.withinTransaction(em, () -> {
-//                em.persist(loginCookie);
-//                em.flush();
-//            });
-//        } catch (Exception e) {
-//            LOG.log(Level.SEVERE, "Failed to create a login cookie", e);
-//            return null;
-//        }
-//
-//        return loginCookie;
-//    }
 
 
     /**

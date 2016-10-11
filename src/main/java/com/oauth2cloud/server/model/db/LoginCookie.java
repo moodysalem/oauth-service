@@ -46,4 +46,8 @@ public class LoginCookie extends BaseEntity {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public void expiresInOneMonth() {
+        setExpires(new Date(System.currentTimeMillis() + (1000L * 60L * 60L * 24L * 30L)));
+    }
 }

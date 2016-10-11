@@ -33,7 +33,7 @@ public class AuthorizeTest extends OAuth2Test {
 
         // invalid client id
         assert target("authorize")
-                .queryParam("client_id", CLIENT_ID + "1")
+                .queryParam("client_id", "ABC")
                 .queryParam("redirect_uri", "http://localhost:8080")
                 .queryParam("response_type", "token")
                 .request()

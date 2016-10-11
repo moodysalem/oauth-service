@@ -333,46 +333,58 @@ public class TokenResource extends BaseResource {
     /**
      * Get the info for a token for a specific client
      *
-     * @param token         unique string representing the token
+     * @param tokenString   unique string representing the token
      * @param applicationId the id of the application for which this token was created
      * @return the token information
      */
     @POST
     @Path("info")
-    public Response tokenInfo(@FormParam("token") String token, @FormParam("client_id") String clientId,
-                              @FormParam("application_id") UUID applicationId) {
-        if (token == null || (applicationId == null && clientId == null)) {
+    public Response tokenInfo(
+            @FormParam("token") final String tokenString,
+            @FormParam("client_id") final String clientId,
+            @FormParam("application_id") final UUID applicationId
+    ) {
+        if (isBlank(tokenString) || (applicationId == null && clientId == null)) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST,
                     "'token' and the 'application_id' or 'client_id' form parameters are required.");
         }
 
-        Client c = null;
+        final Client client;
+        final Application application;
+
         if (clientId != null) {
-            c = QueryUtil.getClient(em, clientId);
-            if (c == null) {
+            client = QueryUtil.getClient(em, clientId);
+            if (client == null) {
                 throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid client ID.");
             }
-            CallLogUtil.logCall(em, c, req);
-            applicationId = c.getApplication().getId();
+            application = null;
+            CallLogUtil.logCall(em, client, req);
+        } else {
+            application = em.find(Application.class, applicationId);
+            if (application == null) {
+                throw new RequestProcessingException(Response.Status.BAD_REQUEST, "Invalid application ID");
+            }
+            client = null;
+            CallLogUtil.logCall(em, application, req);
         }
 
-        final Token t = QueryUtil.findToken(em, token, c, Arrays.asList(TokenType.ACCESS, TokenType.REFRESH, TokenType.TEMPORARY));
-        if (t == null || !t.getClient().getApplication().getId().equals(applicationId)) {
+        final Token token = QueryUtil.findToken(
+                em,
+                tokenString,
+                client,
+                Arrays.asList(TokenType.ACCESS, TokenType.REFRESH, TokenType.TEMPORARY)
+        );
+
+        if (token == null ||
+                (client != null && !client.idMatch(token.getClient())) ||
+                (application != null && !application.idMatch(token.getClient().getApplication()))) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
         }
 
-        // call made on behalf of a client
-        if (clientId != null) {
-            CallLogUtil.logCall(em, t.getClient(), req);
-        } else {
-            // otherwise call made on behalf of the application
-            CallLogUtil.logCall(em, t.getClient().getApplication(), req);
-        }
-
-        return noCache(Response.ok(TokenResponse.from(t))).build();
+        return noCache(Response.ok(TokenResponse.from(token))).build();
     }
 
-    private Response.ResponseBuilder noCache(Response.ResponseBuilder rb) {
+    private static Response.ResponseBuilder noCache(Response.ResponseBuilder rb) {
         return rb.header("Cache-Control", "no-store").header("Pragma", "no-cache");
     }
 

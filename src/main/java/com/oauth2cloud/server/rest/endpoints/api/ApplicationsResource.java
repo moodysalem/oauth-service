@@ -22,13 +22,12 @@ public class ApplicationsResource extends VersionedEntityResource<Application> {
     @Override
     public boolean canMerge(Application oldData, Application newData) {
         final User requestingUser = getUser();
-        return (oldData == null || oldData.getOwner().idMatch(requestingUser)) &&
-                (newData.getOwner().idMatch(requestingUser));
+        return (oldData == null || oldData.getOwner().idMatch(requestingUser));
     }
 
     @Override
     public void beforeMerge(Application oldData, Application newData) {
-
+        newData.setOwner(getUser());
     }
 
     @Override

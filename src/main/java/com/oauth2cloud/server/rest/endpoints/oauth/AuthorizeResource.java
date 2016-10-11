@@ -305,7 +305,7 @@ public class AuthorizeResource extends BaseResource {
         loginCode.setRememberMe(rememberMe);
         loginCode.setBaseUri(req.getUriInfo().getBaseUri().toString());
 
-        loginCode.setCode(randomAlphanumeric(128));
+        loginCode.setCode(randomAlphanumeric(96));
         loginCode.setExpires(
                 client.getLoginCodeTtl() != null ?
                         new Date(System.currentTimeMillis() + (client.getLoginCodeTtl() * 1000L)) :

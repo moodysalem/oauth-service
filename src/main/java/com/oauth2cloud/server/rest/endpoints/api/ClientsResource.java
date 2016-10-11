@@ -34,7 +34,7 @@ public class ClientsResource extends VersionedEntityResource<Client> {
     @Override
     public void beforeMerge(Client oldData, Client newData) {
         if (oldData == null) {
-            newData.setCredentials(ClientCredentials.random(128));
+            newData.setCredentials(ClientCredentials.random(96));
         }
     }
 
