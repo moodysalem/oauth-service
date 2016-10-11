@@ -202,7 +202,7 @@
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.3.6.v20151106</version>
+        <version>9.3.12.v20160915</version>
         <configuration>
           <systemProperties>
             <systemProperty>
@@ -219,13 +219,12 @@
             </systemProperty>
 
             <systemProperty>
-              <name>CLIENT_ID</name>
-              <value>6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4</value>
-            </systemProperty>
-
-            <systemProperty>
               <name>SMTP_HOST</name>
               <value>${SMTP_HOST}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>SMTP_PORT</name>
+              <value>${SMTP_PORT}</value>
             </systemProperty>
             <systemProperty>
               <name>SMTP_USERNAME</name>
@@ -235,19 +234,10 @@
               <name>SMTP_PASSWORD</name>
               <value>${SMTP_PASSWORD}</value>
             </systemProperty>
+
             <systemProperty>
               <name>ENCRYPTION_SECRET</name>
               <value>${ENCRYPTION_SECRET}</value>
-            </systemProperty>
-
-            <systemProperty>
-              <name>DEBUG</name>
-              <value>1</value>
-            </systemProperty>
-
-            <systemProperty>
-              <name>LIQUIBASE_CONTEXT</name>
-              <value>test</value>
             </systemProperty>
           </systemProperties>
         </configuration>

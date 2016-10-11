@@ -3,7 +3,6 @@ package com.oauth2cloud.server.rest.util;
 import com.moodysalem.jaxrs.lib.resources.util.QueryHelper;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.*;
-import sun.net.util.IPAddressUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -14,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -97,6 +97,9 @@ public abstract class CookieUtil {
         return QueryUtil.expectOne(loginCookies);
     }
 
+
+    private static final Pattern IP_ADDRESS = Pattern.compile("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");
+
     /**
      * Get a new login cookie
      *
@@ -120,8 +123,7 @@ public abstract class CookieUtil {
         final String cookieDomain;
         if (requestDomain != null) {
             // don't set a cookie domain if the request came straight to the IP address
-            if (IPAddressUtil.isIPv4LiteralAddress(requestDomain) ||
-                    IPAddressUtil.isIPv6LiteralAddress(requestDomain)) {
+            if (IP_ADDRESS.matcher(requestDomain).matches()) {
                 cookieDomain = null;
             } else {
                 // the domain should be the last two pieces of the domain name

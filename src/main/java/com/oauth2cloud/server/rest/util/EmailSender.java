@@ -38,11 +38,13 @@ public abstract class EmailSender {
                 email.setReplyToAddress(replyTo, replyTo);
             }
             email.setTextHTML(processTemplate(cfg, template, model));
-            try {
-                mailer.sendMail(email);
-            } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Failed to send e-mail", e);
-            }
+            new Thread(() -> {
+                try {
+                    mailer.sendMail(email);
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, "Failed to send e-mail", e);
+                }
+            }).start();
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to send e-mail", e);
         }

@@ -7,12 +7,12 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-lg-8 col-lg-offset-2 col-sm-12">
+        <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
             <h1 class="page-header text-center">${model.client.application.name?html}</h1>
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-4 col-lg-offset-2 col-sm-6">
+        <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
             <form id="form-signin" method="POST">
                 <input type="hidden" name="action" value="email"/>
 
