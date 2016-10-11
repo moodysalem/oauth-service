@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.BaseEntity;
+import com.moodysalem.hibernate.model.VersionedEntity;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "login_cookies")
-public class LoginCookie extends BaseEntity {
+public class LoginCookie extends VersionedEntity {
     @NotEmpty
     @Column(name = "secret", updatable = false)
     private String secret;

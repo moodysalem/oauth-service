@@ -44,9 +44,9 @@
             <div class="alert alert-info" id="sent-email-alert">
                 Your log in e-mail has been sent.
             </div>
-        <#elseif model.errorCode??>
+        <#elseif model.loginErrorCode??>
             <div class="alert alert-danger" id="error-code-alert">
-            ${model.errorCode.message?html}
+            ${model.loginErrorCode.message?html}
             </div>
         </#if>
 

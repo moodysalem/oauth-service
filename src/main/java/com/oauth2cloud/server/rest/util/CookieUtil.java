@@ -9,12 +9,10 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
@@ -100,48 +98,30 @@ public abstract class CookieUtil {
 
     private static final Pattern IP_ADDRESS = Pattern.compile("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");
 
+
     /**
      * Get a new login cookie
      *
-     * @param em            used to persist cookie
-     * @param user          user that logged in
-     * @param client        client that has logged in
-     * @param requestDomain request domain
+     * @param em     used to persist cookie
+     * @param user   user that logged in
+     * @param client client that has logged in
      * @return
      */
     public static NewCookie getNewCookie(
             final EntityManager em,
             final User user,
-            final Client client,
-            final String requestDomain
+            final Client client
     ) {
         final LoginCookie loginCookie = generateLoginCookie(em, user);
         if (loginCookie == null) {
             return null;
         }
 
-        final String cookieDomain;
-        if (requestDomain != null) {
-            // don't set a cookie domain if the request came straight to the IP address
-            if (IP_ADDRESS.matcher(requestDomain).matches()) {
-                cookieDomain = null;
-            } else {
-                // the domain should be the last two pieces of the domain name
-                final List<String> domainPieces = Arrays.asList(requestDomain.split("\\."));
-                cookieDomain = domainPieces.subList(
-                        Math.max(0, domainPieces.size() - 2),
-                        domainPieces.size()
-                ).stream().collect(Collectors.joining("."));
-            }
-        } else {
-            cookieDomain = null;
-        }
-
         return new NewCookie(
                 getCookieName(client),
                 loginCookie.getSecret(),
                 "/",
-                cookieDomain,
+                null,
                 NewCookie.DEFAULT_VERSION,
                 null,
                 60 * 60 * 24 * 30,

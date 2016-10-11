@@ -166,8 +166,7 @@ public class LoginResource extends BaseResource {
                 .location(toRedirect.build());
 
         if (loginCode.getRememberMe()) {
-            builder.cookie(getNewCookie(em, token.getUser(), token.getClient(),
-                    req.getUriInfo().getRequestUri().getHost()));
+            builder.cookie(getNewCookie(em, token.getUser(), token.getClient()));
         }
 
         return builder.build();
@@ -294,7 +293,7 @@ public class LoginResource extends BaseResource {
     private Response backToLogin(final LoginCode loginCode, final LoginErrorCode loginErrorCode) {
         final UriBuilder ub = UriBuilder.fromUri(loginCode.getBaseUri())
                 .path("authorize")
-                .queryParam("client_id", loginCode.getClient().getId())
+                .queryParam("client_id", loginCode.getClient().getCredentials().getId())
                 .queryParam("response_type", loginCode.getResponseType())
                 .queryParam("redirect_uri", loginCode.getRedirectUri());
 
