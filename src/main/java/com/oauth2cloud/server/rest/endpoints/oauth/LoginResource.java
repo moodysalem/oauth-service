@@ -216,13 +216,17 @@ public class LoginResource extends BaseResource {
         );
 
         // group accepted scopes by the client scope ID
-        final Map<UUID, AcceptedScope> accepted = QueryHelper.query(em, AcceptedScope.class, acceptedScope ->
-                cb.and(
-                        // for the user
-                        cb.equal(acceptedScope.get(AcceptedScope_.user), loginCode.getUser()),
-                        // in the list of scopes
-                        acceptedScope.get(AcceptedScope_.clientScope).in(clientScopes)
-                )
+        final Map<UUID, AcceptedScope> accepted = (
+                clientScopes.isEmpty() ?
+                        Collections.<AcceptedScope>emptyList() :
+                        QueryHelper.query(em, AcceptedScope.class, acceptedScope ->
+                                cb.and(
+                                        // for the user
+                                        cb.equal(acceptedScope.get(AcceptedScope_.user), loginCode.getUser()),
+                                        // in the list of scopes
+                                        acceptedScope.get(AcceptedScope_.clientScope).in(clientScopes)
+                                )
+                        )
         ).stream()
                 .collect(
                         Collectors.toMap(
