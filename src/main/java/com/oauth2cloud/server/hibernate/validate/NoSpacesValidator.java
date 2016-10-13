@@ -10,6 +10,10 @@ public class NoSpacesValidator implements ConstraintValidator<NoSpaces, String> 
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+        return noSpaces(s);
+    }
+
+    public static boolean noSpaces(String s) {
         return s == null || !s.contains(" ");
     }
 }

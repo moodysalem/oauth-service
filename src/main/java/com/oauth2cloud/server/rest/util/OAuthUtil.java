@@ -45,14 +45,18 @@ public class OAuthUtil {
     public static Response validateRequest(final EntityManager em,
                                            final String responseType, final String clientId, final String redirectUri, final String scope) {
         // verify all the query parameters are passed
-        if (isBlank(clientId) || isBlank(redirectUri) || isBlank(responseType)) {
-            return badRequest("Client ID, redirect URI, and response type are all required to log in.");
+        if (isBlank(clientId)) {
+            return badRequest("The 'client_id' query parameter is required.");
         }
 
         // first look up the Client by the client identifier
         final Client client = QueryUtil.getClient(em, clientId);
         if (client == null) {
-            return badRequest("Client ID not found.");
+            return badRequest("Specified 'client_id' not found.");
+        }
+
+        if (isBlank(redirectUri) || isBlank(responseType)) {
+            return badRequest(client, "'redirect_uri' and 'response_type' query parameters are required.");
         }
 
         if (!ResponseType.code.name().equals(responseType) &&
@@ -65,7 +69,7 @@ public class OAuthUtil {
         try {
             toRedirect = new URI(redirectUri);
         } catch (Exception e) {
-            return badRequest(client, "Invalid redirect URL: " + e.getMessage());
+            return badRequest(client, "Invalid redirect URI: " + e.getMessage());
         }
 
         // verify the redirect uri is in the list of the client's allowed redirect uris

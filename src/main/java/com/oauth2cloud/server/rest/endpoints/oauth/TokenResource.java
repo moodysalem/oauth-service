@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static com.oauth2cloud.server.model.api.ErrorResponse.Type.*;
 import static com.oauth2cloud.server.model.db.Token.getExpires;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -79,12 +80,12 @@ public class TokenResource extends BaseResource {
     @POST
     public Response post(MultivaluedMap<String, String> formParams) {
         if (formParams == null) {
-            return error(ErrorResponse.Type.invalid_request, "Invalid request body");
+            return error(invalid_request, "Invalid request body");
         }
 
         String grantType = formParams.getFirst("grant_type");
         if (grantType == null) {
-            return error(ErrorResponse.Type.invalid_request, "'grant_type' is required.");
+            return error(invalid_request, "'grant_type' is required.");
         }
 
         switch (grantType) {
@@ -108,29 +109,29 @@ public class TokenResource extends BaseResource {
                 clientId = formParams.getFirst("client_id");
 
         if (isEmpty(token)) {
-            return error(ErrorResponse.Type.invalid_request,
+            return error(invalid_request,
                     String.format("'%s' grant type requires the 'token' parameter", TEMPORARY_TOKEN));
         }
 
         if (isEmpty(clientId)) {
-            return error(ErrorResponse.Type.invalid_request,
+            return error(invalid_request,
                     String.format("'%s' grant type requires the 'client_id' parameter", TEMPORARY_TOKEN));
         }
 
         final Client c = QueryUtil.getClient(em, clientId);
         if (c == null) {
-            return error(ErrorResponse.Type.invalid_client, "Invalid 'client_id.'");
+            return error(invalid_client, "Invalid 'client_id.'");
         }
         CallLogUtil.logCall(em, c, req);
 
         if (!c.getFlows().contains(GrantFlow.TEMPORARY_TOKEN)) {
-            return error(ErrorResponse.Type.unauthorized_client,
+            return error(unauthorized_client,
                     String.format("Client is not authorized for the '%s' grant flow.", TEMPORARY_TOKEN));
         }
 
         final Token accessToken = QueryUtil.findToken(em, token, c, Collections.singleton(TokenType.ACCESS));
         if (accessToken == null) {
-            return error(ErrorResponse.Type.invalid_grant, "Invalid or expired access token.");
+            return error(invalid_grant, "Invalid or expired access token.");
         }
 
         final Set<AcceptedScope> newAcceptedScopes = new HashSet<>(accessToken.getAcceptedScopes());
@@ -147,20 +148,20 @@ public class TokenResource extends BaseResource {
                 scope = formParams.getFirst("scope");
 
         if (client == null) {
-            return error(ErrorResponse.Type.invalid_grant, "Client authorization is required for the '" + REFRESH_TOKEN + "' grant type.");
+            return error(invalid_grant, "Client authorization is required for the '" + REFRESH_TOKEN + "' grant type.");
         }
 
         if (!client.isConfidential()) {
-            return error(ErrorResponse.Type.invalid_grant, "Client type must be confidential for the '" + REFRESH_TOKEN + "' grant type.");
+            return error(invalid_grant, "Client type must be confidential for the '" + REFRESH_TOKEN + "' grant type.");
         }
 
         if (token == null) {
-            return error(ErrorResponse.Type.invalid_request, "'refresh_token' parameter is required.");
+            return error(invalid_request, "'refresh_token' parameter is required.");
         }
 
         final Token refreshToken = QueryUtil.findToken(em, token, client, Collections.singleton(TokenType.REFRESH));
         if (refreshToken == null) {
-            return error(ErrorResponse.Type.invalid_grant, "Invalid or expired refresh token.");
+            return error(invalid_grant, "Invalid or expired refresh token.");
         }
         CallLogUtil.logCall(em, refreshToken.getClient(), req);
 
@@ -188,17 +189,17 @@ public class TokenResource extends BaseResource {
         String scope = formParams.getFirst("scope");
 
         if (client == null) {
-            return error(ErrorResponse.Type.invalid_client, "Client authorization failed.");
+            return error(invalid_client, "Client authorization failed.");
         }
         CallLogUtil.logCall(em, client, req);
 
         if (!client.getFlows().contains(GrantFlow.CLIENT_CREDENTIALS)) {
-            return error(ErrorResponse.Type.unauthorized_client,
+            return error(unauthorized_client,
                     String.format("Client is not authorized for the '%s' grant flow.", CLIENT_CREDENTIALS));
         }
 
         if (!client.isConfidential()) {
-            return error(ErrorResponse.Type.unauthorized_client,
+            return error(unauthorized_client,
                     String.format("Client must be confidential for the '%s' grant flow.", CLIENT_CREDENTIALS));
         }
 
@@ -246,37 +247,37 @@ public class TokenResource extends BaseResource {
                 clientId = formParams.getFirst("client_id");
 
         if (code == null || redirectUri == null || clientId == null) {
-            return error(ErrorResponse.Type.invalid_request,
+            return error(invalid_request,
                     "'code', 'redirect_uri', and 'client_id' are all required for the " + AUTHORIZATION_CODE + " grant flow.");
         }
 
         final Client client = QueryUtil.getClient(em, clientId);
         if (client == null) {
-            return error(ErrorResponse.Type.invalid_client, "Invalid client ID.");
+            return error(invalid_client, "Invalid client ID.");
         }
         CallLogUtil.logCall(em, client, req);
 
         if (!client.getFlows().contains(GrantFlow.CODE)) {
-            return error(ErrorResponse.Type.unauthorized_client, "Client is not authorized for the '" + AUTHORIZATION_CODE + "' grant flow.");
+            return error(unauthorized_client, "Client is not authorized for the '" + AUTHORIZATION_CODE + "' grant flow.");
         }
 
         if (this.client != null && !this.client.idMatch(client)) {
-            return error(ErrorResponse.Type.invalid_client, "Client authentication does not match client ID.");
+            return error(invalid_client, "Client authentication does not match client ID.");
         }
 
         if (client.isConfidential() && this.client == null) {
-            return error(ErrorResponse.Type.invalid_client,
+            return error(invalid_client,
                     String.format("Client authentication is required for CONFIDENTIAL clients in the '%s' grant flow.",
                             AUTHORIZATION_CODE));
         }
 
         final Token codeToken = QueryUtil.findToken(em, code, client, Collections.singleton(TokenType.CODE));
         if (codeToken == null) {
-            return error(ErrorResponse.Type.invalid_grant, "Invalid token.");
+            return error(invalid_grant, "Invalid token.");
         }
 
         if (!redirectUri.equals(codeToken.getRedirectUri())) {
-            return error(ErrorResponse.Type.invalid_grant, "Redirect URI must exactly match the original redirect UriUtil.");
+            return error(invalid_grant, "Redirect URI must exactly match the original redirect UriUtil.");
         }
 
         // first expire the token
@@ -296,7 +297,7 @@ public class TokenResource extends BaseResource {
     }
 
     private Response passwordGrantType(MultivaluedMap<String, String> formParams) {
-        return error(ErrorResponse.Type.invalid_grant, "This OAuth2 server implementation does not support passwords");
+        return error(invalid_grant, "This OAuth2 server implementation does not support passwords");
     }
 
     private Set<String> getMissingScopes(final Set<ClientScope> clientScopes, final Set<String> requestedScopes) {

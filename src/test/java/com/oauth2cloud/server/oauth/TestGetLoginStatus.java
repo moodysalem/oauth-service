@@ -28,5 +28,4 @@ public class TestGetLoginStatus extends OAuth2Test {
             .header("Cookie", CookieUtil.COOKIE_NAME_PREFIX + APPLICATION_ID + "=abc").get().getStatus() == 200;
     }
 
-
 }
