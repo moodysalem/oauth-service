@@ -57,6 +57,7 @@ public class Client extends VersionedEntity {
     @JoinColumn(name = "creator_id", updatable = false)
     private User creator;
 
+    @NotNull
     @Min(60)
     @Column(name = "login_code_ttl")
     private Integer loginCodeTtl;

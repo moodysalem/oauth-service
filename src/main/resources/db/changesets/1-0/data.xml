@@ -53,7 +53,7 @@
       <column name="token_ttl">86400</column>
       <column name="creator_id">46b33c77-e586-433b-acb0-b26e2a7bfb3e</column>
       <column name="show_prompt_no_scopes" valueBoolean="false"/>
-      <!--<column name="login_code_ttl" valueNumeric="300"/>-->
+      <column name="login_code_ttl" valueNumeric="300"/>
     </insert>
 
     <!-- only allow implicit flow -->
@@ -75,7 +75,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_applications</column>
-      <column name="display_name">Manage applicationss</column>
+      <column name="display_name">Manage Applications</column>
       <column name="description">
         Permission to create, view, edit, and delete your applications and application settings.
       </column>
@@ -98,7 +98,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_client_scopes</column>
-      <column name="display_name">Manage Client scopess</column>
+      <column name="display_name">Manage Client Scopes</column>
       <column name="description">
         Permission to change the scopes that a client can use and their priorities.
       </column>
@@ -109,7 +109,7 @@
       <column name="updated" valueNumeric="${CREATED_TIME}"/>
       <column name="application_id">9966e7e3-ac4f-4d8e-9710-2971450cb504</column>
       <column name="name">manage_scopes</column>
-      <column name="display_name">Manage scopess</column>
+      <column name="display_name">Manage Scopes</column>
       <column name="description">
         Permission to create, view, edit, and delete application scopes.
       </column>

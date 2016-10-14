@@ -147,7 +147,7 @@ public class LoginResource extends BaseResource {
      */
     private Response getRedirectResponse(
             final LoginCode loginCode,
-            final Token token
+            final UserToken token
     ) {
         final UriBuilder toRedirect = UriBuilder.fromUri(loginCode.getRedirectUri());
 

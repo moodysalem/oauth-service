@@ -47,12 +47,12 @@ public class TokenFilter implements DynamicFeature {
             if (auth != null && auth.toLowerCase().startsWith(BEARER)) {
                 final String token = auth.substring(BEARER.length());
                 if (token.length() > 0) {
-                    final CriteriaQuery<Token> cq = cb.createQuery(Token.class);
-                    final Root<Token> tokenRoot = cq.from(Token.class);
-                    final List<Token> tks = em.createQuery(cq.select(tokenRoot).where(
+                    final CriteriaQuery<UserToken> cq = cb.createQuery(UserToken.class);
+                    final Root<UserToken> tokenRoot = cq.from(UserToken.class);
+                    final List<UserToken> tks = em.createQuery(cq.select(tokenRoot).where(
                             cb.equal(tokenRoot.get(Token_.token), token),
                             cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
-                            cb.equal(tokenRoot.get(Token_.type), TokenType.ACCESS),
+                            cb.equal(tokenRoot.get(UserToken_.refresh), false),
                             cb.equal(tokenRoot.join(Token_.client).join(Client_.application)
                                     .get(Application_.id), APPLICATION_ID)
                     )).getResultList();
@@ -104,12 +104,12 @@ public class TokenFilter implements DynamicFeature {
      *
      * @return token out of request
      */
-    public static Token getToken(final ContainerRequestContext req) {
-        return (Token) req.getProperty(TOKEN);
+    public static UserToken getToken(final ContainerRequestContext req) {
+        return (UserToken) req.getProperty(TOKEN);
     }
 
     public static User getUser(final ContainerRequestContext req) {
-        final Token tr = getToken(req);
+        final UserToken tr = getToken(req);
         if (tr == null) {
             return null;
         }

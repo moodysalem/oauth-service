@@ -7,9 +7,14 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+/**
+ * A cookie represents that a user has logged in to the application
+ */
 @Entity
 @Table(name = "login_cookies")
 public class LoginCookie extends VersionedEntity {
+    private static final long ONE_MONTH_MS = 1000L * 60L * 60L * 24L * 30L;
+
     @NotEmpty
     @Column(name = "secret", updatable = false)
     private String secret;
@@ -20,7 +25,7 @@ public class LoginCookie extends VersionedEntity {
     private User user;
 
     @NotNull
-    @Column(name = "expires")
+    @Column(name = "expires", updatable = false)
     private Long expires;
 
     public String getSecret() {
@@ -48,6 +53,13 @@ public class LoginCookie extends VersionedEntity {
     }
 
     public void expiresInOneMonth() {
-        setExpires(new Date(System.currentTimeMillis() + (1000L * 60L * 60L * 24L * 30L)));
+        setExpires(new Date(System.currentTimeMillis() + ONE_MONTH_MS));
+    }
+
+    @PrePersist
+    public void setExpires() {
+        if (getExpires() == null) {
+            expiresInOneMonth();
+        }
     }
 }

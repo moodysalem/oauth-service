@@ -1,12 +1,12 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
+import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.data.LoginStatusModel;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
-import com.oauth2cloud.server.model.db.Token;
-import com.oauth2cloud.server.model.db.TokenType;
+import com.oauth2cloud.server.model.db.UserAccessToken;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.CookieUtil;
@@ -20,8 +20,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.logging.Level;
 
-import static com.oauth2cloud.server.model.db.Token.getExpires;
 import static com.oauth2cloud.server.rest.util.OAuthUtil.badRequest;
 
 @Produces(MediaType.TEXT_HTML)
@@ -54,7 +54,7 @@ public class GetLoginStatus extends BaseResource {
         CallLogUtil.logCall(em, client, req);
 
         if (referrer == null) {
-            return badRequest("This page must be accessed from inside an iframe.");
+            return badRequest(client, "This page must be accessed from inside an iframe.");
         }
 
         boolean validReferrer = false;
@@ -82,37 +82,34 @@ public class GetLoginStatus extends BaseResource {
         }
 
         if (!validReferrer) {
-            return badRequest("Invalid referrer.");
+            return badRequest(client, "Invalid referrer.");
         }
 
         final LoginCookie loginCookie = CookieUtil.getLoginCookie(em, req, client);
 
-        TokenResponse tokenResponse = null;
+        final TokenResponse newToken;
         if (loginCookie != null) {
-            final Token existing = QueryUtil.getNewestUserAccessToken(em, client, loginCookie.getUser());
+            final UserAccessToken userAccessToken = new UserAccessToken();
+            userAccessToken.setRandomToken(96);
+            userAccessToken.setExpiresFromClient(client);
+            userAccessToken.setUser(loginCookie.getUser());
+            userAccessToken.setRedirectUri(referrer);
+            userAccessToken.setAcceptedScopes(QueryUtil.getAcceptedScopes(em, client, loginCookie.getUser()));
 
-            if (existing != null) {
-                tokenResponse = TokenResponse.from(existing);
-            } else {
-                // generate a token
-                tokenResponse = TokenResponse.from(
-                        QueryUtil.createToken(
-                                em,
-                                TokenType.ACCESS,
-                                client,
-                                loginCookie.getUser(),
-                                getExpires(client, TokenType.ACCESS),
-                                referrer,
-                                QueryUtil.getAcceptedScopes(em, client, loginCookie.getUser()),
-                                null,
-                                null
-                        )
-                );
+            final UserAccessToken savedToken;
+            try {
+                savedToken = TXHelper.withinTransaction(em, () -> em.merge(userAccessToken));
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "Failed to create token from cookie");
+                return badRequest(client, "An internal server error occurred!");
             }
+            newToken = TokenResponse.from(savedToken);
+        } else {
+            newToken = null;
         }
 
         return Response.ok(
-                new Viewable("/templates/LoginStatus", new LoginStatusModel(loginCookie, referrerOrigin, tokenResponse))
+                new Viewable("/templates/LoginStatus", new LoginStatusModel(loginCookie, referrerOrigin, newToken))
         ).build();
     }
 

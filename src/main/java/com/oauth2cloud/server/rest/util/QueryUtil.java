@@ -6,10 +6,11 @@ import com.oauth2cloud.server.model.db.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -86,9 +87,9 @@ public abstract class QueryUtil {
         );
     }
 
-    public static LoginCode findLoginCode(final EntityManager em, final String code) {
+    public static LoginCode findLoginCode(final EntityManager em, final String token) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        return expectOne(QueryHelper.query(em, LoginCode.class, lc -> cb.equal(lc.get(LoginCode_.code), code)));
+        return expectOne(QueryHelper.query(em, LoginCode.class, lc -> cb.equal(lc.get(LoginCode_.token), token)));
     }
 
     /**
@@ -121,8 +122,7 @@ public abstract class QueryUtil {
     public static Token findToken(
             final EntityManager em,
             final String token,
-            final Client client,
-            final Collection<TokenType> types
+            final Client client
     ) {
         if (isBlank(token)) {
             return null;
@@ -134,52 +134,11 @@ public abstract class QueryUtil {
                 cb.and(
                         cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
                         cb.equal(tokenRoot.get(Token_.token), token),
-                        types != null && !types.isEmpty() ? tokenRoot.get(Token_.type).in(types) : cb.and(),
                         client != null ? cb.equal(tokenRoot.get(Token_.client), client) : cb.and()
                 )
         );
 
         return expectOne(tokens);
-    }
-
-    /**
-     * Create and persist a token
-     *
-     * @param type    the token's type
-     * @param client  the client for which the token is being created
-     * @param user    the to which the token is associated
-     * @param expires when the token becomes invalid
-     * @param scopes  the scopes for which the token is valid
-     * @return a Token with the aforementioned properties
-     */
-    public static Token createToken(
-            final EntityManager em,
-            final TokenType type,
-            final Client client,
-            final User user,
-            final Date expires,
-            final String redirectUri,
-            final Set<AcceptedScope> scopes,
-            final Token refreshToken,
-            final Set<ClientScope> clientScopes
-    ) {
-        final Token toReturn = new Token();
-        toReturn.setClient(client);
-        toReturn.setExpires(expires);
-        toReturn.setUser(user);
-        toReturn.setType(type);
-        toReturn.setRedirectUri(redirectUri);
-        toReturn.setRandomToken(96);
-        toReturn.setAcceptedScopes(scopes);
-        toReturn.setRefreshToken(refreshToken);
-        toReturn.setClientScopes(clientScopes);
-
-        try {
-            return TXHelper.withinTransaction(em, () -> em.merge(toReturn));
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to create a token", e);
-            return null;
-        }
     }
 
     /**
@@ -221,33 +180,6 @@ public abstract class QueryUtil {
             LOG.log(Level.SEVERE, "Failed to create user", e);
             return null;
         }
-    }
-
-    /**
-     * Get all the access tokens for a user for a particular client that expire after today
-     *
-     * @param em
-     * @param client
-     * @param user
-     * @return
-     */
-    public static Token getNewestUserAccessToken(final EntityManager em, final Client client, final User user) {
-        final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<Token> query = cb.createQuery(Token.class);
-        final Root<Token> tokenRoot = query.from(Token.class);
-
-        query.select(tokenRoot)
-                .where(
-                        cb.equal(tokenRoot.get(Token_.client), client),
-                        cb.equal(tokenRoot.get(Token_.user), user),
-                        cb.equal(tokenRoot.get(Token_.type), TokenType.ACCESS),
-                        cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis())
-                )
-                .orderBy(cb.desc(tokenRoot.get(Token_.expires)));
-
-        final List<Token> results = em.createQuery(query).setMaxResults(1).getResultList();
-
-        return expectOne(results);
     }
 
     /**

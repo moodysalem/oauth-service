@@ -1,37 +1,21 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.VersionedEntity;
-import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 
 /**
  * A login code is created when a user attempts to log in and an e-mail is sent
  */
 @Entity
 @Table(name = "login_codes")
-public class LoginCode extends VersionedEntity {
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "client_id", updatable = false)
-    private Client client;
-
+public class LoginCode extends Token {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "user_id", updatable = false)
     private User user;
-
-    @Column(name = "expires", updatable = false)
-    private Long expires;
-
-    @NotNull
-    @Convert(converter = EncryptedStringConverter.class)
-    @Column(name = "code", updatable = false)
-    private String code;
 
     @NotNull
     @Column(name = "remember_me", updatable = false)
@@ -47,27 +31,15 @@ public class LoginCode extends VersionedEntity {
     @Column(name = "base_uri", updatable = false)
     private String baseUri;
 
-    @URL
-    @NotNull
-    @Column(name = "redirect_uri", updatable = false)
-    private String redirectUri;
-
     @Column(name = "scope", updatable = false)
     private String scope;
 
     @Column(name = "state", updatable = false)
     private String state;
 
+    @NotNull
     @Column(name = "used")
     private Boolean used;
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
 
     public User getUser() {
         return user;
@@ -77,36 +49,12 @@ public class LoginCode extends VersionedEntity {
         this.user = user;
     }
 
-    public Date getExpires() {
-        return expires == null ? null : new Date(expires);
-    }
-
-    public void setExpires(Date expires) {
-        this.expires = expires == null ? null : expires.getTime();
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public ResponseType getResponseType() {
         return responseType;
     }
 
     public void setResponseType(ResponseType responseType) {
         this.responseType = responseType;
-    }
-
-    public String getRedirectUri() {
-        return redirectUri;
-    }
-
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
     }
 
     public String getState() {
@@ -119,6 +67,11 @@ public class LoginCode extends VersionedEntity {
 
     public String getScope() {
         return scope;
+    }
+
+    @Override
+    public Long getTtl(Client client) {
+        return Long.valueOf(client.getLoginCodeTtl()) * 1000L;
     }
 
     public void setScope(String scope) {

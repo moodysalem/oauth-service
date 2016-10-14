@@ -117,7 +117,7 @@ public class AuthorizeResource extends BaseResource {
     private Response loginCodeRedirect(final LoginCode loginCode) {
         return Response.status(Response.Status.FOUND).location(
                 req.getUriInfo().getBaseUriBuilder()
-                        .path("login").path(loginCode.getCode())
+                        .path("login").path(loginCode.getToken())
                         .build()
         ).build();
     }
@@ -305,7 +305,7 @@ public class AuthorizeResource extends BaseResource {
         loginCode.setRememberMe(rememberMe);
         loginCode.setBaseUri(req.getUriInfo().getBaseUri().toString());
 
-        loginCode.setCode(randomAlphanumeric(96));
+        loginCode.setToken(randomAlphanumeric(96));
         loginCode.setExpires(
                 client.getLoginCodeTtl() != null ?
                         new Date(System.currentTimeMillis() + (client.getLoginCodeTtl() * 1000L)) :

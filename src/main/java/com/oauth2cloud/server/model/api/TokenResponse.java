@@ -3,8 +3,9 @@ package com.oauth2cloud.server.model.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oauth2cloud.server.model.db.Token;
-import com.oauth2cloud.server.model.db.TokenType;
 import com.oauth2cloud.server.model.db.User;
+import com.oauth2cloud.server.model.db.UserAccessToken;
+import com.oauth2cloud.server.model.db.UserToken;
 import com.oauth2cloud.server.rest.util.QueryString;
 
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -18,23 +19,24 @@ import java.util.UUID;
 public class TokenResponse {
     public static final String BEARER = "bearer";
 
-    public static TokenResponse from(final Token accessToken) {
-        // this should be called with access tokens
-        if (!TokenType.ACCESS.equals(accessToken.getType())) {
-            throw new IllegalArgumentException();
+    public static TokenResponse from(final Token token) {
+        final TokenResponse tr = new TokenResponse();
+        tr.setAccessToken(token.getToken());
+        tr.setExpiresIn(token.getExpiresIn());
+
+        if (token instanceof UserToken) {
+            final UserToken userToken = (UserToken) token;
+            tr.setUser(userToken.getUser());
+            if (userToken instanceof UserAccessToken) {
+                final UserAccessToken uat = (UserAccessToken) token;
+                tr.setRefreshToken(uat.getRefreshToken() != null ? uat.getRefreshToken().getToken() : null);
+            }
         }
 
-        final TokenResponse tr = new TokenResponse();
-        tr.setAccessToken(accessToken.getToken());
-        tr.setExpiresIn(accessToken.getExpiresIn());
-        if (accessToken.getRefreshToken() != null) {
-            tr.setRefreshToken(accessToken.getRefreshToken().getToken());
-        }
-        tr.setScope(accessToken.getScope());
+        tr.setScope(token.getScope());
         tr.setTokenType(BEARER);
-        tr.setClientId(accessToken.getClient().getCredentials().getId());
-        tr.setUser(accessToken.getUser());
-        tr.setApplicationId(accessToken.getClient().getApplication().getId());
+        tr.setClientId(token.getClient().getCredentials().getId());
+        tr.setApplicationId(token.getClient().getApplication().getId());
         return tr;
     }
 

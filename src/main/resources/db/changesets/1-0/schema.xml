@@ -166,7 +166,9 @@
       <column name="show_prompt_no_scopes" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
-      <column name="login_code_ttl" type="INT"/>
+      <column name="login_code_ttl" type="INT">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
     <addForeignKeyConstraint baseTableName="clients" baseColumnNames="application_id"
                              constraintName="fk_clients_applications"
@@ -212,8 +214,11 @@
     <addUniqueConstraint tableName="client_flows" columnNames="client_id,flow"/>
   </changeSet>
 
-  <changeSet id="login_codes table" author="moody.salem">
-    <createTable tableName="login_codes">
+  <changeSet id="create tokens table" author="moody.salem">
+    <comment>
+      Tokens are the base type of several different credential types that include a random string and an expiration
+    </comment>
+    <createTable tableName="tokens">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
@@ -229,11 +234,45 @@
       <column name="client_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="user_id" type="${UUID_TYPE}">
+      <column name="token" type="VARCHAR(191)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="expires" type="BIGINT">
         <constraints nullable="false"/>
       </column>
-      <column name="expires" type="BIGINT"/>
-      <column name="code" type="VARCHAR(191)">
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="client_id" constraintName="fk_tokens_clients"
+                             referencedTableName="clients"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="refresh_token_id"
+                             constraintName="fk_token_refresh_token"
+                             referencedTableName="tokens"
+                             referencedColumnNames="id"/>
+
+    <addUniqueConstraint tableName="tokens" columnNames="token"/>
+  </changeSet>
+
+  <changeSet id="create client_tokens table" author="moody.salem">
+    <createTable tableName="client_tokens">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="client_tokens" baseColumnNames="id"
+                             constraintName="fk_client_tokens_tokens"
+                             referencedTableName="tokens"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
+  <changeSet id="login_codes table" author="moody.salem">
+    <comment>Login codes are a special internal token sent via e-mail used to complete a log in</comment>
+    <createTable tableName="login_codes">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="remember_me" type="BOOLEAN">
@@ -255,70 +294,48 @@
       </column>
     </createTable>
 
-    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="client_id"
-                             constraintName="fk_login_codes_clients"
-                             referencedTableName="clients"
-                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="id" constraintName="fk_login_codes_token"
+                             referencedTableName="tokens"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="user_id" constraintName="fk_login_codes_users"
                              referencedTableName="users"
                              referencedColumnNames="id"/>
-    <addUniqueConstraint tableName="login_codes" columnNames="code" constraintName="uk_login_codes_code"/>
   </changeSet>
 
-  <changeSet id="token table" author="moody.salem">
-    <createTable tableName="tokens">
+  <changeSet id="create user_tokens table" author="moody.salem">
+    <comment>
+      These tokens are created on behalf of a specific user
+      Login codes can be null in the case where a resource owner credentials flow is used
+    </comment>
+    <createTable tableName="user_tokens">
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="created" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="updated" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="version" type="BIGINT" defaultValue="0">
-        <constraints nullable="false"/>
-      </column>
       <column name="user_id" type="${UUID_TYPE}">
-        <constraints nullable="true"/>
-      </column>
-      <column name="client_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
-      <column name="token" type="VARCHAR(191)">
-        <constraints nullable="false" unique="true"/>
-      </column>
-      <column name="refresh_token_id" type="${UUID_TYPE}">
-        <constraints nullable="true"/>
-      </column>
-      <column name="redirect_uri" type="${TEXT}">
-        <constraints nullable="true"/>
-      </column>
-      <column name="expires" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="type" type="VARCHAR(191)">
+      <column name="refresh" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
       <column name="login_code_id" type="${UUID_TYPE}"/>
     </createTable>
-    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="user_id" constraintName="fk_tokens_users"
+
+    <addForeignKeyConstraint baseTableName="user_tokens" baseColumnNames="id"
+                             constraintName="fk_access_tokens_token"
+                             referencedTableName="tokens"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseTableName="user_tokens" baseColumnNames="user_id"
+                             constraintName="fk_tokens_users"
                              referencedTableName="users"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="client_id" constraintName="fk_tokens_clients"
-                             referencedTableName="clients"
-                             referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="refresh_token_id"
-                             constraintName="fk_token_refresh_token"
-                             referencedTableName="tokens"
-                             referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="login_code_id"
+    <addForeignKeyConstraint baseTableName="user_tokens" baseColumnNames="login_code_id"
                              constraintName="fk_tokens_login_code"
                              referencedTableName="login_codes"
                              referencedColumnNames="id"/>
-
-    <addUniqueConstraint tableName="tokens" columnNames="token"/>
   </changeSet>
+
 
   <changeSet author="moody.salem" id="client_scopes Table">
     <createTable tableName="client_scopes">
@@ -391,20 +408,20 @@
 
   <!-- this table lists all the users scopes that are granted with a token -->
   <changeSet id="token accepted scopes join table" author="moody.salem">
-    <createTable tableName="token_accepted_scopes">
-      <column name="token_id" type="${UUID_TYPE}">
+    <createTable tableName="user_token_accepted_scopes">
+      <column name="user_token_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="accepted_scope_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="token_accepted_scopes" baseColumnNames="token_id"
+    <addForeignKeyConstraint baseTableName="user_token_accepted_scopes" baseColumnNames="token_id"
                              constraintName="fk_token_accepted_scopes_token"
-                             referencedTableName="tokens"
+                             referencedTableName="user_tokens"
                              referencedColumnNames="id"/>
     <!-- if you delete the accepted scope, all the tokens drop the scope -->
-    <addForeignKeyConstraint baseTableName="token_accepted_scopes" baseColumnNames="accepted_scope_id"
+    <addForeignKeyConstraint baseTableName="user_token_accepted_scopes" baseColumnNames="accepted_scope_id"
                              constraintName="fk_token_accepted_scopes_scope"
                              referencedTableName="accepted_scopes"
                              referencedColumnNames="id"/>
@@ -412,19 +429,19 @@
 
   <!-- this table lists all the client scopes that are granted with a token -->
   <changeSet id="token client scopes join table" author="moody.salem">
-    <createTable tableName="token_client_scopes">
-      <column name="token_id" type="${UUID_TYPE}">
+    <createTable tableName="client_token_client_scopes">
+      <column name="client_token_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
       <column name="client_scope_id" type="${UUID_TYPE}">
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseTableName="token_client_scopes" baseColumnNames="token_id"
+    <addForeignKeyConstraint baseTableName="client_token_client_scopes" baseColumnNames="client_token_id"
                              constraintName="fk_token_client_scopes_tokens"
-                             referencedTableName="tokens"
+                             referencedTableName="client_tokens"
                              referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableName="token_client_scopes" baseColumnNames="client_scope_id"
+    <addForeignKeyConstraint baseTableName="client_token_client_scopes" baseColumnNames="client_scope_id"
                              constraintName="fk_token_client_scopes_client_scopes"
                              referencedTableName="client_scopes"
                              referencedColumnNames="id"/>
