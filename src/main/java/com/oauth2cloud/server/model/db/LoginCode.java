@@ -17,6 +17,11 @@ public class LoginCode extends Token {
     @JoinColumn(name = "user_id", updatable = false)
     private User user;
 
+    @URL
+    @NotNull
+    @Column(name = "redirect_uri", updatable = false)
+    private String redirectUri;
+
     @NotNull
     @Column(name = "remember_me", updatable = false)
     private Boolean rememberMe;
@@ -100,5 +105,13 @@ public class LoginCode extends Token {
 
     public void setBaseUri(String baseUri) {
         this.baseUri = baseUri;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
     }
 }

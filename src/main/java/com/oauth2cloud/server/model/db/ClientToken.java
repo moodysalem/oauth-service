@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class ClientToken extends Token {
     @ManyToMany
     @JoinTable(
-            name = "token_client_scopes",
+            name = "client_token_client_scopes",
             joinColumns = @JoinColumn(name = "token_id"),
             inverseJoinColumns = @JoinColumn(name = "client_scope_id")
     )

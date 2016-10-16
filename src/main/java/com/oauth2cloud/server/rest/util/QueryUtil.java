@@ -112,6 +112,12 @@ public abstract class QueryUtil {
     }
 
 
+    public static Token findToken(final EntityManager em,
+                                  final String token,
+                                  final Client client) {
+        return findToken(em, token, client, Token.class);
+    }
+
     /**
      * Get a token given the token string and the client it's for
      *
@@ -119,10 +125,11 @@ public abstract class QueryUtil {
      * @param client the client it was issued to
      * @return the token or null if it doesn't exist or has expired
      */
-    public static Token findToken(
+    public static <T extends Token> T findToken(
             final EntityManager em,
             final String token,
-            final Client client
+            final Client client,
+            final Class<T> clazz
     ) {
         if (isBlank(token)) {
             return null;
@@ -130,11 +137,11 @@ public abstract class QueryUtil {
 
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        final List<Token> tokens = QueryHelper.query(em, Token.class, tokenRoot ->
+        final List<T> tokens = QueryHelper.query(em, clazz, root ->
                 cb.and(
-                        cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
-                        cb.equal(tokenRoot.get(Token_.token), token),
-                        client != null ? cb.equal(tokenRoot.get(Token_.client), client) : cb.and()
+                        cb.greaterThan(root.get(Token_.expires), System.currentTimeMillis()),
+                        cb.equal(root.get(Token_.token), token),
+                        client != null ? cb.equal(root.get(Token_.client), client) : cb.and()
                 )
         );
 

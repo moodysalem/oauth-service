@@ -43,10 +43,12 @@ public class Client extends VersionedEntity {
     @Enumerated(EnumType.STRING)
     private Set<GrantFlow> flows;
 
+    @Min(0)
     @NotNull
     @Column(name = "token_ttl")
     private Long tokenTtl;
 
+    @Min(0)
     @Column(name = "refresh_token_ttl")
     private Long refreshTokenTtl;
 
@@ -57,8 +59,8 @@ public class Client extends VersionedEntity {
     @JoinColumn(name = "creator_id", updatable = false)
     private User creator;
 
+    @Min(0)
     @NotNull
-    @Min(60)
     @Column(name = "login_code_ttl")
     private Integer loginCodeTtl;
 

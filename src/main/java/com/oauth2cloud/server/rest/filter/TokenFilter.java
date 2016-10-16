@@ -1,14 +1,13 @@
 package com.oauth2cloud.server.rest.filter;
 
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
+import com.moodysalem.jaxrs.lib.resources.util.QueryHelper;
 import com.oauth2cloud.server.model.db.*;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -47,18 +46,19 @@ public class TokenFilter implements DynamicFeature {
             if (auth != null && auth.toLowerCase().startsWith(BEARER)) {
                 final String token = auth.substring(BEARER.length());
                 if (token.length() > 0) {
-                    final CriteriaQuery<UserToken> cq = cb.createQuery(UserToken.class);
-                    final Root<UserToken> tokenRoot = cq.from(UserToken.class);
-                    final List<UserToken> tks = em.createQuery(cq.select(tokenRoot).where(
-                            cb.equal(tokenRoot.get(Token_.token), token),
-                            cb.greaterThan(tokenRoot.get(Token_.expires), System.currentTimeMillis()),
-                            cb.equal(tokenRoot.get(UserToken_.refresh), false),
-                            cb.equal(tokenRoot.join(Token_.client).join(Client_.application)
-                                    .get(Application_.id), APPLICATION_ID)
-                    )).getResultList();
+                    final List<UserAccessToken> accessTokens = QueryHelper.query(
+                            em,
+                            UserAccessToken.class,
+                            accessTokenPredicator -> cb.and(
+                                    cb.equal(accessTokenPredicator.get(Token_.token), token),
+                                    cb.greaterThan(accessTokenPredicator.get(Token_.expires), System.currentTimeMillis()),
+                                    cb.equal(accessTokenPredicator.join(Token_.client).join(Client_.application)
+                                            .get(Application_.id), APPLICATION_ID)
+                            )
+                    );
 
-                    if (tks.size() == 1) {
-                        containerRequestContext.setProperty(TOKEN, tks.get(0));
+                    if (accessTokens.size() == 1) {
+                        containerRequestContext.setProperty(TOKEN, accessTokens.get(0));
                     }
                 }
             }
@@ -104,8 +104,8 @@ public class TokenFilter implements DynamicFeature {
      *
      * @return token out of request
      */
-    public static UserToken getToken(final ContainerRequestContext req) {
-        return (UserToken) req.getProperty(TOKEN);
+    public static UserAccessToken getToken(final ContainerRequestContext req) {
+        return (UserAccessToken) req.getProperty(TOKEN);
     }
 
     public static User getUser(final ContainerRequestContext req) {

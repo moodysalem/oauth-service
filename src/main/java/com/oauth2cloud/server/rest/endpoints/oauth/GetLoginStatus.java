@@ -90,8 +90,7 @@ public class GetLoginStatus extends BaseResource {
         final TokenResponse newToken;
         if (loginCookie != null) {
             final UserAccessToken userAccessToken = new UserAccessToken();
-            userAccessToken.setRandomToken(96);
-            userAccessToken.setExpiresFromClient(client);
+            userAccessToken.setClient(client);
             userAccessToken.setUser(loginCookie.getUser());
             userAccessToken.setRedirectUri(referrer);
             userAccessToken.setAcceptedScopes(QueryUtil.getAcceptedScopes(em, client, loginCookie.getUser()));

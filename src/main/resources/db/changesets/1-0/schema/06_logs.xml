@@ -1,0 +1,65 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet id="Call Log" author="moody.salem">
+    <createTable tableName="call_log">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="ip" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="path" type="${TEXT}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="method" type="VARCHAR(10)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="Client Call Log" author="moody.slaem">
+    <createTable tableName="client_call_log">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="client_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="client_call_log" baseColumnNames="id"
+                             constraintName="fk_client_call_log_cl"
+                             referencedTableName="call_log"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseTableName="client_call_log" baseColumnNames="client_id"
+                             constraintName="fk_client_call_log_client"
+                             referencedTableName="clients"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
+  <changeSet id="Application Call Log" author="moody.salem">
+    <createTable tableName="application_call_log">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="application_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="application_call_log" baseColumnNames="id"
+                             constraintName="fk_application_call_log_cl"
+                             referencedTableName="call_log"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseTableName="application_call_log" baseColumnNames="application_id"
+                             constraintName="fk_application_call_log_applications"
+                             referencedTableName="applications"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
+</databaseChangeLog>

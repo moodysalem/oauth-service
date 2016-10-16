@@ -34,7 +34,6 @@ public class TokenResponse {
         }
 
         tr.setScope(token.getScope());
-        tr.setTokenType(BEARER);
         tr.setClientId(token.getClient().getCredentials().getId());
         tr.setApplicationId(token.getClient().getApplication().getId());
         return tr;
@@ -43,8 +42,6 @@ public class TokenResponse {
     @JsonProperty("access_token")
     private String accessToken;
 
-    @JsonProperty("token_type")
-    private String tokenType;
 
     @JsonProperty("expires_in")
     private Long expiresIn;
@@ -72,12 +69,9 @@ public class TokenResponse {
         this.accessToken = accessToken;
     }
 
+    @JsonProperty("token_type")
     public String getTokenType() {
-        return tokenType;
-    }
-
-    public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
+        return BEARER;
     }
 
     public String getRefreshToken() {

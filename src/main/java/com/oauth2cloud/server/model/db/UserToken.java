@@ -1,5 +1,7 @@
 package com.oauth2cloud.server.model.db;
 
+import org.hibernate.validator.constraints.URL;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
@@ -12,15 +14,19 @@ public abstract class UserToken extends Token {
     @JoinColumn(name = "user_id", updatable = false)
     private User user;
 
+    @URL
+    @NotNull
+    @Column(name = "redirect_uri", updatable = false)
+    private String redirectUri;
+
     @ManyToMany
     @JoinTable(
             name = "user_token_accepted_scopes",
-            joinColumns = @JoinColumn(name = "token_id"),
+            joinColumns = @JoinColumn(name = "user_token_id"),
             inverseJoinColumns = @JoinColumn(name = "accepted_scope_id")
     )
     private Set<AcceptedScope> acceptedScopes;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "login_code_id")
     private LoginCode loginCode;
@@ -47,6 +53,14 @@ public abstract class UserToken extends Token {
 
     public void setLoginCode(LoginCode loginCode) {
         this.loginCode = loginCode;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
     }
 
     @Override

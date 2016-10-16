@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "user_access_tokens")
 public class UserAccessToken extends UserToken {
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "refresh_token_id")
     private UserRefreshToken refreshToken;

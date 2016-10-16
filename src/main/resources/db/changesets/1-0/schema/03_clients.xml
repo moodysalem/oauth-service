@@ -1,0 +1,95 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+  <changeSet id="clients table" author="moody.salem">
+    <createTable tableName="clients">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="application_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="confidential" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="token_ttl" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="refresh_token_ttl" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="identifier" type="VARCHAR(191)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="secret" type="VARCHAR(191)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="creator_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="show_prompt_no_scopes" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="login_code_ttl" type="INT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="clients" baseColumnNames="application_id"
+                             constraintName="fk_clients_applications"
+                             referencedTableName="applications"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="clients" baseColumnNames="creator_id"
+                             constraintName="fk_clients_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
+  <changeSet id="client redirect uris table" author="moody.salem">
+    <!-- the list of URIs that a client can redirect to -->
+    <createTable tableName="client_uris">
+      <column name="client_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="uri" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="client_uris" baseColumnNames="client_id"
+                             constraintName="fk_client_uris_client"
+                             referencedTableName="clients"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="client_uris" columnNames="client_id,uri"/>
+  </changeSet>
+
+  <changeSet id="client Permitted Flows" author="moody.salem">
+    <!-- the list of flows a client is allowed to use -->
+    <createTable tableName="client_flows">
+      <column name="client_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="flow" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="client_flows" baseColumnNames="client_id"
+                             constraintName="fk_client_flows_client"
+                             referencedTableName="clients"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="client_flows" columnNames="client_id,flow"/>
+  </changeSet>
+
+
+</databaseChangeLog>

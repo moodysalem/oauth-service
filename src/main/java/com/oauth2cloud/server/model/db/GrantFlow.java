@@ -8,7 +8,5 @@ public enum GrantFlow {
     IMPLICIT,
     CODE,
     RESOURCE_OWNER_CREDENTIALS,
-    CLIENT_CREDENTIALS,
-    // this additional grant flow allows receiving a very short lived token
-    TEMPORARY_TOKEN
+    CLIENT_CREDENTIALS
 }

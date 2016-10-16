@@ -1,0 +1,115 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet id="applications table" author="moody.salem">
+    <createTable tableName="applications">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="LONG">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="LONG">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(191)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="description" type="${TEXT}">
+        <constraints nullable="true"/>
+      </column>
+      <column name="support_email" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="owner_id" type="${UUID_TYPE}"/>
+      <column name="google_client_id" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="google_client_secret" type="VARCHAR(191)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stylesheet_url" type="${TEXT}"/>
+      <column name="favicon_url" type="${TEXT}"/>
+      <column name="logo_url" type="${TEXT}"/>
+    </createTable>
+    <addUniqueConstraint tableName="applications" columnNames="google_client_id,google_client_secret"
+                         constraintName="uk_app_google_cred"/>
+  </changeSet>
+
+
+  <changeSet id="scopes table" author="moody.salem">
+    <createTable tableName="scopes">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="application_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="display_name" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="thumbnail" type="${TEXT}">
+        <constraints nullable="true"/>
+      </column>
+      <column name="description" type="${TEXT}">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="scopes" baseColumnNames="application_id"
+                             constraintName="fk_scopes_applications"
+                             referencedTableName="applications"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="scopes" columnNames="application_id,name" constraintName="uk_scopes_names"/>
+  </changeSet>
+
+  <changeSet id="users table" author="moody.salem">
+    <createTable tableName="users">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="application_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="email" type="VARCHAR(191)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="users" baseColumnNames="application_id"
+                             constraintName="fk_users_applications"
+                             referencedTableName="applications"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="applications" baseColumnNames="owner_id"
+                             constraintName="fk_applications_owner"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="users" columnNames="application_id,email" constraintName="uk_users_email"/>
+  </changeSet>
+
+
+</databaseChangeLog>

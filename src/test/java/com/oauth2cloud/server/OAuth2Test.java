@@ -157,7 +157,6 @@ public class OAuth2Test extends BaseTest {
             }
             tokenResponse.setAccessToken(values.getFirst("access_token"));
             tokenResponse.setScope(values.getFirst("scope"));
-            tokenResponse.setTokenType(values.getFirst("token_type"));
             tokenResponse.setExpiresIn(Long.parseLong(values.getFirst("expires_in")));
             return tokenResponse;
         } catch (URISyntaxException e) {

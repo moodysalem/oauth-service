@@ -123,16 +123,33 @@ public class LoginResource extends BaseResource {
                 .map(clientScope -> acceptScope(loginCode.getUser(), clientScope))
                 .collect(Collectors.toSet());
 
+        final ResponseType type = loginCode.getResponseType();
+
         // create a token
-        final TokenType type = loginCode.getResponseType().getCreatesTokenType();
-        final Token token = QueryUtil.createToken(
-                em, type, loginCode.getClient(), loginCode.getUser(), Token.getExpires(loginCode.getClient(), type),
-                loginCode.getRedirectUri(), acceptedScopes, null, null
-        );
+        final UserToken token;
+        if (type.equals(ResponseType.token)) {
+            token = new UserAccessToken();
+        } else {
+            token = new UserAccessCode();
+        }
+        token.setClient(loginCode.getClient());
+        token.setUser(loginCode.getUser());
+        token.setRedirectUri(loginCode.getRedirectUri());
+        token.setAcceptedScopes(acceptedScopes);
+        token.setLoginCode(loginCode);
+
+        // save the token
+        final UserToken saved;
+        try {
+            saved = TXHelper.withinTransaction(em, () -> em.merge(token));
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to create token", e);
+            return backToLogin(loginCode, LoginErrorCode.internal_error);
+        }
 
         try {
             useCode(loginCode);
-            return getRedirectResponse(loginCode, token);
+            return getRedirectResponse(loginCode, saved);
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to complete login", e);
             return backToLogin(loginCode, LoginErrorCode.internal_error);
@@ -151,11 +168,11 @@ public class LoginResource extends BaseResource {
     ) {
         final UriBuilder toRedirect = UriBuilder.fromUri(loginCode.getRedirectUri());
 
-        if (token.getType().equals(TokenType.ACCESS)) {
+        if (token instanceof UserAccessToken) {
             toRedirect.fragment(TokenResponse.from(token).toFragment(loginCode.getState()));
         }
 
-        if (token.getType().equals(TokenType.CODE)) {
+        if (token instanceof UserAccessCode) {
             toRedirect.queryParam("code", token.getToken());
             if (loginCode.getState() != null) {
                 toRedirect.queryParam("state", loginCode.getState());

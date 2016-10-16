@@ -1,0 +1,118 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+
+  <changeSet author="moody.salem" id="client_scopes Table">
+    <createTable tableName="client_scopes">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="scope_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="priority" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="reason" type="${TEXT}"/>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="client_scopes" baseColumnNames="client_id"
+                             constraintName="fk_client_scopes_clients"
+                             referencedTableName="clients"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="client_scopes" baseColumnNames="scope_id"
+                             constraintName="fk_client_scopes_scopes"
+                             referencedTableName="scopes"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="client_scopes" columnNames="client_id,scope_id"/>
+  </changeSet>
+
+  <changeSet id="accepted scopes table" author="moody.salem">
+    <createTable tableName="accepted_scopes">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="created" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="BIGINT" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_scope_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="accepted_scopes" baseColumnNames="user_id"
+                             constraintName="fk_accepted_scopes_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+    <!-- if you delete the client scope, it is unaccepted for all users -->
+    <addForeignKeyConstraint baseTableName="accepted_scopes" baseColumnNames="client_scope_id"
+                             constraintName="fk_accepted_scopes_client_scopes"
+                             referencedTableName="client_scopes"
+                             referencedColumnNames="id"/>
+    <addUniqueConstraint tableName="accepted_scopes" columnNames="user_id,client_scope_id"/>
+  </changeSet>
+
+  <!-- this table lists all the users scopes that are granted with a token -->
+  <changeSet id="token accepted scopes join table" author="moody.salem">
+    <createTable tableName="user_token_accepted_scopes">
+      <column name="user_token_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="accepted_scope_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="user_token_accepted_scopes" baseColumnNames="user_token_id"
+                             constraintName="fk_token_accepted_scopes_token"
+                             referencedTableName="user_tokens"
+                             referencedColumnNames="id"/>
+    <!-- if you delete the accepted scope, all the tokens drop the scope -->
+    <addForeignKeyConstraint baseTableName="user_token_accepted_scopes" baseColumnNames="accepted_scope_id"
+                             constraintName="fk_token_accepted_scopes_scope"
+                             referencedTableName="accepted_scopes"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
+  <!-- this table lists all the client scopes that are granted with a token -->
+  <changeSet id="token client scopes join table" author="moody.salem">
+    <createTable tableName="client_token_client_scopes">
+      <column name="client_token_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_scope_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="client_token_client_scopes" baseColumnNames="client_token_id"
+                             constraintName="fk_token_client_scopes_tokens"
+                             referencedTableName="client_tokens"
+                             referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="client_token_client_scopes" baseColumnNames="client_scope_id"
+                             constraintName="fk_token_client_scopes_client_scopes"
+                             referencedTableName="client_scopes"
+                             referencedColumnNames="id"/>
+  </changeSet>
+
+
+</databaseChangeLog>

@@ -3,7 +3,6 @@ package com.oauth2cloud.server.model.db;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moodysalem.hibernate.model.VersionedEntity;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
-import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -30,11 +29,6 @@ public abstract class Token extends VersionedEntity {
     @Column(name = "expires")
     private Long expires;
 
-    @URL
-    @Lob
-    @Column(name = "redirect_uri", updatable = false)
-    private String redirectUri;
-
     /**
      * @return a space delimited list of scope names, for approved client scopes that are active
      */
@@ -55,10 +49,6 @@ public abstract class Token extends VersionedEntity {
         this.token = token;
     }
 
-    public void setRandomToken(int length) {
-        setToken(randomAlphanumeric(length));
-    }
-
     public Date getExpires() {
         return expires == null ? null : new Date(expires);
     }
@@ -75,18 +65,12 @@ public abstract class Token extends VersionedEntity {
         this.client = client;
     }
 
-    public String getRedirectUri() {
-        return redirectUri;
-    }
-
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
-    }
-
     public abstract Long getTtl(final Client client);
 
-    public void setExpiresFromClient(final Client client) {
-        setExpires(new Date(System.currentTimeMillis() + getTtl(client)));
+    private void setExpiresFromClient(final Client client) {
+        if (client != null) {
+            setExpires(new Date(System.currentTimeMillis() + getTtl(client)));
+        }
     }
 
 //    /**
@@ -116,7 +100,10 @@ public abstract class Token extends VersionedEntity {
     @PrePersist
     public void generateToken() {
         if (getToken() == null) {
-            setRandomToken(96);
+            setToken(randomAlphanumeric(96));
+        }
+        if (getExpires() == null) {
+            setExpiresFromClient(getClient());
         }
     }
 
