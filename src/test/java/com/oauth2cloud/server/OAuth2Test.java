@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 
 public class OAuth2Test extends BaseTest {
     protected static final String AUTH_HEADER = "Authorization",
-            CLIENT_ID = "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4";
+            CLIENT_ID = "l56ladN92ryWSpsamIkGQduwvdRk3K7J1RNS6x6tZ34dVs2HKHMyO7G4lqIHxUrV7N9KxGKuYJAFXWJSKw1rKu458agHnorM";
 
     protected static final UUID APPLICATION_ID = UUID.fromString("9966e7e3-ac4f-4d8e-9710-2971450cb504");
 

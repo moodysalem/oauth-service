@@ -97,8 +97,8 @@ public class OAuth2Application extends BaseApplication {
                 final Client client = em.find(Client.class, UUID.fromString("1489a6d1-5933-4d46-98d0-7e62f37ffc5e"));
                 client.setCredentials(
                         new ClientCredentials(
-                                "6a63c1f1f10df85df6f918d68cb8c13e1e44856f7d861b05cbdd63bf7ea009f4",
-                                "0457a1fe452b7f32e4b84db9db139d9a572bad7599544ac368a079bbe8069714"
+                                "l56ladN92ryWSpsamIkGQduwvdRk3K7J1RNS6x6tZ34dVs2HKHMyO7G4lqIHxUrV7N9KxGKuYJAFXWJSKw1rKu458agHnorM",
+                                "nxe3ljGyPZizHpKDgvYj9BMbNDlUXqGMH3TyRCcqpivZHxiH3mTYlRZF4X39Wz1dFM3ua5F2c2Uu3TWJA4SzbXwmkwoNfhwo"
                         )
                 );
                 em.merge(client);
