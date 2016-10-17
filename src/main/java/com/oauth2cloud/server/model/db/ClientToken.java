@@ -35,6 +35,6 @@ public class ClientToken extends Token {
 
     @Override
     public Long getTtl(Client client) {
-        return client.getTokenTtl();
+        return client.getTokenTtl() * 1000L;
     }
 }

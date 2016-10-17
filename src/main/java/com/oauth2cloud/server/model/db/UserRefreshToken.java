@@ -8,6 +8,6 @@ import javax.persistence.Table;
 public class UserRefreshToken extends UserToken {
     @Override
     public Long getTtl(Client client) {
-        return client.getRefreshTokenTtl();
+        return client.getRefreshTokenTtl() * 1000L;
     }
 }

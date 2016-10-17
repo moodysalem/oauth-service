@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "user_access_tokens")
@@ -23,6 +22,6 @@ public class UserAccessToken extends UserToken {
 
     @Override
     public Long getTtl(Client client) {
-        return client.getTokenTtl();
+        return client.getTokenTtl() * 1000L;
     }
 }
