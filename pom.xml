@@ -217,8 +217,8 @@
             </goals>
             <configuration>
               <silentUpload>true</silentUpload>
-              <applicationName>OAuth</applicationName>
-              <environmentRef>oauth-prd.elasticbeanstalk.com</environmentRef>
+              <applicationName>OAuth2Cloud</applicationName>
+              <environmentRef>oauth2cloud-prod.us-west-2.elasticbeanstalk.com</environmentRef>
               <s3Bucket>eb-project-versions</s3Bucket>
               <s3Key>${project.groupId}/${project.artifactId}/${project.build.finalName}</s3Key>
               <versionLabel>${project.build.finalName}-${maven.build.timestamp}</versionLabel>
