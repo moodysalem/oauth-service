@@ -11,6 +11,7 @@ import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
+import io.swagger.annotations.*;
 import org.codemonkey.simplejavamail.Mailer;
 import org.glassfish.jersey.server.mvc.Viewable;
 
@@ -31,6 +32,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+@Api("oauth2")
 @CORSFilter.Skip
 @NoXFrameOptionsFeature.NoXFrame
 @Produces(MediaType.TEXT_HTML)
@@ -62,15 +64,23 @@ public class AuthorizeResource extends BaseResource {
      *
      * @return a login screen
      */
+    @ApiOperation(
+            value = "Authorize a user",
+            notes = "Send users to the login page. Does not allow CORS nor to be embedded in an iframe"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "If any of the required parameters are missing"),
+            @ApiResponse(code = 200, message = "HTML Login Page for a particular client")
+    })
     @GET
     public Response auth(
-            @QueryParam("response_type") final String responseType,
-            @QueryParam("client_id") final String clientId,
-            @QueryParam("redirect_uri") final String redirectUri,
+            @ApiParam(required = true, allowableValues = "code, token") @QueryParam("response_type") final String responseType,
+            @ApiParam(required = true) @QueryParam("client_id") final String clientId,
+            @ApiParam(required = true) @QueryParam("redirect_uri") final String redirectUri,
             @QueryParam("state") final String state,
-            @QueryParam("scope") final String scope,
-            @QueryParam("error_code") final String errorCode,
-            @QueryParam("logout") final boolean logout
+            @ApiParam(required = true) @QueryParam("scope") final String scope,
+            @ApiParam(hidden = true) @QueryParam("error_code") final String errorCode,
+            @ApiParam(required = true, defaultValue = "false") @QueryParam("logout") final boolean logout
     ) {
         final Response error = validateRequest(em, responseType, clientId, redirectUri, scope);
         if (error != null) {
@@ -129,6 +139,7 @@ public class AuthorizeResource extends BaseResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ApiOperation(value = "Complete a login", hidden = true)
     public Response doAuthorize(
             @QueryParam("response_type") final String responseType,
             @QueryParam("client_id") final String clientId,

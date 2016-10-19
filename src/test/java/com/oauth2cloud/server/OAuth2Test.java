@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import static com.oauth2cloud.server.rest.OAuth2Application.configureSwagger;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -66,6 +67,7 @@ public class OAuth2Test extends BaseTest {
 
         EncryptedStringConverter.init("xTUf4mP2SI6nfeLO");
         app.packages("com.oauth2cloud.server.rest");
+        configureSwagger(app);
 
         app.register(new AbstractBinder() {
             @Override

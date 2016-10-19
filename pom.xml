@@ -13,6 +13,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jaxrs.lib.version>3.0.3</jaxrs.lib.version>
     <hibernate.version>5.2.2.Final</hibernate.version>
+    <swagger.version>1.5.9</swagger.version>
 
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
@@ -88,6 +89,19 @@
       <version>0.3m</version>
     </dependency>
 
+    <!-- docs -->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-jersey2-jaxrs</artifactId>
+      <version>${swagger.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.glassfish.jersey.containers</groupId>
+          <artifactId>jersey-container-servlet-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- TESTING DEPENDENCIES -->
     <dependency>
       <groupId>com.moodysalem.java</groupId>
@@ -107,6 +121,24 @@
 
 
   <build>
+    <!-- the only resource we filter is the APIVersion.properties -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>APIVersion.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>APIVersion.properties</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
     <pluginManagement>
       <plugins>
         <plugin>

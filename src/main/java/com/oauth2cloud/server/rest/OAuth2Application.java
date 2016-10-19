@@ -6,11 +6,16 @@ import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.ClientCredentials;
+import com.oauth2cloud.server.model.api.Version;
 import freemarker.template.Configuration;
+import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.jaxrs.listing.ApiListingResource;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.codemonkey.simplejavamail.Mailer;
 import org.codemonkey.simplejavamail.TransportStrategy;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.process.internal.RequestScoped;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.ApplicationPath;
@@ -32,9 +37,22 @@ public class OAuth2Application extends BaseApplication {
         ENTITY_MANAGER_FACTORY_CONFIG.put("org.hibernate.envers.revision_type_field_name", "rev_info");
     }
 
+    public static void configureSwagger(final ResourceConfig resourceConfig) {
+        resourceConfig.register(ApiListingResource.class);
+        resourceConfig.register(SwaggerSerializers.class);
+
+        final BeanConfig beanConfig = new BeanConfig();
+        beanConfig.setVersion(Version.get());
+        beanConfig.setSchemes(new String[]{"https"});
+        beanConfig.setBasePath("/");
+        beanConfig.setResourcePackage("com.oauth2cloud.server.rest.endpoints");
+        beanConfig.setScan(true);
+    }
+
     public OAuth2Application() {
         super();
         packages("com.oauth2cloud.server.rest");
+        configureSwagger(this);
 
         register(new AbstractBinder() {
             @Override
