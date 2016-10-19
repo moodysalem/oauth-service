@@ -43,6 +43,7 @@ public class OAuth2Application extends BaseApplication {
 
         final BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion(Version.get());
+        beanConfig.setTitle("OAuth2Cloud API");
         beanConfig.setSchemes(new String[]{"https"});
         beanConfig.setBasePath("/");
         beanConfig.setResourcePackage("com.oauth2cloud.server.rest.endpoints");
