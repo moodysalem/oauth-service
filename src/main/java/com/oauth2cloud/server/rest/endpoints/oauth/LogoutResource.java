@@ -20,7 +20,7 @@ import java.util.logging.Level;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-@Api("oauth")
+@Api("oauth2")
 @Path("logout")
 @Produces("application/json")
 public class LogoutResource extends BaseResource {
