@@ -65,8 +65,8 @@ public class AuthorizeResource extends BaseResource {
      * @return a login screen
      */
     @ApiOperation(
-            value = "Authorize a user",
-            notes = "Send users to the login page. Does not allow CORS nor to be embedded in an iframe"
+            value = "Authorize User",
+            notes = "Send users to this endpoint for the login page. Does not allow CORS nor to be embedded in an iframe"
     )
     @ApiResponses({
             @ApiResponse(code = 400, message = "If any of the required parameters are missing"),
@@ -147,9 +147,9 @@ public class AuthorizeResource extends BaseResource {
      *
      * @return a Viewable if further action is required
      */
+    @ApiOperation(value = "Complete Login", hidden = true)
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @ApiOperation(value = "Complete a login", hidden = true)
     public Response doAuthorize(
             @QueryParam("response_type") final String responseType,
             @QueryParam("client_id") final String clientId,

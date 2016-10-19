@@ -42,7 +42,7 @@ public class GetLoginStatus extends BaseResource {
      */
 
     @ApiOperation(
-            value = "iFrame get login status",
+            value = "Get Login Status",
             notes = "This endpoint allows you to retrieve a new token using a hidden iframe if the user is logged in to the application (via remember me feature using cookies)"
     )
     @GET

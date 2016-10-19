@@ -78,7 +78,7 @@ public class TokenResource extends BaseResource {
     }
 
     @ApiOperation(
-            value = "Token endpoint",
+            value = "Token",
             notes = "The authorization code grant flow, *unsupported* password grant flow, client credentials grant flow, and refresh token grant flow go through this endpoint",
             authorizations = {
                     @Authorization("Basic")
@@ -344,7 +344,7 @@ public class TokenResource extends BaseResource {
      * @return the token information
      */
     @ApiOperation(
-            value = "Validate Token",
+            value = "Token Info",
             notes = "This endpoint is used to retrieve information about a token. The server should use it to find the scopes associated with a token. Either client_id or application_id are required"
     )
     @POST
