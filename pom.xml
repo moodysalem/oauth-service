@@ -14,6 +14,8 @@
     <hibernate.version>5.2.2.Final</hibernate.version>
     <swagger.version>1.5.9</swagger.version>
 
+    <!-- skip generating javadocs -->
+    <maven.javadoc.skip>true</maven.javadoc.skip>
     <!--skip deploying to the repositories -->
     <maven.deploy.skip>true</maven.deploy.skip>
 
