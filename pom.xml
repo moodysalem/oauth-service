@@ -3,7 +3,7 @@
 
   <groupId>com.oauth2cloud.server.oauth</groupId>
   <artifactId>oauth-api</artifactId>
-  <version>2.0.2-SNAPSHOT</version>
+  <version>2.0.3-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <name>OAuth2Cloud API</name>
