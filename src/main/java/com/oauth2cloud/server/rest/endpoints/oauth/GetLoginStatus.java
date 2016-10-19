@@ -12,7 +12,9 @@ import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
 import com.oauth2cloud.server.rest.util.UriUtil;
-import org.apache.commons.lang3.StringUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.ws.rs.*;
@@ -23,7 +25,9 @@ import java.net.URI;
 import java.util.logging.Level;
 
 import static com.oauth2cloud.server.rest.util.OAuthUtil.badRequest;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
+@Api("oauth2")
 @Produces(MediaType.TEXT_HTML)
 @Path("login-status")
 public class GetLoginStatus extends BaseResource {
@@ -36,12 +40,21 @@ public class GetLoginStatus extends BaseResource {
      * @param clientId id of the client checking login status
      * @return an html page that posts a message to the parent window
      */
+
+    @ApiOperation(
+            value = "iFrame get login status",
+            notes = "This endpoint allows you to retrieve a new token using a hidden iframe if the user is logged in to the application (via remember me feature using cookies)"
+    )
     @GET
     @CORSFilter.Skip
     @TokenFilter.ReadToken
-    public Response get(@QueryParam("client_id") String clientId,
-                        @HeaderParam("Referer") String referrer) {
-        if (StringUtils.isBlank(clientId)) {
+    public Response get(
+            @ApiParam(value = "The ID of the client attempting to retrieve login status", required = true)
+            @QueryParam("client_id") final String clientId,
+            @ApiParam(value = "The referrer of the request-note the incorrect spelling", required = true)
+            @HeaderParam("Referer") final String referrer
+    ) {
+        if (isBlank(clientId)) {
             return badRequest("'client_id' parameter is required to check login status.");
         }
 

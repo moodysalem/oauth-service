@@ -74,13 +74,23 @@ public class AuthorizeResource extends BaseResource {
     })
     @GET
     public Response auth(
-            @ApiParam(required = true, allowableValues = "code, token") @QueryParam("response_type") final String responseType,
-            @ApiParam(required = true) @QueryParam("client_id") final String clientId,
-            @ApiParam(required = true) @QueryParam("redirect_uri") final String redirectUri,
+            @ApiParam(
+                    value = "The desired response type from the API, either code or token",
+                    required = true, allowableValues = "code, token"
+            )
+            @QueryParam("response_type") final String responseType,
+            @ApiParam(value = "The identifier for the client for which the user will be authenticated", required = true)
+            @QueryParam("client_id") final String clientId,
+            @ApiParam(value = "The redirect URI that the user will be sent to after successfully logging in", required = true)
+            @QueryParam("redirect_uri") final String redirectUri,
+            @ApiParam(value = "A state variable from the client that can be used to validate that the redirect came from the OAuth2 server")
             @QueryParam("state") final String state,
-            @ApiParam(required = true) @QueryParam("scope") final String scope,
-            @ApiParam(hidden = true) @QueryParam("error_code") final String errorCode,
-            @ApiParam(required = true, defaultValue = "false") @QueryParam("logout") final boolean logout
+            @ApiParam(value = "The space delimited list of scopes that the client is requesting")
+            @QueryParam("scope") final String scope,
+            @ApiParam(hidden = true)
+            @QueryParam("error_code") final String errorCode,
+            @ApiParam(value = "Pass true to require the user to re-authenticate if they are already logged in", required = false, defaultValue = "false")
+            @QueryParam("logout") final boolean logout
     ) {
         final Response error = validateRequest(em, responseType, clientId, redirectUri, scope);
         if (error != null) {

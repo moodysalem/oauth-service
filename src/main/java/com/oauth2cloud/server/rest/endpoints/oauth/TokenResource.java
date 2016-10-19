@@ -8,6 +8,10 @@ import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -25,6 +29,7 @@ import static com.oauth2cloud.server.rest.util.OAuthUtil.parseScope;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+@Api("oauth2")
 @NoXFrameOptionsFeature.NoXFrame
 @Path("token")
 @Produces(MediaType.APPLICATION_JSON)
@@ -72,15 +77,30 @@ public class TokenResource extends BaseResource {
         return null;
     }
 
+    @ApiOperation(
+            value = "Token endpoint",
+            notes = "The authorization code grant flow, *unsupported* password grant flow, client credentials grant flow, and refresh token grant flow go through this endpoint",
+            authorizations = {
+                    @Authorization("Basic")
+            }
+    )
     @POST
     public Response post(
+            @ApiParam(value = "Basic authorization scheme is required in some cases to identify that the request is coming from a specific client")
             @HeaderParam("Authorization") final String authorizationHeader,
+            @ApiParam(value = "Required indicator of the type of grant flow being attempted", required = true, allowableValues = "authorization_code, password, client_credentials, refresh_token")
             @FormParam("grant_type") final String grantTypeString,
+            @ApiParam(value = "Refresh token required for refresh_token grant flow")
             @FormParam("refresh_token") final String refreshToken,
+            @ApiParam(value = "Scope of the token being requested")
             @FormParam("scope") final String scope,
+            @ApiParam(value = "Authorization code for authorization_code flow")
             @FormParam("code") final String code,
+            @ApiParam(value = "The original redirect URI used to retrieve an authorization code")
             @FormParam("redirect_uri") final String redirectUri,
+            @ApiParam(value = "The identifier of the client retrieving the authorization code")
             @FormParam("client_id") final String clientId,
+            @ApiParam(hidden = true)
             @FormParam("email") final String email
     ) {
         if (isEmpty(grantTypeString)) {
@@ -323,11 +343,18 @@ public class TokenResource extends BaseResource {
      * @param applicationId the id of the application for which this token was created
      * @return the token information
      */
+    @ApiOperation(
+            value = "Validate Token",
+            notes = "This endpoint is used to retrieve information about a token. The server should use it to find the scopes associated with a token. Either client_id or application_id are required"
+    )
     @POST
     @Path("info")
     public Response tokenInfo(
+            @ApiParam(value = "The token to be found", required = true)
             @FormParam("token") final String tokenString,
+            @ApiParam(value = "The identifier of the client", required = true)
             @FormParam("client_id") final String clientId,
+            @ApiParam(value = "The ID of the application", required = true)
             @FormParam("application_id") final UUID applicationId
     ) {
         if (isBlank(tokenString) || (applicationId == null && clientId == null)) {
