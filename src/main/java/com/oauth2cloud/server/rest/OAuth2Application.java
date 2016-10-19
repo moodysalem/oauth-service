@@ -4,9 +4,9 @@ import com.moodysalem.jaxrs.lib.BaseApplication;
 import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
+import com.oauth2cloud.server.model.api.Version;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.ClientCredentials;
-import com.oauth2cloud.server.model.api.Version;
 import freemarker.template.Configuration;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
@@ -48,6 +48,9 @@ public class OAuth2Application extends BaseApplication {
         beanConfig.setBasePath("/");
         beanConfig.setResourcePackage("com.oauth2cloud.server.rest.endpoints");
         beanConfig.setScan(true);
+        beanConfig.setDescription("An API for an OAuth2 Server as a service");
+        beanConfig.setContact("moody.salem@gmail.com");
+        beanConfig.setHost("api.oauth2cloud.com");
     }
 
     public OAuth2Application() {
