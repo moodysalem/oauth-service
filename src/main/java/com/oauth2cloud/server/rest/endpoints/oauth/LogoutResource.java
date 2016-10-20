@@ -1,14 +1,13 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
+import com.moodysalem.jaxrs.lib.exceptionmappers.ErrorResponse;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.LoginCookie;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -29,6 +28,10 @@ public class LogoutResource extends BaseResource {
             value = "Log Out",
             notes = "This unsecured endpoint is used to expire any login cookies that a user may have for an application"
     )
+    @ApiResponses({
+            @ApiResponse(code = 204, message = "Returns a 204 if the client_id is valid"),
+            @ApiResponse(code = 400, response = ErrorResponse.class, message = "Returns a 400 if the client_id is not provided")
+    })
     @GET
     public Response logout(
             @ApiParam(value = "The ID of the client requesting to log the user out", required = true)

@@ -8,10 +8,7 @@ import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,7 +24,6 @@ import java.util.stream.Collectors;
 import static com.oauth2cloud.server.model.api.ErrorResponse.Type.*;
 import static com.oauth2cloud.server.rest.util.OAuthUtil.parseScope;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Api("oauth2")
 @NoXFrameOptionsFeature.NoXFrame
@@ -35,13 +31,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class TokenResource extends BaseResource {
-    public enum GrantType {
-        authorization_code,
-        password,
-        client_credentials,
-        refresh_token
-    }
-
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private Response error(final int statusCode, final ErrorResponse.Type type, final String description, final String uri) {
@@ -57,7 +46,7 @@ public class TokenResource extends BaseResource {
     private static final String BASIC = "Basic ";
     private static final int BASIC_LENGTH = BASIC.length();
 
-    private Client readAuthorizationHeader(final String authorizationHeader) {
+    private Client parseAuthorizationHeader(final String authorizationHeader) {
         if (authorizationHeader != null) {
             if (authorizationHeader.startsWith(BASIC)) {
                 final String credentials = authorizationHeader.substring(BASIC_LENGTH);
@@ -78,156 +67,25 @@ public class TokenResource extends BaseResource {
     }
 
     @ApiOperation(
-            value = "Token",
-            notes = "The authorization code grant flow, *unsupported* password grant flow, client credentials grant flow, and refresh token grant flow go through this endpoint",
-            authorizations = {
-                    @Authorization("Basic")
-            }
+            value = "Authorization Code Grant Flow",
+            notes = "Exchange an access code retrieved from the authorize resource for an access token"
     )
+    @ApiResponses({
+            @ApiResponse(code = 200, response = TokenResponse.class, message = "Success if the code is valid and the request is well formed"),
+            @ApiResponse(code = 400, response = ErrorResponse.class, message = "Error if the request is not valid")
+    })
     @POST
-    public Response post(
-            @ApiParam(value = "Basic authorization scheme is required in some cases to identify that the request is coming from a specific client")
+    @Path("authorization_code")
+    public Response authorizationCode(
+            @ApiParam(value = "Base64 encoded client_id:secret. Required for confidential clients only", required = true)
             @HeaderParam("Authorization") final String authorizationHeader,
-            @ApiParam(value = "Required indicator of the type of grant flow being attempted", required = true, allowableValues = "authorization_code, password, client_credentials, refresh_token")
-            @FormParam("grant_type") final String grantTypeString,
-            @ApiParam(value = "Refresh token required for refresh_token grant flow")
-            @FormParam("refresh_token") final String refreshToken,
-            @ApiParam(value = "Scope of the token being requested")
-            @FormParam("scope") final String scope,
-            @ApiParam(value = "Authorization code for authorization_code flow")
+            @ApiParam(value = "The code received from the authorization code grant flow to be exchanged for an access token", required = true)
             @FormParam("code") final String code,
-            @ApiParam(value = "The original redirect URI used to retrieve an authorization code")
+            @ApiParam(value = "The redirect URI used to retrieve an authorization code", required = true)
             @FormParam("redirect_uri") final String redirectUri,
-            @ApiParam(value = "The identifier of the client retrieving the authorization code")
-            @FormParam("client_id") final String clientId,
-            @ApiParam(hidden = true)
-            @FormParam("email") final String email
+            @ApiParam(value = "The identifier of the client retrieving the authorization code", required = true)
+            @FormParam("client_id") final String clientId
     ) {
-        if (isEmpty(grantTypeString)) {
-            return error(invalid_request, "'grant_type' is required.");
-        }
-
-        final GrantType grantType;
-        try {
-            grantType = GrantType.valueOf(grantTypeString);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Invalid grant type passed", e);
-            return error(ErrorResponse.Type.unsupported_grant_type,
-                    "The 'grant_type' specified is not supported by this server.");
-        }
-
-        switch (grantType) {
-            case authorization_code:
-                return authorizationCodeGrantType(authorizationHeader, code, redirectUri, clientId);
-            case password:
-                return passwordGrantType(email);
-            case client_credentials:
-                return clientCredentialsGrantType(authorizationHeader, scope);
-            case refresh_token:
-                return refreshTokenGrantType(authorizationHeader, refreshToken, scope);
-            default:
-                return error(ErrorResponse.Type.unsupported_grant_type, "Unrecognized 'grant_type'");
-        }
-    }
-
-    private Response refreshTokenGrantType(final String authorizationHeader, final String token, final String scope) {
-        final Client client = readAuthorizationHeader(authorizationHeader);
-
-        if (client == null) {
-            return error(invalid_grant, "Client authorization is required for the 'refresh_token' grant type.");
-        }
-
-        if (!client.isConfidential()) {
-            return error(invalid_grant, "Client type must be confidential for the 'refresh_token' grant type.");
-        }
-
-        if (token == null) {
-            return error(invalid_request, "'refresh_token' parameter is required.");
-        }
-
-        final UserRefreshToken refreshToken = QueryUtil.findToken(em, token, client, UserRefreshToken.class);
-        if (refreshToken == null) {
-            return error(invalid_grant, "Invalid or expired refresh token.");
-        }
-        CallLogUtil.logCall(em, refreshToken.getClient(), req);
-
-        final Set<AcceptedScope> newTokenScopes = new HashSet<>(refreshToken.getAcceptedScopes());
-
-        final Set<String> scopes = parseScope(scope);
-        if (scopes.size() > 0) {
-            final Set<String> acceptedScopeNames = newTokenScopes.stream().map(AcceptedScope::getClientScope)
-                    .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
-
-            if (!acceptedScopeNames.containsAll(scopes)) {
-                final Set<ClientScope> clientScopes = newTokenScopes.stream().map(AcceptedScope::getClientScope).collect(Collectors.toSet());
-                final String invalidScopes = getMissingScopes(clientScopes, scopes).stream().collect(Collectors.joining("; "));
-                return error(invalid_scope, "The following scopes were invalid for the refresh token: " + invalidScopes);
-            }
-        }
-
-        final UserAccessToken userAccessToken = new UserAccessToken();
-        userAccessToken.setClient(client);
-        userAccessToken.setUser(refreshToken.getUser());
-        userAccessToken.setRedirectUri(refreshToken.getRedirectUri());
-        userAccessToken.setAcceptedScopes(newTokenScopes);
-        userAccessToken.setRefreshToken(refreshToken);
-
-        final UserAccessToken saved;
-        try {
-            saved = TXHelper.withinTransaction(em, () -> em.merge(userAccessToken));
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Failed to save token in refresh grant type", e);
-            return internalServerError();
-        }
-
-        return noCache(Response.ok(TokenResponse.from(saved))).build();
-    }
-
-    private Response clientCredentialsGrantType(final String authorizationHeader, final String scope) {
-        final Client client = readAuthorizationHeader(authorizationHeader);
-        if (client == null) {
-            return error(invalid_client, "Client authorization failed.");
-        }
-
-        CallLogUtil.logCall(em, client, req);
-
-        if (!client.getFlows().contains(GrantFlow.CLIENT_CREDENTIALS)) {
-            return error(unauthorized_client,
-                    "Client is not authorized for the 'client_credentials' grant flow.");
-        }
-
-        if (!client.isConfidential()) {
-            return error(unauthorized_client,
-                    "Client must be confidential to use the 'client_credentials' grant flow.");
-        }
-
-        final Set<String> scopes = parseScope(scope);
-
-        final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
-
-        final Set<String> missingScopes = getMissingScopes(clientScopes, scopes);
-
-        if (!missingScopes.isEmpty()) {
-            return error(ErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + missingScopes.stream().collect(Collectors.joining("; ")));
-        }
-
-        final ClientToken saved;
-        {
-            final ClientToken clientToken = new ClientToken();
-            clientToken.setClient(client);
-            clientToken.setClientScopes(clientScopes);
-            try {
-                saved = TXHelper.withinTransaction(em, () -> em.merge(clientToken));
-            } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Failed to save client token", e);
-                return error(invalid_request, "Internal server error occurred!");
-            }
-        }
-
-        return noCache(Response.ok(TokenResponse.from(saved))).build();
-    }
-
-    private Response authorizationCodeGrantType(final String authorizationHeader, final String code, final String redirectUri, final String clientId) {
         if (code == null || redirectUri == null || clientId == null) {
             return error(invalid_request,
                     "'code', 'redirect_uri', and 'client_id' are all required for the 'authorization_code' grant flow.");
@@ -243,7 +101,7 @@ public class TokenResource extends BaseResource {
             return error(unauthorized_client, "Client is not authorized for the 'authorization_code' grant flow.");
         }
 
-        final Client headerClient = readAuthorizationHeader(authorizationHeader);
+        final Client headerClient = parseAuthorizationHeader(authorizationHeader);
 
         if (headerClient != null && !headerClient.idMatch(client)) {
             return error(invalid_client, "Client authentication does not match client ID.");
@@ -318,13 +176,153 @@ public class TokenResource extends BaseResource {
         return noCache(Response.ok(TokenResponse.from(accessToken))).build();
     }
 
-    private Response internalServerError() {
-        return error(invalid_grant, "Internal server error!");
+
+    @ApiOperation(
+            value = "Resource Owner Password Grant Flow",
+            notes = "Retrieve an access token via the resource owner's credentials. This flow is not currently supported for this OAuth2 server implementation because users do not authenticate with passwords"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, response = ErrorResponse.class, message = "Always returns invalid_grant error")
+    })
+    @POST
+    @Path("password")
+    public Response password() {
+        // TODO: send an e-mail to the user with a redirect url without forcing the user to go to
+        return error(invalid_grant, "This OAuth2 server implementation does not yet support the password flow");
     }
 
-    private Response passwordGrantType(final String email) {
-        // TODO: send an e-mail to the user with a redirect url without forcing the user to go to
-        return error(invalid_grant, "This OAuth2 server implementation does not support passwords");
+
+    @ApiOperation(
+            value = "Refresh Token Grant Flow",
+            notes = "Use a refresh token to create a new access token"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, response = TokenResponse.class, message = "Returns the new access token if the request is well formed and the refresh token has not expired"),
+            @ApiResponse(code = 400, response = ErrorResponse.class, message = "If the request is not well formed, or scopes are requested that are not associated with the refresh token, or the token has expired")
+    })
+    @POST
+    @Path("refresh_token")
+    public Response refreshTokenGrantType(
+            @ApiParam(value = "Basic authorization scheme is required in some cases to identify that the request is coming from a specific client", required = true)
+            @HeaderParam("Authorization") final String authorizationHeader,
+            @ApiParam(value = "Refresh token required for refresh_token grant flow", required = true)
+            @FormParam("refresh_token") final String refreshTokenString,
+            @ApiParam(value = "Scope of the token being requested")
+            @FormParam("scope") final String scope
+    ) {
+        final Client client = parseAuthorizationHeader(authorizationHeader);
+
+        if (client == null) {
+            return error(invalid_grant, "Client authorization is required for the 'refresh_token' grant type.");
+        }
+
+        if (!client.isConfidential()) {
+            return error(invalid_grant, "Client type must be confidential for the 'refresh_token' grant type.");
+        }
+
+        if (refreshTokenString == null) {
+            return error(invalid_request, "'refresh_token' parameter is required.");
+        }
+
+        final UserRefreshToken refreshToken = QueryUtil.findToken(em, refreshTokenString, client, UserRefreshToken.class);
+        if (refreshToken == null) {
+            return error(invalid_grant, "Invalid or expired refresh token.");
+        }
+        CallLogUtil.logCall(em, refreshToken.getClient(), req);
+
+        final Set<AcceptedScope> newTokenScopes = new HashSet<>(refreshToken.getAcceptedScopes());
+
+        final Set<String> scopes = parseScope(scope);
+        if (scopes.size() > 0) {
+            final Set<String> acceptedScopeNames = newTokenScopes.stream().map(AcceptedScope::getClientScope)
+                    .map(ClientScope::getScope).map(Scope::getName).collect(Collectors.toSet());
+
+            if (!acceptedScopeNames.containsAll(scopes)) {
+                final Set<ClientScope> clientScopes = newTokenScopes.stream().map(AcceptedScope::getClientScope).collect(Collectors.toSet());
+                final String invalidScopes = getMissingScopes(clientScopes, scopes).stream().collect(Collectors.joining("; "));
+                return error(invalid_scope, "The following scopes were invalid for the refresh token: " + invalidScopes);
+            }
+        }
+
+        final UserAccessToken userAccessToken = new UserAccessToken();
+        userAccessToken.setClient(client);
+        userAccessToken.setUser(refreshToken.getUser());
+        userAccessToken.setRedirectUri(refreshToken.getRedirectUri());
+        userAccessToken.setAcceptedScopes(newTokenScopes);
+        userAccessToken.setRefreshToken(refreshToken);
+
+        final UserAccessToken saved;
+        try {
+            saved = TXHelper.withinTransaction(em, () -> em.merge(userAccessToken));
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to save token in refresh grant type", e);
+            return internalServerError();
+        }
+
+        return noCache(Response.ok(TokenResponse.from(saved))).build();
+    }
+
+    @ApiOperation(
+            value = "Client Credentials Grant Flow",
+            notes = "This endpoint provides client tokens in exchange for client credentials"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, response = TokenResponse.class, message = "If the request is well formed and the client supports the grant flow"),
+            @ApiResponse(code = 400, response = ErrorResponse.class, message = "If the client does not have the client credentials grant flow or lacks the requested scopes")
+    })
+    @POST
+    @Path("client_credentials")
+    public Response clientCredentialsGrantType(
+            @ApiParam(value = "Base64 encoded client_id:secret used to authenticate the client", required = true)
+            @HeaderParam("Authorization") final String authorizationHeader,
+            @ApiParam(value = "Scope of the token being requested")
+            @FormParam("scope") final String scope
+    ) {
+        final Client client = parseAuthorizationHeader(authorizationHeader);
+        if (client == null) {
+            return error(invalid_client, "Client authorization failed.");
+        }
+
+        CallLogUtil.logCall(em, client, req);
+
+        if (!client.getFlows().contains(GrantFlow.CLIENT_CREDENTIALS)) {
+            return error(unauthorized_client,
+                    "Client is not authorized for the 'client_credentials' grant flow.");
+        }
+
+        if (!client.isConfidential()) {
+            return error(unauthorized_client,
+                    "Client must be confidential to use the 'client_credentials' grant flow.");
+        }
+
+        final Set<String> scopes = parseScope(scope);
+
+        final Set<ClientScope> clientScopes = QueryUtil.getScopes(em, client, scopes);
+
+        final Set<String> missingScopes = getMissingScopes(clientScopes, scopes);
+
+        if (!missingScopes.isEmpty()) {
+            return error(ErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + missingScopes.stream().collect(Collectors.joining("; ")));
+        }
+
+        final ClientToken saved;
+        {
+            final ClientToken clientToken = new ClientToken();
+            clientToken.setClient(client);
+            clientToken.setClientScopes(clientScopes);
+            try {
+                saved = TXHelper.withinTransaction(em, () -> em.merge(clientToken));
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "Failed to save client token", e);
+                return error(invalid_request, "Internal server error occurred!");
+            }
+        }
+
+        return noCache(Response.ok(TokenResponse.from(saved))).build();
+    }
+
+    private Response internalServerError() {
+        return error(invalid_grant, "Internal server error!");
     }
 
     private Set<String> getMissingScopes(final Set<ClientScope> clientScopes, final Set<String> requestedScopes) {

@@ -12,9 +12,7 @@ import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
 import com.oauth2cloud.server.rest.util.UriUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.ws.rs.*;
@@ -42,9 +40,13 @@ public class GetLoginStatus extends BaseResource {
      */
 
     @ApiOperation(
-            value = "Get Login Status",
-            notes = "This endpoint allows you to retrieve a new token using a hidden iframe if the user is logged in to the application (via remember me feature using cookies)"
+            value = "Get Log In Status",
+            notes = "This endpoint returns an HTML page for use in a hidden iframe to get a new token if the user is already authorized (via remember me feature using cookies)"
     )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Returns HTML page that posts a message to the parent window in the Referer domain"),
+            @ApiResponse(code = 400, message = "If the client ID is missing or invalid or the referer is not an authorized URI")
+    })
     @GET
     @CORSFilter.Skip
     @TokenFilter.ReadToken

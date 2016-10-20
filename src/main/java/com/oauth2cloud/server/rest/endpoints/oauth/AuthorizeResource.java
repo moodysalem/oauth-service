@@ -69,8 +69,8 @@ public class AuthorizeResource extends BaseResource {
             notes = "Send users to this endpoint for the login page. Does not allow CORS nor to be embedded in an iframe"
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "If any of the required parameters are missing"),
-            @ApiResponse(code = 200, message = "HTML Login Page for a particular client")
+            @ApiResponse(code = 200, message = "Returns 200 if request is well formed"),
+            @ApiResponse(code = 400, message = "Returns 400 if any of the required parameters are missing or invalid")
     })
     @GET
     public Response auth(
