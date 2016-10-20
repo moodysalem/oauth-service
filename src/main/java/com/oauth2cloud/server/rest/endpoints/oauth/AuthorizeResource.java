@@ -81,9 +81,9 @@ public class AuthorizeResource extends BaseResource {
             @QueryParam("response_type") final String responseType,
             @ApiParam(value = "The identifier for the client for which the user will be authenticated", required = true)
             @QueryParam("client_id") final String clientId,
-            @ApiParam(value = "The redirect URI that the user will be sent to after successfully logging in", required = true)
+            @ApiParam(value = "The redirect URI that the user will be sent to after successfully or unsuccessfully authorizing", required = true)
             @QueryParam("redirect_uri") final String redirectUri,
-            @ApiParam(value = "A state variable from the client that can be used to validate that the redirect came from the OAuth2 server")
+            @ApiParam(value = "A state variable from the client that can be used to validate that the redirect came from the OAuth2 server. The state will be included in the redirect URI in the query parameter for the code response type and the hash for the token response type")
             @QueryParam("state") final String state,
             @ApiParam(value = "The space delimited list of scopes that the client is requesting")
             @QueryParam("scope") final String scope,

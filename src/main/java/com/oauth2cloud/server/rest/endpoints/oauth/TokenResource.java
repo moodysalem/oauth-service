@@ -1,8 +1,9 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
+import com.moodysalem.jaxrs.lib.exceptionmappers.ErrorResponse;
 import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
-import com.oauth2cloud.server.model.api.ErrorResponse;
+import com.oauth2cloud.server.model.api.OAuthErrorResponse;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
@@ -21,7 +22,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static com.oauth2cloud.server.model.api.ErrorResponse.Type.*;
+import static com.oauth2cloud.server.model.api.OAuthErrorResponse.Type.*;
 import static com.oauth2cloud.server.rest.util.OAuthUtil.parseScope;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -33,14 +34,18 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class TokenResource extends BaseResource {
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    private Response error(final int statusCode, final ErrorResponse.Type type, final String description, final String uri) {
+    private Response error(final int statusCode, final OAuthErrorResponse.Type type, final String description, final String uri) {
         return Response.status(statusCode)
-                .entity(new ErrorResponse(type, description, uri))
+                .entity(new OAuthErrorResponse(type, description, uri))
                 .build();
     }
 
-    private Response error(ErrorResponse.Type type, String description) {
+    private Response error(OAuthErrorResponse.Type type, String description) {
         return error(400, type, description, null);
+    }
+
+    private Response internalServerError() {
+        return error(invalid_grant, "Internal server error!");
     }
 
     private static final String BASIC = "Basic ";
@@ -72,12 +77,12 @@ public class TokenResource extends BaseResource {
     )
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenResponse.class, message = "Success if the code is valid and the request is well formed"),
-            @ApiResponse(code = 400, response = ErrorResponse.class, message = "Error if the request is not valid")
+            @ApiResponse(code = 400, response = OAuthErrorResponse.class, message = "Error if the request is not valid")
     })
     @POST
     @Path("authorization_code")
     public Response authorizationCode(
-            @ApiParam(value = "Base64 encoded client_id:secret. Required for confidential clients only", required = true)
+            @ApiParam(value = "Base64 encoded client_id:secret required for confidential clients only", example = "Basic YWJjOjEyMwo=")
             @HeaderParam("Authorization") final String authorizationHeader,
             @ApiParam(value = "The code received from the authorization code grant flow to be exchanged for an access token", required = true)
             @FormParam("code") final String code,
@@ -182,7 +187,7 @@ public class TokenResource extends BaseResource {
             notes = "Retrieve an access token via the resource owner's credentials. This flow is not currently supported for this OAuth2 server implementation because users do not authenticate with passwords"
     )
     @ApiResponses({
-            @ApiResponse(code = 400, response = ErrorResponse.class, message = "Always returns invalid_grant error")
+            @ApiResponse(code = 400, response = OAuthErrorResponse.class, message = "Always returns invalid_grant error")
     })
     @POST
     @Path("password")
@@ -198,12 +203,12 @@ public class TokenResource extends BaseResource {
     )
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenResponse.class, message = "Returns the new access token if the request is well formed and the refresh token has not expired"),
-            @ApiResponse(code = 400, response = ErrorResponse.class, message = "If the request is not well formed, or scopes are requested that are not associated with the refresh token, or the token has expired")
+            @ApiResponse(code = 400, response = OAuthErrorResponse.class, message = "If the request is not well formed, or scopes are requested that are not associated with the refresh token, or the token has expired")
     })
     @POST
     @Path("refresh_token")
     public Response refreshTokenGrantType(
-            @ApiParam(value = "Basic authorization scheme is required in some cases to identify that the request is coming from a specific client", required = true)
+            @ApiParam(value = "Base64 encoded client_id:secret", required = true, example = "Basic YWJjOjEyMwo=")
             @HeaderParam("Authorization") final String authorizationHeader,
             @ApiParam(value = "Refresh token required for refresh_token grant flow", required = true)
             @FormParam("refresh_token") final String refreshTokenString,
@@ -268,12 +273,12 @@ public class TokenResource extends BaseResource {
     )
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenResponse.class, message = "If the request is well formed and the client supports the grant flow"),
-            @ApiResponse(code = 400, response = ErrorResponse.class, message = "If the client does not have the client credentials grant flow or lacks the requested scopes")
+            @ApiResponse(code = 400, response = OAuthErrorResponse.class, message = "If the client does not have the client credentials grant flow or lacks the requested scopes")
     })
     @POST
     @Path("client_credentials")
     public Response clientCredentialsGrantType(
-            @ApiParam(value = "Base64 encoded client_id:secret used to authenticate the client", required = true)
+            @ApiParam(value = "Base64 encoded client_id:secret", required = true, example = "Basic YWJjOjEyMwo=")
             @HeaderParam("Authorization") final String authorizationHeader,
             @ApiParam(value = "Scope of the token being requested")
             @FormParam("scope") final String scope
@@ -302,7 +307,7 @@ public class TokenResource extends BaseResource {
         final Set<String> missingScopes = getMissingScopes(clientScopes, scopes);
 
         if (!missingScopes.isEmpty()) {
-            return error(ErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + missingScopes.stream().collect(Collectors.joining("; ")));
+            return error(OAuthErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + missingScopes.stream().collect(Collectors.joining("; ")));
         }
 
         final ClientToken saved;
@@ -319,10 +324,6 @@ public class TokenResource extends BaseResource {
         }
 
         return noCache(Response.ok(TokenResponse.from(saved))).build();
-    }
-
-    private Response internalServerError() {
-        return error(invalid_grant, "Internal server error!");
     }
 
     private Set<String> getMissingScopes(final Set<ClientScope> clientScopes, final Set<String> requestedScopes) {
@@ -345,14 +346,18 @@ public class TokenResource extends BaseResource {
             value = "Token Info",
             notes = "This endpoint is used to retrieve information about a token. The server should use it to find the scopes associated with a token. Either client_id or application_id are required"
     )
+    @ApiResponses({
+            @ApiResponse(code = 200, response = TokenResponse.class, message = "If the token is found and associated with either the client_id or the application_id"),
+            @ApiResponse(code = 400, response = ErrorResponse.class, message = "If the client_id or application_id are invalid or the token is invalid or expired")
+    })
     @POST
     @Path("info")
     public Response tokenInfo(
             @ApiParam(value = "The token to be found", required = true)
             @FormParam("token") final String tokenString,
-            @ApiParam(value = "The identifier of the client", required = true)
+            @ApiParam(value = "The identifier of the client")
             @FormParam("client_id") final String clientId,
-            @ApiParam(value = "The ID of the application", required = true)
+            @ApiParam(value = "The ID of the application")
             @FormParam("application_id") final UUID applicationId
     ) {
         if (isBlank(tokenString) || (applicationId == null && clientId == null)) {

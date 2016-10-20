@@ -11,7 +11,7 @@ import javax.ws.rs.core.MultivaluedMap;
  * The OAauth2 spec for an error response
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponse {
+public class OAuthErrorResponse {
     public enum Type {
         invalid_request,
         invalid_client,
@@ -29,7 +29,7 @@ public class ErrorResponse {
     @JsonProperty("error_uri")
     private final String errorUri;
 
-    public ErrorResponse(final Type error, final String errorDescription, final String errorUri) {
+    public OAuthErrorResponse(final Type error, final String errorDescription, final String errorUri) {
         this.error = error;
         this.errorDescription = errorDescription;
         this.errorUri = errorUri;

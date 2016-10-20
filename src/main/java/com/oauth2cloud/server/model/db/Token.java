@@ -73,29 +73,6 @@ public abstract class Token extends VersionedEntity {
         }
     }
 
-//    /**
-//     * Helper function to calculate when a token should expire based on the client's TTL
-//     *
-//     * @param client for which the token is being generated
-//     * @return when the token should expire
-//     */
-//    public static Date getExpires(final Client client, final TokenType type) {
-//        final long duration;
-//
-//        if (TokenType.REFRESH.equals(type)) {
-//            if (client.getRefreshTokenTtl() == null) {
-//                throw new IllegalArgumentException();
-//            }
-//            duration = client.getRefreshTokenTtl() * 1000L;
-//        } else if (type.getFixedTtl() != null) {
-//            duration = type.getFixedTtl() * 1000L;
-//        } else {
-//            duration = client.getTokenTtl() * 1000L;
-//        }
-//
-//        return new Date(System.currentTimeMillis() + duration);
-//    }
-
     @PreUpdate
     @PrePersist
     public void generateToken() {
