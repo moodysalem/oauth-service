@@ -108,7 +108,7 @@ public class OAuth2Test extends BaseTest implements SendsMail {
     public static final String ADMIN_USER = "moody.salem@gmail.com";
 
     public TokenResponse getToken() {
-        return TokenUtil.getToken(client(), this, ADMIN_USER);
+        return TokenUtil.getToken(client(), target(), this, ADMIN_USER);
     }
 
 }

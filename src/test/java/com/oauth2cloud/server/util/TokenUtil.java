@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -25,11 +26,11 @@ public class TokenUtil {
      * This method returns a TokenResponse corresponding to a log in to the admin application
      * from the administrative user
      */
-    public static TokenResponse getToken(final Client client, final SendsMail sendsMail, final String email) {
+    public static TokenResponse getToken(final Client client, final WebTarget base, final SendsMail sendsMail, final String email) {
         final Form up = new Form();
         up.param("email", email).param("action", "email");
 
-        final Response loginScreen = client.target("authorize")
+        final Response loginScreen = base.path("authorize")
                 .property(ClientProperties.FOLLOW_REDIRECTS, false)
                 .queryParam("client_id", OAuth2Test.CLIENT_ID)
                 .queryParam("redirect_uri", "https://oauth2cloud.com")
