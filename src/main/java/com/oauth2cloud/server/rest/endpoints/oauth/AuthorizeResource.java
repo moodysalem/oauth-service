@@ -89,7 +89,7 @@ public class AuthorizeResource extends BaseResource {
             @QueryParam("scope") final String scope,
             @ApiParam(hidden = true)
             @QueryParam("error_code") final String errorCode,
-            @ApiParam(value = "Pass true to require the user to re-authenticate if they are already logged in", required = false, defaultValue = "false")
+            @ApiParam(value = "Pass true to require the user to re-authenticate if they are already logged in", required = false, defaultValue = "false", allowableValues = "true,false")
             @QueryParam("logout") final boolean logout
     ) {
         final Response error = validateRequest(em, responseType, clientId, redirectUri, scope);
@@ -176,7 +176,7 @@ public class AuthorizeResource extends BaseResource {
         final Client client = QueryUtil.getClient(em, clientId);
         CallLogUtil.logCall(em, client, req);
 
-        final boolean remember = "on".equals(rememberMe);
+        final boolean remember = "on".equalsIgnoreCase(rememberMe);
 
         // this resource is used for a few different actions which are represented as hidden inputs in the forms
         // this is done so that the query string can be preserved across all requests without any special work

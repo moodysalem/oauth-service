@@ -25,7 +25,7 @@ public class LoginCookie extends VersionedEntity {
     private User user;
 
     @NotNull
-    @Column(name = "expires", updatable = false)
+    @Column(name = "expires")
     private Long expires;
 
     public String getSecret() {

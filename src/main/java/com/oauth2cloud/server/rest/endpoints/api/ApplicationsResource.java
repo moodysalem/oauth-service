@@ -5,12 +5,14 @@ import com.oauth2cloud.server.model.db.Application_;
 import com.oauth2cloud.server.model.db.User;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
+import io.swagger.annotations.Api;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
 import java.util.List;
 
+@Api("crud")
 @Path("applications")
 @TokenFilter.ReadToken
 public class ApplicationsResource extends VersionedEntityResource<Application> {

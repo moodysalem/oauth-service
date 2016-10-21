@@ -6,6 +6,7 @@ import com.oauth2cloud.server.model.db.Scope;
 import com.oauth2cloud.server.model.db.Scope_;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
+import io.swagger.annotations.Api;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Api("crud")
 @Path("scopes")
 @TokenFilter.ReadToken
 public class ScopesResource extends VersionedEntityResource<Scope> {
