@@ -88,7 +88,7 @@ public class OAuth2Test extends BaseTest implements SendsMail {
                 bindFactory(jrem).to(EntityManager.class).in(RequestScoped.class).proxy(true);
 
                 final Mailer mailer = mock(Mailer.class);
-                // this is used to send e-mails and record the email to our list of sent e-mails
+                // this is used to send e-mails and record the email to our listResponse of sent e-mails
                 doAnswer(
                         invocation -> {
                             final Email email = (Email) invocation.getArguments()[0];
@@ -108,7 +108,11 @@ public class OAuth2Test extends BaseTest implements SendsMail {
     public static final String ADMIN_USER = "moody.salem@gmail.com";
 
     public TokenResponse getToken() {
-        return TokenUtil.getToken(client(), target(), this, ADMIN_USER);
+        return getToken(ADMIN_USER);
+    }
+
+    public TokenResponse getToken(final String email) {
+        return TokenUtil.getToken(client(), target(), this, email);
     }
 
 }
