@@ -29,7 +29,11 @@ public class OAuthErrorResponse {
     @JsonProperty("error_uri")
     private final String errorUri;
 
-    public OAuthErrorResponse(final Type error, final String errorDescription, final String errorUri) {
+    public OAuthErrorResponse(
+            @JsonProperty("error") final Type error,
+            @JsonProperty("error_description") final String errorDescription,
+            @JsonProperty("error_uri") final String errorUri
+    ) {
         this.error = error;
         this.errorDescription = errorDescription;
         this.errorUri = errorUri;

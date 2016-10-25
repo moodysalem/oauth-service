@@ -307,7 +307,8 @@ public class TokenResource extends BaseResource {
         final Set<String> missingScopes = getMissingScopes(clientScopes, scopes);
 
         if (!missingScopes.isEmpty()) {
-            return error(OAuthErrorResponse.Type.invalid_scope, "The following scopes were invalid: " + missingScopes.stream().collect(Collectors.joining("; ")));
+            return error(OAuthErrorResponse.Type.invalid_scope,
+                    "The following scopes were invalid: " + missingScopes.stream().collect(Collectors.joining("; ")));
         }
 
         final ClientToken saved;

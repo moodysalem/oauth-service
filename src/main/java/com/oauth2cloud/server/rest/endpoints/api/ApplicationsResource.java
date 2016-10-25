@@ -29,9 +29,7 @@ public class ApplicationsResource extends VersionedEntityResource<Application> {
 
     @Override
     public void beforeMerge(Application oldData, Application newData) {
-        if (oldData == null) {
-            newData.setOwner(getUser());
-        }
+        newData.setOwner(getUser());
     }
 
     @Override

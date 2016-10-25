@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "applications")
@@ -15,6 +16,7 @@ public class Application extends VersionedEntity {
     @Column(name = "name")
     private String name;
 
+    @NotNull
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "owner_id", updatable = false)

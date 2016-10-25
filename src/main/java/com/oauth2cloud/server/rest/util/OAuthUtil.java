@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.rest.util;
 
+import com.moodysalem.jaxrs.lib.resources.util.QueryHelper;
 import com.oauth2cloud.server.model.data.ClientErrorModel;
 import com.oauth2cloud.server.model.db.*;
 import org.apache.commons.lang3.StringUtils;
@@ -106,10 +107,13 @@ public class OAuthUtil {
 
         // verify all the requested scopes are available to the client
         if (scopes != null && !scopes.isEmpty()) {
-            final Set<String> scopeNames = client.getScopes().stream()
-                    .map(ClientScope::getScope)
-                    .map(Scope::getName)
-                    .collect(Collectors.toSet());
+            final Set<String> scopeNames =
+                    QueryHelper.query(em, ClientScope.class,
+                            cs -> em.getCriteriaBuilder().equal(cs.join(ClientScope_.client), client))
+                            .stream()
+                            .map(ClientScope::getScope)
+                            .map(Scope::getName)
+                            .collect(Collectors.toSet());
 
             if (!scopeNames.containsAll(scopes)) {
                 final String joinedScopes = scopes.stream()

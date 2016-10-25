@@ -5,8 +5,10 @@ import com.moodysalem.jaxrs.lib.factories.JAXRSEntityManagerFactory;
 import com.moodysalem.jaxrs.lib.test.BaseTest;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import com.oauth2cloud.server.model.api.TokenResponse;
+import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
 import com.oauth2cloud.server.rest.OAuth2Application;
+import com.oauth2cloud.server.util.Crud;
 import com.oauth2cloud.server.util.TokenUtil;
 import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
@@ -114,5 +116,26 @@ public class OAuth2Test extends BaseTest implements SendsMail {
     public TokenResponse getToken(final String email) {
         return TokenUtil.getToken(client(), target(), this, email);
     }
+
+    public Crud<Application> applicationCrud(final String token) {
+        return new Crud<>(Application.class, target("applications"), token);
+    }
+
+    public Crud<Client> clientCrud(final String token) {
+        return new Crud<>(Client.class, target("clients"), token);
+    }
+
+    public Crud<ClientScope> clientScopeCrud(final String token) {
+        return new Crud<>(ClientScope.class, target("client-scopes"), token);
+    }
+
+    public Crud<Scope> scopeCrud(final String token) {
+        return new Crud<>(Scope.class, target("scopes"), token);
+    }
+
+    public Crud<User> userCrud(final String token) {
+        return new Crud<>(User.class, target("users"), token);
+    }
+
 
 }

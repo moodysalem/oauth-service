@@ -13,7 +13,7 @@ public class CrudTest extends OAuth2Test {
     @Test
     public void testCrudApplications() {
         final TokenResponse response = getToken();
-        final Crud<Application> crud = new Crud<>(Application.class, target("applications"), response.getAccessToken());
+        final Crud<Application> crud = applicationCrud(response.getAccessToken());
 
         final Application app = new Application();
         assert crud.saveResponse(app).getStatus() == 422;
@@ -30,8 +30,8 @@ public class CrudTest extends OAuth2Test {
         assert crud.delete(crud.save(app)).getStatus() == 204;
 
         Application saved = crud.save(app);
-        saved.setGoogleCredentials(new ClientCredentials(null, null));
-        assert crud.saveResponse(saved).getStatus() == 422;
+        saved.setGoogleCredentials(null);
+        assert crud.saveResponse(saved).getStatus() == 200;
 
         saved.setGoogleCredentials(new ClientCredentials("abc", "123"));
         assert crud.saveResponse(saved).getStatus() == 200;
@@ -51,10 +51,10 @@ public class CrudTest extends OAuth2Test {
     @Test
     public void testApplicationWorkflow() {
         final String token = getToken().getAccessToken();
-        final Crud<Application> appCrud = new Crud<>(Application.class, target("applications"), token);
-        final Crud<Client> clientCrud = new Crud<>(Client.class, target("clients"), token);
-        final Crud<Scope> scopeCrud = new Crud<>(Scope.class, target("scopes"), token);
-        final Crud<ClientScope> csCrud = new Crud<>(ClientScope.class, target("client-scopes"), token);
+        final Crud<Application> appCrud = applicationCrud(token);
+        final Crud<Client> clientCrud = clientCrud(token);
+        final Crud<Scope> scopeCrud = scopeCrud(token);
+        final Crud<ClientScope> csCrud = clientScopeCrud(token);
 
         final Application app;
         {
@@ -117,12 +117,6 @@ public class CrudTest extends OAuth2Test {
             c.setConfidential(true);
             c = clientCrud.save(c);
             assert c.isConfidential();
-
-            // create client scopes and make sure they don't save
-            final ClientScope cs = new ClientScope();
-            c.setScopes(Collections.singleton(cs));
-            c = clientCrud.save(c);
-            assert c.getScopes() == null || c.getScopes().isEmpty();
 
             client = c;
         }

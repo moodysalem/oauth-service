@@ -53,10 +53,6 @@ public class Client extends VersionedEntity {
     private Long refreshTokenTtl;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "client")
-    private Set<ClientScope> scopes;
-
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "creator_id", updatable = false)
     private User creator;
@@ -143,14 +139,6 @@ public class Client extends VersionedEntity {
 
     public String getCreatorEmail() {
         return creator != null ? creator.getEmail() : null;
-    }
-
-    public Set<ClientScope> getScopes() {
-        return scopes;
-    }
-
-    public void setScopes(Set<ClientScope> scopes) {
-        this.scopes = scopes;
     }
 
     public boolean isShowPromptNoScopes() {

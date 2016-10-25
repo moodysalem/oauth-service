@@ -5,10 +5,12 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "users")
 public class User extends VersionedEntity {
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "application_id", updatable = false)
     private Application application;

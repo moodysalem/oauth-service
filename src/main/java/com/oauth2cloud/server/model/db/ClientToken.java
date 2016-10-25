@@ -10,7 +10,7 @@ public class ClientToken extends Token {
     @ManyToMany
     @JoinTable(
             name = "client_token_client_scopes",
-            joinColumns = @JoinColumn(name = "token_id"),
+            joinColumns = @JoinColumn(name = "client_token_id"),
             inverseJoinColumns = @JoinColumn(name = "client_scope_id")
     )
     private Set<ClientScope> clientScopes;
