@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.rest.endpoints.api.base;
 
-import com.moodysalem.hibernate.model.VersionedEntity;
 import com.oauth2cloud.server.model.db.User;
+import com.oauth2cloud.server.model.db.VersionedEntity;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 
 import javax.annotation.PostConstruct;

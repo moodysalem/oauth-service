@@ -38,6 +38,8 @@ public class ClientsResource extends VersionedEntityResource<Client> {
         if (oldData == null) {
             newData.setCredentials(ClientCredentials.random(96));
             newData.setCreator(getUser());
+        } else {
+            newData.setCredentials(oldData.getCredentials());
         }
     }
 

@@ -1,6 +1,6 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.VersionedEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
@@ -52,14 +52,16 @@ public class Client extends VersionedEntity {
     @Column(name = "refresh_token_ttl")
     private Long refreshTokenTtl;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "client")
+    @JsonIgnore
+    @OneToMany(mappedBy = "client")
     private Set<ClientScope> scopes;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "creator_id", updatable = false)
     private User creator;
 
-    @Min(0)
+    @Min(60)
     @NotNull
     @Column(name = "login_code_ttl")
     private Integer loginCodeTtl;

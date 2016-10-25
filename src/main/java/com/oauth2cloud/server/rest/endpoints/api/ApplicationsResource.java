@@ -46,7 +46,7 @@ public class ApplicationsResource extends VersionedEntityResource<Application> {
 
     @Override
     public void getPredicatesFromRequest(List<Predicate> predicates, Root<Application> root) {
-        predicates.add(cb.equal(root.get(Application_.owner), TokenFilter.getUser(request)));
+        predicates.add(cb.equal(root.get(Application_.owner), getUser()));
     }
 
     @Override

@@ -1,12 +1,12 @@
 package com.oauth2cloud.server.model.db;
 
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
-import org.hibernate.validator.constraints.NotEmpty;
+import com.oauth2cloud.server.hibernate.validate.NoSpaces;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Embeddable;
-import javax.validation.constraints.Size;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
@@ -24,12 +24,14 @@ public class ClientCredentials {
         this.secret = secret;
     }
 
-    @NotEmpty
+    @NotBlank
+    @NoSpaces
     @Column(name = "id")
     @Convert(converter = EncryptedStringConverter.class)
     private String id;
 
-    @NotEmpty
+    @NotBlank
+    @NoSpaces
     @Column(name = "secret")
     @Convert(converter = EncryptedStringConverter.class)
     private String secret;

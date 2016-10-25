@@ -1,7 +1,6 @@
 package com.oauth2cloud.server.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.moodysalem.hibernate.model.VersionedEntity;
 import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 
 import javax.persistence.*;

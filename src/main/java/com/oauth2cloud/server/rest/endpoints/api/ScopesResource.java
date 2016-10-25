@@ -27,10 +27,14 @@ public class ScopesResource extends VersionedEntityResource<Scope> {
 
     @Override
     public boolean canMerge(Scope oldData, Scope newData) {
-        final Application ap = newData.getApplication() != null && newData.getApplication().getId() != null ?
-                em.find(Application.class, newData.getApplication().getId()) : null;
-
-        return ap != null && ap.getOwner().idMatch(getUser());
+        if (oldData == null) {
+            return newData.getApplication() != null && newData.getApplication().getId() != null &&
+                    em.find(Application.class, newData.getApplication().getId())
+                            .getOwner()
+                            .idMatch(getUser());
+        } else {
+            return oldData.getApplication().getOwner().idMatch(getUser());
+        }
     }
 
     @Override
@@ -45,7 +49,7 @@ public class ScopesResource extends VersionedEntityResource<Scope> {
 
     @Override
     public boolean canDelete(Scope scope) {
-        return false;
+        return scope.getApplication().getOwner().idMatch(getUser());
     }
 
     @QueryParam("applicationId")
@@ -53,10 +57,10 @@ public class ScopesResource extends VersionedEntityResource<Scope> {
 
     @Override
     public void getPredicatesFromRequest(List<Predicate> list, Root<Scope> root) {
-        list.add(cb.equal(root.join(Scope_.application).get(Application_.owner), getUser()));
+        list.add(cb.equal(root.join(Scope_.application).join(Application_.owner), getUser()));
 
-        if (applicationId != null) {
-            list.add(cb.equal(root.join(Scope_.application).get(Application_.id), applicationId));
+        if (applicationId != null && !applicationId.isEmpty()) {
+            list.add(root.join(Scope_.application).get(Application_.id).in(applicationId));
         }
     }
 

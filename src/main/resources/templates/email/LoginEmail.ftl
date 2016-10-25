@@ -133,7 +133,7 @@
                                     <td class="content-block"
                                         style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
                                         valign="top">
-                                        This link will expire in ${loginCode.client.loginCodeTtl} seconds for your
+                                        This link will expire in ${friendlyTtl} seconds for your
                                         security.
                                     </td>
                                 </tr>

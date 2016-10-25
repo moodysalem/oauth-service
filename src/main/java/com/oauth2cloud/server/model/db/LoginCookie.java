@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.VersionedEntity;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;

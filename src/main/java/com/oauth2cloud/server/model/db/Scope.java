@@ -1,8 +1,6 @@
 package com.oauth2cloud.server.model.db;
 
-import com.moodysalem.hibernate.model.VersionedEntity;
 import com.oauth2cloud.server.hibernate.validate.NoSpaces;
-import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
@@ -11,12 +9,12 @@ import javax.persistence.*;
 @Table(name = "scopes")
 public class Scope extends VersionedEntity {
     @ManyToOne
-    @JoinColumn(name = "application_id")
+    @JoinColumn(name = "application_id", updatable = false)
     private Application application;
 
     @NoSpaces
     @NotBlank
-    @Column(name = "name")
+    @Column(name = "name", updatable = false)
     private String name;
 
     @NotBlank
