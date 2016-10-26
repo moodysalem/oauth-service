@@ -17,6 +17,9 @@
       <column name="method" type="VARCHAR(10)">
         <constraints nullable="false"/>
       </column>
+      <column name="timestamp" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
   </changeSet>
 

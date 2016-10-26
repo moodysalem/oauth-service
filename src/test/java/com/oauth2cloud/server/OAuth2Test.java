@@ -14,10 +14,12 @@ import freemarker.template.Configuration;
 import org.codemonkey.simplejavamail.Mailer;
 import org.codemonkey.simplejavamail.email.Email;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.internal.util.Base64;
 import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.client.Invocation;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,6 +137,11 @@ public class OAuth2Test extends BaseTest implements SendsMail {
 
     public Crud<User> userCrud(final String token) {
         return new Crud<>(User.class, target("users"), token);
+    }
+
+    protected Invocation.Builder basicAuth(final Invocation.Builder builder, final Client client) {
+        return builder.header("Authorization",
+                "Basic " + Base64.encodeAsString(client.getCredentials().getId() + ":" + client.getCredentials().getSecret()));
     }
 
 

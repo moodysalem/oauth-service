@@ -54,6 +54,12 @@ public class LogoutResourceTest extends OAuth2Test {
         assert loc.getFragment().contains("state=abc-123");
 
         final Cookie cookie = loginResponse.getCookies().get(CookieUtil.COOKIE_NAME_PREFIX + APPLICATION_ID);
+        final String cookieHeader = loginResponse.getHeaderString("Set-Cookie");
+        assert cookieHeader.contains(";Path=/;");
+        assert cookieHeader.contains(";Max-Age=2592000;");
+        assert cookieHeader.contains(";Secure;");
+        assert cookieHeader.contains(";HttpOnly;");
+
         assert cookie != null;
         return cookie;
     }

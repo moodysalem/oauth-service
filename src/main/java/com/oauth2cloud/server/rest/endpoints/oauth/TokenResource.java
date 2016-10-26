@@ -52,18 +52,22 @@ public class TokenResource extends BaseResource {
     private static final int BASIC_LENGTH = BASIC.length();
 
     private Client parseAuthorizationHeader(final String authorizationHeader) {
-        if (authorizationHeader != null) {
+        if (!isBlank(authorizationHeader)) {
             if (authorizationHeader.startsWith(BASIC)) {
                 final String credentials = authorizationHeader.substring(BASIC_LENGTH);
-                final String decoded = new String(Base64.getDecoder().decode(credentials.getBytes(UTF8)), UTF8);
-                final String[] pieces = decoded.split(":");
-                if (pieces.length == 2) {
-                    final String clientId = pieces[0].trim();
-                    final String secret = pieces[1].trim();
-                    final Client withId = QueryUtil.getClient(em, clientId);
-                    if (withId != null && secret.equals(withId.getCredentials().getSecret())) {
-                        return withId;
+                try {
+                    final String decoded = new String(Base64.getDecoder().decode(credentials.getBytes(UTF8)), UTF8);
+                    final String[] pieces = decoded.split(":");
+                    if (pieces.length == 2) {
+                        final String clientId = pieces[0].trim();
+                        final String secret = pieces[1].trim();
+                        final Client withId = QueryUtil.getClient(em, clientId);
+                        if (withId != null && secret.equals(withId.getCredentials().getSecret())) {
+                            return withId;
+                        }
                     }
+                } catch (Exception e) {
+                    return null;
                 }
             }
         }
@@ -125,7 +129,7 @@ public class TokenResource extends BaseResource {
         }
 
         if (!redirectUri.equals(codeToken.getRedirectUri())) {
-            return error(invalid_grant, "Redirect URI must exactly match the original redirect UriUtil.");
+            return error(invalid_grant, "Redirect URI must exactly match the original redirect URI.");
         }
 
         if (codeToken.isUsed()) {
@@ -345,7 +349,7 @@ public class TokenResource extends BaseResource {
      */
     @ApiOperation(
             value = "Token Info",
-            notes = "This endpoint is used to retrieve information about a token. The server should use it to find the scopes associated with a token. Either client_id or application_id are required"
+            notes = "This endpoint is used to retrieve information about an access token or refresh token. The server should use it to find the scopes associated with a token. Either client_id or application_id are required"
     )
     @ApiResponses({
             @ApiResponse(code = 200, response = TokenResponse.class, message = "If the token is found and associated with either the client_id or the application_id"),
@@ -387,10 +391,15 @@ public class TokenResource extends BaseResource {
 
         final Token token = QueryUtil.findToken(em, tokenString, client);
 
+
         if (token == null ||
                 (client != null && !client.idMatch(token.getClient())) ||
                 (application != null && !application.idMatch(token.getClient().getApplication()))) {
             throw new RequestProcessingException(Response.Status.NOT_FOUND, "Token not found or expired.");
+        }
+
+        if (!(token instanceof UserAccessToken) && !(token instanceof UserRefreshToken)) {
+            throw new RequestProcessingException(Response.Status.BAD_REQUEST, "The token provided is not an access or refresh token");
         }
 
         return noCache(Response.ok(TokenResponse.from(token))).build();

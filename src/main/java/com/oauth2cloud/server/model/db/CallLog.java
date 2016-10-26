@@ -4,6 +4,8 @@ import com.moodysalem.hibernate.model.BaseEntity;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 @Entity
 @Table(name = "call_log")
@@ -20,6 +22,10 @@ public abstract class CallLog extends BaseEntity {
     @NotEmpty
     @Column(name = "method", updatable = false)
     private String method;
+
+    @NotNull
+    @Column(name = "timestamp", updatable = false)
+    private Long timestamp;
 
     public String getIp() {
         return ip;
@@ -43,5 +49,20 @@ public abstract class CallLog extends BaseEntity {
 
     public void setMethod(String method) {
         this.method = method;
+    }
+
+    public Date getTimestamp() {
+        return timestamp != null ? new Date(timestamp) : null;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp != null ? timestamp.getTime() : null;
+    }
+
+    @PrePersist
+    public void setTimestamp() {
+        if (getTimestamp() == null) {
+            setTimestamp(new Date());
+        }
     }
 }
