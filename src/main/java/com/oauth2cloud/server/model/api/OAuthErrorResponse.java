@@ -6,6 +6,7 @@ import com.oauth2cloud.server.rest.util.QueryString;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import java.util.Objects;
 
 /**
  * The OAauth2 spec for an error response
@@ -65,5 +66,20 @@ public class OAuthErrorResponse {
         }
 
         return QueryString.mapToQueryString(toConcatenate);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OAuthErrorResponse that = (OAuthErrorResponse) o;
+        return getError() == that.getError() &&
+                Objects.equals(getErrorDescription(), that.getErrorDescription()) &&
+                Objects.equals(getErrorUri(), that.getErrorUri());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getError(), getErrorDescription(), getErrorUri());
     }
 }
