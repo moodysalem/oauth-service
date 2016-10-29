@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
+import com.moodysalem.jaxrs.lib.exceptions.RequestProcessingException;
 import com.moodysalem.jaxrs.lib.resources.config.EntityResourceConfig;
 import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.model.db.Application_;
@@ -7,11 +8,16 @@ import com.oauth2cloud.server.model.db.User;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.UUID;
 
 @Api("crud")
 @Path("applications")

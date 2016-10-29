@@ -19,7 +19,7 @@ public class User extends VersionedEntity {
     @Column(name = "email", updatable = false)
     private String email;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne
     @JoinColumn(name = "user_group_id")
     private UserGroup group;
 

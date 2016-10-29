@@ -86,7 +86,16 @@
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
+      <column name="application_id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_groups" baseColumnNames="application_id"
+                             constraintName="fk_user_groups_application"
+                             referencedTableName="applications"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
   <changeSet id="users table" author="moody.salem">
