@@ -131,6 +131,8 @@ public class CrudTest extends OAuth2Test {
                 final TokenResponse ti = TokenUtil.tokenInfo(target(), tr.getAccessToken(), atc.getApplication().getId());
                 assert ti != null;
 
+                assert ti.getUser().getEmail().equals(u.getEmail());
+                assert ti.getUser().getUserId().equals(u.getId());
                 assert ti.getUser().getLinkedUsers().size() == 2;
                 {
                     final Set<UserInfo> others = Stream.of(arr).filter(other -> !u.idMatch(other)).map(UserInfo::from).collect(Collectors.toSet());
