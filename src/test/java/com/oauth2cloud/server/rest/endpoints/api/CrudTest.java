@@ -10,6 +10,8 @@ import com.oauth2cloud.server.util.TokenUtil;
 import org.testng.annotations.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CrudTest extends OAuth2Test {
     @Test
@@ -121,16 +123,21 @@ public class CrudTest extends OAuth2Test {
         atc = cc.save(atc);
         assert atc.getId() != null;
 
-        final TokenResponse tr = getToken("moody+test@gmail.com", atc.getCredentials().getId(), atc.getUris().iterator().next());
-        assert tr != null;
-        final TokenResponse ti = TokenUtil.tokenInfo(target(), tr.getAccessToken(), atc.getApplication().getId());
-        assert ti != null;
-
-        assert ti.getUser().getLinkedUsers().size() == 2;
         {
-            final UserInfo uio = UserInfo.from(one), uit = UserInfo.from(two);
-            assert ti.getUser().getLinkedUsers().stream().anyMatch(uio::equals);
-            assert ti.getUser().getLinkedUsers().stream().anyMatch(uit::equals);
+            final User[] arr = new User[]{one, two, three};
+            for (final User u : arr) {
+                final TokenResponse tr = getToken(u.getEmail(), atc.getCredentials().getId(), atc.getUris().iterator().next());
+                assert tr != null;
+                final TokenResponse ti = TokenUtil.tokenInfo(target(), tr.getAccessToken(), atc.getApplication().getId());
+                assert ti != null;
+
+                assert ti.getUser().getLinkedUsers().size() == 2;
+                {
+                    final Set<UserInfo> others = Stream.of(arr).filter(other -> !u.idMatch(other)).map(UserInfo::from).collect(Collectors.toSet());
+                    assert ti.getUser().getLinkedUsers().size() == others.size();
+                    assert ti.getUser().getLinkedUsers().containsAll(others);
+                }
+            }
         }
     }
 
