@@ -3,15 +3,11 @@ package com.oauth2cloud.server.rest.endpoints.api;
 
 import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.model.api.TokenResponse;
-import com.oauth2cloud.server.model.api.UserInfo;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.util.Crud;
-import com.oauth2cloud.server.util.TokenUtil;
 import org.testng.annotations.Test;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CrudTest extends OAuth2Test {
     @Test
