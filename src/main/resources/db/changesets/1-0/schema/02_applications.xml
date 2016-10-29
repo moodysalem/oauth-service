@@ -84,7 +84,7 @@
     <comment>For creating links between users, we create these shell objects called user_groups</comment>
     <createTable tableName="user_groups">
       <column name="id" type="${UUID_TYPE}">
-        <constraints nullable="false"/>
+        <constraints nullable="false" primaryKey="true"/>
       </column>
     </createTable>
   </changeSet>
