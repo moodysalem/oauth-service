@@ -3,13 +3,13 @@ package com.oauth2cloud.server.model.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oauth2cloud.server.model.db.Token;
-import com.oauth2cloud.server.model.db.User;
 import com.oauth2cloud.server.model.db.UserAccessToken;
 import com.oauth2cloud.server.model.db.UserToken;
 import com.oauth2cloud.server.rest.util.QueryString;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -26,7 +26,7 @@ public class TokenResponse {
 
         if (token instanceof UserToken) {
             final UserToken userToken = (UserToken) token;
-            tr.setUser(userToken.getUser());
+            tr.setUser(PrimaryUserInfo.from(userToken.getUser()));
             if (userToken instanceof UserAccessToken) {
                 final UserAccessToken uat = (UserAccessToken) token;
                 tr.setRefreshToken(uat.getRefreshToken() != null ? uat.getRefreshToken().getToken() : null);
@@ -42,7 +42,6 @@ public class TokenResponse {
     @JsonProperty("access_token")
     private String accessToken;
 
-
     @JsonProperty("expires_in")
     private Long expiresIn;
 
@@ -56,7 +55,7 @@ public class TokenResponse {
     private String clientId;
 
     @JsonProperty("user")
-    private UserInfo user;
+    private PrimaryUserInfo user;
 
     @JsonProperty("application_id")
     private UUID applicationId;
@@ -106,8 +105,8 @@ public class TokenResponse {
         this.clientId = clientId;
     }
 
-    public void setUser(User user) {
-        this.user = UserInfo.from(user);
+    public void setUser(PrimaryUserInfo user) {
+        this.user = user;
     }
 
     public UUID getApplicationId() {
@@ -118,7 +117,7 @@ public class TokenResponse {
         this.applicationId = applicationId;
     }
 
-    public UserInfo getUser() {
+    public PrimaryUserInfo getUser() {
         return user;
     }
 
@@ -134,5 +133,24 @@ public class TokenResponse {
         params.putSingle("scope", getScope());
 
         return QueryString.mapToQueryString(params);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TokenResponse that = (TokenResponse) o;
+        return Objects.equals(getAccessToken(), that.getAccessToken()) &&
+                Objects.equals(getExpiresIn(), that.getExpiresIn()) &&
+                Objects.equals(getRefreshToken(), that.getRefreshToken()) &&
+                Objects.equals(getScope(), that.getScope()) &&
+                Objects.equals(getClientId(), that.getClientId()) &&
+                Objects.equals(getUser(), that.getUser()) &&
+                Objects.equals(getApplicationId(), that.getApplicationId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAccessToken(), getExpiresIn(), getRefreshToken(), getScope(), getClientId(), getUser(), getApplicationId());
     }
 }

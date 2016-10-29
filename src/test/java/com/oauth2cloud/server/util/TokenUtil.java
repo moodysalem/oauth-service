@@ -1,10 +1,8 @@
 package com.oauth2cloud.server.util;
 
-import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.SendsMail;
 import com.oauth2cloud.server.model.api.TokenResponse;
 import org.codemonkey.simplejavamail.email.Email;
-import org.glassfish.jersey.client.ClientProperties;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -19,21 +17,29 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.UUID;
 import java.util.regex.Pattern;
+
+import static org.glassfish.jersey.client.ClientProperties.FOLLOW_REDIRECTS;
 
 public class TokenUtil {
     /**
      * This method returns a TokenResponse corresponding to a log in to the admin application
      * from the administrative user
      */
-    public static TokenResponse getToken(final Client client, final WebTarget base, final SendsMail sendsMail, final String email) {
+    public static TokenResponse getToken(final Client client,
+                                         final WebTarget base,
+                                         final SendsMail sendsMail,
+                                         final String email,
+                                         final String clientId,
+                                         final String redirectUri) {
         final Form up = new Form();
         up.param("email", email).param("action", "email");
 
         final Response loginScreen = base.path("authorize")
-                .property(ClientProperties.FOLLOW_REDIRECTS, false)
-                .queryParam("client_id", OAuth2Test.CLIENT_ID)
-                .queryParam("redirect_uri", "https://oauth2cloud.com")
+                .property(FOLLOW_REDIRECTS, false)
+                .queryParam("client_id", clientId)
+                .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", "token")
                 .request()
                 .post(Entity.form(up));
@@ -45,7 +51,7 @@ public class TokenUtil {
         final Document emailContent = Jsoup.parse(lastEmail.getTextHTML());
         final String loginLink = emailContent.select("#login-link").attr("href");
 
-        final Response login = client.target(loginLink).request().get();
+        final Response login = client.target(loginLink).property(FOLLOW_REDIRECTS, false).request().get();
         final String redirect = login.getHeaderString("Location");
 
         try {
@@ -75,5 +81,35 @@ public class TokenUtil {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static TokenResponse tokenInfo(final WebTarget base, final String token, final String clientId) {
+        return tokenInfo(base, token, null, clientId);
+    }
+
+    public static TokenResponse tokenInfo(final WebTarget base, final String token, final UUID applicationId) {
+        return tokenInfo(base, token, applicationId, null);
+    }
+
+    public static TokenResponse tokenInfo(final WebTarget base, final String token, final UUID applicationId, final String clientId) {
+        final Form f = new Form();
+        if (token != null) {
+            f.param("token", token);
+        }
+
+        if (applicationId != null) {
+            f.param("application_id", applicationId.toString());
+        }
+
+        if (clientId != null) {
+            f.param("client_id", clientId);
+        }
+
+        return base.path("token").path("info")
+                .request()
+                .post(
+                        Entity.form(f),
+                        TokenResponse.class
+                );
     }
 }

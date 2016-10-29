@@ -1,10 +1,11 @@
 package com.oauth2cloud.server.model.api;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oauth2cloud.server.model.db.User;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -34,5 +35,19 @@ public class UserInfo {
 
     public UUID getUserId() {
         return userId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserInfo userInfo = (UserInfo) o;
+        return Objects.equals(getEmail(), userInfo.getEmail()) &&
+                Objects.equals(getUserId(), userInfo.getUserId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getEmail(), getUserId());
     }
 }

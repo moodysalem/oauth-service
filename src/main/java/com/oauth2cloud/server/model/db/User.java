@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.model.db;
 
-import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -20,6 +19,10 @@ public class User extends VersionedEntity {
     @Column(name = "email", updatable = false)
     private String email;
 
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
+    @JoinColumn(name = "user_group_id")
+    private UserGroup group;
+
     public Application getApplication() {
         return application;
     }
@@ -34,5 +37,13 @@ public class User extends VersionedEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public UserGroup getGroup() {
+        return group;
+    }
+
+    public void setGroup(UserGroup group) {
+        this.group = group;
     }
 }

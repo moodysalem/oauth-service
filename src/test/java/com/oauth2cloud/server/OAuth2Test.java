@@ -116,7 +116,11 @@ public class OAuth2Test extends BaseTest implements SendsMail {
     }
 
     public TokenResponse getToken(final String email) {
-        return TokenUtil.getToken(client(), target(), this, email);
+        return getToken(email, CLIENT_ID, "https://oauth2cloud.com");
+    }
+
+    public TokenResponse getToken(final String email, final String clientId, final String redirectUri) {
+        return TokenUtil.getToken(client(), target(), this, email, clientId, redirectUri);
     }
 
     public Crud<Application> applicationCrud(final String token) {

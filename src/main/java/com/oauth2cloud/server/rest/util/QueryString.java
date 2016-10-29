@@ -25,7 +25,7 @@ public abstract class QueryString {
         if (map != null) {
             for (final String key : map.keySet()) {
                 for (final String value : map.get(key)) {
-                    if (!isBlank(value) && sb.length() > 0) {
+                    if (sb.length() > 0) {
                         sb.append(AMPERSAND);
                     }
                     try {

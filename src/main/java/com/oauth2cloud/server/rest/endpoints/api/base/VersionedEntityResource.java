@@ -25,13 +25,16 @@ public abstract class VersionedEntityResource<T extends VersionedEntity> extends
         cb = em.getCriteriaBuilder();
     }
 
-    @Override
-    public boolean isLoggedIn() {
-        return getUser() != null;
-    }
-
     public User getUser() {
         return TokenFilter.getUser(request);
+    }
+
+    public void requireLoggedIn() {
+        TokenFilter.requireLoggedIn(request);
+    }
+
+    public void requireScope(final String scope) {
+        TokenFilter.requireScope(request, scope);
     }
 
     @Override

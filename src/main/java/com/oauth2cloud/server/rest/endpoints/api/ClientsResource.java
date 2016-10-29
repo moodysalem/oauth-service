@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
+import com.moodysalem.jaxrs.lib.resources.config.EntityResourceConfig;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
@@ -72,7 +73,7 @@ public class ClientsResource extends VersionedEntityResource<Client> {
     }
 
     @Override
-    public boolean requiresLogin() {
-        return true;
+    public void checkAccess(Action action) {
+        requireScope("manage_clients");
     }
 }

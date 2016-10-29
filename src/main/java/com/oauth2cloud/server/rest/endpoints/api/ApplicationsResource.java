@@ -1,5 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
+import com.moodysalem.jaxrs.lib.resources.config.EntityResourceConfig;
 import com.oauth2cloud.server.model.db.Application;
 import com.oauth2cloud.server.model.db.Application_;
 import com.oauth2cloud.server.model.db.User;
@@ -53,8 +54,8 @@ public class ApplicationsResource extends VersionedEntityResource<Application> {
     }
 
     @Override
-    public boolean requiresLogin() {
-        return true;
+    public void checkAccess(Action action) {
+        requireScope("manage_applications");
     }
 
 }

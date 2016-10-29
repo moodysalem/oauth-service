@@ -1,9 +1,6 @@
 package com.oauth2cloud.server.rest.endpoints.api;
 
-import com.oauth2cloud.server.model.db.Application;
-import com.oauth2cloud.server.model.db.Application_;
-import com.oauth2cloud.server.model.db.User;
-import com.oauth2cloud.server.model.db.User_;
+import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 import io.swagger.annotations.Api;
@@ -27,13 +24,36 @@ public class UsersResource extends VersionedEntityResource<User> {
 
     @Override
     public boolean canMerge(User oldData, User newData) {
-        if (newData.getApplication() == null) {
+        final Application userApplication;
+
+        if (oldData == null) {
+            if (newData.getApplication() == null || newData.getApplication().getId() == null) {
+                return false;
+            } else {
+                userApplication = em.find(Application.class, newData.getApplication().getId());
+            }
+        } else {
+            if (!oldData.getApplication().getOwner().idMatch(getUser())) {
+                return false;
+            }
+
+            userApplication = oldData.getApplication();
+        }
+
+
+        if (userApplication == null || !userApplication.getOwner().idMatch(getUser())) {
             return false;
         }
 
-        final Application ap = em.find(Application.class, newData.getApplication().getId());
+        // all users in the group must be associated with the same application
+        if (newData.getGroup() != null && newData.getGroup().getId() != null) {
+            final UserGroup ug = em.find(UserGroup.class, newData.getGroup().getId());
+            if (ug.getUsers().stream().anyMatch(user -> !userApplication.idMatch(user.getApplication()))) {
+                return false;
+            }
+        }
 
-        return ap != null && ap.getOwner().idMatch(getUser());
+        return true;
     }
 
     @Override
@@ -69,7 +89,7 @@ public class UsersResource extends VersionedEntityResource<User> {
     }
 
     @Override
-    public boolean requiresLogin() {
-        return true;
+    public void checkAccess(Action action) {
+        requireScope("manage_users");
     }
 }

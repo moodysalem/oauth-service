@@ -365,7 +365,7 @@ public class TokenResource extends BaseResource {
             @ApiParam(value = "The ID of the application")
             @FormParam("application_id") final UUID applicationId
     ) {
-        if (isBlank(tokenString) || (applicationId == null && clientId == null)) {
+        if (isBlank(tokenString) || (applicationId == null && isBlank(clientId))) {
             throw new RequestProcessingException(Response.Status.BAD_REQUEST,
                     "'token' and the 'application_id' or 'client_id' form parameters are required.");
         }

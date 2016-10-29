@@ -84,7 +84,18 @@ public class TokenFilter implements DynamicFeature {
      * @return true if user has scope
      */
     public static boolean hasScope(final ContainerRequestContext req, final String scope) {
-        return isLoggedIn(req) && Stream.of(getToken(req).getScope().split(" ")).anyMatch(scope::equalsIgnoreCase);
+        return isLoggedIn(req) && Stream.of(getToken(req).getScope().split(" ")).anyMatch(scope::equals);
+    }
+
+    /**
+     * Throw an exception if the user is not logged in
+     *
+     * @param req to check if user is logged in
+     */
+    public static void requireLoggedIn(final ContainerRequestContext req) {
+        if (!isLoggedIn(req)) {
+            throw new RequestProcessingException(Response.Status.UNAUTHORIZED, "You must be logged in to access this resource.");
+        }
     }
 
     /**
@@ -118,11 +129,5 @@ public class TokenFilter implements DynamicFeature {
 
     public static boolean isLoggedIn(final ContainerRequestContext req) {
         return getUser(req) != null;
-    }
-
-    public static void requireLoggedIn(final ContainerRequestContext req) {
-        if (!isLoggedIn(req)) {
-            throw new RequestProcessingException(Response.Status.UNAUTHORIZED, "You must be logged in to access this resource.");
-        }
     }
 }

@@ -55,9 +55,7 @@ public class ClientScopesResource extends VersionedEntityResource<ClientScope> {
     }
 
     @Override
-    public boolean requiresLogin() {
-        return true;
+    public void checkAccess(Action action) {
+        requireScope("manage_client_scopes");
     }
-
-
 }

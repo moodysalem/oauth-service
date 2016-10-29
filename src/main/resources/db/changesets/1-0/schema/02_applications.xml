@@ -79,6 +79,16 @@
     <addUniqueConstraint tableName="scopes" columnNames="application_id,name" constraintName="uk_scopes_names"/>
   </changeSet>
 
+
+  <changeSet id="Create user_groups table" author="moody.salem">
+    <comment>For creating links between users, we create these shell objects called user_groups</comment>
+    <createTable tableName="user_groups">
+      <column name="id" type="${UUID_TYPE}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
   <changeSet id="users table" author="moody.salem">
     <createTable tableName="users">
       <column name="id" type="${UUID_TYPE}">
@@ -99,7 +109,9 @@
       <column name="email" type="VARCHAR(191)">
         <constraints nullable="false"/>
       </column>
+      <column name="user_group_id" type="${UUID_TYPE}"/>
     </createTable>
+
     <addForeignKeyConstraint baseTableName="users" baseColumnNames="application_id"
                              constraintName="fk_users_applications"
                              referencedTableName="applications"
@@ -108,8 +120,11 @@
                              constraintName="fk_applications_owner"
                              referencedTableName="users"
                              referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableName="users" baseColumnNames="user_group_id" constraintName="fk_users_user_groups"
+                             referencedTableName="user_groups"
+                             referencedColumnNames="id"
+                             onDelete="SET NULL"/>
     <addUniqueConstraint tableName="users" columnNames="application_id,email" constraintName="uk_users_email"/>
   </changeSet>
-
 
 </databaseChangeLog>

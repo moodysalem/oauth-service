@@ -70,7 +70,7 @@ public class ScopesResource extends VersionedEntityResource<Scope> {
     }
 
     @Override
-    public boolean requiresLogin() {
-        return true;
+    public void checkAccess(Action action) {
+        requireScope("manage_scopes");
     }
 }
