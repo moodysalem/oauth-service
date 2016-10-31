@@ -27,7 +27,7 @@ public class TokenUtil {
      * This method returns a TokenResponse corresponding to a log in to the admin application
      * from the administrative user
      */
-    public static TokenResponse getToken(final Client client,
+    public synchronized static TokenResponse getToken(final Client client,
                                          final WebTarget base,
                                          final SendsMail sendsMail,
                                          final String email,
