@@ -59,7 +59,7 @@
             <form>
                 <input type="hidden" name="action" value="google"/>
                 <input type="hidden" id="google-token" name="google_token"/>
-                <button class="btn btn-sm btn-danger btn-block" id="googleLogin" type="button">
+                <button class="btn btn-sm btn-danger btn-block" id="google-login" type="button">
                     <i class="fa fa-google fa-lg"></i>
                 </button>
             </form>
@@ -69,7 +69,7 @@
                 if (gapi && typeof gapi.load === "function") {
                     gapi.load('auth2', function () {
                         var auth2 = gapi.auth2.init({
-                            client_id: "${model.client.application.googleClientId?js_string}",
+                            client_id: "${model.client.application.googleCredentials.id?js_string}",
                             fetch_basic_profile: true,
                             scope: 'profile email'
                         });

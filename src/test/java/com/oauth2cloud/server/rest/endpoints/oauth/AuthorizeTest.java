@@ -2,6 +2,11 @@ package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.model.api.LoginErrorCode;
+import com.oauth2cloud.server.model.db.Application;
+import com.oauth2cloud.server.model.db.Client;
+import com.oauth2cloud.server.model.db.ClientCredentials;
+import com.oauth2cloud.server.model.db.GrantFlow;
+import com.oauth2cloud.server.util.Crud;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,6 +16,8 @@ import org.testng.annotations.Test;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
+import java.util.Collections;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 
@@ -136,6 +143,58 @@ public class AuthorizeTest extends OAuth2Test {
                         String.class
                 ));
         assert !noError.select("#sent-email-alert").isEmpty();
+    }
+
+    @Test
+    public void validateGoogleCredentialsShowsButton() {
+        final String token = getToken().getAccessToken();
+        final Crud<Application> ac = applicationCrud(token);
+        final Crud<Client> cc = clientCrud(token);
+
+        Application a = new Application();
+        a.setName(UUID.randomUUID().toString());
+        a.setSupportEmail("moody.saleM@gmail.com");
+        a = ac.save(a);
+        assert a.getGoogleCredentials() == null;
+
+        Client c = new Client();
+        c.setApplication(a);
+        c.setFlows(Collections.singleton(GrantFlow.IMPLICIT));
+        c.setName(UUID.randomUUID().toString());
+        c.setTokenTtl(86400L);
+        c.setConfidential(false);
+        c.setLoginCodeTtl(300);
+        c.setUris(Collections.singleton("http://google.com"));
+        c = cc.save(c);
+        assert c.getId() != null;
+
+        final Document noGoogle = Jsoup.parse(
+                target("authorize")
+                        .queryParam("client_id", c.getCredentials().getId())
+                        .queryParam("redirect_uri", "http://google.com")
+                        .queryParam("response_type", "token")
+                        .request()
+                        .get(String.class)
+        );
+
+        assert noGoogle.select("#google-login").size() == 0;
+
+        a.setGoogleCredentials(new ClientCredentials("abc", "123"));
+        a = ac.save(a);
+        assert a.getGoogleCredentials() != null;
+        assert a.getGoogleCredentials().getId().equals("abc");
+        assert a.getGoogleCredentials().getSecret().equals("123");
+
+        final Document hasGoogle = Jsoup.parse(
+                target("authorize")
+                        .queryParam("client_id", c.getCredentials().getId())
+                        .queryParam("redirect_uri", "http://google.com")
+                        .queryParam("response_type", "token")
+                        .request()
+                        .get(String.class)
+        );
+
+        assert hasGoogle.select("button#google-login").size() == 1;
     }
 
 
