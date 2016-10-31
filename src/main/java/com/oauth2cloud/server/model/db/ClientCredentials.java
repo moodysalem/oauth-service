@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 
+import java.util.Objects;
+
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Embeddable
@@ -42,5 +44,19 @@ public class ClientCredentials {
 
     public String getSecret() {
         return secret;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ClientCredentials that = (ClientCredentials) o;
+        return Objects.equals(getId(), that.getId()) &&
+                Objects.equals(getSecret(), that.getSecret());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getSecret());
     }
 }

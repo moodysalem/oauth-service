@@ -179,11 +179,10 @@ public class AuthorizeTest extends OAuth2Test {
 
         assert noGoogle.select("#google-login").size() == 0;
 
-        a.setGoogleCredentials(new ClientCredentials("abc", "123"));
+        final ClientCredentials gc = new ClientCredentials(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        a.setGoogleCredentials(gc);
         a = ac.save(a);
-        assert a.getGoogleCredentials() != null;
-        assert a.getGoogleCredentials().getId().equals("abc");
-        assert a.getGoogleCredentials().getSecret().equals("123");
+        assert a.getGoogleCredentials().equals(gc);
 
         final Document hasGoogle = Jsoup.parse(
                 target("authorize")
