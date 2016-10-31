@@ -43,7 +43,7 @@
         <#-- google login -->
         <#if model.client.application.googleCredentials??>
             <hr/>
-            <form>
+            <form id="google-sign-in" method="POST">
                 <input type="hidden" name="action" value="google"/>
                 <input type="hidden" id="google-token" name="google_token"/>
                 <button class="btn btn-sm btn-danger btn-block" id="google-login" type="button">
