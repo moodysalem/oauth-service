@@ -7,6 +7,7 @@ import com.oauth2cloud.server.hibernate.converter.EncryptedStringConverter;
 import com.oauth2cloud.server.model.api.Version;
 import com.oauth2cloud.server.model.db.Client;
 import com.oauth2cloud.server.model.db.ClientCredentials;
+import com.oauth2cloud.server.rest.util.GoogleTokenValidator;
 import freemarker.template.Configuration;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
@@ -97,6 +98,8 @@ public class OAuth2Application extends BaseApplication {
 
                 // this is used for generating e-mails from freemarker templates
                 bind(new EmailTemplateFreemarkerConfiguration()).to(Configuration.class);
+
+                bind(new GoogleTokenValidator()).to(GoogleTokenValidator.class);
             }
         });
     }

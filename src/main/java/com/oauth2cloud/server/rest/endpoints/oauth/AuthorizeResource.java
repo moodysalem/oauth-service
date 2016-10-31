@@ -1,6 +1,5 @@
 package com.oauth2cloud.server.rest.endpoints.oauth;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.moodysalem.jaxrs.lib.filters.CORSFilter;
 import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.api.LoginErrorCode;
@@ -10,6 +9,7 @@ import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
 import com.oauth2cloud.server.rest.util.CallLogUtil;
 import com.oauth2cloud.server.rest.util.CookieUtil;
+import com.oauth2cloud.server.rest.util.GoogleTokenValidator;
 import com.oauth2cloud.server.rest.util.QueryUtil;
 import io.swagger.annotations.*;
 import org.codemonkey.simplejavamail.Mailer;
@@ -18,8 +18,6 @@ import org.glassfish.jersey.server.mvc.Viewable;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
@@ -30,7 +28,6 @@ import static com.oauth2cloud.server.rest.util.OAuthUtil.badRequest;
 import static com.oauth2cloud.server.rest.util.OAuthUtil.validateRequest;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Api("oauth2")
 @CORSFilter.Skip
@@ -207,17 +204,23 @@ public class AuthorizeResource extends BaseResource {
             }
 
             case "google": {
-                final User user = doGoogleLogin(client.getApplication(), googleToken);
-                if (user == null) {
-                    return badRequest("Invalid google token");
-                }
+                try {
+                    final User user = doGoogleLogin(client.getApplication(), googleToken);
 
-                final LoginCode loginCode = makeLoginCode(
-                        em,
-                        user, client, scope, redirectUri,
-                        responseType, state, remember
-                );
-                return loginCodeRedirect(loginCode);
+                    final LoginCode loginCode = makeLoginCode(
+                            em,
+                            user, client, scope, redirectUri,
+                            responseType, state, remember
+                    );
+
+                    return loginCodeRedirect(loginCode);
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE,
+                            String.format("Failed to use google to log in for application ID %s",
+                                    client.getApplication().getId()),
+                            e);
+                    return badRequest(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+                }
             }
             default:
                 return badRequest(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
@@ -245,67 +248,18 @@ public class AuthorizeResource extends BaseResource {
         return true;
     }
 
-    private static final WebTarget GOOGLE_TOKEN_VALIDATE = ClientBuilder.newClient()
-            .target("https://www.googleapis.com/oauth2/v1/tokeninfo");
+    @Inject
+    private GoogleTokenValidator googleTokenValidator;
 
     /**
      * Use a google token to log in as a google user
      *
-     * @param application application to log in
+     * @param application application checking token
      * @param googleToken token from google
      * @return User if successfully logged in
      */
     private User doGoogleLogin(final Application application, final String googleToken) {
-        if (application.getGoogleCredentials() == null) {
-            throw new IllegalArgumentException(
-                    String.format("The application %s is not fully configured for Google Login.", application.getName()));
-        }
-
-        if (isBlank(googleToken)) {
-            throw new IllegalArgumentException("Invalid Google Token supplied.");
-        }
-
-        final Response tokenInfo = GOOGLE_TOKEN_VALIDATE
-                .queryParam("access_token", googleToken)
-                .request(MediaType.APPLICATION_JSON).get();
-
-        if (tokenInfo.getStatus() != 200) {
-            throw new IllegalArgumentException("Invalid Google Token supplied.");
-        }
-        final JsonNode tokenInfoJson = tokenInfo.readEntity(JsonNode.class);
-
-        final JsonNode aud = tokenInfoJson.get("audience");
-        if (aud == null || !aud.asText().equals(application.getGoogleCredentials().getId())) {
-            throw new IllegalArgumentException("Token supplied is not for the correct client.");
-        }
-
-        final JsonNode emailVerified = tokenInfoJson.get("verified_email");
-        if (emailVerified == null || !emailVerified.asBoolean()) {
-            throw new IllegalArgumentException("Google E-mail address is not yet verified.");
-        }
-
-        final JsonNode scopes = tokenInfoJson.get("scope");
-        final String scope = scopes == null ? null : scopes.asText().trim();
-        if (isEmpty(scope)) {
-            throw new IllegalArgumentException("The profile and e-mail scopes are required to log in.");
-        }
-
-        final Response userInfo = ClientBuilder.newClient().target("https://www.googleapis.com/plus/v1/people/me")
-                .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + googleToken)
-                .get();
-
-        if (userInfo.getStatus() != 200) {
-            throw new IllegalArgumentException("Failed to get user info.");
-        }
-
-        final JsonNode userData = userInfo.readEntity(JsonNode.class);
-
-        final JsonNode emails = userData.get("emails");
-        if (emails == null || !emails.isArray() || emails.size() != 1) {
-            throw new IllegalArgumentException("Google account is not associated with an e-mail or has more than one e-mail.");
-        }
-        final String email = emails.get(0).get("value").asText();
+        final String email = googleTokenValidator.getTokenEmail(application.getGoogleCredentials(), googleToken);
 
         return QueryUtil.findOrCreateUser(em, application, email);
     }

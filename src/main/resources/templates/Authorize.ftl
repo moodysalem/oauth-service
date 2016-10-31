@@ -70,7 +70,7 @@
                         var auth2 = gapi.auth2.init({
                             client_id: "${model.client.application.googleCredentials.id?js_string}",
                             fetch_basic_profile: true,
-                            scope: 'profile email'
+                            scope: 'email'
                         });
 
                         $(function () {
@@ -80,7 +80,7 @@
                                 auth2.signIn()
                                         .then(
                                                 function () {
-                                                    var token = auth2.currentUser.get().getAuthResponse().access_token;
+                                                    var token = auth2.currentUser.get().getAuthResponse().id_token;
                                                     if (token) {
                                                         tokenInput.val(token).closest("form").submit();
                                                     }

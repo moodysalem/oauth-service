@@ -8,6 +8,7 @@ import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
 import com.oauth2cloud.server.rest.OAuth2Application;
+import com.oauth2cloud.server.rest.util.GoogleTokenValidator;
 import com.oauth2cloud.server.util.Crud;
 import com.oauth2cloud.server.util.TokenUtil;
 import freemarker.template.Configuration;
@@ -27,8 +28,8 @@ import java.util.UUID;
 
 import static com.oauth2cloud.server.rest.OAuth2Application.configureSwagger;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class OAuth2Test extends BaseTest implements SendsMail {
     public static final String AUTH_HEADER = "Authorization",
@@ -103,6 +104,11 @@ public class OAuth2Test extends BaseTest implements SendsMail {
                 bind(mailer).to(Mailer.class);
 
                 bind(new EmailTemplateFreemarkerConfiguration()).to(Configuration.class);
+
+                final GoogleTokenValidator mock = mock(GoogleTokenValidator.class);
+                when(mock.getTokenEmail(any(ClientCredentials.class), anyString()))
+                        .thenThrow(IllegalArgumentException.class);
+                bind(mock).to(GoogleTokenValidator.class);
             }
         });
 
