@@ -40,19 +40,6 @@
                 </div>
             </form>
 
-        <#if model.sentEmail>
-            <div class="alert alert-info" id="sent-email-alert">
-                <i class="fa fa-envelope"></i>
-                Your log in e-mail has been sent.
-            </div>
-        <#elseif model.loginErrorCode??>
-            <div class="alert alert-danger" id="error-code-alert">
-                <i class="fa fa-exclamation-triangle"></i>
-            ${model.loginErrorCode.message?html}
-            </div>
-        </#if>
-
-
         <#-- google login -->
         <#if model.client.application.googleCredentials??>
             <hr/>
@@ -121,6 +108,19 @@
                     $("#form-signin").submit(showLoadingIndicators);
                 });
             </script>
+
+        <#if model.sentEmail>
+            <div class="alert alert-info" id="sent-email-alert">
+                <i class="fa fa-envelope"></i>
+                Your log in e-mail has been sent.
+            </div>
+        <#elseif model.loginErrorCode??>
+            <div class="alert alert-danger" id="error-code-alert">
+                <i class="fa fa-exclamation-triangle"></i>
+            ${model.loginErrorCode.message?html}
+            </div>
+        </#if>
+
         </div>
     </div>
 </div>
