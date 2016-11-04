@@ -3,6 +3,11 @@
         cursor: pointer;
     }
 
+    .truncate {
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
     #form-signin, #form-register, #form-reset {
         padding: 1em;
         background-color: rgba(0, 0, 0, 0.02);

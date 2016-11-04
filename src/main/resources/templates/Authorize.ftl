@@ -5,10 +5,11 @@
     <title>${model.client.application.name?html} Log In</title>
 </head>
 <body>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
-            <h1 class="page-header text-center">${model.client.application.name?html}</h1>
+            <h1 class="page-header text-center truncate">${model.client.application.name?html}</h1>
         </div>
     </div>
     <div class="row">
@@ -16,10 +17,12 @@
             <form id="form-signin" method="POST">
                 <input type="hidden" name="action" value="email"/>
 
-                <h2>
-                    Sign In<br/>
+                <h2 class="truncate">
+                    Sign In
+                    <br/>
                     <small>${model.client.name?html}</small>
                 </h2>
+
                 <div class="form-group">
                     <label class="control-label" for="email">E-mail Address</label>
                     <input type="email" id="email" name="email" class="form-control"
@@ -52,46 +55,48 @@
             </form>
             <script src="https://apis.google.com/js/platform.js"></script>
             <script>
-                var loginButton = $('#google-login');
-                var tokenInput = $('#google-token');
+                (function () {
+                    var loginButton = $('#google-login');
+                    var tokenInput = $('#google-token');
 
-                function disableLoginButton() {
-                    loginButton.prop("disabled", true);
-                }
+                    function disableLoginButton() {
+                        loginButton.prop("disabled", true);
+                    }
 
-                // define a function to be called when google loads
-                if (gapi && typeof gapi.load === "function") {
-                    gapi.load('auth2', function () {
-                        if (!gapi.auth2 || !gapi.auth2.init) {
-                            disableLoginButton();
-                            return;
-                        }
+                    // define a function to be called when google loads
+                    if (gapi && typeof gapi.load === "function") {
+                        gapi.load('auth2', function () {
+                            if (!gapi.auth2 || !gapi.auth2.init) {
+                                disableLoginButton();
+                                return;
+                            }
 
-                        var auth2 = gapi.auth2.init({
-                            client_id: "${model.client.application.googleCredentials.id?js_string}",
-                            fetch_basic_profile: true,
-                            scope: 'email'
-                        });
+                            var auth2 = gapi.auth2.init({
+                                client_id: "${model.client.application.googleCredentials.id?js_string}",
+                                fetch_basic_profile: true,
+                                scope: 'email'
+                            });
 
-                        $(function () {
-                            loginButton.click(function () {
-                                // Sign the user in, and then retrieve their ID token for the server
-                                // to validate
-                                auth2.signIn()
-                                        .then(
-                                                function () {
-                                                    var token = auth2.currentUser.get().getAuthResponse().id_token;
-                                                    if (token) {
-                                                        tokenInput.val(token).closest("form").submit();
+                            $(function () {
+                                loginButton.click(function () {
+                                    // Sign the user in, and then retrieve their ID token for the server
+                                    // to validate
+                                    auth2.signIn()
+                                            .then(
+                                                    function () {
+                                                        var token = auth2.currentUser.get().getAuthResponse().id_token;
+                                                        if (token) {
+                                                            tokenInput.val(token).closest("form").submit();
+                                                        }
                                                     }
-                                                }
-                                        );
+                                            );
+                                });
                             });
                         });
-                    });
-                } else {
-                    disableLoginButton();
-                }
+                    } else {
+                        disableLoginButton();
+                    }
+                })();
             </script>
         </#if>
         <#-- close the alternative login button section -->
