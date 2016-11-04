@@ -33,4 +33,8 @@ public class PermissionsModel implements HeadProperties {
     public String getFaviconUrl() {
         return getLoginCode().getClient().getApplication().getFaviconUrl();
     }
+
+    public boolean isAlreadyAuthorized() {
+        return userClientScopes == null || userClientScopes.isEmpty();
+    }
 }

@@ -25,10 +25,10 @@
       <column name="confidential" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
-      <column name="token_ttl" type="BIGINT">
+      <column name="token_ttl" type="INT">
         <constraints nullable="false"/>
       </column>
-      <column name="refresh_token_ttl" type="BIGINT">
+      <column name="refresh_token_ttl" type="INT">
         <constraints nullable="true"/>
       </column>
       <column name="identifier" type="VARCHAR(191)">

@@ -98,7 +98,7 @@ public class UserLinkingTest extends OAuth2Test {
         atc.setUris(Collections.singleton("http://localhost:8080"));
         atc.setLoginCodeTtl(3600);
         atc.setName(UUID.randomUUID().toString());
-        atc.setTokenTtl(3600L);
+        atc.setTokenTtl(3600);
         atc.setFlows(Collections.singleton(GrantFlow.IMPLICIT));
         atc.setApplication(a);
         atc = cc.save(atc);

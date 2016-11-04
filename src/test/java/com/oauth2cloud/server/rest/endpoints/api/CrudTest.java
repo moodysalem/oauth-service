@@ -100,7 +100,7 @@ public class CrudTest extends OAuth2Test {
             c.setApplication(app);
             c.setName(UUID.randomUUID().toString());
             assert clientCrud.saveResponse(c).getStatus() == 422;
-            c.setTokenTtl(86400L);
+            c.setTokenTtl(86400);
             assert clientCrud.saveResponse(c).getStatus() == 422;
             c.setLoginCodeTtl(30);
             assert clientCrud.saveResponse(c).getStatus() == 422;

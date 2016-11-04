@@ -46,11 +46,11 @@ public class Client extends VersionedEntity {
     @Min(0)
     @NotNull
     @Column(name = "token_ttl")
-    private Long tokenTtl;
+    private Integer tokenTtl;
 
     @Min(0)
     @Column(name = "refresh_token_ttl")
-    private Long refreshTokenTtl;
+    private Integer refreshTokenTtl;
 
     @JsonIgnore
     @ManyToOne
@@ -105,12 +105,20 @@ public class Client extends VersionedEntity {
         this.name = name;
     }
 
-    public Long getTokenTtl() {
+    public Integer getTokenTtl() {
         return tokenTtl;
     }
 
-    public void setTokenTtl(Long tokenTtl) {
+    public void setTokenTtl(Integer tokenTtl) {
         this.tokenTtl = tokenTtl;
+    }
+
+    public Integer getRefreshTokenTtl() {
+        return refreshTokenTtl;
+    }
+
+    public void setRefreshTokenTtl(Integer refreshTokenTtl) {
+        this.refreshTokenTtl = refreshTokenTtl;
     }
 
     public boolean isConfidential() {
@@ -121,24 +129,12 @@ public class Client extends VersionedEntity {
         this.confidential = confidential;
     }
 
-    public Long getRefreshTokenTtl() {
-        return refreshTokenTtl;
-    }
-
-    public void setRefreshTokenTtl(Long refreshTokenTtl) {
-        this.refreshTokenTtl = refreshTokenTtl;
-    }
-
     public User getCreator() {
         return creator;
     }
 
     public void setCreator(User creator) {
         this.creator = creator;
-    }
-
-    public String getCreatorEmail() {
-        return creator != null ? creator.getEmail() : null;
     }
 
     public boolean isShowPromptNoScopes() {

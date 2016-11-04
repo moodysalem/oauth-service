@@ -12,8 +12,11 @@
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2">
             <p class="lead text-center">
-                <strong>${model.loginCode.client.name?html}</strong>
-                is requesting the following permissions
+            <#if model.alreadyAuthorized>
+                You have already authorized <strong>${model.loginCode.client.name?html}</strong>
+            <#else>
+                <strong>${model.loginCode.client.name?html}</strong> is requesting the following permissions
+            </#if>
             </p>
 
             <form method="POST">
@@ -67,7 +70,7 @@
                     </div>
                     <div class="col-sm-4">
                         <div class="form-group">
-                            <button class="btn btn-block btn-primary" type="submit"  name="action" value="ok">
+                            <button class="btn btn-block btn-primary" type="submit" name="action" value="ok">
                                 <i class="fa fa-check"></i>
                                 OK
                             </button>

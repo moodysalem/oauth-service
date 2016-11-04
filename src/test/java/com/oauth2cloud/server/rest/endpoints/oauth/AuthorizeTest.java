@@ -2,10 +2,7 @@ package com.oauth2cloud.server.rest.endpoints.oauth;
 
 import com.oauth2cloud.server.OAuth2Test;
 import com.oauth2cloud.server.model.api.LoginErrorCode;
-import com.oauth2cloud.server.model.db.Application;
-import com.oauth2cloud.server.model.db.Client;
-import com.oauth2cloud.server.model.db.ClientCredentials;
-import com.oauth2cloud.server.model.db.GrantFlow;
+import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.util.Crud;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -128,6 +125,55 @@ public class AuthorizeTest extends OAuth2Test {
     }
 
     @Test
+    public void testShowPromptNoScopes() {
+        final String token = getToken().getAccessToken();
+        final Crud<Application> ac = applicationCrud(token);
+        final Crud<Client> cc = clientCrud(token);
+        final Crud<ClientScope> csc = clientScopeCrud(token);
+        final Crud<Scope> sc = scopeCrud(token);
+
+        Application a = new Application();
+        a.setName(UUID.randomUUID().toString());
+        a.setSupportEmail("moody.salem@gmail.com");
+        a = ac.save(a);
+
+        Client c = new Client();
+        c.setFlows(Collections.singleton(GrantFlow.IMPLICIT));
+        c.setUris(Collections.singleton("https://localhost:3000"));
+        c.setShowPromptNoScopes(false);
+        c.setName("Hello World");
+        c.setApplication(a);
+        c.setTokenTtl(86400);
+        c.setLoginCodeTtl(300);
+        c = cc.save(c);
+
+        Scope s1 = new Scope();
+        s1.setApplication(a);
+        s1.setDisplayName("s1");
+        s1.setName("s1");
+        s1.setDescription("test scope");
+        s1 = sc.save(s1);
+
+        Scope s2 = new Scope();
+        s2.setApplication(a);
+        s2.setDisplayName("s2");
+        s2.setName("s2");
+        s2.setDescription("test scope");
+        s2 = sc.save(s2);
+
+        ClientScope cs1 = new ClientScope();
+        cs1.setClient(c);
+        cs1.setScope(s1);
+        cs1.setPriority(ClientScope.Priority.ASK);
+        cs1.setReason("because");
+        cs1 = csc.save(cs1);
+
+        // TODO: after this set up, modify the client show prompt no scopes setting and verify that the
+        // permissions screen shows up always/only when scopes are required
+
+    }
+
+    @Test
     public void validateSentEmailMessage() {
         // if you submit a log in you should not see the error code any longer
         final Document noError = Jsoup.parse(target("authorize")
@@ -161,7 +207,7 @@ public class AuthorizeTest extends OAuth2Test {
         c.setApplication(a);
         c.setFlows(Collections.singleton(GrantFlow.IMPLICIT));
         c.setName(UUID.randomUUID().toString());
-        c.setTokenTtl(86400L);
+        c.setTokenTtl(86400);
         c.setConfidential(false);
         c.setLoginCodeTtl(300);
         c.setUris(Collections.singleton("http://google.com"));

@@ -58,7 +58,7 @@ public class AuthorizationCodeTest extends OAuth2Test {
         Client client = new Client();
         client.setApplication(application);
         client.setFlows(Collections.singleton(GrantFlow.CODE));
-        client.setTokenTtl(86400L);
+        client.setTokenTtl(86400);
         client.setLoginCodeTtl(300);
         client.setName("Authorization Code");
         client.setUris(Collections.singleton("https://moodysalem.com"));

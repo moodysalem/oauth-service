@@ -28,10 +28,12 @@ public class ScopesResource extends VersionedEntityResource<Scope> {
     @Override
     public boolean canMerge(Scope oldData, Scope newData) {
         if (oldData == null) {
-            return newData.getApplication() != null && newData.getApplication().getId() != null &&
-                    em.find(Application.class, newData.getApplication().getId())
-                            .getOwner()
-                            .idMatch(getUser());
+            if (newData.getApplication() == null || newData.getApplication().getId() == null) {
+                return false;
+            }
+            final Application application = em.find(Application.class, newData.getApplication().getId());
+
+            return application != null && application.getOwner().idMatch(getUser());
         } else {
             return oldData.getApplication().getOwner().idMatch(getUser());
         }

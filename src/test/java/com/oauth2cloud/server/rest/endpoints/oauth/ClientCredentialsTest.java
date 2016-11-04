@@ -35,7 +35,7 @@ public class ClientCredentialsTest extends OAuth2Test {
         Client client = new Client();
         client.setName("confidential client credentials client");
         client.setFlows(Collections.singleton(GrantFlow.CLIENT_CREDENTIALS));
-        client.setTokenTtl(3600L);
+        client.setTokenTtl(3600);
         client.setApplication(t);
         client.setLoginCodeTtl(300);
         client = cc.save(client);
