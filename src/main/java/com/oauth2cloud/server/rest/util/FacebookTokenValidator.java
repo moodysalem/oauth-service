@@ -3,6 +3,7 @@ package com.oauth2cloud.server.rest.util;
 import com.oauth2cloud.server.model.db.ClientCredentials;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.Parameter;
 import com.restfb.Version;
 import com.restfb.types.User;
 
@@ -20,7 +21,7 @@ public class FacebookTokenValidator implements ProviderTokenValidator {
             throw new IllegalArgumentException("Invalid Facebook Token supplied.");
         }
 
-        final DefaultFacebookClient client = new DefaultFacebookClient(tokenString, credentials.getSecret(), Version.VERSION_2_8);
+        final DefaultFacebookClient client = new DefaultFacebookClient(tokenString, credentials.getSecret(), Version.VERSION_2_5);
 
         final FacebookClient.DebugTokenInfo info = client.debugToken(tokenString);
 
@@ -34,7 +35,7 @@ public class FacebookTokenValidator implements ProviderTokenValidator {
             throw new IllegalArgumentException("Facebook 'email' scope is required");
         }
 
-        final User user = client.fetchObject("me?fields=email", User.class);
+        final User user = client.fetchObject("me", User.class, Parameter.with("fields", "email,first_name,last_name"));
 
         if (user == null || isBlank(user.getEmail())) {
             throw new IllegalArgumentException("Token did not associate to a user with e-mail");
