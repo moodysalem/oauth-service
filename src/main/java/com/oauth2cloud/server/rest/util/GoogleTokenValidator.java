@@ -11,22 +11,26 @@ import javax.ws.rs.core.Response;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class GoogleTokenValidator {
+public class GoogleTokenValidator implements ProviderTokenValidator {
     private static final WebTarget VALIDATE_TOKEN_ENDPOINT = ClientBuilder.newClient()
             .target("https://www.googleapis.com/oauth2/v3/tokeninfo");
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class TokenInfoResponse {
         private final String aud, emailVerified, email;
+        private final Long expires;
 
         public TokenInfoResponse(
                 @JsonProperty("aud") String aud,
                 @JsonProperty("email_verified") String emailVerified,
-                @JsonProperty("email") String email
+                @JsonProperty("email") String email,
+                @JsonProperty("exp") Long expires
+
         ) {
             this.aud = aud;
             this.emailVerified = emailVerified;
             this.email = email;
+            this.expires = expires;
         }
 
         public String getAud() {
@@ -40,10 +44,14 @@ public class GoogleTokenValidator {
         public boolean isVerified() {
             return "true".equalsIgnoreCase(emailVerified);
         }
+
+        public Long getExpires() {
+            return expires;
+        }
     }
 
-    public String getTokenEmail(final ClientCredentials googleCredentials, final String tokenString) {
-        if (googleCredentials == null || isBlank(googleCredentials.getId()) || isBlank(googleCredentials.getSecret())) {
+    public String getTokenEmail(final ClientCredentials credentials, final String tokenString) {
+        if (credentials == null || isBlank(credentials.getId()) || isBlank(credentials.getSecret())) {
             throw new IllegalArgumentException("Missing google credentials");
         }
 
@@ -61,12 +69,17 @@ public class GoogleTokenValidator {
 
         final TokenInfoResponse token = tokenResponse.readEntity(TokenInfoResponse.class);
 
-        if (isBlank(token.getAud()) || !token.getAud().equals(googleCredentials.getId())) {
+
+        if (isBlank(token.getAud()) || !token.getAud().equals(credentials.getId())) {
             throw new IllegalArgumentException("Token supplied is not for the correct client.");
         }
 
         if (!token.isVerified()) {
             throw new IllegalArgumentException("Google E-mail address is not yet verified.");
+        }
+
+        if (token.getExpires() > (System.currentTimeMillis() / 1000)) {
+            throw new IllegalArgumentException("Token is expired");
         }
 
         if (isBlank(token.getEmail())) {

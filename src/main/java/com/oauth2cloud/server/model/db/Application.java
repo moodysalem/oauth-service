@@ -35,6 +35,14 @@ public class Application extends VersionedEntity {
     })
     private ClientCredentials googleCredentials;
 
+    @Valid
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "id", column = @Column(name = "facebook_client_id")),
+            @AttributeOverride(name = "secret", column = @Column(name = "facebook_client_secret"))
+    })
+    private ClientCredentials facebookCredentials;
+
     @URL
     @Lob
     @Column(name = "stylesheet_url")
@@ -116,5 +124,13 @@ public class Application extends VersionedEntity {
 
     public void setFaviconUrl(String faviconUrl) {
         this.faviconUrl = faviconUrl;
+    }
+
+    public ClientCredentials getFacebookCredentials() {
+        return facebookCredentials;
+    }
+
+    public void setFacebookCredentials(ClientCredentials facebookCredentials) {
+        this.facebookCredentials = facebookCredentials;
     }
 }

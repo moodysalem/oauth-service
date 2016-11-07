@@ -5,12 +5,10 @@ import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.api.LoginErrorCode;
 import com.oauth2cloud.server.model.data.LoginEmailModel;
 import com.oauth2cloud.server.model.data.LoginModel;
+import com.oauth2cloud.server.model.data.SentEmailModel;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
-import com.oauth2cloud.server.rest.util.CallLogUtil;
-import com.oauth2cloud.server.rest.util.CookieUtil;
-import com.oauth2cloud.server.rest.util.GoogleTokenValidator;
-import com.oauth2cloud.server.rest.util.QueryUtil;
+import com.oauth2cloud.server.rest.util.*;
 import io.swagger.annotations.*;
 import org.codemonkey.simplejavamail.Mailer;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -38,7 +36,8 @@ public class AuthorizeResource extends BaseResource {
     private static final String INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES =
             "Invalid request. Please contact an administrator if this continues.";
 
-    private static final String AUTHORIZE_TEMPLATE = "/templates/Authorize";
+    private static final String AUTHORIZE_TEMPLATE = "/templates/Authorize",
+            SENT_EMAIL_TEMPLATE = "/templates/SentEmail";
 
     /**
      * Helper method that takes a LoginCookie and expires it
@@ -158,20 +157,24 @@ public class AuthorizeResource extends BaseResource {
             @FormParam("action") final String action,
             @FormParam("remember_me") final String rememberMe,
             @FormParam("google_token") final String googleToken,
+            @FormParam("facebook_token") final String facebookToken,
             @FormParam("email") final String email
     ) {
         // validate the client id stuff again
-        final Response badRequest = validateRequest(em, responseType, clientId, redirectUri, scope);
-        if (badRequest != null) {
-            return badRequest;
-        }
-
-        if (isBlank(action)) {
-            return badRequest(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+        final Response validation = validateRequest(em, responseType, clientId, redirectUri, scope);
+        if (validation != null) {
+            return validation;
         }
 
         final Client client = QueryUtil.getClient(em, clientId);
+        if (client == null) {
+            return badRequest(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+        }
         CallLogUtil.logCall(em, client, req);
+
+        if (isBlank(action)) {
+            return badRequest(client, INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+        }
 
         final boolean remember = "on".equalsIgnoreCase(rememberMe);
 
@@ -181,12 +184,12 @@ public class AuthorizeResource extends BaseResource {
             // handle the login action
             case "email": {
                 if (isBlank(email)) {
-                    return badRequest("Invalid e-mail address");
+                    return badRequest(client, "Invalid e-mail address");
                 }
 
                 final User user = QueryUtil.findOrCreateUser(em, client.getApplication(), email);
                 if (user == null) {
-                    return badRequest("Failed to find or create user with provided e-mail address");
+                    return badRequest(client, "Failed to find or create user with provided e-mail address");
                 }
 
                 sendLoginCode(
@@ -198,9 +201,9 @@ public class AuthorizeResource extends BaseResource {
                 );
 
 
-                final LoginModel loginModel = new LoginModel(client, null, true);
+                final SentEmailModel sentEmailModel = new SentEmailModel(client);
 
-                return Response.ok(new Viewable(AUTHORIZE_TEMPLATE, loginModel)).build();
+                return Response.ok(new Viewable(SENT_EMAIL_TEMPLATE, sentEmailModel)).build();
             }
 
             case "google": {
@@ -219,14 +222,33 @@ public class AuthorizeResource extends BaseResource {
                             String.format("Failed to use google to log in for application ID %s",
                                     client.getApplication().getId()),
                             e);
-                    return badRequest(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+                    return badRequest(client, INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+                }
+            }
+
+            case "facebook": {
+                try {
+                    final User user = doFacebookLogin(client.getApplication(), facebookToken);
+
+                    final LoginCode loginCode = makeLoginCode(
+                            em,
+                            user, client, scope, redirectUri,
+                            responseType, state, remember
+                    );
+
+                    return loginCodeRedirect(loginCode);
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE,
+                            String.format("Failed to use facebook to log in for application ID %s",
+                                    client.getApplication().getId()),
+                            e);
+                    return badRequest(client, INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
                 }
             }
             default:
-                return badRequest(INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
+                return badRequest(client, INVALID_REQUEST_PLEASE_CONTACT_AN_ADMINISTRATOR_IF_THIS_CONTINUES);
         }
     }
-
 
     @Inject
     private Mailer mailer;
@@ -248,8 +270,17 @@ public class AuthorizeResource extends BaseResource {
         return true;
     }
 
+    private User doFacebookLogin(final Application application, final String facebookToken) {
+        final String email = facebookTokenValidator.getTokenEmail(application.getGoogleCredentials(), facebookToken);
+
+        return QueryUtil.findOrCreateUser(em, application, email);
+    }
+
     @Inject
     private GoogleTokenValidator googleTokenValidator;
+
+    @Inject
+    private FacebookTokenValidator facebookTokenValidator;
 
     /**
      * Use a google token to log in as a google user

@@ -4,7 +4,6 @@ import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.*;
 
 import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,9 +41,8 @@ public class CallLogUtil {
         final String forwardedIp = containerRequestContext.getHeaderString("X-Forwaded-For");
         if (forwardedIp != null) {
             callLog.setIp(forwardedIp);
-        } else {
-            callLog.setIp("unknown");
         }
+
         callLog.setPath(containerRequestContext.getUriInfo().getPath());
         callLog.setMethod(containerRequestContext.getMethod());
 

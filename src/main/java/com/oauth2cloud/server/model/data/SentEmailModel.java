@@ -6,17 +6,11 @@ import com.oauth2cloud.server.model.db.Client;
 /**
  * This is the model that gets passed to Authorize.ftl
  */
-public class LoginModel implements HeadProperties {
-    private final LoginErrorCode loginErrorCode;
+public class SentEmailModel implements HeadProperties {
     private final Client client;
 
-    public LoginModel(Client client, LoginErrorCode loginErrorCode, boolean sentEmail) {
-        this.loginErrorCode = loginErrorCode;
+    public SentEmailModel(Client client) {
         this.client = client;
-    }
-
-    public LoginErrorCode getLoginErrorCode() {
-        return loginErrorCode;
     }
 
     public Client getClient() {

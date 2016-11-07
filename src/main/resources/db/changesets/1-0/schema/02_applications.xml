@@ -27,18 +27,14 @@
         <constraints nullable="false"/>
       </column>
       <column name="owner_id" type="${UUID_TYPE}"/>
-      <column name="google_client_id" type="VARCHAR(191)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="google_client_secret" type="VARCHAR(191)">
-        <constraints nullable="true"/>
-      </column>
+      <column name="google_client_id" type="VARCHAR(2048)"/>
+      <column name="google_client_secret" type="VARCHAR(2048)"/>
+      <column name="facebook_client_id" type="VARCHAR(2048)"/>
+      <column name="facebook_client_secret" type="VARCHAR(2048)"/>
       <column name="stylesheet_url" type="${TEXT}"/>
       <column name="favicon_url" type="${TEXT}"/>
       <column name="logo_url" type="${TEXT}"/>
     </createTable>
-    <addUniqueConstraint tableName="applications" columnNames="google_client_id,google_client_secret"
-                         constraintName="uk_app_google_cred"/>
   </changeSet>
 
 

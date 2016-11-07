@@ -8,9 +8,7 @@
       <column name="id" type="${UUID_TYPE}">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="ip" type="VARCHAR(50)">
-        <constraints nullable="false"/>
-      </column>
+      <column name="ip" type="VARCHAR(45)"/>
       <column name="path" type="${TEXT}">
         <constraints nullable="false"/>
       </column>

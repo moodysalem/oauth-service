@@ -15,10 +15,10 @@
       <column name="description">OAuth2 as a service</column>
       <column name="support_email">support@oauth2cloud.com</column>
       <column name="stylesheet_url">
-        https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/cosmo/bootstrap.min.css
+        https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css
       </column>
       <column name="favicon_url">
-        https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-chain.ico?v=2
+        https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-logo.ico?v=3
       </column>
     </insert>
 

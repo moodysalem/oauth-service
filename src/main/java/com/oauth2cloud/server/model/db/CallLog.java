@@ -15,7 +15,6 @@ public abstract class CallLog extends BaseEntity {
     @Column(name = "path", updatable = false)
     private String path;
 
-    @NotEmpty
     @Column(name = "ip", updatable = false)
     private String ip;
 
