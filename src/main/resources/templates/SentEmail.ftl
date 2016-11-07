@@ -15,7 +15,7 @@
 
     <div class="row">
         <div class="col-lg-4 col-lg-offset-4 col-sm-6 col-sm-offset-3">
-            <div class="alert alert-info">
+            <div class="alert alert-info" id="sent-email-alert">
                 <div class="text-center">
                     <i class="fa fa-envelope"></i> <strong>Check your inbox!</strong>
                 </div>

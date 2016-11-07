@@ -72,7 +72,7 @@ public class AuthorizeTest extends OAuth2Test {
         // verify favicon is in there
         final Element head = doc.select("head").first();
         final String fi = head.select("link[rel=\"icon\"]").first().attr("href");
-        assert "https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-chain.ico?v=2".equals(fi);
+        assert "https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-logo.ico?v=3".equals(fi);
 
         final Elements ss = head.select("link[rel=\"stylesheet\"]");
         // bootstrap stylesheet
@@ -119,7 +119,6 @@ public class AuthorizeTest extends OAuth2Test {
                                     String.class
                             ));
                     assert noError.select("#error-code-alert").isEmpty();
-                    assert !noError.select("#sent-email-alert").isEmpty();
                 }
         );
     }
@@ -176,7 +175,7 @@ public class AuthorizeTest extends OAuth2Test {
     @Test
     public void validateSentEmailMessage() {
         // if you submit a log in you should not see the error code any longer
-        final Document noError = Jsoup.parse(target("authorize")
+        final Document sentEmail = Jsoup.parse(target("authorize")
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("redirect_uri", "https://oauth2cloud.com")
                 .queryParam("response_type", "token")
@@ -188,7 +187,8 @@ public class AuthorizeTest extends OAuth2Test {
                         ),
                         String.class
                 ));
-        assert !noError.select("#sent-email-alert").isEmpty();
+
+        assert !sentEmail.select("#sent-email-alert").isEmpty();
     }
 
     @Test
