@@ -76,17 +76,17 @@ public class AuthorizeTest extends OAuth2Test {
 
         final Elements ss = head.select("link[rel=\"stylesheet\"]");
         // bootstrap stylesheet
-        assert "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css"
+        assert "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
                 .equals(ss.first().attr("href"));
         // custom stylesheet
-        assert "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/cosmo/bootstrap.min.css"
+        assert "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css"
                 .equals(ss.get(1).attr("href"));
         // fontawesome
         assert "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"
                 .equals(ss.get(2).attr("href"));
 
         // page title includes application name
-        assert "OAuth2Cloud Log In".equals(head.select("title").text());
+        assert "Administration - OAuth2Cloud".equals(head.select("title").text());
         assert "Administration".equals(doc.select("h2 small").text());
     }
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <#include "Head.ftl">
-    <title>${model.client.name} - ${model.client.application.name?html}</title>
+    <title>${model.client.name?html} - ${model.client.application.name?html}</title>
 </head>
 <body>
 
