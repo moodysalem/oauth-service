@@ -20,8 +20,9 @@ public class FacebookTokenValidator implements ProviderTokenValidator {
             throw new IllegalArgumentException("Invalid Facebook Token supplied.");
         }
 
-        final FacebookClient.DebugTokenInfo info = new DefaultFacebookClient(Version.VERSION_2_8)
-                .debugToken(tokenString);
+        final DefaultFacebookClient client = new DefaultFacebookClient(tokenString, credentials.getSecret(), Version.VERSION_2_8);
+
+        final FacebookClient.DebugTokenInfo info = client.debugToken(tokenString);
 
         if (info == null ||
                 !info.getAppId().equals(credentials.getId()) ||
@@ -33,8 +34,7 @@ public class FacebookTokenValidator implements ProviderTokenValidator {
             throw new IllegalArgumentException("Facebook 'email' scope is required");
         }
 
-        final User user = (new DefaultFacebookClient(tokenString, Version.VERSION_2_8))
-                .fetchObject("me", User.class);
+        final User user = client.fetchObject("me?fields=email", User.class);
 
         if (user == null || isBlank(user.getEmail())) {
             throw new IllegalArgumentException("Token did not associate to a user with e-mail");

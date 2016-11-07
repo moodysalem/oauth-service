@@ -78,7 +78,7 @@ public class GoogleTokenValidator implements ProviderTokenValidator {
             throw new IllegalArgumentException("Google E-mail address is not yet verified.");
         }
 
-        if (token.getExpires() > (System.currentTimeMillis() / 1000)) {
+        if (token.getExpires() < (System.currentTimeMillis() / 1000)) {
             throw new IllegalArgumentException("Token is expired");
         }
 

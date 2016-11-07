@@ -8,6 +8,7 @@ import com.oauth2cloud.server.model.api.TokenResponse;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.EmailTemplateFreemarkerConfiguration;
 import com.oauth2cloud.server.rest.OAuth2Application;
+import com.oauth2cloud.server.rest.util.FacebookTokenValidator;
 import com.oauth2cloud.server.rest.util.GoogleTokenValidator;
 import com.oauth2cloud.server.util.Crud;
 import com.oauth2cloud.server.util.TokenUtil;
@@ -109,6 +110,11 @@ public class OAuth2Test extends BaseTest implements SendsMail {
                 when(mock.getTokenEmail(any(ClientCredentials.class), anyString()))
                         .thenThrow(IllegalArgumentException.class);
                 bind(mock).to(GoogleTokenValidator.class);
+
+                final FacebookTokenValidator fbmock = mock(FacebookTokenValidator.class);
+                when(fbmock.getTokenEmail(any(ClientCredentials.class), anyString()))
+                        .thenThrow(IllegalArgumentException.class);
+                bind(fbmock).to(FacebookTokenValidator.class);
             }
         });
 

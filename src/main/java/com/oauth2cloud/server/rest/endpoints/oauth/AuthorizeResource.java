@@ -271,7 +271,7 @@ public class AuthorizeResource extends BaseResource {
     }
 
     private User doFacebookLogin(final Application application, final String facebookToken) {
-        final String email = facebookTokenValidator.getTokenEmail(application.getGoogleCredentials(), facebookToken);
+        final String email = facebookTokenValidator.getTokenEmail(application.getFacebookCredentials(), facebookToken);
 
         return QueryUtil.findOrCreateUser(em, application, email);
     }

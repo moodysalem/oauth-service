@@ -18,11 +18,10 @@
             btn.prop("disabled", false);
 
             FB.init({
-                appId: '${model.client.application.facebookCredentials?js_string}',
+                appId: '${model.client.application.facebookCredentials.id?js_string}',
                 xfbml: false,
                 version: 'v2.8'
             });
-
 
             btn.click(function () {
                 FB.login(function (response) {
