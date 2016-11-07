@@ -22,7 +22,7 @@ public class CrudTest extends OAuth2Test {
 
         app.setSupportEmail("moody.salem@gmail.com");
         assert crud.saveResponse(app).getStatus() == 200;
-        assert crud.saveResponse(app).getStatus() == 422;
+        assert crud.saveResponse(app).getStatus() == 409;
         app.setName(null);
         assert crud.saveResponse(app).getStatus() == 422;
         app.setName(UUID.randomUUID().toString());

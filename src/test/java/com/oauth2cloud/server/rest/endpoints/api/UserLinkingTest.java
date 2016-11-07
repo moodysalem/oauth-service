@@ -83,7 +83,7 @@ public class UserLinkingTest extends OAuth2Test {
         User three = new User();
         three.setEmail("moody.salem@gmail.com");
         three.setApplication(a);
-        assert uc.saveResponse(three).getStatus() == 422;
+        assert uc.saveResponse(three).getStatus() == 409;
         three.setEmail("moody+test@gmail.com");
         three = uc.save(three);
         assert three.getGroup() == null;
