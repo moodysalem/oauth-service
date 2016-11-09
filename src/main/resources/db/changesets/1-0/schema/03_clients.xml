@@ -50,11 +50,13 @@
     <addForeignKeyConstraint baseTableName="clients" baseColumnNames="application_id"
                              constraintName="fk_clients_applications"
                              referencedTableName="applications"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addForeignKeyConstraint baseTableName="clients" baseColumnNames="creator_id"
                              constraintName="fk_clients_users"
                              referencedTableName="users"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
   <changeSet id="client redirect uris table" author="moody.salem">
@@ -70,7 +72,8 @@
     <addForeignKeyConstraint baseTableName="client_uris" baseColumnNames="client_id"
                              constraintName="fk_client_uris_client"
                              referencedTableName="clients"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addUniqueConstraint tableName="client_uris" columnNames="client_id,uri"/>
   </changeSet>
 
@@ -87,7 +90,8 @@
     <addForeignKeyConstraint baseTableName="client_flows" baseColumnNames="client_id"
                              constraintName="fk_client_flows_client"
                              referencedTableName="clients"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addUniqueConstraint tableName="client_flows" columnNames="client_id,flow"/>
   </changeSet>
 

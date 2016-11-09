@@ -120,7 +120,8 @@
     <addForeignKeyConstraint baseTableName="users" baseColumnNames="application_id"
                              constraintName="fk_users_applications"
                              referencedTableName="applications"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addForeignKeyConstraint baseTableName="applications" baseColumnNames="owner_id"
                              constraintName="fk_applications_owner"
                              referencedTableName="users"

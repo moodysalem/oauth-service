@@ -32,9 +32,11 @@
       </column>
     </createTable>
 
-    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="client_id" constraintName="fk_tokens_clients"
+    <addForeignKeyConstraint baseTableName="tokens" baseColumnNames="client_id"
+                             constraintName="fk_tokens_clients"
                              referencedTableName="clients"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
 
     <addUniqueConstraint tableName="tokens" columnNames="token"/>
   </changeSet>
@@ -85,9 +87,11 @@
                              referencedTableName="tokens"
                              referencedColumnNames="id"
                              onDelete="CASCADE"/>
-    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="user_id" constraintName="fk_login_codes_users"
+    <addForeignKeyConstraint baseTableName="login_codes" baseColumnNames="user_id"
+                             constraintName="fk_login_codes_users"
                              referencedTableName="users"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
   <changeSet id="create user_tokens table" author="moody.salem">
@@ -117,11 +121,13 @@
     <addForeignKeyConstraint baseTableName="user_tokens" baseColumnNames="user_id"
                              constraintName="fk_tokens_users"
                              referencedTableName="users"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addForeignKeyConstraint baseTableName="user_tokens" baseColumnNames="login_code_id"
                              constraintName="fk_user_token_src_code"
                              referencedTableName="login_codes"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
   <changeSet id="create user_access_codes" author="moody.salem">
@@ -173,7 +179,8 @@
     <addForeignKeyConstraint baseTableName="user_access_tokens" baseColumnNames="refresh_token_id"
                              constraintName="fk_access_tokens_refresh_tokens"
                              referencedTableName="user_refresh_tokens"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
 
@@ -204,7 +211,8 @@
     <addForeignKeyConstraint baseTableName="login_cookies" baseColumnNames="user_id"
                              constraintName="fk_login_cookies_users"
                              referencedTableName="users"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
 </databaseChangeLog>

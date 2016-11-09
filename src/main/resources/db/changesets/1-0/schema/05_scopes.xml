@@ -32,11 +32,13 @@
     <addForeignKeyConstraint baseTableName="client_scopes" baseColumnNames="client_id"
                              constraintName="fk_client_scopes_clients"
                              referencedTableName="clients"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addForeignKeyConstraint baseTableName="client_scopes" baseColumnNames="scope_id"
                              constraintName="fk_client_scopes_scopes"
                              referencedTableName="scopes"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addUniqueConstraint tableName="client_scopes" columnNames="client_id,scope_id"/>
   </changeSet>
 
@@ -64,12 +66,14 @@
     <addForeignKeyConstraint baseTableName="accepted_scopes" baseColumnNames="user_id"
                              constraintName="fk_accepted_scopes_users"
                              referencedTableName="users"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <!-- if you delete the client scope, it is unaccepted for all users -->
     <addForeignKeyConstraint baseTableName="accepted_scopes" baseColumnNames="client_scope_id"
                              constraintName="fk_accepted_scopes_client_scopes"
                              referencedTableName="client_scopes"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addUniqueConstraint tableName="accepted_scopes" columnNames="user_id,client_scope_id"/>
   </changeSet>
 
@@ -86,12 +90,14 @@
     <addForeignKeyConstraint baseTableName="user_token_accepted_scopes" baseColumnNames="user_token_id"
                              constraintName="fk_token_accepted_scopes_token"
                              referencedTableName="user_tokens"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <!-- if you delete the accepted scope, all the tokens drop the scope -->
     <addForeignKeyConstraint baseTableName="user_token_accepted_scopes" baseColumnNames="accepted_scope_id"
                              constraintName="fk_token_accepted_scopes_scope"
                              referencedTableName="accepted_scopes"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
   <!-- this table lists all the client scopes that are granted with a token -->
@@ -107,11 +113,13 @@
     <addForeignKeyConstraint baseTableName="client_token_client_scopes" baseColumnNames="client_token_id"
                              constraintName="fk_token_client_scopes_tokens"
                              referencedTableName="client_tokens"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
     <addForeignKeyConstraint baseTableName="client_token_client_scopes" baseColumnNames="client_scope_id"
                              constraintName="fk_token_client_scopes_client_scopes"
                              referencedTableName="client_scopes"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
   </changeSet>
 
 
