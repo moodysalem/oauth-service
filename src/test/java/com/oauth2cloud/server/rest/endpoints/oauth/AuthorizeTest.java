@@ -13,8 +13,10 @@ import org.testng.annotations.Test;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -75,15 +77,18 @@ public class AuthorizeTest extends OAuth2Test {
         assert "https://s3.amazonaws.com/oauth2cloud-static-assets/favicon-logo.ico?v=3".equals(fi);
 
         final Elements ss = head.select("link[rel=\"stylesheet\"]");
-        // bootstrap stylesheet
-        assert "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
-                .equals(ss.first().attr("href"));
-        // custom stylesheet
-        assert "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css"
-                .equals(ss.get(1).attr("href"));
-        // fontawesome
-        assert "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"
-                .equals(ss.get(2).attr("href"));
+
+        assert ss.stream().map(s -> s.attr("href")).collect(Collectors.toSet())
+                .containsAll(
+                        Arrays.asList(
+                                //bootstrap
+                                "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css",
+                                //paper
+                                "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css",
+                                //fontawesome
+                                "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"
+                        )
+                );
 
         // page title includes application name
         assert "Administration - OAuth2Cloud".equals(head.select("title").text());
@@ -189,7 +194,6 @@ public class AuthorizeTest extends OAuth2Test {
         assert permis.getStatus() == 200;
 
         final Document permissions = Jsoup.parse(permis.readEntity(String.class));
-        assert permissions.select(".client-scope-toggle").size() == 1;
         // we need to see the checkbox
         assert permissions.select("input[name][type=checkbox]").attr("name")
                 .contains(cs1.getScope().getId().toString());
