@@ -41,11 +41,11 @@
                         <div class="client-scope-toggle">
                             <#if userClientScope.accepted>
                                 Accepted <i class="fa fa-question-circle"
-                                            data-title="You have already accepted this scope"/>
+                                            data-title="You have already accepted this scope"></i>
                             <#else>
                                 <#if (clientScope.priority == "REQUIRED")>
                                     Required <i class="fa fa-question-circle"
-                                                data-title="This scope is required to log in for this client"/>
+                                                data-title="This scope is required to log in for this client"></i>
                                 <#else>
                                     <div class="toggle-checkbox">
                                         <input title="${scope.name?html}" type="checkbox" checked
