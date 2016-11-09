@@ -187,6 +187,12 @@ public class AuthorizeTest extends OAuth2Test {
 
         final Response permis = client().target(loginLink).request().get();
         assert permis.getStatus() == 200;
+
+        final Document permissions = Jsoup.parse(permis.readEntity(String.class));
+        assert permissions.select(".client-scope-toggle").size() == 1;
+        // we need to see the checkbox
+        assert permissions.select("input[name][type=checkbox]").attr("name")
+                .contains(cs1.getScope().getId().toString());
     }
 
     @Test
