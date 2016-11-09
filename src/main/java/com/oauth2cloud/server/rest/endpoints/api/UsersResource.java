@@ -121,12 +121,23 @@ public class UsersResource extends VersionedEntityResource<User> {
     @QueryParam("applicationId")
     private Set<UUID> applicationId;
 
+    @QueryParam("grouped")
+    private Boolean grouped;
+
     @Override
     public void getPredicatesFromRequest(List<Predicate> list, Root<User> root) {
         list.add(cb.equal(root.join(User_.application).get(Application_.owner), getUser()));
 
         if (applicationId != null && !applicationId.isEmpty()) {
             list.add(root.join(User_.application).get(Application_.id).in(applicationId));
+        }
+
+        if (grouped != null) {
+            if (grouped) {
+                list.add(cb.isNotNull(root.get(User_.group)));
+            } else {
+                list.add(cb.isNull(root.get(User_.group)));
+            }
         }
     }
 

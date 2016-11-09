@@ -8,7 +8,10 @@ import io.swagger.annotations.Api;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Api("crud")
 @Path("client-scopes")
@@ -44,9 +47,25 @@ public class ClientScopesResource extends VersionedEntityResource<ClientScope> {
         return canMerge(toDelete, null);
     }
 
+    @QueryParam("clientId")
+    private Set<UUID> clientIds;
+
+    @QueryParam("scopeId")
+    private Set<UUID> scopeIds;
+
     @Override
     public void getPredicatesFromRequest(List<Predicate> predicates, Root<ClientScope> root) {
-        predicates.add(cb.equal(root.join(ClientScope_.client).join(Client_.application).get(Application_.owner), getUser()));
+        predicates.add(
+                cb.equal(root.join(ClientScope_.client).join(Client_.application).get(Application_.owner), getUser())
+        );
+
+        if (clientIds != null && !clientIds.isEmpty()) {
+            predicates.add(root.join(ClientScope_.client).get(Client_.id).in(clientIds));
+        }
+
+        if (scopeIds != null && !scopeIds.isEmpty()) {
+            predicates.add(root.join(ClientScope_.scope).get(Scope_.id).in(scopeIds));
+        }
     }
 
     @Override

@@ -159,6 +159,4 @@ public class OAuth2Test extends BaseTest implements SendsMail {
         return builder.header("Authorization",
                 "Basic " + Base64.encodeAsString(client.getCredentials().getId() + ":" + client.getCredentials().getSecret()));
     }
-
-
 }
