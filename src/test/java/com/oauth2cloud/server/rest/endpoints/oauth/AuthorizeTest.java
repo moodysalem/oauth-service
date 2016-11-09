@@ -167,9 +167,26 @@ public class AuthorizeTest extends OAuth2Test {
         cs1.setReason("because");
         cs1 = csc.save(cs1);
 
-        // TODO: after this set up, modify the client show prompt no scopes setting and verify that the
-        // permissions screen shows up always/only when scopes are required
+        assert target("authorize").queryParam("client_id", c.getCredentials().getId())
+                .queryParam("response_type", "token")
+                .queryParam("redirect_uri", "https://localhost:3000")
+                .request().get().getStatus() == 200;
 
+        assert target("authorize").queryParam("client_id", c.getCredentials().getId())
+                .queryParam("response_type", "token")
+                .queryParam("redirect_uri", "https://localhost:3000")
+                .request().post(
+                        Entity.form(
+                                new Form()
+                                        .param("email", "test@gmail.com")
+                                        .param("action", "email")
+                        )
+                ).getStatus() == 200;
+        final Document emailContent = Jsoup.parse(lastSentEmail().getTextHTML());
+        final String loginLink = emailContent.select("#login-link").attr("href");
+
+        final Response permis = client().target(loginLink).request().get();
+        assert permis.getStatus() == 200;
     }
 
     @Test

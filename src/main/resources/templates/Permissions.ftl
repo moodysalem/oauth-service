@@ -21,10 +21,7 @@
 
             <form method="POST">
             <#list model.userClientScopes as userClientScope>
-                <#assign
-                clientScope=userClientScope.clientScope
-                scope=userClientScope.clientScope.scope
-                acceptedScope=userClientScope.acceptedScope>
+                <#assign clientScope=userClientScope.clientScope scope=userClientScope.clientScope.scope>
                 <div class="well well-sm">
                     <div class="client-scope-row">
                         <div class="client-scope-thumbnail">
@@ -42,11 +39,13 @@
                             <p>${(clientScope.reason)!"No reason given."?html}</p>
                         </div>
                         <div class="client-scope-toggle">
-                            <#if acceptedScope??>
-                                ACCEPTED
+                            <#if userClientScope.accepted>
+                                Accepted <i class="fa fa-question-circle"
+                                            data-title="You have already accepted this scope"/>
                             <#else>
                                 <#if (clientScope.priority == "REQUIRED")>
-                                    REQUIRED
+                                    Required <i class="fa fa-question-circle"
+                                                data-title="This scope is required to log in for this client"/>
                                 <#else>
                                     <div class="toggle-checkbox">
                                         <input title="${scope.name?html}" type="checkbox" checked
