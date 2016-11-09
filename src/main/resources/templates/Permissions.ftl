@@ -23,15 +23,15 @@
             <#list model.userClientScopes as userClientScope>
                 <#assign clientScope=userClientScope.clientScope scope=userClientScope.clientScope.scope>
                 <div class="well well-sm">
-                    <div class="client-scope-row">
-                        <div class="client-scope-thumbnail">
+                    <div class="display-flex align-items-center">
+                        <div class="flex-shrink-0" style="width:125px;padding:0.5em;">
                             <#if scope.thumbnail??>
-                                <img class="scope-thumbnail" src="${scope.thumbnail?html}">
+                                <img class="scope-thumbnail" style="width:100%;" src="${scope.thumbnail?html}">
                             <#else>
-                                <img class="scope-thumbnail" src="http://placehold.it/150x150">
+                                <img class="scope-thumbnail" style="width:100%;" src="http://placehold.it/150x150">
                             </#if>
                         </div>
-                        <div class="client-scope-description">
+                        <div class="flex-grow-1">
                             <h3>
                             ${scope.displayName?html}
                                 <i class="fa fa-question-circle"
@@ -40,7 +40,7 @@
 
                             <p>${(clientScope.reason)!"No reason given."?html}</p>
                         </div>
-                        <div class="client-scope-toggle">
+                        <div class="flex-shrink-0" style="width: 120px; text-align:center;">
                             <#if userClientScope.accepted>
                                 Accepted <i class="fa fa-question-circle"
                                             data-title="You have already accepted this scope"></i>

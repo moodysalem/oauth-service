@@ -17,35 +17,6 @@
     /*
         permissions page
     */
-
-    .client-scope-row {
-        display: flex;
-        align-items: center;
-        flex-direction: row;
-    }
-
-    .client-scope-row .client-scope-thumbnail {
-        width: 125px;
-        flex: none;
-        padding: 0.5em;
-    }
-
-    .client-scope-row .client-scope-thumbnail img.scope-thumbnail {
-        width: 100%;
-    }
-
-    .client-scope-row .client-scope-description {
-        flex: 1 0;
-    }
-
-    .client-scope-row .client-scope-toggle {
-        flex: none;
-        width: 120px;
-        text-align: center;
-        color: blue;
-        text-shadow: 0 0 1px rgba(0, 0, 0, 0.8);
-    }
-
     .toggle-checkbox input[type=checkbox] {
         visibility: hidden;
     }

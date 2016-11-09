@@ -10,6 +10,11 @@
 <link rel="icon" href="${model.faviconUrl?html}">
 </#if>
 
+<!-- flexbox styles always available -->
+<link rel="stylesheet"
+      href="https://cdn.rawgit.com/moodysalem/flexbox-css/7b5063fb5985904245bf7e2a75f1d2221440ebe5/dist/flexbox-css-min.css"
+      integrity="sha384-5DzewQ8m2sTfg+tmtmzOdfg89aydUYzyuLsVNPbFlm9w4+DFPrRmbHqajYALly7W" crossorigin="anonymous">
+
 <!-- Bootstrap core CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
       integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous"/>
