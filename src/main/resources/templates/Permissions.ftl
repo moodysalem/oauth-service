@@ -27,6 +27,8 @@
                         <div class="client-scope-thumbnail">
                             <#if scope.thumbnail??>
                                 <img class="scope-thumbnail" src="${scope.thumbnail?html}">
+                            <#else>
+                                <img class="scope-thumbnail" src="http://placehold.it/150x150">
                             </#if>
                         </div>
                         <div class="client-scope-description">
@@ -49,7 +51,9 @@
                                 <#else>
                                     <div class="toggle-checkbox">
                                         <input title="${scope.name?html}" type="checkbox" checked
+                                               id="scope-${scope.id}"
                                                name="SCOPE-${scope.id}"/>
+                                        <label for="scope-${scope.id}"></label>
                                     </div>
                                 </#if>
                             </#if>
