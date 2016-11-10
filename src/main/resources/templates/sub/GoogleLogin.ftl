@@ -3,7 +3,7 @@
 
     <input type="hidden" id="google-token" name="google_token"/>
 
-    <button class="btn btn-sm btn-danger btn-block" id="google-login" type="button">
+    <button class="btn btn-sm btn-danger btn-block" id="google-login" type="button" disabled>
         <i class="fa fa-google fa-lg"></i>
         <span class="hidden-xs">via Google</span>
     </button>
@@ -17,17 +17,17 @@
         var loginButton = $('#google-login'),
                 tokenInput = $('#google-token');
 
-        function disableLoginButton() {
-            loginButton.prop("disabled", true);
+        function enableGoogleButton() {
+            loginButton.prop("disabled", false);
         }
 
-        // define a function to be called when google loads
-        if (gapi && typeof gapi.load === "function") {
+        if (gapi && typeof gapi.load == 'function') {
             gapi.load('auth2', function () {
                 if (!gapi.auth2 || !gapi.auth2.init) {
-                    disableLoginButton();
                     return;
                 }
+
+                enableGoogleButton();
 
                 var auth2 = gapi.auth2.init({
                     client_id: "${model.client.application.googleCredentials.id?js_string}",
@@ -35,24 +35,20 @@
                     scope: 'email'
                 });
 
-                $(function () {
-                    loginButton.click(function () {
-                        // Sign the user in, and then retrieve their ID token for the server
-                        // to validate
-                        auth2.signIn()
-                                .then(
-                                        function () {
-                                            var token = auth2.currentUser.get().getAuthResponse().id_token;
-                                            if (token) {
-                                                tokenInput.val(token).closest("form").submit();
-                                            }
+                loginButton.click(function () {
+                    // Sign the user in, and then retrieve their ID token for the server
+                    // to validate
+                    auth2.signIn()
+                            .then(
+                                    function () {
+                                        var token = auth2.currentUser.get().getAuthResponse().id_token;
+                                        if (token) {
+                                            tokenInput.val(token).closest("form").submit();
                                         }
-                                );
-                    });
+                                    }
+                            );
                 });
             });
-        } else {
-            disableLoginButton();
         }
     })();
 </script>
