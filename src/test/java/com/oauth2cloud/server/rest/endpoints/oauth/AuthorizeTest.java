@@ -196,7 +196,7 @@ public class AuthorizeTest extends OAuth2Test {
         final Document permissions = Jsoup.parse(permis.readEntity(String.class));
         // we need to see the checkbox
         assert permissions.select("input[name][type=checkbox]").attr("name")
-                .contains(cs1.getScope().getId().toString());
+                .contains(cs1.getId().toString());
     }
 
     @Test
