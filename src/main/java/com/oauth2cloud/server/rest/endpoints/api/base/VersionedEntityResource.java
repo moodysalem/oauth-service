@@ -1,7 +1,7 @@
 package com.oauth2cloud.server.rest.endpoints.api.base;
 
 import com.oauth2cloud.server.model.db.User;
-import com.oauth2cloud.server.model.db.VersionedEntity;
+import com.oauth2cloud.server.model.db.OAuthVersionedEntity;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
 
 import javax.annotation.PostConstruct;
@@ -11,7 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 
-public abstract class VersionedEntityResource<T extends VersionedEntity> extends com.moodysalem.jaxrs.lib.resources.VersionedEntityResource<T> {
+public abstract class VersionedEntityResource<T extends OAuthVersionedEntity> extends com.moodysalem.jaxrs.lib.resources.VersionedEntityResource<T> {
     @Inject
     protected EntityManager em;
 

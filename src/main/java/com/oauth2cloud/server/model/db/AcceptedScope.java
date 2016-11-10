@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "accepted_scopes")
-public class AcceptedScope extends VersionedEntity {
+public class AcceptedScope extends OAuthVersionedEntity {
     @ManyToOne
     @JoinColumn(name = "client_scope_id", updatable = false)
     private ClientScope clientScope;

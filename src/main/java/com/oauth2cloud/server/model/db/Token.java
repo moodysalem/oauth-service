@@ -13,7 +13,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 @Entity
 @Table(name = "tokens")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Token extends VersionedEntity {
+public abstract class Token extends OAuthVersionedEntity {
     @Size(max = 96, min = 32)
     @Column(name = "token", updatable = false)
     @Convert(converter = EncryptedStringConverter.class)

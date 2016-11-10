@@ -11,7 +11,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "login_cookies")
-public class LoginCookie extends VersionedEntity {
+public class LoginCookie extends OAuthVersionedEntity {
     private static final long ONE_MONTH_MS = 1000L * 60L * 60L * 24L * 30L;
 
     @NotEmpty

@@ -1,13 +1,11 @@
 package com.oauth2cloud.server.model.db;
 
-import org.hibernate.envers.Audited;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "client_scopes")
-public class ClientScope extends VersionedEntity {
+public class ClientScope extends OAuthVersionedEntity {
     public enum Priority {
         // REQUIRED_HIDDEN is the highest level, the user is not asked for nor shown the permission when logging in
         REQUIRED_HIDDEN,

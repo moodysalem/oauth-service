@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "applications")
-public class Application extends VersionedEntity {
+public class Application extends OAuthVersionedEntity {
     @NotBlank
     @Column(name = "name")
     private String name;

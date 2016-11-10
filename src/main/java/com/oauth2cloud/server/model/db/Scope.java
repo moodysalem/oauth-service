@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "scopes")
-public class Scope extends VersionedEntity {
+public class Scope extends OAuthVersionedEntity {
     @ManyToOne
     @JoinColumn(name = "application_id", updatable = false)
     private Application application;

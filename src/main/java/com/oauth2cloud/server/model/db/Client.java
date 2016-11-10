@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "clients")
-public class Client extends VersionedEntity {
+public class Client extends OAuthVersionedEntity {
     @NotBlank
     @Column(name = "name")
     private String name;

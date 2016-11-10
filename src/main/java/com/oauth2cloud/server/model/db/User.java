@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "users")
-public class User extends VersionedEntity {
+public class User extends OAuthVersionedEntity {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "application_id", updatable = false)

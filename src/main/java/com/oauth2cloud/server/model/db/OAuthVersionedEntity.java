@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
 @JsonIdentityInfo(generator = JSOGGenerator.class)
-public class VersionedEntity extends com.moodysalem.hibernate.model.VersionedEntity {
+public class OAuthVersionedEntity extends com.moodysalem.hibernate.model.VersionedEntity {
 }
