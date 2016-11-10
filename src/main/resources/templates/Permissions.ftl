@@ -51,9 +51,9 @@
                                 <#else>
                                     <div class="toggle-checkbox">
                                         <input title="${scope.name?html}" type="checkbox" checked
-                                               id="scope-${scope.id}"
-                                               name="SCOPE-${scope.id}"/>
-                                        <label for="scope-${scope.id}"></label>
+                                               id="scope-${clientScope.id}"
+                                               name="SCOPE-${clientScope.id}"/>
+                                        <label for="scope-${clientScope.id}"></label>
                                     </div>
                                 </#if>
                             </#if>

@@ -9,6 +9,7 @@ import com.oauth2cloud.server.model.data.PermissionsModel;
 import com.oauth2cloud.server.model.data.UserClientScope;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.filter.NoXFrameOptionsFeature;
+import com.oauth2cloud.server.rest.util.CookieUtil;
 import com.oauth2cloud.server.rest.util.OAuthUtil;
 import com.oauth2cloud.server.rest.util.QueryUtil;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -100,6 +101,20 @@ public class LoginResource extends BaseResource {
 
         if ("cancel".equals(action)) {
             useCode(loginCode);
+
+            // log the user out if they got here from already being logged in
+            final LoginCookie cookie = CookieUtil.getLoginCookie(em, req, loginCode.getClient());
+            if (cookie != null) {
+                try {
+                    TXHelper.withinTransaction(em, () -> {
+                        cookie.setExpires(new Date());
+                        em.merge(cookie);
+                    });
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, "Failed to log user out when cancelling log in");
+                }
+            }
+
             return backToLogin(loginCode, LoginErrorCode.permission_denied);
         }
 
