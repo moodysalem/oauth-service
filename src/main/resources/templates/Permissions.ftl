@@ -23,15 +23,12 @@
             <#list model.userClientScopes as userClientScope>
                 <#assign clientScope=userClientScope.clientScope scope=userClientScope.clientScope.scope>
                 <div class="well well-sm">
-                    <div class="display-flex align-items-center">
-                        <div class="flex-shrink-0" style="width:125px;padding:0.5em;">
-                            <#if scope.thumbnail??>
-                                <img class="scope-thumbnail" style="width:100%;" src="${scope.thumbnail?html}">
-                            <#else>
-                                <img class="scope-thumbnail" style="width:100%;" src="http://placehold.it/150x150">
-                            </#if>
+                    <div class="display-flex flex-wrap-wrap justify-content-center align-items-center">
+                        <div class="flex-shrink-0" style="padding: 0.5em; width: 128px;">
+                            <img class="scope-thumbnail" style="width:100%;"
+                                 src="${(scope.thumbnail)!"https://placehold.it/128x128"?html}">
                         </div>
-                        <div class="flex-grow-1">
+                        <div class="flex-grow-1 text-center">
                             <h3>
                             ${scope.displayName?html}
                                 <i class="fa fa-question-circle"
