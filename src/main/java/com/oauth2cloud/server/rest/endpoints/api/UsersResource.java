@@ -5,6 +5,7 @@ import com.moodysalem.jaxrs.lib.resources.util.TXHelper;
 import com.oauth2cloud.server.model.db.*;
 import com.oauth2cloud.server.rest.endpoints.api.base.VersionedEntityResource;
 import com.oauth2cloud.server.rest.filter.TokenFilter;
+import com.oauth2cloud.server.rest.util.PredicateHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -18,6 +19,8 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Api("crud")
 @Path("users")
@@ -124,6 +127,9 @@ public class UsersResource extends VersionedEntityResource<User> {
     @QueryParam("grouped")
     private Boolean grouped;
 
+    @QueryParam("search")
+    private String search;
+
     @Override
     public void getPredicatesFromRequest(List<Predicate> list, Root<User> root) {
         list.add(cb.equal(root.join(User_.application).get(Application_.owner), getUser()));
@@ -138,6 +144,10 @@ public class UsersResource extends VersionedEntityResource<User> {
             } else {
                 list.add(cb.isNull(root.get(User_.group)));
             }
+        }
+
+        if (!isBlank(search)) {
+            list.add(PredicateHelper.createSearchPredicate(cb, search, root.get(User_.email)));
         }
     }
 
