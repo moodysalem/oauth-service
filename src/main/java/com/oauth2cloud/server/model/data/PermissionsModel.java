@@ -2,26 +2,27 @@ package com.oauth2cloud.server.model.data;
 
 import com.oauth2cloud.server.model.db.LoginCode;
 
+import java.util.List;
 import java.util.Set;
 
 /**
  * This is the model that gets passed to Permissions.ftl
  */
 public class PermissionsModel implements HeadProperties {
-    public PermissionsModel(final LoginCode loginCode, final Set<UserClientScope> userClientScopes) {
+    public PermissionsModel(final LoginCode loginCode, final List<UserClientScope> userClientScopes) {
         this.loginCode = loginCode;
         this.userClientScopes = userClientScopes;
     }
 
     private final LoginCode loginCode;
-    private final Set<UserClientScope> userClientScopes;
-
-    public Set<UserClientScope> getUserClientScopes() {
-        return userClientScopes;
-    }
+    private final List<UserClientScope> userClientScopes;
 
     public LoginCode getLoginCode() {
         return loginCode;
+    }
+
+    public List<UserClientScope> getUserClientScopes() {
+        return userClientScopes;
     }
 
     @Override

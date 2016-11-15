@@ -76,7 +76,7 @@ public class LoginResource extends BaseResource {
 
         final LoginCode loginCode = v.getLoginCode();
 
-        final Set<UserClientScope> userClientScopes = getUserClientScopes(loginCode);
+        final List<UserClientScope> userClientScopes = getUserClientScopes(loginCode);
 
         if (userClientScopes.isEmpty() && !loginCode.getClient().isShowPromptNoScopes()) {
             return acceptPermissions(code, "ok", new MultivaluedHashMap<>());
@@ -230,7 +230,7 @@ public class LoginResource extends BaseResource {
      *
      * @return list of scopes we should ask for
      */
-    public Set<UserClientScope> getUserClientScopes(final LoginCode loginCode) {
+    public List<UserClientScope> getUserClientScopes(final LoginCode loginCode) {
         final Set<String> scopes = OAuthUtil.parseScope(loginCode.getScope());
         // get all the client scopes for this client
         final List<ClientScope> clientScopes = QueryHelper.query(em, ClientScope.class, clientScope ->
@@ -244,9 +244,7 @@ public class LoginResource extends BaseResource {
                                 clientScope.join(ClientScope_.scope).get(Scope_.name).in(scopes) :
                                 cb.and()
                 )
-        ).stream()
-                .sorted((cs1, cs2) -> Integer.compare(cs1.getDisplayOrder(), cs2.getDisplayOrder()))
-                .collect(Collectors.toList());
+        );
 
         // group accepted scopes by the client scope ID
         final Map<UUID, AcceptedScope> accepted = (
@@ -270,7 +268,11 @@ public class LoginResource extends BaseResource {
 
         return clientScopes.stream()
                 .map(clientScope -> new UserClientScope(clientScope, accepted.get(clientScope.getId())))
-                .collect(Collectors.toSet());
+                .sorted(
+                        (ucs1, ucs2) -> Integer.compare(
+                                ucs1.getClientScope().getDisplayOrder(), ucs2.getClientScope().getDisplayOrder()
+                        )
+                ).collect(Collectors.toList());
     }
 
     /**
