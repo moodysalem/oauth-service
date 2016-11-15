@@ -34,6 +34,9 @@ public class ClientScope extends OAuthVersionedEntity {
     @Column(name = "reason")
     private String reason;
 
+    @Column(name = "display_order")
+    private int displayOrder;
+
     public Scope getScope() {
         return scope;
     }
@@ -64,5 +67,13 @@ public class ClientScope extends OAuthVersionedEntity {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public int getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(int displayOrder) {
+        this.displayOrder = displayOrder;
     }
 }

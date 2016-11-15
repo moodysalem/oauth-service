@@ -244,7 +244,9 @@ public class LoginResource extends BaseResource {
                                 clientScope.join(ClientScope_.scope).get(Scope_.name).in(scopes) :
                                 cb.and()
                 )
-        );
+        ).stream()
+                .sorted((cs1, cs2) -> Integer.compare(cs1.getDisplayOrder(), cs2.getDisplayOrder()))
+                .collect(Collectors.toList());
 
         // group accepted scopes by the client scope ID
         final Map<UUID, AcceptedScope> accepted = (
