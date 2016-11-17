@@ -78,7 +78,8 @@ public class LoginResource extends BaseResource {
 
         final List<UserClientScope> userClientScopes = getUserClientScopes(loginCode);
 
-        if (userClientScopes.isEmpty() && !loginCode.getClient().isShowPromptNoScopes()) {
+        if (!loginCode.getClient().isShowPromptNoScopes() &&
+                (userClientScopes.isEmpty() || userClientScopes.stream().allMatch(ucs -> ucs.getAcceptedScope() != null))) {
             return acceptPermissions(code, "ok", new MultivaluedHashMap<>());
         }
 
