@@ -1,16 +1,16 @@
 # oauth-service
 An OAuth 2.0 Software as a Service Platform
 
-# API Documentation
+## API Documentation
 [Powered by swagger](https://docs.oauth2cloud.com)
 
-# Build
+## Build
 `mvn clean package`
 
-# Run locally in Jetty container
+## Run locally in Jetty container
 `mvn compile jetty:run -Pprofile-with-environment-variables`
 
-# Environment Configuration
+## Environment Configuration
 
 ```java
 public static final String JDBC_CONNECTION_STRING = System.getProperty("JDBC_CONNECTION_STRING"),
