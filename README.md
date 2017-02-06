@@ -1,6 +1,9 @@
 # oauth-service
 An OAuth 2.0 Software as a Service Platform
 
+# API Documentation
+[Powered by swagger](https://docs.oauth2cloud.com)
+
 # Build
 `mvn clean package`
 
