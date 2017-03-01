@@ -1,5 +1,5 @@
-# oauth-service
-An OAuth 2.0 Software as a Service Platform
+# [![Build Status](https://travis-ci.org/moodysalem/oauth-service.svg?branch=master)](https://travis-ci.org/moodysalem/oauth-service) oauth-service
+An OAuth 2.0 Software as a Service Platform built using Java, FreeMarker and Maven. Powers the login page behind [OAuth2Cloud](https://oauth2cloud.com)
 
 ## API Documentation
 [Powered by swagger](https://docs.oauth2cloud.com)
